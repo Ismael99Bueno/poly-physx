@@ -1,4 +1,4 @@
-project "geometry"
+project "engine"
    language "C++"
    cppdialect "C++17"
    staticruntime "on"
