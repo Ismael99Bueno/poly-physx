@@ -21,6 +21,7 @@ namespace physics
     };
 
     bool operator==(const entity_ptr &e1, const entity_ptr &e2);
+    bool operator!=(const entity_ptr &e1, const entity_ptr &e2);
 }
 
 #endif

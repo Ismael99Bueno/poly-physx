@@ -8,4 +8,5 @@ namespace physics
     const entity2D *entity_ptr::operator->() const { return &m_vec[m_index]; }
     const entity2D &entity_ptr::operator*() const { return m_vec[m_index]; }
     bool operator==(const entity_ptr &e1, const entity_ptr &e2) { return &(*e1) == &(*e2); }
+    bool operator!=(const entity_ptr &e1, const entity_ptr &e2) { return !(e1 == e2); }
 }
