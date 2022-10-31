@@ -3,7 +3,7 @@
 
 namespace physics
 {
-    collider2D::collider2D(const std::vector<entity2D> &entities,
+    collider2D::collider2D(std::vector<entity2D> &entities,
                            const std::size_t allocations) : m_buffer(entities)
     {
         m_entities.reserve(allocations);
