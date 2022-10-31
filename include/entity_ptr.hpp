@@ -9,7 +9,7 @@ namespace physics
     class const_entity_ptr
     {
     public:
-        const_entity_ptr(const std::vector<entity2D> &vec, std::size_t index = 0);
+        const_entity_ptr(const std::vector<entity2D> &buffer, std::size_t index = 0);
 
         const entity2D *operator->() const;
         const entity2D &operator*() const;
@@ -17,7 +17,7 @@ namespace physics
         explicit operator bool() const;
 
     private:
-        const std::vector<entity2D> *m_vec = nullptr;
+        const std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
     };
 
@@ -27,7 +27,7 @@ namespace physics
     class entity_ptr
     {
     public:
-        entity_ptr(std::vector<entity2D> &vec, std::size_t index = 0);
+        entity_ptr(std::vector<entity2D> &buffer, std::size_t index = 0);
 
         entity2D *operator->() const;
         entity2D &operator*() const;
@@ -36,7 +36,7 @@ namespace physics
         operator const_entity_ptr() const;
 
     private:
-        std::vector<entity2D> *m_vec = nullptr;
+        std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
     };
 
