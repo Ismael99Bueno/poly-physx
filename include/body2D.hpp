@@ -26,7 +26,7 @@ namespace physics
         void mass(float mass);
         void charge(float charge);
 
-    private:
+    protected:
         vec2 m_pos, m_vel;
         float m_angvel, m_angpos;
         float m_mass, m_charge;
