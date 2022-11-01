@@ -1,6 +1,7 @@
 #ifndef ENGINE2D_HPP
 #define ENGINE2D_HPP
 
+#include "integrator.hpp"
 #include "entity_ptr.hpp"
 
 namespace physics
@@ -8,9 +9,13 @@ namespace physics
     class engine2D
     {
     public:
-        engine2D(std::size_t allocations = 100);
+        engine2D(const rk::tableau &table, float dt = 0.001f, std::size_t allocations = 100);
 
         void retrieve();
+
+        bool raw_forward();
+        bool reiterative_forward(std::size_t reiterations = 2);
+        bool embedded_forward();
 
         entity_ptr add(const vec2 &pos = {0.f, 0.f},
                        const vec2 &vel = {0.f, 0.f},
@@ -24,9 +29,12 @@ namespace physics
         std::vector<entity2D> m_entities;
         std::vector<float> m_state;
 
+        rk::integrator m_integ;
+        float m_t = 0.f, m_dt = 0.001f;
+
         void retrieve(const std::vector<float> &state);
 
-        friend std::vector<float> ode(float t, const std::vector<float> state, engine2D &engine);
+        friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
     };
 }
 

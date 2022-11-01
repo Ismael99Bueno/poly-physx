@@ -1,10 +1,14 @@
 #include "engine2D.hpp"
+#include "ode2D.hpp"
 
 #define VAR_PER_ENTITY 6
 
 namespace physics
 {
-    engine2D::engine2D(const std::size_t allocations)
+    engine2D::engine2D(const rk::tableau &table,
+                       const float dt,
+                       const std::size_t allocations) : m_dt(dt),
+                                                        m_integ(table, m_state)
     {
         m_entities.reserve(allocations);
         m_state.reserve(VAR_PER_ENTITY * allocations);
@@ -17,6 +21,19 @@ namespace physics
     }
 
     void engine2D::retrieve() { retrieve(m_state); }
+
+    bool engine2D::raw_forward()
+    {
+        return m_integ.raw_forward(m_t, m_dt, *this, ode);
+    }
+    bool engine2D::reiterative_forward(const std::size_t reiterations)
+    {
+        return m_integ.reiterative_forward(m_t, m_dt, *this, ode, reiterations);
+    }
+    bool engine2D::embedded_forward()
+    {
+        return m_integ.embedded_forward(m_t, m_dt, *this, ode);
+    }
 
     entity_ptr engine2D::add(const vec2 &pos = {0.f, 0.f},
                              const vec2 &vel = {0.f, 0.f},
