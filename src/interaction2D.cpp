@@ -17,4 +17,6 @@ namespace physics
     }
 
     bool interaction2D::contains(const const_entity_ptr &e) const { return m_entities.find(e) != m_entities.end(); }
+
+    const std::unordered_set<const_entity_ptr> &interaction2D::entities() const { return m_entities; }
 }
