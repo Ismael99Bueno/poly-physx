@@ -1,4 +1,6 @@
 #include "entity2D.hpp"
+#include "force2D.hpp"
+#include "interaction2D.hpp"
 #include "debug.h"
 
 namespace physics
@@ -22,6 +24,18 @@ namespace physics
 
     bool entity2D::contains(const force2D &force) const { return m_forces.find(&force) != m_forces.end(); }
     bool entity2D::contains(const interaction2D &inter) const { return m_inters.find(&inter) != m_inters.end(); }
+
+    const vec2 &entity2D::compute_accel(const utils::vec_ptr &buffer)
+    {
+        retrieve(buffer);
+        for (const force2D *force : m_forces)
+            m_accel += force->acceleration(*this);
+        for (const interaction2D *inter : m_inters)
+            for (const const_entity_ptr &e : inter->entities())
+                if (&(*e) != this)
+                    m_accel += inter->acceleration(*this, *e);
+        return m_accel;
+    }
 
     const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
     const geo::polygon2D &entity2D::shape() const { return m_shape; }

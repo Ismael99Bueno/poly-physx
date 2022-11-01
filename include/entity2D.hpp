@@ -3,14 +3,14 @@
 
 #include "body2D.hpp"
 #include "box2D.hpp"
-#include "force2D.hpp"
-#include "interaction2D.hpp"
 #include "polygon2D.hpp"
 #include "vec_ptr.hpp"
 #include <unordered_set>
 
 namespace physics
 {
+    class force2D;
+    class interaction2D;
     class entity2D : public body2D
     {
     public:
@@ -22,6 +22,8 @@ namespace physics
         bool contains(const force2D &force) const;
         bool contains(const interaction2D &inter) const;
 
+        const vec2 &compute_accel();
+
         const geo::box2D &bounding_box() const;
         const geo::polygon2D &shape() const;
 
@@ -29,7 +31,7 @@ namespace physics
         geo::box2D m_bbox;
         geo::polygon2D m_shape;
         utils::vec_ptr m_buffer;
-        vec2 accel;
+        vec2 m_accel;
 
         std::unordered_set<const force2D *> m_forces;
         std::unordered_set<const interaction2D *> m_inters;
@@ -39,6 +41,8 @@ namespace physics
 
         void remove(const force2D &force);
         void remove(const interaction2D &inter);
+
+        const vec2 &compute_accel(const utils::vec_ptr &buffer);
 
         friend class force2D;
         friend class interaction2D;
