@@ -3,6 +3,8 @@
 
 #include "engine2D.hpp"
 
+#define VAR_PER_ENTITY 6
+
 namespace physics
 {
     std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);

@@ -12,9 +12,12 @@ namespace physics
         {
             entity2D &e = engine.m_entities[i];
             const std::pair<vec2, float> &accel = e.compute_accel();
-            result.insert(result.end(), {state[i + 3], state[i + 4], state[i + 5],
+
+            const std::size_t j = VAR_PER_ENTITY * i;
+            result.insert(result.end(), {state[j + 3], state[j + 4], state[j + 5],
                                          accel.first.x, accel.first.y, accel.second});
         }
+        engine.reset_accelerations();
         return result;
     }
 }
