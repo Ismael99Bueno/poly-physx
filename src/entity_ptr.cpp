@@ -28,12 +28,12 @@ namespace physics
 
 namespace std
 {
-    size_t hash<physics::const_entity_ptr>::operator()(const physics::const_entity_ptr &key)
+    size_t hash<physics::const_entity_ptr>::operator()(const physics::const_entity_ptr &key) const
     {
         return hash<std::size_t>()(key.m_index);
     }
 
-    size_t hash<physics::entity_ptr>::operator()(const physics::entity_ptr &key)
+    size_t hash<physics::entity_ptr>::operator()(const physics::entity_ptr &key) const
     {
         return hash<std::size_t>()(key.m_index);
     }

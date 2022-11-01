@@ -53,13 +53,13 @@ namespace std
     template <>
     struct hash<physics::const_entity_ptr>
     {
-        size_t operator()(const physics::const_entity_ptr &key);
+        size_t operator()(const physics::const_entity_ptr &key) const;
     };
 
     template <>
     struct hash<physics::entity_ptr>
     {
-        size_t operator()(const physics::entity_ptr &key);
+        size_t operator()(const physics::entity_ptr &key) const;
     };
 }
 
