@@ -25,6 +25,9 @@ namespace physics
         const_entity_ptr get(std::size_t index) const;
         entity_ptr get(std::size_t index);
 
+        rk::integrator &integrator();
+        float elapsed() const;
+
     private:
         std::vector<entity2D> m_entities;
         std::vector<float> m_state;
@@ -33,6 +36,7 @@ namespace physics
         float m_t = 0.f, m_dt = 0.001f;
 
         void retrieve(const std::vector<float> &state);
+        void reset_accelerations();
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
     };

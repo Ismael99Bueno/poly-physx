@@ -1,8 +1,6 @@
 #include "engine2D.hpp"
 #include "ode2D.hpp"
 
-#define VAR_PER_ENTITY 6
-
 namespace physics
 {
     engine2D::engine2D(const rk::tableau &table,
@@ -12,6 +10,7 @@ namespace physics
     {
         m_entities.reserve(allocations);
         m_state.reserve(VAR_PER_ENTITY * allocations);
+        m_integ.reserve(VAR_PER_ENTITY * allocations);
     }
 
     void engine2D::retrieve(const std::vector<float> &state)
@@ -35,19 +34,29 @@ namespace physics
         return m_integ.embedded_forward(m_t, m_dt, *this, ode);
     }
 
-    entity_ptr engine2D::add(const vec2 &pos = {0.f, 0.f},
-                             const vec2 &vel = {0.f, 0.f},
-                             const float angpos = 0.f,
-                             const float angvel = 0.f,
-                             const float mass = 1.f,
-                             const float charge = 1.f)
+    void engine2D::reset_accelerations()
+    {
+        for (entity2D &e : m_entities)
+            e.m_accel = {{0.f, 0.f}, 0.f};
+    }
+
+    entity_ptr engine2D::add(const vec2 &pos,
+                             const vec2 &vel,
+                             const float angpos,
+                             const float angvel,
+                             const float mass,
+                             const float charge)
     {
         m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge);
         m_entities[m_entities.size() - 1].m_buffer = utils::const_vec_ptr(m_state, m_state.size());
-        m_state.insert(m_state.end(), {pos.x, pos.y, vel.x, vel.y, angpos, angvel});
+        m_state.insert(m_state.end(), {pos.x, pos.y, angpos, vel.x, vel.y, angvel});
+
+        m_integ.resize();
         return entity_ptr(m_entities, m_entities.size() - 1);
     }
 
     const_entity_ptr engine2D::get(const std::size_t index) const { return const_entity_ptr(m_entities, index); }
     entity_ptr engine2D::get(const std::size_t index) { return entity_ptr(m_entities, index); }
+    float engine2D::elapsed() const { return m_t; }
+    rk::integrator &engine2D::integrator() { return m_integ; }
 }
