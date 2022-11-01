@@ -2,7 +2,7 @@
 
 namespace physics
 {
-    std::vector<float> ode(float t, const std::vector<float> state, engine2D &engine)
+    std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine)
     {
         std::vector<float> result;
         result.reserve(state.size());
@@ -15,7 +15,6 @@ namespace physics
             result.insert(result.end(), {state[i + 3], state[i + 4], state[i + 5],
                                          accel.first.x, accel.first.y, accel.second});
         }
-
         return result;
     }
 }
