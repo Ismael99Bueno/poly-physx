@@ -25,14 +25,22 @@ namespace physics
     bool entity2D::contains(const force2D &force) const { return m_forces.find(&force) != m_forces.end(); }
     bool entity2D::contains(const interaction2D &inter) const { return m_inters.find(&inter) != m_inters.end(); }
 
-    const vec2 &entity2D::compute_accel()
+    const std::pair<vec2, float> &entity2D::compute_accel()
     {
         for (const force2D *force : m_forces)
-            m_accel += force->acceleration(*this);
+        {
+            const auto [linaccel, angaccel] = force->acceleration(*this);
+            m_accel.first += linaccel;
+            m_accel.second += angaccel;
+        }
         for (const interaction2D *inter : m_inters)
             for (const const_entity_ptr &e : inter->entities())
                 if (&(*e) != this)
-                    m_accel += inter->acceleration(*this, *e);
+                {
+                    const auto [linaccel, angaccel] = inter->acceleration(*this, *e);
+                    m_accel.first += linaccel;
+                    m_accel.second += angaccel;
+                }
         return m_accel;
     }
 
