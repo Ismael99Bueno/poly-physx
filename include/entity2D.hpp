@@ -14,9 +14,9 @@ namespace physics
     class entity2D : public body2D
     {
     public:
-        using body2D::body2D;
+        using body2D::body2D; // Consider making this private
 
-        void retrieve(const utils::vec_ptr &buffer);
+        void retrieve(const utils::const_vec_ptr &buffer);
         void retrieve();
 
         bool contains(const force2D &force) const;
@@ -30,7 +30,7 @@ namespace physics
     private:
         geo::box2D m_bbox;
         geo::polygon2D m_shape;
-        utils::vec_ptr m_buffer;
+        utils::const_vec_ptr m_buffer;
         vec2 m_accel;
 
         std::unordered_set<const force2D *> m_forces;
@@ -42,10 +42,9 @@ namespace physics
         void remove(const force2D &force);
         void remove(const interaction2D &inter);
 
-        const vec2 &compute_accel(const utils::vec_ptr &buffer);
-
         friend class force2D;
         friend class interaction2D;
+        friend class engine2D;
     };
 }
 

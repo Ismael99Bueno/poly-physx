@@ -5,7 +5,7 @@
 
 namespace physics
 {
-    void entity2D::retrieve(const utils::vec_ptr &buffer)
+    void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
         DBG_EXIT_IF(!buffer, "Cannot retrieve from a null buffer.\n")
         m_pos = {buffer[0], buffer[1]};
@@ -25,9 +25,8 @@ namespace physics
     bool entity2D::contains(const force2D &force) const { return m_forces.find(&force) != m_forces.end(); }
     bool entity2D::contains(const interaction2D &inter) const { return m_inters.find(&inter) != m_inters.end(); }
 
-    const vec2 &entity2D::compute_accel(const utils::vec_ptr &buffer)
+    const vec2 &entity2D::compute_accel()
     {
-        retrieve(buffer);
         for (const force2D *force : m_forces)
             m_accel += force->acceleration(*this);
         for (const interaction2D *inter : m_inters)
