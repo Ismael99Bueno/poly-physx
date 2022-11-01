@@ -1,18 +1,22 @@
 #include "engine2D.hpp"
 
+#define VAR_PER_ENTITY 6
+
 namespace physics
 {
     engine2D::engine2D(const std::size_t allocations)
     {
         m_entities.reserve(allocations);
-        m_state.reserve(8 * allocations);
+        m_state.reserve(VAR_PER_ENTITY * allocations);
     }
 
-    void engine2D::retrieve()
+    void engine2D::retrieve(const std::vector<float> &state)
     {
-        for (entity2D &e : m_entities)
-            e.retrieve();
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+            m_entities[i].retrieve(utils::const_vec_ptr(state, VAR_PER_ENTITY * i));
     }
+
+    void engine2D::retrieve() { retrieve(m_state); }
 
     entity_ptr engine2D::add(const vec2 &pos = {0.f, 0.f},
                              const vec2 &vel = {0.f, 0.f},
@@ -23,7 +27,7 @@ namespace physics
     {
         m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge);
         m_entities[m_entities.size() - 1].m_buffer = utils::const_vec_ptr(m_state, m_state.size());
-        m_state.insert(m_state.end(), {pos.x, pos.y, vel.x, vel.y, angpos, angvel, mass, charge});
+        m_state.insert(m_state.end(), {pos.x, pos.y, vel.x, vel.y, angpos, angvel});
         return entity_ptr(m_entities, m_entities.size() - 1);
     }
 

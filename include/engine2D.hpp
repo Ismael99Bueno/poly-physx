@@ -23,6 +23,10 @@ namespace physics
     private:
         std::vector<entity2D> m_entities;
         std::vector<float> m_state;
+
+        void retrieve(const std::vector<float> &state);
+
+        friend std::vector<float> ode(float t, const std::vector<float> state, engine2D &engine);
     };
 }
 
