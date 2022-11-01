@@ -19,6 +19,8 @@ namespace physics
     private:
         const std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
+
+        friend struct std::hash<physics::const_entity_ptr>;
     };
 
     bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2);
@@ -38,10 +40,27 @@ namespace physics
     private:
         std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
+
+        friend struct std::hash<physics::entity_ptr>;
     };
 
     bool operator==(const entity_ptr &e1, const entity_ptr &e2);
     bool operator!=(const entity_ptr &e1, const entity_ptr &e2);
+}
+
+namespace std
+{
+    template <>
+    struct hash<physics::const_entity_ptr>
+    {
+        size_t operator()(const physics::const_entity_ptr &key);
+    };
+
+    template <>
+    struct hash<physics::entity_ptr>
+    {
+        size_t operator()(const physics::entity_ptr &key);
+    };
 }
 
 #endif

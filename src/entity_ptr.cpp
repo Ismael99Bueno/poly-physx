@@ -25,3 +25,16 @@ namespace physics
     bool operator==(const entity_ptr &e1, const entity_ptr &e2) { return &(*e1) == &(*e2); }
     bool operator!=(const entity_ptr &e1, const entity_ptr &e2) { return !(e1 == e2); }
 }
+
+namespace std
+{
+    size_t hash<physics::const_entity_ptr>::operator()(const physics::const_entity_ptr &key)
+    {
+        return hash<std::size_t>()(key.m_index);
+    }
+
+    size_t hash<physics::entity_ptr>::operator()(const physics::entity_ptr &key)
+    {
+        return hash<std::size_t>()(key.m_index);
+    }
+}
