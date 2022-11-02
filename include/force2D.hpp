@@ -10,7 +10,7 @@ namespace physics
     {
     public:
         force2D(std::size_t allocations = 50);
-        virtual std::pair<vec2, float> acceleration(const entity2D &e) const = 0;
+        virtual std::pair<vec2, float> acceleration(const body2D &b) const = 0;
 
         void add(const entity_ptr &e);
         void remove(const entity_ptr &e);
