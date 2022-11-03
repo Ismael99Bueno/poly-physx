@@ -22,7 +22,9 @@ namespace physics
         bool contains(const force2D &force) const;
         bool contains(const interaction2D &inter) const;
 
-        const std::pair<vec2, float> &compute_accel();
+        void add_force(const vec2 &force);
+        void add_torque(float torque);
+        std::pair<vec2, float> accel() const;
 
         const geo::box2D &bounding_box() const;
         const geo::polygon2D &shape() const;

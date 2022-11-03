@@ -16,6 +16,9 @@ namespace physics
 
     void entity2D::retrieve() { retrieve(m_buffer); }
 
+    void entity2D::add_force(const vec2 &force) { m_accel.first += force / m_mass; }
+    void entity2D::add_torque(const float torque) { m_accel.second += torque / m_mass; }
+
     void entity2D::add(const force2D &force) { m_forces.insert(&force); }
     void entity2D::add(const interaction2D &inter) { m_inters.insert(&inter); }
 
@@ -25,23 +28,25 @@ namespace physics
     bool entity2D::contains(const force2D &force) const { return m_forces.find(&force) != m_forces.end(); }
     bool entity2D::contains(const interaction2D &inter) const { return m_inters.find(&inter) != m_inters.end(); }
 
-    const std::pair<vec2, float> &entity2D::compute_accel()
+    std::pair<vec2, float> entity2D::accel() const
     {
+        vec2 linaccel;
+        float angaccel = 0.f;
         for (const force2D *force : m_forces)
         {
-            const auto [linaccel, angaccel] = force->acceleration(*this);
-            m_accel.first += linaccel;
-            m_accel.second += angaccel;
+            const auto [lin, ang] = force->acceleration(*this);
+            linaccel += lin;
+            angaccel += ang;
         }
         for (const interaction2D *inter : m_inters)
             for (const const_entity_ptr &e : inter->entities())
                 if (&(*e) != this)
                 {
-                    const auto [linaccel, angaccel] = inter->acceleration(*this, *e);
-                    m_accel.first += linaccel;
-                    m_accel.second += angaccel;
+                    const auto [lin, ang] = inter->acceleration(*this, *e);
+                    linaccel += lin;
+                    angaccel += ang;
                 }
-        return m_accel;
+        return {linaccel, angaccel};
     }
 
     const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
