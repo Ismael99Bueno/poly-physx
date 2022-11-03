@@ -3,7 +3,7 @@
 
 namespace physics
 {
-    collider2D::collider2D(std::vector<entity2D> &entities,
+    collider2D::collider2D(const std::vector<entity2D> &entities,
                            const std::size_t allocations) : m_buffer(entities)
     {
         m_entities.reserve(allocations);
@@ -11,12 +11,12 @@ namespace physics
         m_collisions.reserve(allocations);
     }
 
-    collider2D::collision_pair::collision_pair(const entity_ptr &e1,
-                                               const entity_ptr &e2) : e1(e1), e2(e2) {}
+    collider2D::collision_pair::collision_pair(const const_entity_ptr &e1,
+                                               const const_entity_ptr &e2) : e1(e1), e2(e2) {}
 
-    collider2D::interval::interval(const entity_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
+    collider2D::interval::interval(const const_entity_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
 
-    const entity_ptr &collider2D::interval::entity() const { return m_entity; }
+    const const_entity_ptr &collider2D::interval::entity() const { return m_entity; }
 
     float collider2D::interval::value() const
     {
@@ -28,7 +28,7 @@ namespace physics
     void collider2D::add(const std::size_t index)
     {
         m_entities.emplace_back(m_buffer, index);
-        const entity_ptr &e = m_entities[m_entities.size() - 1];
+        const const_entity_ptr &e = m_entities[m_entities.size() - 1];
         m_intervals.emplace_back(e, interval::LOWER);
         m_intervals.emplace_back(e, interval::HIGHER);
     }
@@ -38,14 +38,14 @@ namespace physics
         sort_entities();
         m_collisions.clear();
 
-        std::vector<entity_ptr> eligible;
+        std::vector<const_entity_ptr> eligible;
         eligible.reserve(6);
         for (const interval &itrv : m_intervals)
             if (itrv.type() == interval::LOWER)
                 eligible.emplace_back(itrv.entity());
             else
             {
-                for (const entity_ptr &entity : eligible)
+                for (const const_entity_ptr &entity : eligible)
                     if (entity != itrv.entity() &&
                         entity->bounding_box().overlaps(itrv.entity()->bounding_box()) &&
                         entity->shape().overlaps(itrv.entity()->shape()))
