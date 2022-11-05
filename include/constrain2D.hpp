@@ -3,6 +3,7 @@
 
 #include "entity_ptr.hpp"
 #include <vector>
+#include <array>
 
 namespace physics
 {
@@ -12,8 +13,8 @@ namespace physics
         constrain2D(std::size_t allocations = 50);
 
         virtual float constrain(const std::vector<const_entity_ptr> &m_entities) const = 0;
-        virtual std::vector<float> constrain_grad(const std::vector<const_entity_ptr> &m_entities) const = 0;
-        virtual std::vector<float> constrain_grad_dt(const std::vector<const_entity_ptr> &m_entities) const = 0;
+        virtual std::array<float, 3> constrain_grad(const std::vector<const_entity_ptr> &m_entities) const = 0;
+        virtual std::array<float, 3> constrain_grad_dt(const std::vector<const_entity_ptr> &m_entities) const = 0;
 
         void add(const const_entity_ptr &e);
         void remove(const const_entity_ptr &e);
@@ -21,6 +22,8 @@ namespace physics
 
     private:
         std::vector<const_entity_ptr> m_entities;
+
+        friend class compeller2D;
     };
 }
 
