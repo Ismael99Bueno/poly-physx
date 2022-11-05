@@ -18,11 +18,15 @@ namespace physics
         const vec2 &vel() const;
         vec2 &pos();
         vec2 &vel();
+        float angpos() const;
+        float angvel() const;
         float mass() const;
         float charge() const;
 
         void pos(const vec2 &pos);
         void vel(const vec2 &vel);
+        void angpos(float angpos);
+        void angvel(float angvel);
         void mass(float mass);
         void charge(float charge);
 

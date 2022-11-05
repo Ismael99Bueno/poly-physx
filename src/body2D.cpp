@@ -16,11 +16,18 @@ namespace physics
     vec2 &body2D::pos() { return m_pos; }
     vec2 &body2D::vel() { return m_vel; }
 
+    float body2D::angpos() const { return m_angpos; }
+    float body2D::angvel() const { return m_angvel; }
+
     float body2D::mass() const { return m_mass; }
     float body2D::charge() const { return m_charge; }
 
     void body2D::pos(const vec2 &pos) { m_pos = pos; }
     void body2D::vel(const vec2 &vel) { m_vel = vel; }
+
+    void body2D::angpos(const float angpos) { m_angpos = angpos; }
+    void body2D::angvel(const float angvel) { m_angvel = angvel; }
+
     void body2D::mass(const float mass) { m_mass = mass; }
     void body2D::charge(const float charge) { m_charge = charge; }
 }
