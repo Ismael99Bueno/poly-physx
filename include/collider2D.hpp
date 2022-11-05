@@ -13,7 +13,7 @@ namespace physics
         collider2D() = delete;
         collider2D(const std::vector<entity2D> &entities, std::size_t allocations = 40);
 
-        void add(std::size_t index);
+        void add(std::size_t index); // TODO: Implement remove
         void detect_collisions();
 
     private:
