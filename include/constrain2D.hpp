@@ -12,16 +12,25 @@ namespace physics
     public:
         constrain2D(std::size_t allocations = 50);
 
-        virtual float constrain(const std::vector<const_entity_ptr> &m_entities) const = 0;
-        virtual std::array<float, 3> constrain_grad(const std::vector<const_entity_ptr> &m_entities) const = 0;
-        virtual std::array<float, 3> constrain_grad_dt(const std::vector<const_entity_ptr> &m_entities) const = 0;
+        float value() const;
+        float derivative() const;
 
-        void add(const const_entity_ptr &e);
+        void add(const entity_ptr &e);
         void remove(const const_entity_ptr &e);
         bool contains(const const_entity_ptr &e) const;
 
+    protected:
+        virtual float constrain(const std::vector<const_entity_ptr> &entities) const = 0;
+        virtual float constrain_derivative(const std::vector<const_entity_ptr> &entities) const = 0;
+
     private:
         std::vector<const_entity_ptr> m_entities;
+        std::vector<entity_ptr> m_grad_entities;
+
+        std::array<float, 3> constrain_grad(std::size_t index) const;
+        std::array<float, 3> constrain_grad_dt(std::size_t index) const;
+        std::array<float, 3> gradient(std::size_t index,
+                                      float (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const;
 
         friend class compeller2D;
     };
