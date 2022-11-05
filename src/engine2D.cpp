@@ -6,7 +6,8 @@ namespace physics
     engine2D::engine2D(const rk::tableau &table,
                        const float dt,
                        const std::size_t allocations) : m_dt(dt),
-                                                        m_integ(table, m_state)
+                                                        m_integ(table, m_state),
+                                                        m_compeller(m_entities)
     {
         m_entities.reserve(allocations);
         m_state.reserve(VAR_PER_ENTITY * allocations);

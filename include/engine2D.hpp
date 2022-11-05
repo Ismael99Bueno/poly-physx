@@ -3,6 +3,7 @@
 
 #include "integrator.hpp"
 #include "entity_ptr.hpp"
+#include "compeller2D.hpp"
 
 namespace physics
 {
@@ -31,6 +32,7 @@ namespace physics
     private:
         std::vector<entity2D> m_entities;
         std::vector<float> m_state;
+        compeller2D m_compeller;
 
         rk::integrator m_integ;
         float m_t = 0.f, m_dt = 0.001f;
