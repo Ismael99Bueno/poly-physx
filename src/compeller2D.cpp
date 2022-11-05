@@ -6,33 +6,41 @@
 
 namespace physics
 {
-    compeller2D::compeller2D(const std::vector<entity2D> &entities, const std::size_t allocations) : m_entities(entities)
+    compeller2D::compeller2D(const std::vector<entity2D> &entities,
+                             const float stiffness,
+                             const float dampening,
+                             const std::size_t allocations) : m_entities(entities),
+                                                              m_stiffness(stiffness),
+                                                              m_dampening(dampening)
     {
         m_constrains.reserve(allocations);
     }
 
-    void compeller2D::add(const constrain2D *c) { m_constrains.push_back(c); }
+    void compeller2D::add(const constrain2D &c) { m_constrains.push_back(&c); }
 
-    std::vector<float> compeller2D::solve_constrains(const std::vector<float> &state, const std::vector<float> &stchanges) const
+    std::vector<float> compeller2D::solve_constrains(const std::vector<float> &stchanges) const
     {
         const std::vector<float> jcb = jacobian(), djcb = jacobian_derivative();
         const std::vector<float> A = lhs(jcb);
-        const std::vector<float> b = rhs(jcb, djcb, state, stchanges);
+        const std::vector<float> b = rhs(jcb, djcb, stchanges);
         const std::vector<float> lambda = lu_decomposition(A, b);
         return constrain_accels(jcb, lambda);
     }
 
-    std::vector<float> compeller2D::constrain_matrix(std::array<float, 3> (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const
+    std::vector<float> compeller2D::constrain_matrix(std::array<float, 3> (constrain2D::*constrain)(std::size_t) const) const
     {
         std::vector<float> cmatrix(ROWS * COLS, 0.f);
         for (std::size_t i = 0; i < ROWS; i++)
-            for (std::size_t j = 0; j < COLS; j++)
+        {
+            std::size_t index = 0;
+            for (std::size_t j = 0; j < m_entities.size(); j++)
                 if (m_constrains[i]->contains({m_entities, j}))
                 {
-                    const std::array<float, 3> state = (m_constrains[i]->*constrain)(m_constrains[i]->m_entities);
+                    const std::array<float, 3> state = (m_constrains[i]->*constrain)(index++);
                     for (std::size_t k = 0; k < 3; k++)
                         cmatrix[i * ROWS + j * 3 + k] = state[k];
                 }
+        }
         return cmatrix;
     }
 
@@ -48,7 +56,7 @@ namespace physics
                 const std::size_t id = i * ROWS + j;
                 for (std::size_t k = 0; k < COLS; k++)
                 {
-                    const std::size_t id1 = i * ROWS + k, id2 = k * COLS + j;
+                    const std::size_t id1 = i * ROWS + k, id2 = j * ROWS + k;
                     A[id] += jcb[id1] * jcb[id2];
                 }
             }
@@ -57,24 +65,28 @@ namespace physics
 
     std::vector<float> compeller2D::rhs(const std::vector<float> &jcb,
                                         const std::vector<float> &djcb,
-                                        const std::vector<float> &state,
                                         const std::vector<float> &stchanges) const
     {
-        std::vector<float> b(ROWS, 0.f), qdot(ROWS, 0.f), accels(ROWS, 0.f);
+        std::vector<float> b(ROWS, 0.f), qdot(stchanges.size() / 2, 0.f), accels(stchanges.size() / 2, 0.f);
+
         std::size_t index = 0;
         for (std::size_t i = 0; i < m_entities.size(); i++)
-            for (std::size_t j = 3; j < 6; j++)
+            for (std::size_t j = 0; j < 3; j++)
             {
-                qdot[index] = state[6 * i + j];
-                accels[index++] = stchanges[6 * i + j];
+                qdot[index] = stchanges[6 * i + j];
+                accels[index++] = stchanges[6 * i + j + 3];
             }
 
         for (std::size_t i = 0; i < ROWS; i++)
+        {
             for (std::size_t j = 0; j < COLS; j++)
             {
                 const std::size_t id = i * ROWS + j;
-                b[i] -= djcb[id] * qdot[i] + jcb[id] * accels[i];
+                b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
             }
+            const float val = (m_stiffness * m_constrains[i]->constrain() + m_dampening * m_constrains[i]->constrain_dt());
+            b[i] -= val;
+        }
         return b;
     }
 
@@ -123,10 +135,10 @@ namespace physics
     std::vector<float> compeller2D::constrain_accels(const std::vector<float> &jcb,
                                                      const std::vector<float> &lambda) const
     {
-        std::vector<float> accels(ROWS, 0.f);
-        for (std::size_t i = 0; i < ROWS; i++)
+        std::vector<float> accels(COLS, 0.f);
+        for (std::size_t i = 0; i < COLS; i++)
             for (std::size_t j = 0; j < ROWS; j++)
-                accels[i] += lambda[i * ROWS + j];
+                accels[i] += jcb[i * ROWS + j] * lambda[j];
         return accels;
     }
 }
