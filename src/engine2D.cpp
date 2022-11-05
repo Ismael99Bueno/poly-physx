@@ -56,6 +56,8 @@ namespace physics
         return entity_ptr(m_entities, m_entities.size() - 1);
     }
 
+    void engine2D::add(const constrain2D &c) { m_compeller.add(c); }
+
     const_entity_ptr engine2D::get(const std::size_t index) const { return const_entity_ptr(m_entities, index); }
     entity_ptr engine2D::get(const std::size_t index) { return entity_ptr(m_entities, index); }
     float engine2D::elapsed() const { return m_t; }
