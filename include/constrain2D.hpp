@@ -28,7 +28,7 @@ namespace physics
         std::vector<entity_ptr> m_grad_entities;
 
         std::array<float, 3> constrain_grad(std::size_t index) const;
-        std::array<float, 3> constrain_grad_dt(std::size_t index) const;
+        std::array<float, 3> constrain_grad_derivative(std::size_t index) const;
         std::array<float, 3> gradient(std::size_t index,
                                       float (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const;
 

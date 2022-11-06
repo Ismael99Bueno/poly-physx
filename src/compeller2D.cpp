@@ -45,7 +45,7 @@ namespace physics
     }
 
     std::vector<float> compeller2D::jacobian() const { return constrain_matrix(&constrain2D::constrain_grad); }
-    std::vector<float> compeller2D::jacobian_derivative() const { return constrain_matrix(&constrain2D::constrain_grad_dt); }
+    std::vector<float> compeller2D::jacobian_derivative() const { return constrain_matrix(&constrain2D::constrain_grad_derivative); }
 
     std::vector<float> compeller2D::lhs(const std::vector<float> &jcb) const
     {

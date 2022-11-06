@@ -24,11 +24,11 @@ namespace physics
         return std::find(m_entities.begin(), m_entities.end(), e) != m_entities.end();
     }
 
-    float constrain2D::constrain() const { return constrain(m_entities); }
-    float constrain2D::constrain_dt() const { return constrain_dt(m_entities); };
+    float constrain2D::value() const { return constrain(m_entities); }
+    float constrain2D::derivative() const { return constrain_derivative(m_entities); };
 
     std::array<float, 3> constrain2D::constrain_grad(std::size_t index) const { return gradient(index, &constrain2D::constrain); }
-    std::array<float, 3> constrain2D::constrain_grad_dt(std::size_t index) const { return gradient(index, &constrain2D::constrain_dt); }
+    std::array<float, 3> constrain2D::constrain_grad_derivative(std::size_t index) const { return gradient(index, &constrain2D::constrain_derivative); }
     std::array<float, 3> constrain2D::gradient(std::size_t index,
                                                float (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const
     {
