@@ -15,7 +15,10 @@ namespace physics
     class entity2D : public body2D
     {
     public:
-        using body2D::body2D; // Consider making this private
+        entity2D(const vec2 &pos = {0.f, 0.f},
+                 const vec2 &vel = {0.f, 0.f},
+                 float angpos = 0.f, float angvel = 0.f,
+                 float mass = 1.f, float charge = 1.f);
 
         void retrieve();
 
@@ -28,6 +31,11 @@ namespace physics
 
         const geo::box2D &bounding_box() const;
         const geo::polygon2D &shape() const;
+
+        geo::box2D &bounding_box();
+        geo::polygon2D &shape();
+
+        geo::polygon2D &shape(const geo::polygon2D &poly);
 
     private:
         geo::box2D m_bbox;

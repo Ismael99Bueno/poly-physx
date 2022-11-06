@@ -5,6 +5,13 @@
 
 namespace physics
 {
+    entity2D::entity2D(const vec2 &pos,
+                       const vec2 &vel,
+                       const float angpos, const float angvel,
+                       const float mass, const float charge) : body2D(pos, vel, angpos,
+                                                                      angvel, mass, charge),
+                                                               m_bbox(m_shape) {}
+
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
         DBG_EXIT_IF(!buffer, "Cannot retrieve from a null buffer.\n")
@@ -51,4 +58,14 @@ namespace physics
 
     const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
     const geo::polygon2D &entity2D::shape() const { return m_shape; }
+
+    geo::box2D &entity2D::bounding_box() { return m_bbox; }
+    geo::polygon2D &entity2D::shape() { return m_shape; }
+
+    geo::polygon2D &entity2D::shape(const geo::polygon2D &poly)
+    {
+        m_shape = poly;
+        m_bbox.bound();
+        return m_shape;
+    }
 }
