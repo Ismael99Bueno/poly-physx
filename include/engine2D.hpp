@@ -42,6 +42,7 @@ namespace physics
 
         void retrieve(const std::vector<float> &state);
         void reset_accelerations();
+        void move_shapes();
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
     };
