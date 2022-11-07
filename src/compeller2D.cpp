@@ -1,5 +1,5 @@
 #include "compeller2D.hpp"
-#include "constrain2D.hpp"
+#include "constrain_interface.hpp"
 
 namespace physics
 {
@@ -13,7 +13,7 @@ namespace physics
         m_constrains.reserve(allocations);
     }
 
-    void compeller2D::add(const constrain2D &c) { m_constrains.push_back(&c); }
+    void compeller2D::add(const constrain_interface &c) { m_constrains.push_back(&c); }
 
     std::vector<float> compeller2D::solve_constrains(const std::vector<float> &stchanges) const
     {
@@ -24,13 +24,14 @@ namespace physics
         return constrain_accels(jcb, lambda);
     }
 
-    std::vector<float> compeller2D::constrain_matrix(std::array<float, POS_PER_ENTITY> (constrain2D::*constrain_grad)(const entity_ptr &e) const) const
+    std::vector<float> compeller2D::constrain_matrix(std::array<float, POS_PER_ENTITY> (constrain_interface::*constrain_grad)(const entity_ptr &e) const) const
     {
         const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
         std::vector<float> cmatrix(rows * cols, 0.f);
         for (std::size_t i = 0; i < rows; i++)
-            for (const entity_ptr e : m_constrains[i]->m_grad_entities)
+            for (std::size_t j = 0; j < m_constrains[i]->size(); j++)
             {
+                const entity_ptr &e = m_constrains[i]->operator[](j);
                 const std::array<float, POS_PER_ENTITY> state = (m_constrains[i]->*constrain_grad)(e);
                 for (std::size_t k = 0; k < POS_PER_ENTITY; k++)
                     cmatrix[i * rows + e.index() * POS_PER_ENTITY + k] = state[k];
@@ -38,8 +39,8 @@ namespace physics
         return cmatrix;
     }
 
-    std::vector<float> compeller2D::jacobian() const { return constrain_matrix(&constrain2D::constrain_grad); }
-    std::vector<float> compeller2D::jacobian_derivative() const { return constrain_matrix(&constrain2D::constrain_grad_derivative); }
+    std::vector<float> compeller2D::jacobian() const { return constrain_matrix(&constrain_interface::constrain_grad); }
+    std::vector<float> compeller2D::jacobian_derivative() const { return constrain_matrix(&constrain_interface::constrain_grad_derivative); }
 
     std::vector<float> compeller2D::lhs(const std::vector<float> &jcb) const
     {

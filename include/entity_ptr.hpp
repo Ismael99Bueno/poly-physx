@@ -9,6 +9,7 @@ namespace physics
     class const_entity_ptr
     {
     public:
+        const_entity_ptr() = default;
         const_entity_ptr(const std::vector<entity2D> &buffer, std::size_t index = 0);
 
         std::size_t index() const;
@@ -30,6 +31,7 @@ namespace physics
     class entity_ptr
     {
     public:
+        entity_ptr() = default;
         entity_ptr(std::vector<entity2D> &buffer, std::size_t index = 0);
 
         std::size_t index() const;

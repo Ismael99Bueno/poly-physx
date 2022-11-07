@@ -6,7 +6,7 @@
 
 namespace physics
 {
-    class constrain2D;
+    class constrain_interface;
     class compeller2D
     {
     public:
@@ -15,16 +15,16 @@ namespace physics
                     float stiffness = 2.f, float dampening = 2.f,
                     std::size_t allocations = 6);
 
-        void add(const constrain2D &c); // Implement remove
+        void add(const constrain_interface &c); // Implement remove
 
         std::vector<float> solve_constrains(const std::vector<float> &stchanges) const;
 
     private:
         std::vector<entity2D> &m_entities;
-        std::vector<const constrain2D *> m_constrains;
+        std::vector<const constrain_interface *> m_constrains;
         float m_stiffness, m_dampening;
 
-        std::vector<float> constrain_matrix(std::array<float, 3> (constrain2D::*constrain)(const entity_ptr &e) const) const;
+        std::vector<float> constrain_matrix(std::array<float, 3> (constrain_interface::*constrain)(const entity_ptr &e) const) const;
         std::vector<float> jacobian() const;
         std::vector<float> jacobian_derivative() const;
 
