@@ -33,18 +33,18 @@ namespace physics
                                                float (constrain2D::*constrain)() const) const
     {
         const float x = e->pos().x;
-        e->pos().x -= TOLERANCE;
+        e->translate({-TOLERANCE, 0.f});
         const float cx1 = (this->*constrain)();
-        e->pos().x += 2.f * TOLERANCE;
+        e->translate({2.f * TOLERANCE, 0.f});
         const float cx2 = (this->*constrain)();
-        e->pos().x = x;
+        e->pos({x, e->pos().y});
 
         const float y = e->pos().y;
-        e->pos().y -= TOLERANCE;
+        e->translate({0.f, -TOLERANCE});
         const float cy1 = (this->*constrain)();
-        e->pos().y += 2.f * TOLERANCE;
+        e->translate({0.f, 2.f * TOLERANCE});
         const float cy2 = (this->*constrain)();
-        e->pos().y = y;
+        e->pos({e->pos().x, y});
 
         const float angpos = e->angpos();
         e->angpos(e->angpos() - TOLERANCE);

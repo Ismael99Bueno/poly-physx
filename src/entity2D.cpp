@@ -15,12 +15,10 @@ namespace physics
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
         DBG_EXIT_IF(!buffer, "Cannot retrieve from a null buffer.\n")
-        m_pos = {buffer[0], buffer[1]};
-        m_vel = {buffer[3], buffer[4]};
-        m_angpos = buffer[2];
-        m_angvel = buffer[5];
-        m_shape.move(m_pos);
-        m_shape.rotation(m_angpos);
+        pos({buffer[0], buffer[1]});
+        vel({buffer[3], buffer[4]});
+        angpos(buffer[2]);
+        angvel(buffer[5]);
     }
 
     void entity2D::retrieve() { retrieve(m_buffer); }
@@ -61,13 +59,26 @@ namespace physics
     const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
     const geo::polygon2D &entity2D::shape() const { return m_shape; }
 
-    geo::box2D &entity2D::bounding_box() { return m_bbox; }
-    geo::polygon2D &entity2D::shape() { return m_shape; }
-
-    geo::polygon2D &entity2D::shape(const geo::polygon2D &poly)
+    const geo::polygon2D &entity2D::shape(const geo::polygon2D &poly)
     {
         m_shape = poly;
         m_bbox.bound();
         return m_shape;
+    }
+
+    const vec2 &entity2D::pos() const { return m_pos; }
+
+    void entity2D::pos(const vec2 &pos)
+    {
+        m_pos = pos;
+        m_shape.pos(pos);
+    }
+
+    float entity2D::angpos() const { return m_angpos; }
+
+    void entity2D::angpos(const float angpos)
+    {
+        m_angpos = angpos;
+        m_shape.rotation(angpos);
     }
 }

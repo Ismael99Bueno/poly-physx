@@ -32,10 +32,12 @@ namespace physics
         const geo::box2D &bounding_box() const;
         const geo::polygon2D &shape() const;
 
-        geo::box2D &bounding_box();
-        geo::polygon2D &shape();
+        const geo::polygon2D &shape(const geo::polygon2D &poly);
 
-        geo::polygon2D &shape(const geo::polygon2D &poly);
+        const vec2 &pos() const override;
+        void pos(const vec2 &pos) override;
+        float angpos() const override;
+        void angpos(float angpos) override;
 
     private:
         geo::box2D m_bbox;

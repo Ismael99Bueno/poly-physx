@@ -14,18 +14,19 @@ namespace physics
                float angpos = 0.f, float angvel = 0.f,
                float mass = 1.f, float charge = 1.f);
 
-        const vec2 &pos() const;
+        void translate(const vec2 &dpos);
+        void rotate(float angle);
+
+        virtual const vec2 &pos() const;
         const vec2 &vel() const;
-        vec2 &pos();
-        vec2 &vel();
-        float angpos() const;
+        virtual float angpos() const;
         float angvel() const;
         float mass() const;
         float charge() const;
 
-        void pos(const vec2 &pos);
+        virtual void pos(const vec2 &pos);
         void vel(const vec2 &vel);
-        void angpos(float angpos);
+        virtual void angpos(float angpos);
         void angvel(float angvel);
         void mass(float mass);
         void charge(float charge);

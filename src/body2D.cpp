@@ -11,10 +11,11 @@ namespace physics
                                          m_angpos(angpos), m_angvel(angvel),
                                          m_mass(mass), m_charge(charge) {}
 
+    void body2D::translate(const vec2 &dpos) { pos(m_pos + dpos); }
+    void body2D::rotate(float angle) { angpos(m_angpos + angle); }
+
     const vec2 &body2D::pos() const { return m_pos; }
     const vec2 &body2D::vel() const { return m_vel; }
-    vec2 &body2D::pos() { return m_pos; }
-    vec2 &body2D::vel() { return m_vel; }
 
     float body2D::angpos() const { return m_angpos; }
     float body2D::angvel() const { return m_angvel; }
