@@ -29,10 +29,10 @@ namespace physics
         std::vector<const_entity_ptr> m_entities;
         std::vector<entity_ptr> m_grad_entities;
 
-        std::array<float, POS_PER_ENTITY> constrain_grad(std::size_t index) const;
-        std::array<float, POS_PER_ENTITY> constrain_grad_derivative(std::size_t index) const;
-        std::array<float, POS_PER_ENTITY> gradient(std::size_t index,
-                                                   float (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const;
+        std::array<float, POS_PER_ENTITY> constrain_grad(const entity_ptr &e) const;
+        std::array<float, POS_PER_ENTITY> constrain_grad_derivative(const entity_ptr &e) const;
+        std::array<float, POS_PER_ENTITY> gradient(const entity_ptr &e,
+                                                   float (constrain2D::*constrain)() const) const;
 
         friend class compeller2D;
     };

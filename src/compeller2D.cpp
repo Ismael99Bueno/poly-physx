@@ -3,7 +3,7 @@
 
 namespace physics
 {
-    compeller2D::compeller2D(const std::vector<entity2D> &entities,
+    compeller2D::compeller2D(std::vector<entity2D> &entities,
                              const float stiffness,
                              const float dampening,
                              const std::size_t allocations) : m_entities(entities),
@@ -24,21 +24,21 @@ namespace physics
         return constrain_accels(jcb, lambda);
     }
 
-    std::vector<float> compeller2D::constrain_matrix(std::array<float, POS_PER_ENTITY> (constrain2D::*constrain_grad)(std::size_t) const) const
+    std::vector<float> compeller2D::constrain_matrix(std::array<float, POS_PER_ENTITY> (constrain2D::*constrain_grad)(const entity_ptr &e) const) const
     {
         const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
         std::vector<float> cmatrix(rows * cols, 0.f);
         for (std::size_t i = 0; i < rows; i++)
-        {
-            std::size_t index = 0;
             for (std::size_t j = 0; j < m_entities.size(); j++)
-                if (m_constrains[i]->contains({m_entities, j})) // ENTITIES MUST BE ADDED IN ORDER FOR THIS TO WORK
+            {
+                const entity_ptr e = {m_entities, j};
+                if (m_constrains[i]->contains(e)) // ENTITIES MUST BE ADDED IN ORDER FOR THIS TO WORK
                 {
-                    const std::array<float, POS_PER_ENTITY> state = (m_constrains[i]->*constrain_grad)(index++); // PASS FUCKING ENTITY PTR AND DELETE GRAD_ENTITIES FROM CONSTRAIN
+                    const std::array<float, POS_PER_ENTITY> state = (m_constrains[i]->*constrain_grad)(e); // PASS FUCKING ENTITY PTR AND DELETE GRAD_ENTITIES FROM CONSTRAIN
                     for (std::size_t k = 0; k < POS_PER_ENTITY; k++)
                         cmatrix[i * rows + j * POS_PER_ENTITY + k] = state[k];
                 }
-        }
+            }
         return cmatrix;
     }
 

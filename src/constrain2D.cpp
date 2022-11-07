@@ -27,31 +27,31 @@ namespace physics
     float constrain2D::value() const { return constrain(m_entities); }
     float constrain2D::derivative() const { return constrain_derivative(m_entities); };
 
-    std::array<float, 3> constrain2D::constrain_grad(std::size_t index) const { return gradient(index, &constrain2D::constrain); }
-    std::array<float, 3> constrain2D::constrain_grad_derivative(std::size_t index) const { return gradient(index, &constrain2D::constrain_derivative); }
-    std::array<float, 3> constrain2D::gradient(std::size_t index,
-                                               float (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const
+    std::array<float, 3> constrain2D::constrain_grad(const entity_ptr &e) const { return gradient(e, &constrain2D::value); }
+    std::array<float, 3> constrain2D::constrain_grad_derivative(const entity_ptr &e) const { return gradient(e, &constrain2D::derivative); }
+    std::array<float, 3> constrain2D::gradient(const entity_ptr &e,
+                                               float (constrain2D::*constrain)() const) const
     {
-        const float x = m_grad_entities[index]->pos().x;
-        m_grad_entities[index]->pos().x -= TOLERANCE;
-        const float cx1 = (this->*constrain)(m_entities);
-        m_grad_entities[index]->pos().x += 2.f * TOLERANCE;
-        const float cx2 = (this->*constrain)(m_entities);
-        m_grad_entities[index]->pos().x = x;
+        const float x = e->pos().x;
+        e->pos().x -= TOLERANCE;
+        const float cx1 = (this->*constrain)();
+        e->pos().x += 2.f * TOLERANCE;
+        const float cx2 = (this->*constrain)();
+        e->pos().x = x;
 
-        const float y = m_grad_entities[index]->pos().y;
-        m_grad_entities[index]->pos().y -= TOLERANCE;
-        const float cy1 = (this->*constrain)(m_entities);
-        m_grad_entities[index]->pos().y += 2.f * TOLERANCE;
-        const float cy2 = (this->*constrain)(m_entities);
-        m_grad_entities[index]->pos().y = y;
+        const float y = e->pos().y;
+        e->pos().y -= TOLERANCE;
+        const float cy1 = (this->*constrain)();
+        e->pos().y += 2.f * TOLERANCE;
+        const float cy2 = (this->*constrain)();
+        e->pos().y = y;
 
-        const float angpos = m_grad_entities[index]->angpos();
-        m_grad_entities[index]->angpos(m_grad_entities[index]->angpos() - TOLERANCE);
-        const float ca1 = (this->*constrain)(m_entities);
-        m_grad_entities[index]->angpos(m_grad_entities[index]->angpos() + 2.f * TOLERANCE);
-        const float ca2 = (this->*constrain)(m_entities);
-        m_grad_entities[index]->angpos(angpos);
+        const float angpos = e->angpos();
+        e->angpos(e->angpos() - TOLERANCE);
+        const float ca1 = (this->*constrain)();
+        e->angpos(e->angpos() + 2.f * TOLERANCE);
+        const float ca2 = (this->*constrain)();
+        e->angpos(angpos);
 
         return {(cx2 - cx1) / (2.f * TOLERANCE), (cy2 - cy1) / (2.f * TOLERANCE), (ca2 - ca1) / (2.f * TOLERANCE)};
     }
