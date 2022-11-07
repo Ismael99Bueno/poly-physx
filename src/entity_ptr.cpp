@@ -5,6 +5,7 @@ namespace physics
     const_entity_ptr::const_entity_ptr(const std::vector<entity2D> &buffer,
                                        const std::size_t index) : m_buffer(&buffer), m_index(index) {}
 
+    std::size_t const_entity_ptr::index() const { return m_index; }
     const entity2D *const_entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     const entity2D &const_entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
@@ -16,6 +17,7 @@ namespace physics
     entity_ptr::entity_ptr(std::vector<entity2D> &buffer,
                            const std::size_t index) : m_buffer(&buffer), m_index(index) {}
 
+    std::size_t entity_ptr::index() const { return m_index; }
     entity2D *entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     entity2D &entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
 

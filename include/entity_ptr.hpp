@@ -11,6 +11,7 @@ namespace physics
     public:
         const_entity_ptr(const std::vector<entity2D> &buffer, std::size_t index = 0);
 
+        std::size_t index() const;
         const entity2D *operator->() const;
         const entity2D &operator*() const;
 
@@ -31,6 +32,7 @@ namespace physics
     public:
         entity_ptr(std::vector<entity2D> &buffer, std::size_t index = 0);
 
+        std::size_t index() const;
         entity2D *operator->() const;
         entity2D &operator*() const;
 

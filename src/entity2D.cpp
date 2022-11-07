@@ -19,6 +19,8 @@ namespace physics
         m_vel = {buffer[3], buffer[4]};
         m_angpos = buffer[2];
         m_angvel = buffer[5];
+        m_shape.move(m_pos);
+        m_shape.rotation(m_angpos);
     }
 
     void entity2D::retrieve() { retrieve(m_buffer); }
