@@ -19,7 +19,6 @@ namespace physics
 
         void add(const entity_ptr &e);
         void remove(const const_entity_ptr &e);
-        bool contains(const const_entity_ptr &e) const;
 
     protected:
         virtual float constrain(const std::vector<const_entity_ptr> &entities) const = 0;

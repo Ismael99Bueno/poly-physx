@@ -19,11 +19,6 @@ namespace physics
         m_grad_entities.erase(std::remove(m_grad_entities.begin(), m_grad_entities.end(), e), m_grad_entities.end());
     }
 
-    bool constrain2D::contains(const const_entity_ptr &e) const
-    {
-        return std::find(m_entities.begin(), m_entities.end(), e) != m_entities.end();
-    }
-
     float constrain2D::value() const { return constrain(m_entities); }
     float constrain2D::derivative() const { return constrain_derivative(m_entities); };
 

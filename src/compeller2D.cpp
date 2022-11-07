@@ -29,15 +29,11 @@ namespace physics
         const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
         std::vector<float> cmatrix(rows * cols, 0.f);
         for (std::size_t i = 0; i < rows; i++)
-            for (std::size_t j = 0; j < m_entities.size(); j++)
+            for (const entity_ptr e : m_constrains[i]->m_grad_entities)
             {
-                const entity_ptr e = {m_entities, j};
-                if (m_constrains[i]->contains(e)) // ENTITIES MUST BE ADDED IN ORDER FOR THIS TO WORK
-                {
-                    const std::array<float, POS_PER_ENTITY> state = (m_constrains[i]->*constrain_grad)(e); // PASS FUCKING ENTITY PTR AND DELETE GRAD_ENTITIES FROM CONSTRAIN
-                    for (std::size_t k = 0; k < POS_PER_ENTITY; k++)
-                        cmatrix[i * rows + j * POS_PER_ENTITY + k] = state[k];
-                }
+                const std::array<float, POS_PER_ENTITY> state = (m_constrains[i]->*constrain_grad)(e);
+                for (std::size_t k = 0; k < POS_PER_ENTITY; k++)
+                    cmatrix[i * rows + e.index() * POS_PER_ENTITY + k] = state[k];
             }
         return cmatrix;
     }
