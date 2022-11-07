@@ -1,9 +1,6 @@
 #include "compeller2D.hpp"
 #include "constrain2D.hpp"
 
-#define ROWS m_constrains.size()
-#define COLS (3 * m_entities.size())
-
 namespace physics
 {
     compeller2D::compeller2D(const std::vector<entity2D> &entities,
@@ -27,18 +24,19 @@ namespace physics
         return constrain_accels(jcb, lambda);
     }
 
-    std::vector<float> compeller2D::constrain_matrix(std::array<float, 3> (constrain2D::*constrain)(std::size_t) const) const
+    std::vector<float> compeller2D::constrain_matrix(std::array<float, POS_PER_ENTITY> (constrain2D::*constrain_grad)(std::size_t) const) const
     {
-        std::vector<float> cmatrix(ROWS * COLS, 0.f);
-        for (std::size_t i = 0; i < ROWS; i++)
+        const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
+        std::vector<float> cmatrix(rows * cols, 0.f);
+        for (std::size_t i = 0; i < rows; i++)
         {
             std::size_t index = 0;
             for (std::size_t j = 0; j < m_entities.size(); j++)
-                if (m_constrains[i]->contains({m_entities, j}))
+                if (m_constrains[i]->contains({m_entities, j})) // ENTITIES MUST BE ADDED IN ORDER FOR THIS TO WORK
                 {
-                    const std::array<float, 3> state = (m_constrains[i]->*constrain)(index++);
-                    for (std::size_t k = 0; k < 3; k++)
-                        cmatrix[i * ROWS + j * 3 + k] = state[k];
+                    const std::array<float, POS_PER_ENTITY> state = (m_constrains[i]->*constrain_grad)(index++); // PASS FUCKING ENTITY PTR AND DELETE GRAD_ENTITIES FROM CONSTRAIN
+                    for (std::size_t k = 0; k < POS_PER_ENTITY; k++)
+                        cmatrix[i * rows + j * POS_PER_ENTITY + k] = state[k];
                 }
         }
         return cmatrix;
@@ -49,14 +47,15 @@ namespace physics
 
     std::vector<float> compeller2D::lhs(const std::vector<float> &jcb) const
     {
-        std::vector<float> A(ROWS * ROWS, 0.f);
-        for (std::size_t i = 0; i < ROWS; i++)
-            for (std::size_t j = 0; j < ROWS; j++)
+        const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
+        std::vector<float> A(rows * rows, 0.f);
+        for (std::size_t i = 0; i < rows; i++)
+            for (std::size_t j = 0; j < rows; j++)
             {
-                const std::size_t id = i * ROWS + j;
-                for (std::size_t k = 0; k < COLS; k++)
+                const std::size_t id = i * rows + j;
+                for (std::size_t k = 0; k < cols; k++)
                 {
-                    const std::size_t id1 = i * ROWS + k, id2 = j * ROWS + k;
+                    const std::size_t id1 = i * rows + k, id2 = j * rows + k;
                     A[id] += jcb[id1] * jcb[id2];
                 }
             }
@@ -67,21 +66,22 @@ namespace physics
                                         const std::vector<float> &djcb,
                                         const std::vector<float> &stchanges) const
     {
-        std::vector<float> b(ROWS, 0.f), qdot(stchanges.size() / 2, 0.f), accels(stchanges.size() / 2, 0.f);
+        const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
+        std::vector<float> b(rows, 0.f), qdot(stchanges.size() / 2, 0.f), accels(stchanges.size() / 2, 0.f);
 
         std::size_t index = 0;
         for (std::size_t i = 0; i < m_entities.size(); i++)
-            for (std::size_t j = 0; j < 3; j++)
+            for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
             {
                 qdot[index] = stchanges[6 * i + j];
-                accels[index++] = stchanges[6 * i + j + 3];
+                accels[index++] = stchanges[6 * i + j + POS_PER_ENTITY];
             }
 
-        for (std::size_t i = 0; i < ROWS; i++)
+        for (std::size_t i = 0; i < rows; i++)
         {
-            for (std::size_t j = 0; j < COLS; j++)
+            for (std::size_t j = 0; j < cols; j++)
             {
-                const std::size_t id = i * ROWS + j;
+                const std::size_t id = i * rows + j;
                 b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
             }
             const float val = (m_stiffness * m_constrains[i]->value() + m_dampening * m_constrains[i]->derivative());
@@ -93,7 +93,8 @@ namespace physics
     std::vector<float> compeller2D::lu_decomposition(const std::vector<float> &A,
                                                      const std::vector<float> &b) const
     {
-        const std::size_t size = ROWS;
+        const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
+        const std::size_t size = rows;
         std::vector<float> L(size * size, 0.f), U(size * size, 0.f), sol(size, 0.f);
         for (std::size_t i = 0; i < size; i++)
         {
@@ -135,10 +136,11 @@ namespace physics
     std::vector<float> compeller2D::constrain_accels(const std::vector<float> &jcb,
                                                      const std::vector<float> &lambda) const
     {
-        std::vector<float> accels(COLS, 0.f);
-        for (std::size_t i = 0; i < COLS; i++)
-            for (std::size_t j = 0; j < ROWS; j++)
-                accels[i] += jcb[i * ROWS + j] * lambda[j];
+        const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
+        std::vector<float> accels(cols, 0.f);
+        for (std::size_t i = 0; i < cols; i++)
+            for (std::size_t j = 0; j < rows; j++)
+                accels[i] += jcb[i * rows + j] * lambda[j];
         return accels;
     }
 }

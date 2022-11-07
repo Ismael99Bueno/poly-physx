@@ -5,6 +5,8 @@
 #include <vector>
 #include <array>
 
+#define POS_PER_ENTITY 3
+
 namespace physics
 {
     class constrain2D
@@ -27,10 +29,10 @@ namespace physics
         std::vector<const_entity_ptr> m_entities;
         std::vector<entity_ptr> m_grad_entities;
 
-        std::array<float, 3> constrain_grad(std::size_t index) const;
-        std::array<float, 3> constrain_grad_derivative(std::size_t index) const;
-        std::array<float, 3> gradient(std::size_t index,
-                                      float (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const;
+        std::array<float, POS_PER_ENTITY> constrain_grad(std::size_t index) const;
+        std::array<float, POS_PER_ENTITY> constrain_grad_derivative(std::size_t index) const;
+        std::array<float, POS_PER_ENTITY> gradient(std::size_t index,
+                                                   float (constrain2D::*constrain)(const std::vector<const_entity_ptr> &) const) const;
 
         friend class compeller2D;
     };
