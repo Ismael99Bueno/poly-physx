@@ -1,5 +1,7 @@
 #include "collider2D.hpp"
 #include <set>
+#include <limits>
+#include <cmath>
 
 namespace physics
 {
@@ -24,6 +26,44 @@ namespace physics
     }
 
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
+
+    void collider2D::collision_constrain::compute_closest_vertices()
+    {
+        float min_dist = std::numeric_limits<float>::max();
+        const const_entity_ptr &e1 = m_entities[0], &e2 = m_entities[1];
+        for (const vec2 &v1 : e1->shape().vertices())
+            for (const vec2 &v2 : e2->shape().vertices())
+            {
+                const float dist = v1.sq_dist(v2);
+                if (dist < min_dist)
+                {
+                    min_dist = dist;
+                    m_vx1 = &v1;
+                    m_vx2 = &v2;
+                }
+            }
+    }
+
+    std::pair<vec2, vec2> collider2D::collision_constrain::compute_vertices_velocities() const
+    {
+        const const_entity_ptr &e1 = m_entities[0], &e2 = m_entities[1];
+        const vec2 rel_vx1 = (*m_vx1 - e1->shape().centroid()),
+                   rel_vx2 = (*m_vx2 - e2->shape().centroid());
+        const float a1 = rel_vx2.angle(), a2 = rel_vx2.angle();
+        return {e1->vel() + rel_vx1.norm() * e1->angvel() * vec2(-std::sin(a1), std::cos(a1)),
+                e2->vel() + rel_vx2.norm() * e2->angvel() * vec2(-std::sin(a2), std::cos(a2))};
+    }
+
+    float collider2D::collision_constrain::constrain(const std::array<const_entity_ptr, 2> &entities) const
+    {
+        return m_vx1->sq_dist(*m_vx2);
+    }
+
+    float collider2D::collision_constrain::constrain_derivative(const std::array<const_entity_ptr, 2> &entities) const
+    {
+        const auto [v1, v2] = compute_vertices_velocities();
+        return 2.f * (*m_vx1 - *m_vx2).dot(v1 - v2);
+    }
 
     void collider2D::add(const std::size_t index)
     {

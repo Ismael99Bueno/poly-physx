@@ -25,8 +25,10 @@ namespace physics
 
         float value() const override { return constrain(m_entities); }
 
-    private:
+    protected:
         std::array<const_entity_ptr, N> m_entities;
+
+    private:
         std::array<entity_ptr, N> m_grad_entities;
         virtual float constrain(const std::array<const_entity_ptr, N> &entities) const = 0;
         virtual float constrain_derivative(const std::array<const_entity_ptr, N> &entities) const = 0;
