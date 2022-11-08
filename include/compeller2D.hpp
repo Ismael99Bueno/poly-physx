@@ -12,7 +12,7 @@ namespace physics
     public:
         compeller2D() = delete;
         compeller2D(std::vector<entity2D> &entities,
-                    float stiffness = 2.f, float dampening = 2.f,
+                    float stiffness = 5.f, float dampening = 2.f,
                     std::size_t allocations = 6);
 
         void add(const constrain_interface &c); // Implement remove

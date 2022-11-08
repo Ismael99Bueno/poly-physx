@@ -81,8 +81,7 @@ namespace physics
                 const std::size_t id = i * rows + j;
                 b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
             }
-            const float val = (m_stiffness * m_constrains[i]->value() + m_dampening * m_constrains[i]->derivative());
-            b[i] -= val;
+            b[i] -= (m_stiffness * m_constrains[i]->value() + m_dampening * m_constrains[i]->derivative());
         }
         return b;
     }

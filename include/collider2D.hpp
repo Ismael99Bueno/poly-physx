@@ -3,6 +3,7 @@
 
 #include "entity2D.hpp"
 #include "entity_ptr.hpp"
+#include "constrain2D.hpp"
 #include <vector>
 
 namespace physics

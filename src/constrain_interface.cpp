@@ -1,7 +1,7 @@
 #include "constrain_interface.hpp"
 #include <algorithm>
 
-#define TOLERANCE 1.e-1f
+#define TOLERANCE 1.e-2f
 
 namespace physics
 {
