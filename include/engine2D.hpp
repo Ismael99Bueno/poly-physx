@@ -18,11 +18,11 @@ namespace physics
         bool reiterative_forward(std::size_t reiterations = 2);
         bool embedded_forward();
 
-        virtual entity_ptr add(const vec2 &pos = {0.f, 0.f},
-                               const vec2 &vel = {0.f, 0.f},
-                               float angpos = 0.f, float angvel = 0.f,
-                               float mass = 1.f, float charge = 1.f);
-        void add(const constrain_interface &c);
+        virtual entity_ptr add_entity(const vec2 &pos = {0.f, 0.f},
+                                      const vec2 &vel = {0.f, 0.f},
+                                      float angpos = 0.f, float angvel = 0.f,
+                                      float mass = 1.f, float charge = 1.f);
+        void add_constrain(const constrain_interface &c);
 
         const_entity_ptr get(std::size_t index) const;
         entity_ptr get(std::size_t index);

@@ -16,7 +16,7 @@ namespace physics
                 m_entities[i] = entities[i];
         }
 
-        void add(const std::array<entity_ptr, N> &entities)
+        void add_entities(const std::array<entity_ptr, N> &entities)
         {
             m_grad_entities = entities;
             for (std::size_t i = 0; i < N; i++)

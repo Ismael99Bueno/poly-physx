@@ -26,10 +26,9 @@ namespace physics
             std::pair<vec2, vec2> compute_touch_velocities() const;
         };
 
-        collider2D() = delete;
-        collider2D(std::vector<entity2D> &entities, std::size_t allocations = 40);
+        collider2D(std::size_t allocations = 40);
 
-        void add(std::size_t index); // TODO: Implement remove
+        void add_entity(const entity_ptr &e); // TODO: Implement remove
         const std::vector<collision_constrain> &build_collision_constrains();
 
     private:
@@ -53,7 +52,6 @@ namespace physics
             end m_end;
         };
 
-        std::vector<entity2D> &m_buffer;
         std::vector<entity_ptr> m_entities;
         std::vector<interval> m_intervals;
         std::vector<collision_constrain> m_constrains;

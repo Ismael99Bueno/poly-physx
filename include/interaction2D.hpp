@@ -12,8 +12,8 @@ namespace physics
         interaction2D(std::size_t allocations = 50);
         virtual std::pair<vec2, float> acceleration(const entity2D &e1, const entity2D &e2) const = 0;
 
-        void add(const entity_ptr &e);
-        void remove(const entity_ptr &e);
+        void include(const entity_ptr &e);
+        void exclude(const entity_ptr &e);
         bool contains(const const_entity_ptr &e) const;
 
         const std::unordered_set<const_entity_ptr> &entities() const;

@@ -50,11 +50,11 @@ namespace physics
 
         void retrieve(const utils::const_vec_ptr &buffer);
 
-        void add(const force2D &force);
-        void add(const interaction2D &inter);
+        void include(const force2D &force);
+        void include(const interaction2D &inter);
 
-        void remove(const force2D &force);
-        void remove(const interaction2D &inter);
+        void exclude(const force2D &force);
+        void exclude(const interaction2D &inter);
 
         friend class force2D;
         friend class interaction2D;

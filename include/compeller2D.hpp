@@ -15,7 +15,7 @@ namespace physics
                     float stiffness = 5.f, float dampening = 2.f,
                     std::size_t allocations = 6);
 
-        void add(const constrain_interface &c); // Implement remove
+        void add_constrain(const constrain_interface &c); // Implement remove
 
         std::vector<float> solve_constrains(const std::vector<float> &stchanges) const;
 

@@ -13,7 +13,7 @@ namespace physics
         m_constrains.reserve(allocations);
     }
 
-    void compeller2D::add(const constrain_interface &c) { m_constrains.push_back(&c); }
+    void compeller2D::add_constrain(const constrain_interface &c) { m_constrains.push_back(&c); }
 
     std::vector<float> compeller2D::solve_constrains(const std::vector<float> &stchanges) const
     {

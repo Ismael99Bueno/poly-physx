@@ -5,8 +5,7 @@
 
 namespace physics
 {
-    collider2D::collider2D(std::vector<entity2D> &entities,
-                           const std::size_t allocations) : m_buffer(entities)
+    collider2D::collider2D(const std::size_t allocations)
     {
         m_entities.reserve(allocations);
         m_intervals.reserve(allocations);
@@ -55,10 +54,8 @@ namespace physics
         return 2.f * (m_touch1 - m_touch2).dot(v1 - v2);
     }
 
-    void collider2D::add(const std::size_t index)
+    void collider2D::add_entity(const entity_ptr &e)
     {
-        m_entities.emplace_back(m_buffer, index);
-        const entity_ptr &e = m_entities[m_entities.size() - 1];
         m_intervals.emplace_back(e, interval::LOWER);
         m_intervals.emplace_back(e, interval::HIGHER);
     }

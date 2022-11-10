@@ -41,12 +41,12 @@ namespace physics
             e.m_accel = {{0.f, 0.f}, 0.f};
     }
 
-    entity_ptr engine2D::add(const vec2 &pos,
-                             const vec2 &vel,
-                             const float angpos,
-                             const float angvel,
-                             const float mass,
-                             const float charge)
+    entity_ptr engine2D::add_entity(const vec2 &pos,
+                                    const vec2 &vel,
+                                    const float angpos,
+                                    const float angvel,
+                                    const float mass,
+                                    const float charge)
     {
         m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge);
         m_entities[m_entities.size() - 1].m_buffer = utils::const_vec_ptr(m_state, m_state.size());
@@ -56,7 +56,7 @@ namespace physics
         return entity_ptr(m_entities, m_entities.size() - 1);
     }
 
-    void engine2D::add(const constrain_interface &c) { m_compeller.add(c); }
+    void engine2D::add_constrain(const constrain_interface &c) { m_compeller.add_constrain(c); }
 
     const_entity_ptr engine2D::get(const std::size_t index) const { return const_entity_ptr(m_entities, index); }
     entity_ptr engine2D::get(const std::size_t index) { return entity_ptr(m_entities, index); }
