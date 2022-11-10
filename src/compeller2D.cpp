@@ -15,13 +15,13 @@ namespace physics
 
     void compeller2D::add_constrain(const constrain_interface &c) { m_constrains.push_back(&c); }
 
-    std::vector<float> compeller2D::solve_constrains(const std::vector<float> &stchanges) const
+    void compeller2D::solve_and_load_constrains(std::vector<float> &stchanges) const
     {
         const std::vector<float> jcb = jacobian(), djcb = jacobian_derivative();
         const std::vector<float> A = lhs(jcb);
         const std::vector<float> b = rhs(jcb, djcb, stchanges);
         const std::vector<float> lambda = lu_decomposition(A, b);
-        return constrain_accels(jcb, lambda);
+        return load_constrain_accels(jcb, lambda, stchanges);
     }
 
     std::vector<float> compeller2D::constrain_matrix(std::array<float, POS_PER_ENTITY> (constrain_interface::*constrain_grad)(const entity_ptr &e) const) const
@@ -34,7 +34,7 @@ namespace physics
                 const entity_ptr &e = m_constrains[i]->operator[](j);
                 const std::array<float, POS_PER_ENTITY> state = (m_constrains[i]->*constrain_grad)(e);
                 for (std::size_t k = 0; k < POS_PER_ENTITY; k++)
-                    cmatrix[i * rows + e.index() * POS_PER_ENTITY + k] = state[k];
+                    cmatrix[i * cols + e.index() * POS_PER_ENTITY + k] = state[k];
             }
         return cmatrix;
     }
@@ -52,7 +52,7 @@ namespace physics
                 const std::size_t id = i * rows + j;
                 for (std::size_t k = 0; k < cols; k++)
                 {
-                    const std::size_t id1 = i * rows + k, id2 = j * rows + k;
+                    const std::size_t id1 = i * cols + k, id2 = j * cols + k;
                     A[id] += jcb[id1] * jcb[id2];
                 }
             }
@@ -78,7 +78,7 @@ namespace physics
         {
             for (std::size_t j = 0; j < cols; j++)
             {
-                const std::size_t id = i * rows + j;
+                const std::size_t id = i * cols + j;
                 b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
             }
             b[i] -= (m_stiffness * m_constrains[i]->value() + m_dampening * m_constrains[i]->derivative());
@@ -89,8 +89,7 @@ namespace physics
     std::vector<float> compeller2D::lu_decomposition(const std::vector<float> &A,
                                                      const std::vector<float> &b) const
     {
-        const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
-        const std::size_t size = rows;
+        const std::size_t size = m_constrains.size();
         std::vector<float> L(size * size, 0.f), U(size * size, 0.f), sol(size, 0.f);
         for (std::size_t i = 0; i < size; i++)
         {
@@ -129,14 +128,18 @@ namespace physics
         return sol;
     }
 
-    std::vector<float> compeller2D::constrain_accels(const std::vector<float> &jcb,
-                                                     const std::vector<float> &lambda) const
+    void compeller2D::load_constrain_accels(const std::vector<float> &jcb,
+                                            const std::vector<float> &lambda,
+                                            std::vector<float> &stchanges) const
     {
-        const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
-        std::vector<float> accels(cols, 0.f);
-        for (std::size_t i = 0; i < cols; i++)
-            for (std::size_t j = 0; j < rows; j++)
-                accels[i] += jcb[i * rows + j] * lambda[j];
-        return accels;
+        const std::size_t rows = m_constrains.size(), entts = m_entities.size();
+        for (std::size_t i = 0; i < entts; i++)
+            for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
+                for (std::size_t k = 0; k < rows; k++)
+                {
+                    const std::size_t id1 = 6 * i + j + POS_PER_ENTITY,
+                                      id2 = (i * POS_PER_ENTITY + j) * rows + k;
+                    stchanges[id1] += jcb[id2] * lambda[k];
+                }
     }
 }

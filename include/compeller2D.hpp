@@ -17,7 +17,7 @@ namespace physics
 
         void add_constrain(const constrain_interface &c); // Implement remove
 
-        std::vector<float> solve_constrains(const std::vector<float> &stchanges) const;
+        void solve_and_load_constrains(std::vector<float> &stchanges) const;
 
     private:
         std::vector<entity2D> &m_entities;
@@ -33,7 +33,9 @@ namespace physics
                                const std::vector<float> &djcb,
                                const std::vector<float> &stchanges) const;
         std::vector<float> lu_decomposition(const std::vector<float> &A, const std::vector<float> &b) const;
-        std::vector<float> constrain_accels(const std::vector<float> &jcb, const std::vector<float> &lambda) const;
+        void load_constrain_accels(const std::vector<float> &jcb,
+                                   const std::vector<float> &lambda,
+                                   std::vector<float> &stchanges) const;
     };
 }
 

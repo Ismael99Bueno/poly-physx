@@ -18,10 +18,7 @@ namespace physics
             stchanges.insert(stchanges.end(), {state[j + 3], state[j + 4], state[j + 5],
                                                accel.first.x, accel.first.y, accel.second});
         }
-        const std::vector<float> accels = engine.m_compeller.solve_constrains(stchanges);
-        for (std::size_t i = 0; i < engine.m_entities.size(); i++)
-            for (std::size_t j = 0; j < 3; j++)
-                stchanges[6 * i + j + 3] += accels[3 * i + j];
+        engine.m_compeller.solve_and_load_constrains(stchanges);
         return stchanges;
     }
 }
