@@ -72,6 +72,7 @@ namespace physics
     {
         m_pos = pos;
         m_shape.pos(pos);
+        m_bbox.recentre();
     }
 
     float entity2D::angpos() const { return m_angpos; }
@@ -80,5 +81,6 @@ namespace physics
     {
         m_angpos = angpos;
         m_shape.rotation(angpos);
+        m_bbox.bound();
     }
 }
