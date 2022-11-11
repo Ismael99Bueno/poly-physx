@@ -7,29 +7,19 @@
 #include <vector>
 #include <utility>
 
+#define VAR_PER_ENTITY 6
+
 namespace physics
 {
     class collider2D
     {
     public:
-        class collision_constrain : public constrain2D<2>
-        {
-        public:
-            using constrain2D<2>::constrain2D;
+        collider2D(float stiffness = 150.f,
+                   float dampening = 0.f,
+                   std::size_t allocations = 40);
 
-        private:
-            vec2 m_touch1, m_touch2;
-            float constrain(const std::array<const_entity_ptr, 2> &entities) const override;
-            float constrain_derivative(const std::array<const_entity_ptr, 2> &entities) const override;
-
-            void compute_touch_points();
-            std::pair<vec2, vec2> compute_touch_velocities() const;
-        };
-
-        collider2D(std::size_t allocations = 40);
-
-        void add_entity(const entity_ptr &e); // TODO: Implement remove
-        const std::vector<collision_constrain> &build_collision_constrains();
+        void add_entity(const const_entity_ptr &e); // TODO: Implement remove
+        void solve_and_load_collisions(std::vector<float> &stchanges);
 
     private:
         struct interval
@@ -41,22 +31,38 @@ namespace physics
                 HIGHER
             };
 
-            interval(const entity_ptr &e, end end_type);
+            interval(const const_entity_ptr &e, end end_type);
 
-            const entity_ptr &entity() const;
+            const const_entity_ptr &entity() const;
             float value() const;
             end type() const;
 
         private:
-            entity_ptr m_entity;
+            const_entity_ptr m_entity;
             end m_end;
         };
 
-        std::vector<entity_ptr> m_entities;
-        std::vector<interval> m_intervals;
-        std::vector<collision_constrain> m_constrains;
+        struct collision_pair
+        {
+            collision_pair(const const_entity_ptr &e1, const const_entity_ptr &e2);
+            const_entity_ptr e1, e2;
+        };
 
-        void sort_entities();
+        std::vector<const_entity_ptr> m_entities;
+        std::vector<interval> m_intervals;
+        float m_stiffness, m_dampening;
+
+        void sort_intervals();
+
+        std::vector<collision_pair> detect_collisions() const;
+
+        void load_collisions(const std::vector<collision_pair> &collisions,
+                             std::vector<float> &stchanges) const;
+        std::pair<vec2, vec2> touch_points(const const_entity_ptr &e1, const const_entity_ptr &e2) const;
+        std::array<float, VAR_PER_ENTITY> state_changes_upon_collision(const const_entity_ptr &e1,
+                                                                       const const_entity_ptr &e2,
+                                                                       const vec2 &touch1,
+                                                                       const vec2 &touch2) const;
     };
 }
 
