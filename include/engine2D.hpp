@@ -4,6 +4,7 @@
 #include "integrator.hpp"
 #include "entity_ptr.hpp"
 #include "compeller2D.hpp"
+#include "collider2D.hpp"
 
 namespace physics
 {
@@ -36,6 +37,7 @@ namespace physics
     private:
         std::vector<float> m_state;
         compeller2D m_compeller;
+        collider2D m_collider;
 
         rk::integrator m_integ;
         float m_t = 0.f, m_dt = 0.001f;

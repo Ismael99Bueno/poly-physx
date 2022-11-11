@@ -48,10 +48,12 @@ namespace physics
                                     const float mass,
                                     const float charge)
     {
-        m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge);
-        m_entities[m_entities.size() - 1].m_buffer = utils::const_vec_ptr(m_state, m_state.size());
+        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge);
+        e.m_buffer = utils::const_vec_ptr(m_state, m_state.size());
         m_state.insert(m_state.end(), {pos.x, pos.y, angpos, vel.x, vel.y, angvel});
+        m_collider.add_entity({m_entities, m_entities.size() - 1});
 
+        e.retrieve();
         m_integ.resize();
         return entity_ptr(m_entities, m_entities.size() - 1);
     }
