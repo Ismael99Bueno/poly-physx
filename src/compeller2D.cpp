@@ -1,6 +1,8 @@
 #include "compeller2D.hpp"
 #include "constrain_interface.hpp"
 
+#define VAR_PER_ENTITY 6
+
 namespace physics
 {
     compeller2D::compeller2D(std::vector<entity2D> &entities,
@@ -70,8 +72,8 @@ namespace physics
         for (std::size_t i = 0; i < m_entities.size(); i++)
             for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
             {
-                qdot[index] = stchanges[6 * i + j];
-                accels[index++] = stchanges[6 * i + j + POS_PER_ENTITY];
+                qdot[index] = stchanges[VAR_PER_ENTITY * i + j];
+                accels[index++] = stchanges[VAR_PER_ENTITY * i + j + POS_PER_ENTITY];
             }
 
         for (std::size_t i = 0; i < rows; i++)
@@ -137,7 +139,7 @@ namespace physics
             for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
                 for (std::size_t k = 0; k < rows; k++)
                 {
-                    const std::size_t id1 = 6 * i + j + POS_PER_ENTITY,
+                    const std::size_t id1 = VAR_PER_ENTITY * i + j + POS_PER_ENTITY,
                                       id2 = (i * POS_PER_ENTITY + j) * rows + k;
                     stchanges[id1] += jcb[id2] * lambda[k];
                 }

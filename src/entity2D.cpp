@@ -9,8 +9,7 @@ namespace physics
                        const vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge) : body2D(pos, vel, angpos,
-                                                                      angvel, mass, charge),
-                                                               m_bbox(m_shape) {}
+                                                                      angvel, mass, charge) {}
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
@@ -62,7 +61,8 @@ namespace physics
     const geo::polygon2D &entity2D::shape(const geo::polygon2D &poly)
     {
         m_shape = poly;
-        m_bbox.bound();
+        m_shape.rotation(m_angpos);
+        m_bbox.bound(m_shape.vertices(), m_shape.centroid());
         return m_shape;
     }
 
@@ -72,7 +72,8 @@ namespace physics
     {
         m_pos = pos;
         m_shape.pos(pos);
-        m_bbox.recentre();
+        m_bbox.recentre(m_shape.centroid());
+        // m_bbox.bound(m_shape.vertices(), m_shape.centroid());
     }
 
     float entity2D::angpos() const { return m_angpos; }
@@ -81,6 +82,6 @@ namespace physics
     {
         m_angpos = angpos;
         m_shape.rotation(angpos);
-        m_bbox.bound();
+        m_bbox.bound(m_shape.vertices(), m_shape.centroid());
     }
 }

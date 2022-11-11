@@ -18,6 +18,7 @@ namespace physics
             stchanges.insert(stchanges.end(), {state[j + 3], state[j + 4], state[j + 5],
                                                accel.first.x, accel.first.y, accel.second});
         }
+        engine.m_collider.solve_and_load_collisions(stchanges);
         engine.m_compeller.solve_and_load_constrains(stchanges);
         return stchanges;
     }
