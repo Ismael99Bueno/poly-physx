@@ -14,8 +14,8 @@ namespace physics
     class collider2D
     {
     public:
-        collider2D(float stiffness = 150.f,
-                   float dampening = 0.f,
+        collider2D(float stiffness = 100.f,
+                   float dampening = 10.f,
                    std::size_t allocations = 40);
 
         void add_entity(const const_entity_ptr &e); // TODO: Implement remove
@@ -48,7 +48,6 @@ namespace physics
             const_entity_ptr e1, e2;
         };
 
-        std::vector<const_entity_ptr> m_entities;
         std::vector<interval> m_intervals;
         float m_stiffness, m_dampening;
 
@@ -58,11 +57,8 @@ namespace physics
 
         void load_collisions(const std::vector<collision_pair> &collisions,
                              std::vector<float> &stchanges) const;
-        std::pair<vec2, vec2> touch_points(const const_entity_ptr &e1, const const_entity_ptr &e2) const;
         std::array<float, VAR_PER_ENTITY> state_changes_upon_collision(const const_entity_ptr &e1,
-                                                                       const const_entity_ptr &e2,
-                                                                       const vec2 &touch1,
-                                                                       const vec2 &touch2) const;
+                                                                       const const_entity_ptr &e2) const;
     };
 }
 
