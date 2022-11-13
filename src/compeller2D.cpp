@@ -134,14 +134,15 @@ namespace physics
                                             const std::vector<float> &lambda,
                                             std::vector<float> &stchanges) const
     {
-        const std::size_t rows = m_constrains.size(), entts = m_entities.size();
-        for (std::size_t i = 0; i < entts; i++)
-            for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
-                for (std::size_t k = 0; k < rows; k++)
-                {
-                    const std::size_t id1 = VAR_PER_ENTITY * i + j + POS_PER_ENTITY,
-                                      id2 = (i * POS_PER_ENTITY + j) * rows + k;
-                    stchanges[id1] += jcb[id2] * lambda[k];
-                }
+        const std::size_t rows = m_constrains.size();
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+            if (m_entities[i].dynamic())
+                for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
+                    for (std::size_t k = 0; k < rows; k++)
+                    {
+                        const std::size_t id1 = VAR_PER_ENTITY * i + j + POS_PER_ENTITY,
+                                          id2 = (i * POS_PER_ENTITY + j) * rows + k;
+                        stchanges[id1] += jcb[id2] * lambda[k];
+                    }
     }
 }

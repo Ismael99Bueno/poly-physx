@@ -63,7 +63,10 @@ namespace physics
                         if (entity1 != entity2 &&
                             entity1->bounding_box().overlaps(entity2->bounding_box()) &&
                             entity1->shape().overlaps(entity2->shape()))
-                            collisions.emplace_back(entity1, entity2);
+                        {
+                            const bool first = entity1.index() < entity2.index();
+                            collisions.emplace_back(first ? entity1 : entity2, first ? entity2 : entity1);
+                        }
                 eligible.clear();
             }
         return collisions;
@@ -78,8 +81,10 @@ namespace physics
             const std::array<float, VAR_PER_ENTITY> accels = state_changes_upon_collision(e1, e2);
             for (std::size_t i = 0; i < POS_PER_ENTITY; i++)
             {
-                stchanges[e1.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += accels[i];
-                stchanges[e2.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += accels[i + POS_PER_ENTITY];
+                if (e1->dynamic())
+                    stchanges[e1.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += accels[i];
+                if (e2->dynamic())
+                    stchanges[e2.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += accels[i + POS_PER_ENTITY];
             }
         }
     }

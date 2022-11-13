@@ -36,6 +36,8 @@ namespace physics
 
     std::pair<vec2, float> entity2D::accel() const
     {
+        if (!m_dynamic)
+            return {{0.f, 0.f}, 0.f};
         vec2 linaccel;
         float angaccel = 0.f;
         for (const force2D *force : m_forces)
@@ -61,6 +63,7 @@ namespace physics
     const geo::polygon2D &entity2D::shape(const geo::polygon2D &poly)
     {
         m_shape = poly;
+        m_shape.pos(m_pos);
         m_shape.rotation(m_angpos);
         m_bbox.bound(m_shape.vertices(), m_shape.centroid());
         return m_shape;
@@ -84,4 +87,7 @@ namespace physics
         m_shape.rotation(angpos);
         m_bbox.bound(m_shape.vertices(), m_shape.centroid());
     }
+
+    bool entity2D::dynamic() const { return m_dynamic; }
+    void entity2D::dynamic(bool dynamic) { m_dynamic = dynamic; }
 }

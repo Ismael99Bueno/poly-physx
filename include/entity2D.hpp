@@ -39,11 +39,15 @@ namespace physics
         float angpos() const override;
         void angpos(float angpos) override;
 
+        bool dynamic() const;
+        void dynamic(bool dynamic);
+
     private:
         geo::box2D m_bbox;
         geo::polygon2D m_shape;
         utils::const_vec_ptr m_buffer;
         std::pair<vec2, float> m_accel = {{0.f, 0.f}, 0.f};
+        bool m_dynamic = true;
 
         std::unordered_set<const force2D *> m_forces;
         std::unordered_set<const interaction2D *> m_inters;
