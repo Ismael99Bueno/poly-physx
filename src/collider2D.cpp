@@ -2,6 +2,7 @@
 #include <set>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 
 #define POS_PER_ENTITY 3
 
@@ -48,27 +49,31 @@ namespace physics
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    std::vector<collider2D::collision_pair> collider2D::detect_collisions() const
+    std::vector<collider2D::collision_pair> collider2D::detect_collisions()
     {
         std::vector<collision_pair> collisions;
         std::vector<const_entity_ptr> eligible;
+        sort_intervals();
+
         eligible.reserve(6);
+        collisions.reserve(m_intervals.size() / 2);
         for (const interval &itrv : m_intervals)
             if (itrv.type() == interval::LOWER)
-                eligible.emplace_back(itrv.entity());
-            else
             {
-                for (const const_entity_ptr &entity1 : eligible)
-                    for (const const_entity_ptr &entity2 : eligible)
-                        if (entity1 != entity2 &&
-                            entity1->bounding_box().overlaps(entity2->bounding_box()) &&
-                            entity1->shape().overlaps(entity2->shape()))
-                        {
-                            const bool first = entity1.index() < entity2.index();
-                            collisions.emplace_back(first ? entity1 : entity2, first ? entity2 : entity1);
-                        }
-                eligible.clear();
+                for (const const_entity_ptr &e : eligible)
+                    if (e != itrv.entity() &&
+                        e->bounding_box().overlaps(itrv.entity()->bounding_box()) &&
+                        e->shape().overlaps(itrv.entity()->shape()))
+                        collisions.emplace_back(e, itrv.entity());
+                eligible.emplace_back(itrv.entity());
             }
+            else
+                for (auto it = eligible.begin(); it != eligible.end(); ++it)
+                    if (*it == itrv.entity())
+                    {
+                        eligible.erase(it);
+                        break;
+                    }
         return collisions;
     }
 
@@ -92,14 +97,7 @@ namespace physics
     std::array<float, VAR_PER_ENTITY> collider2D::state_changes_upon_collision(const const_entity_ptr &e1,
                                                                                const const_entity_ptr &e2) const
     {
-        const auto [sep11, sep12] = e1->shape().separation_points(e2->shape());
-        const auto [sep21, sep22] = e2->shape().separation_points(e1->shape());
-
-        const float d1 = sep11.sq_dist(sep12),
-                    d2 = sep21.sq_dist(sep22);
-
-        const vec2 touch1 = d1 < d2 ? sep11 : sep22,
-                   touch2 = d1 < d2 ? sep12 : sep21;
+        const auto [touch1, touch2] = geo::polygon2D::touch_points(e1->shape(), e2->shape());
 
         const vec2 rel1 = touch1 - e1->shape().centroid(),
                    rel2 = touch2 - e2->shape().centroid();

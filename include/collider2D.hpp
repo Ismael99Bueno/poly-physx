@@ -14,7 +14,7 @@ namespace physics
     class collider2D
     {
     public:
-        collider2D(float stiffness = 100.f,
+        collider2D(float stiffness = 400.f,
                    float dampening = 10.f,
                    std::size_t allocations = 40);
 
@@ -52,8 +52,7 @@ namespace physics
         float m_stiffness, m_dampening;
 
         void sort_intervals();
-
-        std::vector<collision_pair> detect_collisions() const;
+        std::vector<collision_pair> detect_collisions();
 
         void load_collisions(const std::vector<collision_pair> &collisions,
                              std::vector<float> &stchanges) const;
