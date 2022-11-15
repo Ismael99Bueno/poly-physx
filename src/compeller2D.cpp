@@ -17,11 +17,11 @@ namespace physics
 
     void compeller2D::add_constrain(const constrain_interface &c) { m_constrains.push_back(&c); }
 
-    void compeller2D::solve_and_load_constrains(std::vector<float> &stchanges) const
+    void compeller2D::solve_and_load_constrains(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const
     {
         const std::vector<float> jcb = jacobian(), djcb = jacobian_derivative();
-        const std::vector<float> A = lhs(jcb);
-        const std::vector<float> b = rhs(jcb, djcb, stchanges);
+        const std::vector<float> A = lhs(jcb, inv_masses);
+        const std::vector<float> b = rhs(jcb, djcb, stchanges, inv_masses);
         const std::vector<float> lambda = lu_decomposition(A, b);
         return load_constrain_accels(jcb, lambda, stchanges);
     }
@@ -44,7 +44,8 @@ namespace physics
     std::vector<float> compeller2D::jacobian() const { return constrain_matrix(&constrain_interface::constrain_grad); }
     std::vector<float> compeller2D::jacobian_derivative() const { return constrain_matrix(&constrain_interface::constrain_grad_derivative); }
 
-    std::vector<float> compeller2D::lhs(const std::vector<float> &jcb) const
+    std::vector<float> compeller2D::lhs(const std::vector<float> &jcb,
+                                        const std::vector<float> &inv_masses) const
     {
         const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
         std::vector<float> A(rows * rows, 0.f);
@@ -55,7 +56,7 @@ namespace physics
                 for (std::size_t k = 0; k < cols; k++)
                 {
                     const std::size_t id1 = i * cols + k, id2 = j * cols + k;
-                    A[id] += jcb[id1] * jcb[id2];
+                    A[id] += jcb[id1] * jcb[id2] * inv_masses[k];
                 }
             }
         return A;
@@ -63,28 +64,43 @@ namespace physics
 
     std::vector<float> compeller2D::rhs(const std::vector<float> &jcb,
                                         const std::vector<float> &djcb,
-                                        const std::vector<float> &stchanges) const
+                                        const std::vector<float> &stchanges,
+                                        const std::vector<float> &inv_masses) const
     {
         const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();
         std::vector<float> b(rows, 0.f), qdot(stchanges.size() / 2, 0.f), accels(stchanges.size() / 2, 0.f);
 
-        std::size_t index = 0;
-        for (std::size_t i = 0; i < m_entities.size(); i++)
-            for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
-            {
-                qdot[index] = stchanges[VAR_PER_ENTITY * i + j];
-                accels[index++] = stchanges[VAR_PER_ENTITY * i + j + POS_PER_ENTITY];
-            }
-
         for (std::size_t i = 0; i < rows; i++)
         {
-            for (std::size_t j = 0; j < cols; j++)
-            {
-                const std::size_t id = i * cols + j;
-                b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
-            }
+            for (std::size_t j = 0; j < m_entities.size(); j++)
+                for (std::size_t k = 0; k < POS_PER_ENTITY; k++)
+                {
+                    const std::size_t index1 = j * POS_PER_ENTITY + k, index2 = j * VAR_PER_ENTITY + k;
+                    const std::size_t id = i * cols + index1;
+                    b[i] -= (djcb[id] * stchanges[index2] +
+                             jcb[id] * stchanges[index2 + POS_PER_ENTITY]) *
+                            inv_masses[index1];
+                }
             b[i] -= (m_stiffness * m_constrains[i]->value() + m_dampening * m_constrains[i]->derivative());
         }
+
+        // std::size_t index = 0;
+        // for (std::size_t i = 0; i < m_entities.size(); i++)
+        //     for (std::size_t j = 0; j < POS_PER_ENTITY; j++)
+        //     {
+        //         qdot[index] = stchanges[VAR_PER_ENTITY * i + j];
+        //         accels[index++] = stchanges[VAR_PER_ENTITY * i + j + POS_PER_ENTITY];
+        //     }
+
+        // for (std::size_t i = 0; i < rows; i++)
+        // {
+        //     for (std::size_t j = 0; j < cols; j++)
+        //     {
+        //         const std::size_t id = i * cols + j;
+        //         b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
+        //     }
+        //     b[i] -= (m_stiffness * m_constrains[i]->value() + m_dampening * m_constrains[i]->derivative());
+        // }
         return b;
     }
 

@@ -18,7 +18,11 @@ namespace physics
         entity2D(const vec2 &pos = {0.f, 0.f},
                  const vec2 &vel = {0.f, 0.f},
                  float angpos = 0.f, float angvel = 0.f,
-                 float mass = 1.f, float charge = 1.f);
+                 float mass = 1.f, float charge = 1.f,
+                 const std::vector<vec2> &vertices = {{-45.f, 0.f},
+                                                      {45.f, 0.f},
+                                                      {0.f, 45.f},
+                                                      {45.f, 45.f}});
 
         void retrieve();
 
@@ -27,7 +31,7 @@ namespace physics
 
         void add_force(const vec2 &force);
         void add_torque(float torque);
-        std::pair<vec2, float> accel() const;
+        std::pair<vec2, float> force() const;
 
         const geo::box2D &bounding_box() const;
         const geo::polygon2D &shape() const;
@@ -39,6 +43,8 @@ namespace physics
         float angpos() const override;
         void angpos(float angpos) override;
 
+        float inertia() const;
+
         bool dynamic() const;
         void dynamic(bool dynamic);
 
@@ -46,7 +52,8 @@ namespace physics
         geo::box2D m_bbox;
         geo::polygon2D m_shape;
         utils::const_vec_ptr m_buffer;
-        std::pair<vec2, float> m_accel = {{0.f, 0.f}, 0.f};
+        vec2 m_force;
+        float m_torque = 0.f;
         bool m_dynamic = true;
 
         std::unordered_set<const force2D *> m_forces;

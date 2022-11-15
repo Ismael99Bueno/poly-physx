@@ -17,7 +17,7 @@ namespace physics
 
         void add_constrain(const constrain_interface &c); // Implement remove
 
-        void solve_and_load_constrains(std::vector<float> &stchanges) const;
+        void solve_and_load_constrains(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const;
 
     private:
         std::vector<entity2D> &m_entities;
@@ -28,10 +28,14 @@ namespace physics
         std::vector<float> jacobian() const;
         std::vector<float> jacobian_derivative() const;
 
-        std::vector<float> lhs(const std::vector<float> &jcb) const;
+        std::vector<float> lhs(const std::vector<float> &jcb,
+                               const std::vector<float> &inv_masses) const;
+
         std::vector<float> rhs(const std::vector<float> &jcb,
                                const std::vector<float> &djcb,
-                               const std::vector<float> &stchanges) const;
+                               const std::vector<float> &stchanges,
+                               const std::vector<float> &inv_masses) const;
+
         std::vector<float> lu_decomposition(const std::vector<float> &A, const std::vector<float> &b) const;
         void load_constrain_accels(const std::vector<float> &jcb,
                                    const std::vector<float> &lambda,

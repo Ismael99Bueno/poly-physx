@@ -56,8 +56,8 @@ namespace physics
 
         void load_collisions(const std::vector<collision_pair> &collisions,
                              std::vector<float> &stchanges) const;
-        std::array<float, VAR_PER_ENTITY> state_changes_upon_collision(const const_entity_ptr &e1,
-                                                                       const const_entity_ptr &e2) const;
+        std::array<float, VAR_PER_ENTITY> forces_upon_collision(const const_entity_ptr &e1,
+                                                                const const_entity_ptr &e2) const;
     };
 }
 

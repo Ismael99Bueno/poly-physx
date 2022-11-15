@@ -24,21 +24,30 @@ namespace physics
 
     bool engine2D::raw_forward()
     {
-        return m_integ.raw_forward(m_t, m_dt, *this, ode);
+        const bool valid = m_integ.raw_forward(m_t, m_dt, *this, ode);
+        reset_forces();
+        return valid;
     }
     bool engine2D::reiterative_forward(const std::size_t reiterations)
     {
-        return m_integ.reiterative_forward(m_t, m_dt, *this, ode, reiterations);
+        const bool valid = m_integ.reiterative_forward(m_t, m_dt, *this, ode, reiterations);
+        reset_forces();
+        return valid;
     }
     bool engine2D::embedded_forward()
     {
-        return m_integ.embedded_forward(m_t, m_dt, *this, ode);
+        const bool valid = m_integ.embedded_forward(m_t, m_dt, *this, ode);
+        reset_forces();
+        return valid;
     }
 
-    void engine2D::reset_accelerations()
+    void engine2D::reset_forces()
     {
         for (entity2D &e : m_entities)
-            e.m_accel = {{0.f, 0.f}, 0.f};
+        {
+            e.m_force = {0.f, 0.f};
+            e.m_torque = 0.f;
+        }
     }
 
     entity_ptr engine2D::add_entity(const vec2 &pos,

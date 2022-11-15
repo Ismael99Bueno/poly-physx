@@ -83,19 +83,19 @@ namespace physics
         for (const collision_pair &pair : collisions)
         {
             const const_entity_ptr &e1 = pair.e1, &e2 = pair.e2;
-            const std::array<float, VAR_PER_ENTITY> accels = state_changes_upon_collision(e1, e2);
+            const std::array<float, VAR_PER_ENTITY> forces = forces_upon_collision(e1, e2);
             for (std::size_t i = 0; i < POS_PER_ENTITY; i++)
             {
                 if (e1->dynamic())
-                    stchanges[e1.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += accels[i];
+                    stchanges[e1.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += forces[i];
                 if (e2->dynamic())
-                    stchanges[e2.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += accels[i + POS_PER_ENTITY];
+                    stchanges[e2.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += forces[i + POS_PER_ENTITY];
             }
         }
     }
 
-    std::array<float, VAR_PER_ENTITY> collider2D::state_changes_upon_collision(const const_entity_ptr &e1,
-                                                                               const const_entity_ptr &e2) const
+    std::array<float, VAR_PER_ENTITY> collider2D::forces_upon_collision(const const_entity_ptr &e1,
+                                                                        const const_entity_ptr &e2) const
     {
         const auto [touch1, touch2] = geo::polygon2D::touch_points(e1->shape(), e2->shape());
 
@@ -108,8 +108,8 @@ namespace physics
         const float director = (touch1 - touch2).dot(e1->pos() - e2->pos());
         const float sign = director > 0.f ? -1.f : 1.f;
 
-        const vec2 accel = (m_stiffness * (touch2 - touch1) + m_dampening * (vel2 - vel1)) * sign;
-        const float angaccel1 = rel1.cross(accel) / rel1.sq_norm(), angaccel2 = accel.cross(rel2) / rel2.sq_norm();
-        return {accel.x, accel.y, angaccel1, -accel.x, -accel.y, angaccel2};
+        const vec2 force = (m_stiffness * (touch2 - touch1) + m_dampening * (vel2 - vel1)) * sign;
+        const float torque1 = rel1.cross(force), torque2 = force.cross(rel2);
+        return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
 }

@@ -8,8 +8,11 @@ namespace physics
     entity2D::entity2D(const vec2 &pos,
                        const vec2 &vel,
                        const float angpos, const float angvel,
-                       const float mass, const float charge) : body2D(pos, vel, angpos,
-                                                                      angvel, mass, charge) {}
+                       const float mass, const float charge,
+                       const std::vector<vec2> &vertices) : body2D(pos, vel, angpos,
+                                                                   angvel, mass, charge),
+                                                            m_shape(pos, vertices),
+                                                            m_bbox() {}
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
@@ -22,8 +25,8 @@ namespace physics
 
     void entity2D::retrieve() { retrieve(m_buffer); }
 
-    void entity2D::add_force(const vec2 &force) { m_accel.first += force / m_mass; }
-    void entity2D::add_torque(const float torque) { m_accel.second += torque / m_mass; }
+    void entity2D::add_force(const vec2 &force) { m_force += force; }
+    void entity2D::add_torque(const float torque) { m_torque += torque; }
 
     void entity2D::include(const force2D &force) { m_forces.insert(&force); }
     void entity2D::include(const interaction2D &inter) { m_inters.insert(&inter); }
@@ -34,27 +37,27 @@ namespace physics
     bool entity2D::contains(const force2D &force) const { return m_forces.find(&force) != m_forces.end(); }
     bool entity2D::contains(const interaction2D &inter) const { return m_inters.find(&inter) != m_inters.end(); }
 
-    std::pair<vec2, float> entity2D::accel() const
+    std::pair<vec2, float> entity2D::force() const
     {
         if (!m_dynamic)
             return {{0.f, 0.f}, 0.f};
-        vec2 linaccel;
-        float angaccel = 0.f;
-        for (const force2D *force : m_forces)
+        vec2 force;
+        float torque = 0.f;
+        for (const force2D *f2D : m_forces)
         {
-            const auto [lin, ang] = force->acceleration(*this);
-            linaccel += lin;
-            angaccel += ang;
+            const auto [f, t] = f2D->force(*this);
+            force += f;
+            torque += t;
         }
-        for (const interaction2D *inter : m_inters)
-            for (const const_entity_ptr &e : inter->entities())
+        for (const interaction2D *i2D : m_inters)
+            for (const const_entity_ptr &e : i2D->entities())
                 if (&(*e) != this)
                 {
-                    const auto [lin, ang] = inter->acceleration(*this, *e);
-                    linaccel += lin;
-                    angaccel += ang;
+                    const auto [f, t] = i2D->force(*this, *e);
+                    force += f;
+                    torque += t;
                 }
-        return {linaccel, angaccel};
+        return {force, torque};
     }
 
     const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
@@ -87,6 +90,8 @@ namespace physics
         m_shape.rotation(angpos);
         m_bbox.bound(m_shape.vertices(), m_shape.centroid());
     }
+
+    float entity2D::inertia() const { return m_shape.inertia() * m_mass; }
 
     bool entity2D::dynamic() const { return m_dynamic; }
     void entity2D::dynamic(bool dynamic) { m_dynamic = dynamic; }

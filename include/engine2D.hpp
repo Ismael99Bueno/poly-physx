@@ -43,7 +43,7 @@ namespace physics
         float m_t = 0.f, m_dt = 0.001f;
 
         void retrieve(const std::vector<float> &state);
-        void reset_accelerations();
+        void reset_forces();
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
     };
