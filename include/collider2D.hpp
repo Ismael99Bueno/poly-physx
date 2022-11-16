@@ -21,6 +21,12 @@ namespace physics
         void add_entity(const const_entity_ptr &e); // TODO: Implement remove
         void solve_and_load_collisions(std::vector<float> &stchanges);
 
+        float stiffness() const;
+        float dampening() const;
+
+        void stiffness(float stiffness);
+        void dampening(float dampening);
+
     private:
         struct interval
         {

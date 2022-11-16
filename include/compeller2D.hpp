@@ -17,7 +17,14 @@ namespace physics
 
         void add_constrain(const constrain_interface &c); // Implement remove
 
-        void solve_and_load_constrains(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const;
+        void solve_and_load_constrains(std::vector<float> &stchanges,
+                                       const std::vector<float> &inv_masses) const;
+
+        float stiffness() const;
+        float dampening() const;
+
+        void stiffness(float stiffness);
+        void dampening(float dampening);
 
     private:
         std::vector<entity2D> &m_entities;

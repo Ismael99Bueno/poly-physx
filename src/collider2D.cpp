@@ -41,6 +41,12 @@ namespace physics
         load_collisions(collisions, stchanges);
     }
 
+    float collider2D::stiffness() const { return m_stiffness; }
+    float collider2D::dampening() const { return m_dampening; }
+
+    void collider2D::stiffness(float stiffness) { m_stiffness = stiffness; }
+    void collider2D::dampening(float dampening) { m_dampening = dampening; }
+
     void collider2D::sort_intervals()
     {
         const auto cmp = [](const interval &itrv1, const interval &itrv2)

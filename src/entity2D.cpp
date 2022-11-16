@@ -24,6 +24,15 @@ namespace physics
     }
 
     void entity2D::retrieve() { retrieve(m_buffer); }
+    void entity2D::dispatch() const
+    {
+        m_buffer[0] = m_pos.x;
+        m_buffer[1] = m_pos.y;
+        m_buffer[2] = m_angpos;
+        m_buffer[3] = m_vel.x;
+        m_buffer[4] = m_vel.y;
+        m_buffer[5] = m_angvel;
+    }
 
     void entity2D::add_force(const vec2 &force) { m_force += force; }
     void entity2D::add_torque(const float torque) { m_torque += torque; }

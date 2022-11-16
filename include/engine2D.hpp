@@ -25,11 +25,27 @@ namespace physics
                                       float mass = 1.f, float charge = 1.f);
         void add_constrain(const constrain_interface &c);
 
-        const_entity_ptr get(std::size_t index) const;
-        entity_ptr get(std::size_t index);
+        const_entity_ptr operator[](std::size_t index) const;
+        entity_ptr operator[](std::size_t index);
 
+        const std::vector<entity2D> &entities() const;
+        std::size_t size() const;
+
+        const rk::integrator &integrator() const;
         rk::integrator &integrator();
+
+        const std::vector<float> &state() const;
+
+        const compeller2D &compeller() const;
+        compeller2D &compeller();
+
+        const collider2D &collider() const;
+        collider2D &collider();
+
         float elapsed() const;
+
+        float timestep() const;
+        void timestep(float timestep);
 
     protected:
         std::vector<entity2D> m_entities;

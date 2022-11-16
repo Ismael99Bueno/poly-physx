@@ -58,7 +58,7 @@ namespace physics
                                     const float charge)
     {
         entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge);
-        e.m_buffer = utils::const_vec_ptr(m_state, m_state.size());
+        e.m_buffer = utils::vec_ptr(m_state, m_state.size());
         m_state.insert(m_state.end(), {pos.x, pos.y, angpos, vel.x, vel.y, angvel});
         m_collider.add_entity({m_entities, m_entities.size() - 1});
 
@@ -69,8 +69,26 @@ namespace physics
 
     void engine2D::add_constrain(const constrain_interface &c) { m_compeller.add_constrain(c); }
 
-    const_entity_ptr engine2D::get(const std::size_t index) const { return const_entity_ptr(m_entities, index); }
-    entity_ptr engine2D::get(const std::size_t index) { return entity_ptr(m_entities, index); }
-    float engine2D::elapsed() const { return m_t; }
+    const_entity_ptr engine2D::operator[](std::size_t index) const { return {m_entities, index}; }
+    entity_ptr engine2D::operator[](std::size_t index) { return {m_entities, index}; }
+
+    const std::vector<entity2D> &engine2D::entities() const { return m_entities; }
+    std::size_t engine2D::size() const { return m_entities.size(); }
+
+    const rk::integrator &engine2D::integrator() const { return m_integ; }
     rk::integrator &engine2D::integrator() { return m_integ; }
+
+    const std::vector<float> &engine2D::state() const { return m_state; }
+
+    const compeller2D &engine2D::compeller() const { return m_compeller; }
+    compeller2D &engine2D::compeller() { return m_compeller; }
+
+    const collider2D &engine2D::collider() const { return m_collider; }
+    collider2D &engine2D::collider() { return m_collider; }
+
+    float engine2D::elapsed() const { return m_t; }
+
+    float engine2D::timestep() const { return m_dt; }
+    void engine2D::timestep(float timestep) { m_dt = timestep; }
+
 }

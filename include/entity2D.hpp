@@ -25,6 +25,7 @@ namespace physics
                                                       {45.f, 45.f}});
 
         void retrieve();
+        void dispatch() const;
 
         bool contains(const force2D &force) const;
         bool contains(const interaction2D &inter) const;
@@ -51,7 +52,7 @@ namespace physics
     private:
         geo::box2D m_bbox;
         geo::polygon2D m_shape;
-        utils::const_vec_ptr m_buffer;
+        utils::vec_ptr m_buffer;
         vec2 m_force;
         float m_torque = 0.f;
         bool m_dynamic = true;

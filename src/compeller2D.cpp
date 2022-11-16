@@ -26,6 +26,12 @@ namespace physics
         return load_constrain_accels(jcb, lambda, stchanges);
     }
 
+    float compeller2D::stiffness() const { return m_stiffness; }
+    float compeller2D::dampening() const { return m_dampening; }
+
+    void compeller2D::stiffness(float stiffness) { m_stiffness = stiffness; }
+    void compeller2D::dampening(float dampening) { m_dampening = dampening; }
+
     std::vector<float> compeller2D::constrain_matrix(std::array<float, POS_PER_ENTITY> (constrain_interface::*constrain_grad)(const entity_ptr &e) const) const
     {
         const std::size_t rows = m_constrains.size(), cols = POS_PER_ENTITY * m_entities.size();

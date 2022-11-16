@@ -22,7 +22,7 @@ namespace physics
         const std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
 
-        friend struct std::hash<physics::const_entity_ptr>;
+        friend struct std::hash<const_entity_ptr>;
     };
 
     bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2);
@@ -45,7 +45,7 @@ namespace physics
         std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
 
-        friend struct std::hash<physics::entity_ptr>;
+        friend struct std::hash<entity_ptr>;
     };
 
     bool operator==(const entity_ptr &e1, const entity_ptr &e2);
