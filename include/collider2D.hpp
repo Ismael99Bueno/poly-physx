@@ -42,22 +42,32 @@ namespace physics
             end m_end;
         };
 
-        struct collision_pair
+        struct collision
         {
-            collision_pair(const const_entity_ptr &e1, const const_entity_ptr &e2);
             const_entity_ptr e1, e2;
+            vec2 touch1, touch2;
         };
 
         std::vector<interval> m_intervals;
         float m_stiffness, m_dampening;
 
         void sort_intervals();
-        std::vector<collision_pair> detect_collisions();
+        std::vector<collision> detect_collisions();
 
-        void load_collisions(const std::vector<collision_pair> &collisions,
+        void load_collisions(const std::vector<collision> &collisions,
                              std::vector<float> &stchanges) const;
-        std::array<float, VAR_PER_ENTITY> forces_upon_collision(const const_entity_ptr &e1,
-                                                                const const_entity_ptr &e2) const;
+        std::array<float, VAR_PER_ENTITY> forces_upon_collision(const collision &c) const;
+
+        static bool gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &col);
+
+        static bool gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<vec2> &simplex);
+        static void line_case(const std::vector<vec2> &simplex, vec2 &dir);
+        static bool triangle_case(std::vector<vec2> &simplex, vec2 &dir);
+
+        static vec2 epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<vec2> &simplex);
+        static std::pair<vec2, vec2> touch_points(const geo::polygon2D &poly1,
+                                                  const geo::polygon2D &poly2,
+                                                  const vec2 &mtv);
     };
 }
 
