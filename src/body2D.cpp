@@ -16,6 +16,7 @@ namespace physics
 
     const vec2 &body2D::pos() const { return m_pos; }
     const vec2 &body2D::vel() const { return m_vel; }
+    const vec2 body2D::vel(const vec2 &at) const { return m_vel + m_angvel * vec2(m_pos.y - at.y, at.x - m_pos.x); }
 
     float body2D::angpos() const { return m_angpos; }
     float body2D::angvel() const { return m_angvel; }

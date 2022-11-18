@@ -19,6 +19,7 @@ namespace physics
 
         virtual const vec2 &pos() const;
         const vec2 &vel() const;
+        const vec2 vel(const vec2 &at) const;
         virtual float angpos() const;
         float angvel() const;
         float mass() const;

@@ -106,8 +106,8 @@ namespace physics
         const vec2 rel1 = c.touch1 - c.e1->shape().centroid(),
                    rel2 = c.touch2 - c.e2->shape().centroid();
 
-        const vec2 vel1 = c.e1->vel() + rel1.norm() * c.e1->angvel() * vec2(-std::sin(rel1.angle()), std::cos(rel1.angle())),
-                   vel2 = c.e2->vel() + rel2.norm() * c.e2->angvel() * vec2(-std::sin(rel2.angle()), std::cos(rel2.angle()));
+        const vec2 vel1 = c.e1->vel(c.touch1),
+                   vel2 = c.e2->vel(c.touch2);
 
         const float director = (c.touch1 - c.touch2).dot(c.e1->pos() - c.e2->pos());
         const float sign = director > 0.f ? -1.f : 1.f;
