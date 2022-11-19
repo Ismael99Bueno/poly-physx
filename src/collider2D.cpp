@@ -57,7 +57,7 @@ namespace physics
     std::vector<collider2D::collision> collider2D::detect_collisions()
     {
         std::vector<collision> collisions;
-        std::vector<const_entity_ptr> eligible;
+        std::unordered_set<const_entity_ptr> eligible;
         sort_intervals();
 
         eligible.reserve(6);
@@ -73,15 +73,10 @@ namespace physics
                         gjk_epa(e, itrv.entity(), c))
                         collisions.emplace_back(c);
                 }
-                eligible.emplace_back(itrv.entity());
+                eligible.insert(itrv.entity());
             }
             else
-                for (auto it = eligible.begin(); it != eligible.end(); ++it)
-                    if (*it == itrv.entity())
-                    {
-                        eligible.erase(it);
-                        break;
-                    }
+                eligible.erase(itrv.entity());
         return collisions;
     }
 

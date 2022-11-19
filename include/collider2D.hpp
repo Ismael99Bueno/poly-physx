@@ -14,7 +14,7 @@ namespace physics
     class collider2D
     {
     public:
-        collider2D(float stiffness = 400.f,
+        collider2D(float stiffness = 1000.f,
                    float dampening = 10.f,
                    std::size_t allocations = 40);
 

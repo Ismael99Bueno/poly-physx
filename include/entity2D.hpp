@@ -19,10 +19,7 @@ namespace physics
                  const vec2 &vel = {0.f, 0.f},
                  float angpos = 0.f, float angvel = 0.f,
                  float mass = 1.f, float charge = 1.f,
-                 const std::vector<vec2> &vertices = {{-45.f, 0.f},
-                                                      {45.f, 0.f},
-                                                      {0.f, 45.f},
-                                                      {45.f, 45.f}});
+                 const std::vector<vec2> &vertices = geo::polygon2D::box(45.f));
 
         void retrieve();
         void dispatch() const;
