@@ -3,7 +3,7 @@
 
 #define VAR_PER_ENTITY 6
 
-namespace physics
+namespace phys
 {
     compeller2D::compeller2D(std::vector<entity2D> &entities,
                              const float stiffness,

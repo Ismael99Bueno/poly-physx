@@ -4,7 +4,7 @@
 #include "entity2D.hpp"
 #include <vector>
 
-namespace physics
+namespace phys
 {
     class const_entity_ptr
     {
@@ -55,15 +55,15 @@ namespace physics
 namespace std
 {
     template <>
-    struct hash<physics::const_entity_ptr>
+    struct hash<phys::const_entity_ptr>
     {
-        size_t operator()(const physics::const_entity_ptr &key) const;
+        size_t operator()(const phys::const_entity_ptr &key) const;
     };
 
     template <>
-    struct hash<physics::entity_ptr>
+    struct hash<phys::entity_ptr>
     {
-        size_t operator()(const physics::entity_ptr &key) const;
+        size_t operator()(const phys::entity_ptr &key) const;
     };
 }
 

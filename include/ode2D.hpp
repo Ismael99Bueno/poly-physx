@@ -5,7 +5,7 @@
 
 #define VAR_PER_ENTITY 6
 
-namespace physics
+namespace phys
 {
     std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
 }

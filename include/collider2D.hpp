@@ -9,7 +9,7 @@
 
 #define VAR_PER_ENTITY 6
 
-namespace physics
+namespace phys
 {
     class collider2D
     {
@@ -51,7 +51,7 @@ namespace physics
         struct collision
         {
             const_entity_ptr e1, e2;
-            vec2 touch1, touch2;
+            alg::vec2 touch1, touch2;
         };
 
         std::vector<interval> m_intervals;
@@ -66,14 +66,14 @@ namespace physics
 
         static bool gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &col);
 
-        static bool gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<vec2> &simplex);
-        static void line_case(const std::vector<vec2> &simplex, vec2 &dir);
-        static bool triangle_case(std::vector<vec2> &simplex, vec2 &dir);
+        static bool gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex);
+        static void line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir);
+        static bool triangle_case(std::vector<alg::vec2> &simplex, alg::vec2 &dir);
 
-        static vec2 epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<vec2> &simplex);
-        static std::pair<vec2, vec2> touch_points(const geo::polygon2D &poly1,
-                                                  const geo::polygon2D &poly2,
-                                                  const vec2 &mtv);
+        static alg::vec2 epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex);
+        static std::pair<alg::vec2, alg::vec2> touch_points(const geo::polygon2D &poly1,
+                                                            const geo::polygon2D &poly2,
+                                                            const alg::vec2 &mtv);
     };
 }
 

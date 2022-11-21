@@ -1,6 +1,6 @@
 #include "entity_ptr.hpp"
 
-namespace physics
+namespace phys
 {
     const_entity_ptr::const_entity_ptr(const std::vector<entity2D> &buffer,
                                        const std::size_t index) : m_buffer(&buffer), m_index(index) {}
@@ -30,12 +30,12 @@ namespace physics
 
 namespace std
 {
-    size_t hash<physics::const_entity_ptr>::operator()(const physics::const_entity_ptr &key) const
+    size_t hash<phys::const_entity_ptr>::operator()(const phys::const_entity_ptr &key) const
     {
         return hash<std::size_t>()(key.m_index);
     }
 
-    size_t hash<physics::entity_ptr>::operator()(const physics::entity_ptr &key) const
+    size_t hash<phys::entity_ptr>::operator()(const phys::entity_ptr &key) const
     {
         return hash<std::size_t>()(key.m_index);
     }

@@ -4,7 +4,7 @@
 #include "entity_ptr.hpp"
 #include <vector>
 
-namespace physics
+namespace phys
 {
     class constrain_interface;
     class compeller2D

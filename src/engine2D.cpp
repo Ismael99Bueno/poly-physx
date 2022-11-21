@@ -1,7 +1,7 @@
 #include "engine2D.hpp"
 #include "ode2D.hpp"
 
-namespace physics
+namespace phys
 {
     engine2D::engine2D(const rk::tableau &table,
                        const float dt,
@@ -51,7 +51,7 @@ namespace physics
     }
 
     entity_ptr engine2D::add_entity(const body2D &body,
-                                    const std::vector<vec2> &vertices)
+                                    const std::vector<alg::vec2> &vertices)
     {
         entity2D &e = m_entities.emplace_back(body, vertices);
         e.m_buffer = utils::vec_ptr(m_state, m_state.size());
@@ -63,13 +63,13 @@ namespace physics
         m_integ.resize();
         return entity_ptr(m_entities, m_entities.size() - 1);
     }
-    entity_ptr engine2D::add_entity(const vec2 &pos,
-                                    const vec2 &vel,
+    entity_ptr engine2D::add_entity(const alg::vec2 &pos,
+                                    const alg::vec2 &vel,
                                     const float angpos,
                                     const float angvel,
                                     const float mass,
                                     const float charge,
-                                    const std::vector<vec2> &vertices)
+                                    const std::vector<alg::vec2> &vertices)
     {
         return add_entity(body2D(pos, vel, angpos, angvel, mass, charge), vertices);
     }

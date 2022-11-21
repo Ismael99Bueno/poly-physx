@@ -3,7 +3,7 @@
 
 #define TOLERANCE 1.e-2f
 
-namespace physics
+namespace phys
 {
     std::array<float, 3> constrain_interface::constrain_grad(const entity_ptr &e) const { return gradient(e, &constrain_interface::value); }
     std::array<float, 3> constrain_interface::constrain_grad_derivative(const entity_ptr &e) const { return gradient(e, &constrain_interface::derivative); }

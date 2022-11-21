@@ -1,6 +1,6 @@
 #include "force2D.hpp"
 
-namespace physics
+namespace phys
 {
     force2D::force2D(const std::size_t allocations) { m_entities.reserve(allocations); }
 

@@ -3,7 +3,7 @@
 
 #include "constrain_interface.hpp"
 
-namespace physics
+namespace phys
 {
     template <std::size_t N>
     class constrain2D : public constrain_interface

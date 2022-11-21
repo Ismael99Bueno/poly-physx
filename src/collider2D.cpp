@@ -8,7 +8,7 @@
 #define POS_PER_ENTITY 3
 #define EPA_EPSILON 1.e-3f
 
-namespace physics
+namespace phys
 {
     collider2D::collider2D(const float stiffness,
                            const float dampening,
@@ -98,42 +98,42 @@ namespace physics
 
     std::array<float, VAR_PER_ENTITY> collider2D::forces_upon_collision(const collision &c) const
     {
-        const vec2 rel1 = c.touch1 - c.e1->shape().centroid(),
-                   rel2 = c.touch2 - c.e2->shape().centroid();
+        const alg::vec2 rel1 = c.touch1 - c.e1->shape().centroid(),
+                        rel2 = c.touch2 - c.e2->shape().centroid();
 
-        const vec2 vel1 = c.e1->vel(c.touch1),
-                   vel2 = c.e2->vel(c.touch2);
+        const alg::vec2 vel1 = c.e1->vel(c.touch1),
+                        vel2 = c.e2->vel(c.touch2);
 
         const float director = (c.touch1 - c.touch2).dot(c.e1->pos() - c.e2->pos());
         const float sign = director > 0.f ? -1.f : 1.f;
 
-        const vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1)) * sign;
+        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1)) * sign;
         const float torque1 = rel1.cross(force), torque2 = force.cross(rel2);
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
 
     bool collider2D::gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c)
     {
-        std::vector<vec2> simplex;
+        std::vector<alg::vec2> simplex;
         if (!gjk(e1->shape(), e2->shape(), simplex))
             return false;
-        const vec2 mtv = epa(e1->shape(), e2->shape(), simplex);
+        const alg::vec2 mtv = epa(e1->shape(), e2->shape(), simplex);
         const auto [t1, t2] = touch_points(e1->shape(), e2->shape(), mtv);
         c = {e1, e2, t1, t2};
         return true;
     }
 
-    bool collider2D::gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<vec2> &simplex)
+    bool collider2D::gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex)
     {
-        vec2 dir = poly2.centroid() - poly1.centroid();
+        alg::vec2 dir = poly2.centroid() - poly1.centroid();
         simplex.reserve(3);
-        const vec2 supp = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
+        const alg::vec2 supp = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
         dir = -supp;
         simplex.emplace_back(supp);
 
         for (;;)
         {
-            const vec2 A = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
+            const alg::vec2 A = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
             if (A.dot(dir) < 0.f)
                 return false;
             simplex.emplace_back(A);
@@ -143,21 +143,21 @@ namespace physics
                 return true;
         }
     }
-    void collider2D::line_case(const std::vector<vec2> &simplex, vec2 &dir)
+    void collider2D::line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir)
     {
-        const vec2 AB = simplex[0] - simplex[1], AO = -simplex[1];
-        dir = vec2::triple_cross(AB, AO, AB);
+        const alg::vec2 AB = simplex[0] - simplex[1], AO = -simplex[1];
+        dir = alg::vec2::triple_cross(AB, AO, AB);
     }
-    bool collider2D::triangle_case(std::vector<vec2> &simplex, vec2 &dir)
+    bool collider2D::triangle_case(std::vector<alg::vec2> &simplex, alg::vec2 &dir)
     {
-        const vec2 AB = simplex[1] - simplex[2], AC = simplex[0] - simplex[2], AO = -simplex[2];
-        const vec2 ABperp = vec2::triple_cross(AC, AB, AB);
+        const alg::vec2 AB = simplex[1] - simplex[2], AC = simplex[0] - simplex[2], AO = -simplex[2];
+        const alg::vec2 ABperp = alg::vec2::triple_cross(AC, AB, AB);
         if (ABperp.dot(AO) > 0.f)
         {
             simplex.erase(simplex.begin());
             return false;
         }
-        const vec2 ACperp = vec2::triple_cross(AB, AC, AC);
+        const alg::vec2 ACperp = alg::vec2::triple_cross(AB, AC, AC);
         if (ACperp.dot(AO) > 0.f)
         {
             simplex.erase(simplex.begin() + 1);
@@ -167,10 +167,10 @@ namespace physics
         return true;
     }
 
-    vec2 collider2D::epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<vec2> &simplex)
+    alg::vec2 collider2D::epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex)
     {
         float min_dist = std::numeric_limits<float>::max();
-        vec2 mtv;
+        alg::vec2 mtv;
         for (;;)
         {
             std::size_t min_index;
@@ -178,10 +178,10 @@ namespace physics
             {
                 const std::size_t j = (i + 1) % simplex.size();
 
-                const vec2 &p1 = simplex[i], &p2 = simplex[j];
-                const vec2 edge = p2 - p1;
+                const alg::vec2 &p1 = simplex[i], &p2 = simplex[j];
+                const alg::vec2 edge = p2 - p1;
 
-                const vec2 normal = vec2(edge.y, -edge.x).normalized();
+                const alg::vec2 normal = alg::vec2(edge.y, -edge.x).normalized();
                 const float dist = normal.dot(p1);
                 if (dist < min_dist)
                 {
@@ -190,7 +190,7 @@ namespace physics
                     mtv = normal;
                 }
             }
-            const vec2 support = poly1.support_vertex(mtv) - poly2.support_vertex(-mtv);
+            const alg::vec2 support = poly1.support_vertex(mtv) - poly2.support_vertex(-mtv);
             const float sup_dist = mtv.dot(support);
             const float diff = std::abs(sup_dist - min_dist);
             if (diff <= EPA_EPSILON)
@@ -201,15 +201,15 @@ namespace physics
         return mtv * min_dist;
     }
 
-    std::pair<vec2, vec2> collider2D::touch_points(const geo::polygon2D &poly1,
-                                                   const geo::polygon2D &poly2,
-                                                   const vec2 &mtv)
+    std::pair<alg::vec2, alg::vec2> collider2D::touch_points(const geo::polygon2D &poly1,
+                                                             const geo::polygon2D &poly2,
+                                                             const alg::vec2 &mtv)
     {
-        vec2 t1, t2;
+        alg::vec2 t1, t2;
         float min_dist = std::numeric_limits<float>::max();
-        for (const vec2 &v : poly1.vertices())
+        for (const alg::vec2 &v : poly1.vertices())
         {
-            const vec2 towards = poly2.towards_closest_edge_from(v - mtv);
+            const alg::vec2 towards = poly2.towards_closest_edge_from(v - mtv);
             const float dist = towards.sq_norm();
             if (min_dist > dist)
             {
@@ -218,9 +218,9 @@ namespace physics
                 t2 = v - mtv;
             }
         }
-        for (const vec2 &v : poly2.vertices())
+        for (const alg::vec2 &v : poly2.vertices())
         {
-            const vec2 towards = poly1.towards_closest_edge_from(v + mtv);
+            const alg::vec2 towards = poly1.towards_closest_edge_from(v + mtv);
             const float dist = towards.sq_norm();
             if (min_dist > dist)
             {

@@ -2,7 +2,7 @@
 
 #define POS_PER_ENTITY 3
 
-namespace physics
+namespace phys
 {
     std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine)
     {
@@ -14,7 +14,7 @@ namespace physics
         for (std::size_t i = 0; i < engine.m_entities.size(); i++)
         {
             const entity2D &e = engine.m_entities[i];
-            const std::pair<vec2, float> &force = e.force();
+            const std::pair<alg::vec2, float> &force = e.force();
 
             const std::size_t j = VAR_PER_ENTITY * i;
             stchanges.insert(stchanges.end(), {state[j + 3], state[j + 4], state[j + 5],

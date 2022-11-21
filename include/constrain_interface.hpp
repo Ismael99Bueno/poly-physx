@@ -7,7 +7,7 @@
 
 #define POS_PER_ENTITY 3
 
-namespace physics
+namespace phys
 {
     class constrain_interface
     {

@@ -1,6 +1,6 @@
 #include "interaction2D.hpp"
 
-namespace physics
+namespace phys
 {
     interaction2D::interaction2D(const std::size_t allocations) { m_entities.reserve(allocations); }
 

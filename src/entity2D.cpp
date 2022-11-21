@@ -3,20 +3,20 @@
 #include "interaction2D.hpp"
 #include "debug.h"
 
-namespace physics
+namespace phys
 {
     entity2D::entity2D(const body2D &body,
-                       const std::vector<vec2> &vertices) : body2D(body),
-                                                            m_shape(body.pos(), vertices) {}
+                       const std::vector<alg::vec2> &vertices) : body2D(body),
+                                                                 m_shape(body.pos(), vertices) {}
 
-    entity2D::entity2D(const vec2 &pos,
-                       const vec2 &vel,
+    entity2D::entity2D(const alg::vec2 &pos,
+                       const alg::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
-                       const std::vector<vec2> &vertices) : body2D(pos, vel, angpos,
-                                                                   angvel, mass, charge),
-                                                            m_shape(pos, vertices),
-                                                            m_bbox() {}
+                       const std::vector<alg::vec2> &vertices) : body2D(pos, vel, angpos,
+                                                                        angvel, mass, charge),
+                                                                 m_shape(pos, vertices),
+                                                                 m_bbox() {}
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
@@ -38,7 +38,7 @@ namespace physics
         m_buffer[5] = m_angvel;
     }
 
-    void entity2D::add_force(const vec2 &force) { m_force += force; }
+    void entity2D::add_force(const alg::vec2 &force) { m_force += force; }
     void entity2D::add_torque(const float torque) { m_torque += torque; }
 
     void entity2D::include(const force2D &force) { m_forces.insert(&force); }
@@ -50,11 +50,11 @@ namespace physics
     bool entity2D::contains(const force2D &force) const { return m_forces.find(&force) != m_forces.end(); }
     bool entity2D::contains(const interaction2D &inter) const { return m_inters.find(&inter) != m_inters.end(); }
 
-    std::pair<vec2, float> entity2D::force() const
+    std::pair<alg::vec2, float> entity2D::force() const
     {
         if (!m_dynamic)
             return {{0.f, 0.f}, 0.f};
-        vec2 force;
+        alg::vec2 force;
         float torque = 0.f;
         for (const force2D *f2D : m_forces)
         {
@@ -85,9 +85,9 @@ namespace physics
         return m_shape;
     }
 
-    const vec2 &entity2D::pos() const { return m_pos; }
+    const alg::vec2 &entity2D::pos() const { return m_pos; }
 
-    void entity2D::pos(const vec2 &pos)
+    void entity2D::pos(const alg::vec2 &pos)
     {
         m_pos = pos;
         m_shape.pos(pos);
