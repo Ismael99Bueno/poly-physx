@@ -5,6 +5,10 @@
 
 namespace physics
 {
+    entity2D::entity2D(const body2D &body,
+                       const std::vector<vec2> &vertices) : body2D(body),
+                                                            m_shape(body.pos(), vertices) {}
+
     entity2D::entity2D(const vec2 &pos,
                        const vec2 &vel,
                        const float angpos, const float angvel,

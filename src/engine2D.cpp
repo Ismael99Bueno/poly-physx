@@ -50,21 +50,28 @@ namespace physics
         }
     }
 
-    entity_ptr engine2D::add_entity(const vec2 &pos,
-                                    const vec2 &vel,
-                                    const float angpos,
-                                    const float angvel,
-                                    const float mass,
-                                    const float charge)
+    entity_ptr engine2D::add_entity(const body2D &body,
+                                    const std::vector<vec2> &vertices)
     {
-        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge);
+        entity2D &e = m_entities.emplace_back(body, vertices);
         e.m_buffer = utils::vec_ptr(m_state, m_state.size());
-        m_state.insert(m_state.end(), {pos.x, pos.y, angpos, vel.x, vel.y, angvel});
+        m_state.insert(m_state.end(), {body.pos().x, body.pos().y, body.angpos(),
+                                       body.vel().x, body.vel().y, body.angvel()});
         m_collider.add_entity({m_entities, m_entities.size() - 1});
 
         e.retrieve();
         m_integ.resize();
         return entity_ptr(m_entities, m_entities.size() - 1);
+    }
+    entity_ptr engine2D::add_entity(const vec2 &pos,
+                                    const vec2 &vel,
+                                    const float angpos,
+                                    const float angvel,
+                                    const float mass,
+                                    const float charge,
+                                    const std::vector<vec2> &vertices)
+    {
+        return add_entity(body2D(pos, vel, angpos, angvel, mass, charge), vertices);
     }
 
     void engine2D::add_constrain(const constrain_interface &c) { m_compeller.add_constrain(c); }
