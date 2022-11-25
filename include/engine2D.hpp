@@ -5,6 +5,8 @@
 #include "entity_ptr.hpp"
 #include "compeller2D.hpp"
 #include "collider2D.hpp"
+#include "force2D.hpp"
+#include "interaction2D.hpp"
 
 namespace phys
 {
@@ -27,6 +29,8 @@ namespace phys
                                       const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
 
         void add_constrain(const constrain_interface &c);
+        void add_force(const force2D &force);
+        void add_interaction(const interaction2D &inter);
 
         const_entity_ptr operator[](std::size_t index) const;
         entity_ptr operator[](std::size_t index);
@@ -57,12 +61,17 @@ namespace phys
         std::vector<float> m_state;
         compeller2D m_compeller;
         collider2D m_collider;
+        std::vector<const force2D *> m_forces;
+        std::vector<const interaction2D *> m_inters;
 
         rk::integrator m_integ;
         float m_t = 0.f, m_dt = 0.001f;
 
-        void retrieve(const std::vector<float> &state);
+        void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
+        void load_interactions_and_externals(std::vector<float> &stchanges) const;
+        std::vector<float> inverse_masses() const;
         void reset_forces();
+        void retrieve(const std::vector<float> &state);
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
     };

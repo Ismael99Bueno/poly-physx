@@ -5,6 +5,12 @@
 
 namespace phys
 {
+    float constrain_interface::stiffness() const { return m_stiffness; }
+    float constrain_interface::dampening() const { return m_dampening; }
+
+    void constrain_interface::stiffness(float stiffness) { m_stiffness = stiffness; }
+    void constrain_interface::dampening(float dampening) { m_dampening = dampening; }
+
     std::array<float, 3> constrain_interface::constrain_grad(const entity_ptr &e) const { return gradient(e, &constrain_interface::value); }
     std::array<float, 3> constrain_interface::constrain_grad_derivative(const entity_ptr &e) const { return gradient(e, &constrain_interface::derivative); }
     std::array<float, 3> constrain_interface::gradient(const entity_ptr &e,

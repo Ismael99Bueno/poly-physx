@@ -5,20 +5,24 @@
 #include <vector>
 #include <array>
 
-#define POS_PER_ENTITY 3
-
 namespace phys
 {
     class constrain_interface
     {
     public:
         virtual float value() const = 0;
+        float stiffness() const;
+        float dampening() const;
+
+        void stiffness(float stiffness);
+        void dampening(float dampening);
 
     private:
-        std::array<float, POS_PER_ENTITY> constrain_grad(const entity_ptr &e) const;
-        std::array<float, POS_PER_ENTITY> constrain_grad_derivative(const entity_ptr &e) const;
-        std::array<float, POS_PER_ENTITY> gradient(const entity_ptr &e,
-                                                   float (constrain_interface::*constrain)() const) const;
+        float m_stiffness = 5.f, m_dampening = 2.f;
+        std::array<float, 3> constrain_grad(const entity_ptr &e) const;
+        std::array<float, 3> constrain_grad_derivative(const entity_ptr &e) const;
+        std::array<float, 3> gradient(const entity_ptr &e,
+                                      float (constrain_interface::*constrain)() const) const;
 
         virtual float derivative() const = 0;
         virtual std::size_t size() const = 0;

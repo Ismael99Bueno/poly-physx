@@ -7,8 +7,6 @@
 #include <vector>
 #include <utility>
 
-#define VAR_PER_ENTITY 6
-
 namespace phys
 {
     class collider2D
@@ -62,7 +60,7 @@ namespace phys
 
         void load_collisions(const std::vector<collision> &collisions,
                              std::vector<float> &stchanges) const;
-        std::array<float, VAR_PER_ENTITY> forces_upon_collision(const collision &c) const;
+        std::array<float, 6> forces_upon_collision(const collision &c) const;
 
         static bool gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &col);
 

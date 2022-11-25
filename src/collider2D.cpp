@@ -4,8 +4,8 @@
 #include <limits>
 #include <cmath>
 #include <algorithm>
+#include <unordered_set>
 
-#define POS_PER_ENTITY 3
 #define EPA_EPSILON 1.e-3f
 
 namespace phys
@@ -85,18 +85,18 @@ namespace phys
     {
         for (const collision &c : collisions)
         {
-            const std::array<float, VAR_PER_ENTITY> forces = forces_upon_collision(c);
-            for (std::size_t i = 0; i < POS_PER_ENTITY; i++)
+            const std::array<float, 6> forces = forces_upon_collision(c);
+            for (std::size_t i = 0; i < 3; i++)
             {
                 if (c.e1->dynamic())
-                    stchanges[c.e1.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += forces[i];
+                    stchanges[c.e1.index() * 6 + i + 3] += forces[i];
                 if (c.e2->dynamic())
-                    stchanges[c.e2.index() * VAR_PER_ENTITY + i + POS_PER_ENTITY] += forces[i + POS_PER_ENTITY];
+                    stchanges[c.e2.index() * 6 + i + 3] += forces[i + 3];
             }
         }
     }
 
-    std::array<float, VAR_PER_ENTITY> collider2D::forces_upon_collision(const collision &c) const
+    std::array<float, 6> collider2D::forces_upon_collision(const collision &c) const
     {
         const alg::vec2 rel1 = c.touch1 - c.e1->shape().centroid(),
                         rel2 = c.touch2 - c.e2->shape().centroid();

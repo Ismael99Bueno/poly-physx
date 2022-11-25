@@ -12,8 +12,8 @@ namespace phys
         interaction2D(std::size_t allocations = 50);
         virtual std::pair<alg::vec2, float> force(const entity2D &e1, const entity2D &e2) const = 0;
 
-        void include(const entity_ptr &e);
-        void exclude(const entity_ptr &e);
+        void include(const const_entity_ptr &e);
+        void exclude(const const_entity_ptr &e);
         bool contains(const const_entity_ptr &e) const;
 
         const std::unordered_set<const_entity_ptr> &entities() const;

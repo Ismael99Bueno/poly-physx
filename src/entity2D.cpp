@@ -38,40 +38,11 @@ namespace phys
         m_buffer[5] = m_angvel;
     }
 
-    void entity2D::add_force(const alg::vec2 &force) { m_force += force; }
-    void entity2D::add_torque(const float torque) { m_torque += torque; }
+    void entity2D::add_force(const alg::vec2 &force) { m_added_force += force; }
+    void entity2D::add_torque(const float torque) { m_added_torque += torque; }
 
-    void entity2D::include(const force2D &force) { m_forces.insert(&force); }
-    void entity2D::include(const interaction2D &inter) { m_inters.insert(&inter); }
-
-    void entity2D::exclude(const force2D &force) { m_forces.erase(&force); }
-    void entity2D::exclude(const interaction2D &inter) { m_inters.erase(&inter); }
-
-    bool entity2D::contains(const force2D &force) const { return m_forces.find(&force) != m_forces.end(); }
-    bool entity2D::contains(const interaction2D &inter) const { return m_inters.find(&inter) != m_inters.end(); }
-
-    std::pair<alg::vec2, float> entity2D::force() const
-    {
-        if (!m_dynamic)
-            return {{0.f, 0.f}, 0.f};
-        alg::vec2 force;
-        float torque = 0.f;
-        for (const force2D *f2D : m_forces)
-        {
-            const auto [f, t] = f2D->force(*this);
-            force += f;
-            torque += t;
-        }
-        for (const interaction2D *i2D : m_inters)
-            for (const const_entity_ptr &e : i2D->entities())
-                if (&(*e) != this)
-                {
-                    const auto [f, t] = i2D->force(*this, *e);
-                    force += f;
-                    torque += t;
-                }
-        return {force, torque};
-    }
+    alg::vec2 entity2D::added_force() const { return m_added_force; }
+    float entity2D::added_torque() const { return m_added_torque; }
 
     const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
     const geo::polygon2D &entity2D::shape() const { return m_shape; }

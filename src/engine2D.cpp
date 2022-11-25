@@ -10,14 +10,14 @@ namespace phys
                                                         m_compeller(m_entities)
     {
         m_entities.reserve(allocations);
-        m_state.reserve(VAR_PER_ENTITY * allocations);
-        m_integ.reserve(VAR_PER_ENTITY * allocations);
+        m_state.reserve(6 * allocations);
+        m_integ.reserve(6 * allocations);
     }
 
     void engine2D::retrieve(const std::vector<float> &state)
     {
         for (std::size_t i = 0; i < m_entities.size(); i++)
-            m_entities[i].retrieve(utils::const_vec_ptr(state, VAR_PER_ENTITY * i));
+            m_entities[i].retrieve(utils::const_vec_ptr(state, 6 * i));
     }
 
     void engine2D::retrieve() { retrieve(m_state); }
@@ -41,12 +41,69 @@ namespace phys
         return valid;
     }
 
+    void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
+    {
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+        {
+            const std::size_t index = 6 * i;
+            const alg::vec2 &vel = m_entities[i].vel();
+            const float angvel = m_entities[i].angvel();
+            stchanges[index] = vel.x;
+            stchanges[index + 1] = vel.y;
+            stchanges[index + 2] = angvel;
+            const alg::vec2 &force = m_entities[i].added_force();
+            const float torque = m_entities[i].added_torque();
+            stchanges[index + 3] = force.x;
+            stchanges[index + 4] = force.y;
+            stchanges[index + 5] = torque;
+        }
+    }
+
+    void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
+    {
+        for (const force2D *f : m_forces)
+            for (const const_entity_ptr &e : f->entities())
+            {
+                const std::size_t index = 6 * e.index();
+                const auto [force, torque] = f->force(*e);
+                stchanges[index + 3] += force.x;
+                stchanges[index + 4] += force.y;
+                stchanges[index + 5] += torque;
+            }
+        for (const interaction2D *i : m_inters)
+            for (const const_entity_ptr &e1 : i->entities())
+            {
+                const std::size_t index = 6 * e1.index();
+                for (const const_entity_ptr &e2 : i->entities())
+                    if (e1 != e2)
+                    {
+                        const auto [force, torque] = i->force(*e1, *e2);
+                        stchanges[index + 3] += force.x;
+                        stchanges[index + 4] += force.y;
+                        stchanges[index + 5] += torque;
+                    }
+            }
+    }
+
+    std::vector<float> engine2D::inverse_masses() const
+    {
+        std::vector<float> inv_masses;
+        inv_masses.reserve(3 * m_entities.size());
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+        {
+            const float inv_mass = 1.f / m_entities[i].mass(),
+                        inv_inertia = 1.f / m_entities[i].inertia();
+            inv_masses.insert(inv_masses.end(), {inv_mass, inv_mass, inv_inertia});
+        }
+        return inv_masses;
+    }
+
     void engine2D::reset_forces()
     {
         for (entity2D &e : m_entities)
         {
-            e.m_force = {0.f, 0.f};
-            e.m_torque = 0.f;
+            e.m_added_force = {0.f, 0.f};
+            e.m_added_torque = 0.f;
         }
     }
 
@@ -75,6 +132,8 @@ namespace phys
     }
 
     void engine2D::add_constrain(const constrain_interface &c) { m_compeller.add_constrain(c); }
+    void engine2D::add_force(const force2D &force) { m_forces.emplace_back(&force); }
+    void engine2D::add_interaction(const interaction2D &inter) { m_inters.emplace_back(&inter); }
 
     const_entity_ptr engine2D::operator[](std::size_t index) const { return {m_entities, index}; }
     entity_ptr engine2D::operator[](std::size_t index) { return {m_entities, index}; }
