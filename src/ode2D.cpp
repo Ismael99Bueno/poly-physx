@@ -4,7 +4,7 @@ namespace phys
 {
     std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine)
     {
-        std::vector<float> stchanges(state.size());
+        std::vector<float> stchanges(state.size(), 0.f);
 
         engine.retrieve(state);
         engine.load_velocities_and_added_forces(stchanges);

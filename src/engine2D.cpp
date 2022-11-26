@@ -53,10 +53,18 @@ namespace phys
             stchanges[index + 2] = angvel;
             const alg::vec2 &force = m_entities[i].added_force();
             const float torque = m_entities[i].added_torque();
-            stchanges[index + 3] = force.x;
-            stchanges[index + 4] = force.y;
-            stchanges[index + 5] = torque;
+            load_force(stchanges, force, torque, index);
         }
+    }
+
+    void engine2D::load_force(std::vector<float> &stchanges,
+                              const alg::vec2 &force,
+                              float torque,
+                              std::size_t index)
+    {
+        stchanges[index + 3] += force.x;
+        stchanges[index + 4] += force.y;
+        stchanges[index + 5] += torque;
     }
 
     void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
@@ -66,10 +74,16 @@ namespace phys
             {
                 const std::size_t index = 6 * e.index();
                 const auto [force, torque] = f->force(*e);
-                stchanges[index + 3] += force.x;
-                stchanges[index + 4] += force.y;
-                stchanges[index + 5] += torque;
+                load_force(stchanges, force, torque, index);
             }
+        for (const spring2D &s : m_springs)
+        {
+            const std::size_t index1 = 6 * s.e1().index(),
+                              index2 = 6 * s.e2().index();
+            const auto [force, t1, t2] = s.force();
+            load_force(stchanges, force, t1, index1);
+            load_force(stchanges, -force, t2, index2);
+        }
         for (const interaction2D *i : m_inters)
             for (const const_entity_ptr &e1 : i->entities())
             {
@@ -78,9 +92,7 @@ namespace phys
                     if (e1 != e2)
                     {
                         const auto [force, torque] = i->force(*e1, *e2);
-                        stchanges[index + 3] += force.x;
-                        stchanges[index + 4] += force.y;
-                        stchanges[index + 5] += torque;
+                        load_force(stchanges, force, torque, index);
                     }
             }
     }
@@ -134,6 +146,7 @@ namespace phys
     void engine2D::add_constrain(const constrain_interface &c) { m_compeller.add_constrain(c); }
     void engine2D::add_force(const force2D &force) { m_forces.emplace_back(&force); }
     void engine2D::add_interaction(const interaction2D &inter) { m_inters.emplace_back(&inter); }
+    void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
 
     const_entity_ptr engine2D::operator[](std::size_t index) const { return {m_entities, index}; }
     entity_ptr engine2D::operator[](std::size_t index) { return {m_entities, index}; }

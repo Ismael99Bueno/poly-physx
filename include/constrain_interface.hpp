@@ -18,7 +18,7 @@ namespace phys
         void dampening(float dampening);
 
     private:
-        float m_stiffness = 5.f, m_dampening = 2.f;
+        float m_stiffness = 50.f, m_dampening = 10.f;
         std::array<float, 3> constrain_grad(const entity_ptr &e) const;
         std::array<float, 3> constrain_grad_derivative(const entity_ptr &e) const;
         std::array<float, 3> gradient(const entity_ptr &e,

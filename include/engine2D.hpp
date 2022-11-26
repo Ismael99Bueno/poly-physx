@@ -7,6 +7,7 @@
 #include "collider2D.hpp"
 #include "force2D.hpp"
 #include "interaction2D.hpp"
+#include "spring2D.hpp"
 
 namespace phys
 {
@@ -31,6 +32,7 @@ namespace phys
         void add_constrain(const constrain_interface &c);
         void add_force(const force2D &force);
         void add_interaction(const interaction2D &inter);
+        void add_spring(const spring2D &spring);
 
         const_entity_ptr operator[](std::size_t index) const;
         entity_ptr operator[](std::size_t index);
@@ -63,6 +65,7 @@ namespace phys
         collider2D m_collider;
         std::vector<const force2D *> m_forces;
         std::vector<const interaction2D *> m_inters;
+        std::vector<spring2D> m_springs;
 
         rk::integrator m_integ;
         float m_t = 0.f, m_dt = 0.001f;
@@ -72,6 +75,11 @@ namespace phys
         std::vector<float> inverse_masses() const;
         void reset_forces();
         void retrieve(const std::vector<float> &state);
+
+        static void load_force(std::vector<float> &stchanges,
+                               const alg::vec2 &force,
+                               float torque,
+                               std::size_t index);
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
     };

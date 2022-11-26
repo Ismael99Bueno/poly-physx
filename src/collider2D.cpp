@@ -98,11 +98,11 @@ namespace phys
 
     std::array<float, 6> collider2D::forces_upon_collision(const collision &c) const
     {
-        const alg::vec2 rel1 = c.touch1 - c.e1->shape().centroid(),
-                        rel2 = c.touch2 - c.e2->shape().centroid();
+        const alg::vec2 rel1 = c.touch1 - c.e1->pos(),
+                        rel2 = c.touch2 - c.e2->pos();
 
-        const alg::vec2 vel1 = c.e1->vel(c.touch1),
-                        vel2 = c.e2->vel(c.touch2);
+        const alg::vec2 vel1 = c.e1->vel(rel1),
+                        vel2 = c.e2->vel(rel2);
 
         const float director = (c.touch1 - c.touch2).dot(c.e1->pos() - c.e2->pos());
         const float sign = director > 0.f ? -1.f : 1.f;
