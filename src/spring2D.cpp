@@ -7,7 +7,7 @@ namespace phys
                        const float length) : m_e1(e1),
                                              m_e2(e2),
                                              m_length(length),
-                                             m_has_joint(false) {}
+                                             m_has_joints(false) {}
 
     spring2D::spring2D(const const_entity_ptr &e1,
                        const const_entity_ptr &e2,
@@ -18,14 +18,14 @@ namespace phys
                                              m_joint1(joint1),
                                              m_joint2(joint2),
                                              m_length(length),
-                                             m_has_joint(true) {}
+                                             m_has_joints(true) {}
 
     std::tuple<alg::vec2, float, float> spring2D::force() const
     {
-        return m_has_joint ? with_joint_force() : without_joint_force();
+        return m_has_joints ? with_joints_force() : without_joints_force();
     }
 
-    std::tuple<alg::vec2, float, float> spring2D::without_joint_force() const
+    std::tuple<alg::vec2, float, float> spring2D::without_joints_force() const
     {
         const alg::vec2 relpos = m_e2->pos() - m_e1->pos(),
                         direction = relpos.normalized(),
@@ -34,7 +34,7 @@ namespace phys
         return {m_stiffness * (relpos - vlen) + m_dampening * relvel, 0.f, 0.f};
     }
 
-    std::tuple<alg::vec2, float, float> spring2D::with_joint_force() const
+    std::tuple<alg::vec2, float, float> spring2D::with_joints_force() const
     {
         const alg::vec2 rot_joint1 = m_joint1.rotated(m_e1->angpos()),
                         rot_joint2 = m_joint2.rotated(m_e2->angpos());
