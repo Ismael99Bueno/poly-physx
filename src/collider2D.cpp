@@ -10,9 +10,13 @@
 
 namespace phys
 {
-    collider2D::collider2D(const float stiffness,
+    collider2D::collider2D(const std::vector<entity2D> &entities,
+                           const float stiffness,
                            const float dampening,
-                           const std::size_t allocations) : m_stiffness(stiffness), m_dampening(dampening)
+                           const std::size_t allocations) : m_entities(entities),
+                                                            m_quad_tree({0.f, 0.f}, {1000.f, 1000.f}),
+                                                            m_stiffness(stiffness),
+                                                            m_dampening(dampening)
     {
         m_intervals.reserve(allocations);
     }
@@ -28,7 +32,7 @@ namespace phys
 
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
 
-    void collider2D::add_entity(const const_entity_ptr &e)
+    void collider2D::add_entity_intervals(const const_entity_ptr &e)
     {
         m_intervals.emplace_back(e, interval::LOWER);
         m_intervals.emplace_back(e, interval::HIGHER);
@@ -36,8 +40,7 @@ namespace phys
 
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
-        sort_intervals();
-        const std::vector<collision> collisions = detect_collisions();
+        const std::vector<collision> collisions = brute_force();
         load_collisions(collisions, stchanges);
     }
 
@@ -54,29 +57,73 @@ namespace phys
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    std::vector<collider2D::collision> collider2D::detect_collisions()
+    void collider2D::update_quad_tree()
+    {
+        m_quad_tree.clear();
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+            m_quad_tree.add_if_inside({m_entities, i});
+    }
+
+    bool collider2D::collide(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c)
+    {
+        return e1 != e2 && e1->bounding_box().overlaps(e2->bounding_box()) && gjk_epa(e1, e2, c);
+    }
+
+    std::vector<collider2D::collision> collider2D::brute_force() const
+    {
+        std::vector<collision> collisions;
+        collisions.reserve(m_entities.size() / 2);
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+            for (std::size_t j = i + 1; j < m_entities.size(); j++)
+            {
+                collision c;
+                if (collide({m_entities, i}, {m_entities, j}, c))
+                    collisions.emplace_back(c);
+            }
+        return collisions;
+    }
+
+    std::vector<collider2D::collision> collider2D::sort_and_sweep()
     {
         std::vector<collision> collisions;
         std::unordered_set<const_entity_ptr> eligible;
         sort_intervals();
 
         eligible.reserve(6);
-        collisions.reserve(m_intervals.size() / 2);
+        collisions.reserve(m_entities.size() / 2);
         for (const interval &itrv : m_intervals)
             if (itrv.type() == interval::LOWER)
             {
                 for (const const_entity_ptr &e : eligible)
                 {
                     collision c;
-                    if (e != itrv.entity() &&
-                        e->bounding_box().overlaps(itrv.entity()->bounding_box()) &&
-                        gjk_epa(e, itrv.entity(), c))
+                    if (collide(e, itrv.entity(), c))
                         collisions.emplace_back(c);
                 }
                 eligible.insert(itrv.entity());
             }
             else
                 eligible.erase(itrv.entity());
+        return collisions;
+    }
+
+    std::vector<collider2D::collision> collider2D::quad_tree()
+    {
+        std::vector<collision> collisions;
+        collisions.reserve(m_entities.size() / 2);
+
+        update_quad_tree();
+        std::vector<const std::vector<const_entity_ptr> *> partitions;
+        partitions.reserve(20);
+        m_quad_tree.partitions(partitions);
+        for (const std::vector<const_entity_ptr> *partition : partitions)
+            for (std::size_t i = 0; i < partition->size(); i++)
+                for (std::size_t j = i + 1; j < partition->size(); j++)
+                {
+                    collision c;
+                    if (collide(partition->operator[](i), partition->operator[](j), c))
+                        collisions.emplace_back(c);
+                }
         return collisions;
     }
 

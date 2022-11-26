@@ -7,6 +7,7 @@ namespace phys
                        const float dt,
                        const std::size_t allocations) : m_dt(dt),
                                                         m_integ(table, m_state),
+                                                        m_collider(m_entities),
                                                         m_compeller(m_entities)
     {
         m_entities.reserve(allocations);
@@ -126,7 +127,7 @@ namespace phys
         e.m_buffer = utils::vec_ptr(m_state, m_state.size());
         m_state.insert(m_state.end(), {body.pos().x, body.pos().y, body.angpos(),
                                        body.vel().x, body.vel().y, body.angvel()});
-        m_collider.add_entity({m_entities, m_entities.size() - 1});
+        m_collider.add_entity_intervals({m_entities, m_entities.size() - 1});
 
         e.retrieve();
         m_integ.resize();
