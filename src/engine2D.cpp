@@ -1,5 +1,6 @@
 #include "engine2D.hpp"
 #include "ode2D.hpp"
+#include "perf.hpp"
 
 namespace phys
 {
@@ -17,6 +18,7 @@ namespace phys
 
     void engine2D::retrieve(const std::vector<float> &state)
     {
+        PERF_FUNCTION()
         for (std::size_t i = 0; i < m_entities.size(); i++)
             m_entities[i].retrieve(utils::const_vec_ptr(state, 6 * i));
     }
@@ -25,18 +27,21 @@ namespace phys
 
     bool engine2D::raw_forward()
     {
+        PERF_FUNCTION()
         const bool valid = m_integ.raw_forward(m_t, m_dt, *this, ode);
         reset_forces();
         return valid;
     }
     bool engine2D::reiterative_forward(const std::size_t reiterations)
     {
+        PERF_FUNCTION()
         const bool valid = m_integ.reiterative_forward(m_t, m_dt, *this, ode, reiterations);
         reset_forces();
         return valid;
     }
     bool engine2D::embedded_forward()
     {
+        PERF_FUNCTION()
         const bool valid = m_integ.embedded_forward(m_t, m_dt, *this, ode);
         reset_forces();
         return valid;
@@ -44,6 +49,7 @@ namespace phys
 
     void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
     {
+        PERF_FUNCTION()
         for (std::size_t i = 0; i < m_entities.size(); i++)
         {
             const std::size_t index = 6 * i;
@@ -70,6 +76,7 @@ namespace phys
 
     void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
     {
+        PERF_FUNCTION()
         for (const force2D *f : m_forces)
             for (const const_entity_ptr &e : f->entities())
             {
@@ -100,6 +107,7 @@ namespace phys
 
     std::vector<float> engine2D::inverse_masses() const
     {
+        PERF_FUNCTION()
         std::vector<float> inv_masses;
         inv_masses.reserve(3 * m_entities.size());
         for (std::size_t i = 0; i < m_entities.size(); i++)

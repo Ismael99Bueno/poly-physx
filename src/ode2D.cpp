@@ -1,9 +1,11 @@
 #include "ode2D.hpp"
+#include "perf.hpp"
 
 namespace phys
 {
     std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine)
     {
+        PERF_FUNCTION()
         std::vector<float> stchanges(state.size(), 0.f);
 
         engine.retrieve(state);

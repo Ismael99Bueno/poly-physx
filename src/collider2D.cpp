@@ -1,6 +1,6 @@
 #include "collider2D.hpp"
 #include "debug.h"
-#include <set>
+#include "perf.hpp"
 #include <limits>
 #include <cmath>
 #include <algorithm>
@@ -40,6 +40,7 @@ namespace phys
 
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
+        PERF_FUNCTION()
         const std::vector<collision> collisions = brute_force();
         load_collisions(collisions, stchanges);
     }
@@ -52,6 +53,7 @@ namespace phys
 
     void collider2D::sort_intervals()
     {
+        PERF_FUNCTION()
         const auto cmp = [](const interval &itrv1, const interval &itrv2)
         { return itrv1.value() < itrv2.value(); };
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
@@ -59,6 +61,7 @@ namespace phys
 
     void collider2D::update_quad_tree()
     {
+        PERF_FUNCTION()
         m_quad_tree.clear();
         for (std::size_t i = 0; i < m_entities.size(); i++)
             m_quad_tree.add_if_inside({m_entities, i});
@@ -71,6 +74,7 @@ namespace phys
 
     std::vector<collider2D::collision> collider2D::brute_force() const
     {
+        PERF_FUNCTION()
         std::vector<collision> collisions;
         collisions.reserve(m_entities.size() / 2);
         for (std::size_t i = 0; i < m_entities.size(); i++)
@@ -85,6 +89,7 @@ namespace phys
 
     std::vector<collider2D::collision> collider2D::sort_and_sweep()
     {
+        PERF_FUNCTION()
         std::vector<collision> collisions;
         std::unordered_set<const_entity_ptr> eligible;
         sort_intervals();
@@ -109,6 +114,7 @@ namespace phys
 
     std::vector<collider2D::collision> collider2D::quad_tree()
     {
+        PERF_FUNCTION()
         std::vector<collision> collisions;
         collisions.reserve(m_entities.size() / 2);
 
@@ -130,6 +136,7 @@ namespace phys
     void collider2D::load_collisions(const std::vector<collision> &collisions,
                                      std::vector<float> &stchanges) const
     {
+        PERF_FUNCTION()
         for (const collision &c : collisions)
         {
             const std::array<float, 6> forces = forces_upon_collision(c);
@@ -161,6 +168,7 @@ namespace phys
 
     bool collider2D::gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c)
     {
+        PERF_FUNCTION()
         std::vector<alg::vec2> simplex;
         if (!gjk(e1->shape(), e2->shape(), simplex))
             return false;
@@ -172,6 +180,7 @@ namespace phys
 
     bool collider2D::gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex)
     {
+        PERF_FUNCTION()
         alg::vec2 dir = poly2.centroid() - poly1.centroid();
         simplex.reserve(3);
         const alg::vec2 supp = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
@@ -216,6 +225,7 @@ namespace phys
 
     alg::vec2 collider2D::epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex)
     {
+        PERF_FUNCTION()
         float min_dist = std::numeric_limits<float>::max();
         alg::vec2 mtv;
         for (;;)
