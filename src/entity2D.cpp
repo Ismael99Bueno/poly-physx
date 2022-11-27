@@ -20,7 +20,7 @@ namespace phys
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
-        DBG_EXIT_IF(!buffer, "Cannot retrieve from a null buffer.\n")
+        DBG_ASSERT(buffer, "Cannot retrieve from a null buffer.\n")
         pos({buffer[0], buffer[1]});
         vel({buffer[3], buffer[4]});
         angpos(buffer[2]);
