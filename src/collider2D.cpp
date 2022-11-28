@@ -40,8 +40,7 @@ namespace phys
 
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
-        PERF_FUNCTION()
-        const std::vector<collision> collisions = brute_force();
+        const std::vector<collision> collisions = quad_tree();
         load_collisions(collisions, stchanges);
     }
 
@@ -168,7 +167,6 @@ namespace phys
 
     bool collider2D::gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c)
     {
-        PERF_FUNCTION()
         std::vector<alg::vec2> simplex;
         if (!gjk(e1->shape(), e2->shape(), simplex))
             return false;
@@ -262,6 +260,7 @@ namespace phys
                                                              const geo::polygon2D &poly2,
                                                              const alg::vec2 &mtv)
     {
+        PERF_FUNCTION()
         alg::vec2 t1, t2;
         float min_dist = std::numeric_limits<float>::max();
         for (const alg::vec2 &v : poly1.vertices())

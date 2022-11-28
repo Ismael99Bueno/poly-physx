@@ -14,7 +14,6 @@ namespace phys
 
     void compeller2D::solve_and_load_constrains(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const
     {
-        PERF_FUNCTION()
         const std::vector<float> jcb = jacobian(), djcb = jacobian_derivative();
         const std::vector<float> A = lhs(jcb, inv_masses);
         const std::vector<float> b = rhs(jcb, djcb, stchanges, inv_masses);

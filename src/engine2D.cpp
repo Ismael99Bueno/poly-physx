@@ -1,6 +1,7 @@
 #include "engine2D.hpp"
 #include "ode2D.hpp"
 #include "perf.hpp"
+#include <iostream>
 
 namespace phys
 {
