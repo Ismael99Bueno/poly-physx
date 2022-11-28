@@ -117,7 +117,7 @@ namespace phys
         std::vector<collision> collisions;
         collisions.reserve(m_entities.size() / 2);
 
-        update_quad_tree();
+        // update_quad_tree();
         std::vector<const std::vector<const_entity_ptr> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
