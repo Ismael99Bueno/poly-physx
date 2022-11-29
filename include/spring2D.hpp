@@ -24,6 +24,7 @@ namespace phys
         float stiffness() const;
         float dampening() const;
         float length() const;
+
         void stiffness(float stiffness);
         void dampening(float dampening);
         void length(float length);
@@ -33,6 +34,9 @@ namespace phys
 
         const alg::vec2 &joint1() const;
         const alg::vec2 &joint2() const;
+
+        void joint2(const alg::vec2 &joint2);
+        void joint1(const alg::vec2 &joint1);
 
     private:
         float m_stiffness = 1.f, m_dampening = 0.f, m_length;

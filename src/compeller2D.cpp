@@ -21,6 +21,8 @@ namespace phys
         return load_constrain_accels(jcb, lambda, stchanges);
     }
 
+    const std::vector<const constrain_interface *> &compeller2D::constrains() const { return m_constrains; }
+
     std::vector<float> compeller2D::constrain_matrix(std::array<float, 3> (constrain_interface::*constrain_grad)(const entity_ptr &e) const) const
     {
         PERF_FUNCTION()

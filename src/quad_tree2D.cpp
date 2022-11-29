@@ -1,4 +1,5 @@
 #include "quad_tree2D.hpp"
+#include "debug.h"
 
 namespace phys
 {
@@ -38,10 +39,15 @@ namespace phys
             partitions.emplace_back(&m_entities);
             return;
         }
-        m_top_left->partitions(partitions);
-        m_top_right->partitions(partitions);
-        m_bottom_left->partitions(partitions);
-        m_bottom_right->partitions(partitions);
+        for (const auto &q : m_children)
+            q->partitions(partitions);
+    }
+
+    void quad_tree2D::build(const std::vector<entity2D> &entities)
+    {
+        clear();
+        for (std::size_t i = 0; i < entities.size(); i++)
+            add_if_inside({entities, i});
     }
 
     void quad_tree2D::clear()
@@ -49,10 +55,8 @@ namespace phys
         m_entities.clear();
         if (m_partitioned)
         {
-            m_top_left->clear();
-            m_top_right->clear();
-            m_bottom_left->clear();
-            m_bottom_right->clear();
+            for (const auto &q : m_children)
+                q->clear();
             m_partitioned = false;
         }
     }
@@ -63,10 +67,10 @@ namespace phys
         const alg::vec2 offset = m_dim / 4.f,
                         inv_offset = {-m_dim.x / 4.f, m_dim.y / 4.f},
                         half_dim = m_dim / 2.f;
-        m_top_left = std::make_unique<quad_tree2D>(m_pos + inv_offset, half_dim, m_max_entities);
-        m_top_right = std::make_unique<quad_tree2D>(m_pos + offset, half_dim, m_max_entities);
-        m_bottom_left = std::make_unique<quad_tree2D>(m_pos - offset, half_dim, m_max_entities);
-        m_bottom_right = std::make_unique<quad_tree2D>(m_pos - inv_offset, half_dim, m_max_entities);
+        m_children[0] = std::make_unique<quad_tree2D>(m_pos + inv_offset, half_dim, m_max_entities);
+        m_children[1] = std::make_unique<quad_tree2D>(m_pos + offset, half_dim, m_max_entities);
+        m_children[2] = std::make_unique<quad_tree2D>(m_pos - offset, half_dim, m_max_entities);
+        m_children[3] = std::make_unique<quad_tree2D>(m_pos - inv_offset, half_dim, m_max_entities);
     }
 
     void quad_tree2D::partition()
@@ -91,16 +95,29 @@ namespace phys
 
     void quad_tree2D::add_to_children(const const_entity_ptr &e)
     {
-        m_top_left->add_if_inside(e);
-        m_top_right->add_if_inside(e);
-        m_bottom_left->add_if_inside(e);
-        m_bottom_right->add_if_inside(e);
+        for (const auto &q : m_children)
+            q->add_if_inside(e);
     }
 
     bool quad_tree2D::full() const { return m_entities.size() == m_max_entities; }
+
     const alg::vec2 &quad_tree2D::pos() const { return m_pos; }
     const alg::vec2 &quad_tree2D::dim() const { return m_dim; }
+
+    void quad_tree2D::pos(const alg::vec2 &pos) { m_pos = pos; }
+    void quad_tree2D::dim(const alg::vec2 &dim) { m_dim = dim; }
+
     std::size_t quad_tree2D::max_entities() const { return m_max_entities; }
+    void quad_tree2D::max_entities(const std::size_t max_entities) { m_max_entities = max_entities; }
+
     bool quad_tree2D::partitioned() const { return m_partitioned; }
     const std::vector<const_entity_ptr> &quad_tree2D::entities() const { return m_entities; }
+
+    const std::array<std::unique_ptr<quad_tree2D>, 4> &quad_tree2D::children() const { return m_children; }
+    const quad_tree2D &quad_tree2D::child(std::size_t index) const
+    {
+        DBG_ASSERT(index < 4, "Index outside of array bounds.\n")
+        return *m_children[index];
+    }
+    const quad_tree2D &quad_tree2D::operator[](std::size_t index) const { return child(index); }
 }

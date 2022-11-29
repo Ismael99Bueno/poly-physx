@@ -13,10 +13,15 @@ namespace phys
     class collider2D
     {
     public:
+        enum coldet_method
+        {
+            BRUTE_FORCE,
+            SORT_AND_SWEEP,
+            QUAD_TREE
+        };
+
         collider2D(const std::vector<entity2D> &entities,
-                   float stiffness = 1000.f,
-                   float dampening = 10.f,
-                   std::size_t allocations = 40);
+                   std::size_t allocations);
 
         void add_entity_intervals(const const_entity_ptr &e); // TODO: Implement remove
         void solve_and_load_collisions(std::vector<float> &stchanges);
@@ -27,7 +32,11 @@ namespace phys
         void stiffness(float stiffness);
         void dampening(float dampening);
 
-        void update_quad_tree();
+        const quad_tree2D &quad_tree() const;
+        quad_tree2D &quad_tree();
+
+        std::size_t quad_tree_build_period() const;
+        void quad_tree_build_period(std::size_t period);
 
     private:
         struct interval
@@ -59,13 +68,16 @@ namespace phys
         const std::vector<entity2D> &m_entities;
         std::vector<interval> m_intervals;
         quad_tree2D m_quad_tree;
-        float m_stiffness, m_dampening;
+        float m_stiffness = 1000.f, m_dampening = 10.f;
+        std::size_t m_qt_build_period = 30, m_qt_build_calls = 0;
+        coldet_method m_coldet_method = QUAD_TREE;
 
         void sort_intervals();
         static bool collide(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c);
-        std::vector<collision> brute_force() const;
-        std::vector<collision> sort_and_sweep();
-        std::vector<collision> quad_tree();
+        std::vector<collision> coldet();
+        void brute_force_coldet(std::vector<collision> &collisions) const;
+        void sort_and_sweep_coldet(std::vector<collision> &collisions);
+        void quad_tree_coldet(std::vector<collision> &collisions);
 
         void load_collisions(const std::vector<collision> &collisions,
                              std::vector<float> &stchanges) const;

@@ -30,6 +30,9 @@ namespace phys
         const alg::vec2 &joint1() const;
         const alg::vec2 &joint2() const;
 
+        void joint1(const alg::vec2 &joint1);
+        void joint2(const alg::vec2 &joint2);
+
     private:
         float m_length;
         alg::vec2 m_joint1, m_joint2;

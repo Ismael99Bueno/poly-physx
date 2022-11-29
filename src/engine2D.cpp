@@ -9,8 +9,8 @@ namespace phys
                        const float dt,
                        const std::size_t allocations) : m_dt(dt),
                                                         m_integ(table, m_state),
-                                                        m_collider(m_entities),
-                                                        m_compeller(m_entities)
+                                                        m_collider(m_entities, 2 * allocations),
+                                                        m_compeller(m_entities, allocations)
     {
         m_entities.reserve(allocations);
         m_state.reserve(6 * allocations);

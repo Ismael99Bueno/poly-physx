@@ -11,12 +11,8 @@
 namespace phys
 {
     collider2D::collider2D(const std::vector<entity2D> &entities,
-                           const float stiffness,
-                           const float dampening,
                            const std::size_t allocations) : m_entities(entities),
-                                                            m_quad_tree({0.f, 0.f}, {1000.f, 1000.f}),
-                                                            m_stiffness(stiffness),
-                                                            m_dampening(dampening)
+                                                            m_quad_tree({0.f, 0.f}, {1000.f, 1000.f})
     {
         m_intervals.reserve(allocations);
     }
@@ -40,8 +36,27 @@ namespace phys
 
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
-        const std::vector<collision> collisions = quad_tree();
+        const std::vector<collision> collisions = coldet();
         load_collisions(collisions, stchanges);
+    }
+
+    std::vector<collider2D::collision> collider2D::coldet()
+    {
+        std::vector<collider2D::collision> collisions;
+        collisions.reserve(m_entities.size() / 2);
+        switch (m_coldet_method)
+        {
+        case BRUTE_FORCE:
+            brute_force_coldet(collisions);
+            break;
+        case SORT_AND_SWEEP:
+            sort_and_sweep_coldet(collisions);
+            break;
+        case QUAD_TREE:
+            quad_tree_coldet(collisions);
+            break;
+        }
+        return collisions;
     }
 
     float collider2D::stiffness() const { return m_stiffness; }
@@ -49,6 +64,12 @@ namespace phys
 
     void collider2D::stiffness(float stiffness) { m_stiffness = stiffness; }
     void collider2D::dampening(float dampening) { m_dampening = dampening; }
+
+    const quad_tree2D &collider2D::quad_tree() const { return m_quad_tree; }
+    quad_tree2D &collider2D::quad_tree() { return m_quad_tree; }
+
+    std::size_t collider2D::quad_tree_build_period() const { return m_qt_build_period; }
+    void collider2D::quad_tree_build_period(const std::size_t period) { m_qt_build_period = period; }
 
     void collider2D::sort_intervals()
     {
@@ -58,24 +79,14 @@ namespace phys
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    void collider2D::update_quad_tree()
-    {
-        PERF_FUNCTION()
-        m_quad_tree.clear();
-        for (std::size_t i = 0; i < m_entities.size(); i++)
-            m_quad_tree.add_if_inside({m_entities, i});
-    }
-
     bool collider2D::collide(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c)
     {
         return e1 != e2 && e1->bounding_box().overlaps(e2->bounding_box()) && gjk_epa(e1, e2, c);
     }
 
-    std::vector<collider2D::collision> collider2D::brute_force() const
+    void collider2D::brute_force_coldet(std::vector<collision> &collisions) const
     {
         PERF_FUNCTION()
-        std::vector<collision> collisions;
-        collisions.reserve(m_entities.size() / 2);
         for (std::size_t i = 0; i < m_entities.size(); i++)
             for (std::size_t j = i + 1; j < m_entities.size(); j++)
             {
@@ -83,18 +94,15 @@ namespace phys
                 if (collide({m_entities, i}, {m_entities, j}, c))
                     collisions.emplace_back(c);
             }
-        return collisions;
     }
 
-    std::vector<collider2D::collision> collider2D::sort_and_sweep()
+    void collider2D::sort_and_sweep_coldet(std::vector<collision> &collisions)
     {
         PERF_FUNCTION()
-        std::vector<collision> collisions;
         std::unordered_set<const_entity_ptr> eligible;
         sort_intervals();
 
         eligible.reserve(6);
-        collisions.reserve(m_entities.size() / 2);
         for (const interval &itrv : m_intervals)
             if (itrv.type() == interval::LOWER)
             {
@@ -108,16 +116,17 @@ namespace phys
             }
             else
                 eligible.erase(itrv.entity());
-        return collisions;
     }
 
-    std::vector<collider2D::collision> collider2D::quad_tree()
+    void collider2D::quad_tree_coldet(std::vector<collision> &collisions)
     {
         PERF_FUNCTION()
-        std::vector<collision> collisions;
-        collisions.reserve(m_entities.size() / 2);
 
-        // update_quad_tree();
+        if (m_qt_build_calls++ >= m_qt_build_period)
+        {
+            m_qt_build_calls = 0;
+            m_quad_tree.build(m_entities);
+        }
         std::vector<const std::vector<const_entity_ptr> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
@@ -129,7 +138,6 @@ namespace phys
                     if (collide(partition->operator[](i), partition->operator[](j), c))
                         collisions.emplace_back(c);
                 }
-        return collisions;
     }
 
     void collider2D::load_collisions(const std::vector<collision> &collisions,

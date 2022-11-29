@@ -12,12 +12,14 @@ namespace phys
     public:
         compeller2D() = delete;
         compeller2D(std::vector<entity2D> &entities,
-                    std::size_t allocations = 6);
+                    std::size_t allocations);
 
         void add_constrain(const constrain_interface &c); // Implement remove
 
         void solve_and_load_constrains(std::vector<float> &stchanges,
                                        const std::vector<float> &inv_masses) const;
+
+        const std::vector<const constrain_interface *> &constrains() const;
 
     private:
         std::vector<entity2D> &m_entities;

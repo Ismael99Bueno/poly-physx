@@ -66,4 +66,15 @@ namespace phys
 
     const alg::vec2 &rigid_bar2D::joint1() const { return m_joint1; }
     const alg::vec2 &rigid_bar2D::joint2() const { return m_joint2; }
+
+    void rigid_bar2D::joint1(const alg::vec2 &joint1)
+    {
+        m_joint1 = joint1;
+        m_has_joints = true;
+    }
+    void rigid_bar2D::joint2(const alg::vec2 &joint2)
+    {
+        m_joint2 = joint2;
+        m_has_joints = true;
+    }
 }
