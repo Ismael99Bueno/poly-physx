@@ -14,7 +14,7 @@ namespace phys
     class engine2D
     {
     public:
-        engine2D(const rk::tableau &table, std::size_t allocations = 100);
+        engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);
 
         void retrieve();
 

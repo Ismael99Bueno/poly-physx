@@ -5,7 +5,7 @@
 
 namespace phys
 {
-    engine2D::engine2D(const rk::tableau &table,
+    engine2D::engine2D(const rk::butcher_tableau &table,
                        const std::size_t allocations) : m_integ(table, m_state),
                                                         m_collider(m_entities, 2 * allocations),
                                                         m_compeller(m_entities, allocations)
