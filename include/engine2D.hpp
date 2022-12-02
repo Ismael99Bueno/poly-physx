@@ -14,13 +14,13 @@ namespace phys
     class engine2D
     {
     public:
-        engine2D(const rk::tableau &table, float dt = 0.001f, std::size_t allocations = 100);
+        engine2D(const rk::tableau &table, std::size_t allocations = 100);
 
         void retrieve();
 
-        bool raw_forward();
-        bool reiterative_forward(std::size_t reiterations = 2);
-        bool embedded_forward();
+        bool raw_forward(float &dt);
+        bool reiterative_forward(float &dt, std::size_t reiterations = 2);
+        bool embedded_forward(float &dt);
 
         virtual entity_ptr add_entity(const body2D &body, const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
         virtual entity_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
@@ -53,9 +53,6 @@ namespace phys
 
         float elapsed() const;
 
-        float timestep() const;
-        void timestep(float timestep);
-
     protected:
         std::vector<entity2D> m_entities;
 
@@ -68,7 +65,7 @@ namespace phys
         std::vector<spring2D> m_springs;
 
         rk::integrator m_integ;
-        float m_t = 0.f, m_dt = 0.001f;
+        float m_t = 0.f;
 
         void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
         void load_interactions_and_externals(std::vector<float> &stchanges) const;

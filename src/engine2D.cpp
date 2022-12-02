@@ -6,9 +6,7 @@
 namespace phys
 {
     engine2D::engine2D(const rk::tableau &table,
-                       const float dt,
-                       const std::size_t allocations) : m_dt(dt),
-                                                        m_integ(table, m_state),
+                       const std::size_t allocations) : m_integ(table, m_state),
                                                         m_collider(m_entities, 2 * allocations),
                                                         m_compeller(m_entities, allocations)
     {
@@ -26,24 +24,24 @@ namespace phys
 
     void engine2D::retrieve() { retrieve(m_state); }
 
-    bool engine2D::raw_forward()
+    bool engine2D::raw_forward(float &dt)
     {
         PERF_FUNCTION()
-        const bool valid = m_integ.raw_forward(m_t, m_dt, *this, ode);
+        const bool valid = m_integ.raw_forward(m_t, dt, *this, ode);
         reset_forces();
         return valid;
     }
-    bool engine2D::reiterative_forward(const std::size_t reiterations)
+    bool engine2D::reiterative_forward(float &dt, const std::size_t reiterations)
     {
         PERF_FUNCTION()
-        const bool valid = m_integ.reiterative_forward(m_t, m_dt, *this, ode, reiterations);
+        const bool valid = m_integ.reiterative_forward(m_t, dt, *this, ode, reiterations);
         reset_forces();
         return valid;
     }
-    bool engine2D::embedded_forward()
+    bool engine2D::embedded_forward(float &dt)
     {
         PERF_FUNCTION()
-        const bool valid = m_integ.embedded_forward(m_t, m_dt, *this, ode);
+        const bool valid = m_integ.embedded_forward(m_t, dt, *this, ode);
         reset_forces();
         return valid;
     }
@@ -176,8 +174,4 @@ namespace phys
     collider2D &engine2D::collider() { return m_collider; }
 
     float engine2D::elapsed() const { return m_t; }
-
-    float engine2D::timestep() const { return m_dt; }
-    void engine2D::timestep(float timestep) { m_dt = timestep; }
-
 }
