@@ -46,8 +46,7 @@ namespace phys
         void clear();
         void create_children();
         void partition();
-        bool contains(const alg::vec2 &p) const;
-        bool contains(const const_entity_ptr &e) const;
+        bool contains(const geo::box2D &bbox) const;
         void add_to_children(const const_entity_ptr &e);
     };
 }

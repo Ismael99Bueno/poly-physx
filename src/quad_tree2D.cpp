@@ -16,7 +16,7 @@ namespace phys
 
     void quad_tree2D::add_if_inside(const const_entity_ptr &e)
     {
-        if (!contains(e))
+        if (!contains(e->bounding_box()))
             return;
         if (full())
         {
@@ -80,17 +80,11 @@ namespace phys
             add_to_children(e);
     }
 
-    bool quad_tree2D::contains(const alg::vec2 &p) const
+    bool quad_tree2D::contains(const geo::box2D &bbox) const
     {
-        return 2.f * std::abs(m_pos.x - p.x) <= m_dim.x && 2.f * std::abs(m_pos.y - p.y) <= m_dim.y;
-    }
-
-    bool quad_tree2D::contains(const const_entity_ptr &e) const
-    {
-        for (const alg::vec2 &v : e->shape().vertices())
-            if (contains(v))
-                return true;
-        return false;
+        const alg::vec2 mm = m_pos - m_dim / 2.f;
+        const alg::vec2 mx = m_pos + m_dim / 2.f;
+        return geo::box2D::overlap(mm, mx, bbox.min(), bbox.max());
     }
 
     void quad_tree2D::add_to_children(const const_entity_ptr &e)

@@ -25,12 +25,16 @@ namespace phys
 
         void add_entity_intervals(const const_entity_ptr &e); // TODO: Implement remove
         void solve_and_load_collisions(std::vector<float> &stchanges);
+        void update_quad_tree();
 
         float stiffness() const;
         float dampening() const;
 
         void stiffness(float stiffness);
         void dampening(float dampening);
+
+        coldet_method coldet() const;
+        void coldet(coldet_method coldet);
 
         const quad_tree2D &quad_tree() const;
         quad_tree2D &quad_tree();
@@ -74,7 +78,7 @@ namespace phys
 
         void sort_intervals();
         static bool collide(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c);
-        std::vector<collision> coldet();
+        std::vector<collision> detect_collisions();
         void brute_force_coldet(std::vector<collision> &collisions) const;
         void sort_and_sweep_coldet(std::vector<collision> &collisions);
         void quad_tree_coldet(std::vector<collision> &collisions);

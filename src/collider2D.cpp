@@ -36,11 +36,16 @@ namespace phys
 
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
-        const std::vector<collision> collisions = coldet();
+        const std::vector<collision> collisions = detect_collisions();
         load_collisions(collisions, stchanges);
     }
 
-    std::vector<collider2D::collision> collider2D::coldet()
+    void collider2D::update_quad_tree()
+    {
+        m_quad_tree.build(m_entities);
+    }
+
+    std::vector<collider2D::collision> collider2D::detect_collisions()
     {
         std::vector<collider2D::collision> collisions;
         collisions.reserve(m_entities.size() / 2);
@@ -64,6 +69,9 @@ namespace phys
 
     void collider2D::stiffness(float stiffness) { m_stiffness = stiffness; }
     void collider2D::dampening(float dampening) { m_dampening = dampening; }
+
+    collider2D::coldet_method collider2D::coldet() const { return m_coldet_method; }
+    void collider2D::coldet(coldet_method coldet) { m_coldet_method = coldet; }
 
     const quad_tree2D &collider2D::quad_tree() const { return m_quad_tree; }
     quad_tree2D &collider2D::quad_tree() { return m_quad_tree; }
@@ -125,7 +133,7 @@ namespace phys
         if (m_qt_build_calls++ >= m_qt_build_period)
         {
             m_qt_build_calls = 0;
-            m_quad_tree.build(m_entities);
+            update_quad_tree();
         }
         std::vector<const std::vector<const_entity_ptr> *> partitions;
         partitions.reserve(20);
@@ -166,9 +174,9 @@ namespace phys
                         vel2 = c.e2->vel(rel2);
 
         const float director = (c.touch1 - c.touch2).dot(c.e1->pos() - c.e2->pos());
-        const float sign = director > 0.f ? -1.f : 1.f;
+        const float mass_factor = (c.e1->mass() + c.e2->mass()) / 2.f;
 
-        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1)) * sign;
+        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1)) * mass_factor;
         const float torque1 = rel1.cross(force), torque2 = force.cross(rel2);
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
