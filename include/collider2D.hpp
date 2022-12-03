@@ -72,8 +72,8 @@ namespace phys
         const std::vector<entity2D> &m_entities;
         std::vector<interval> m_intervals;
         quad_tree2D m_quad_tree;
-        float m_stiffness = 1000.f, m_dampening = 10.f;
-        std::size_t m_qt_build_period = 30, m_qt_build_calls = 0;
+        float m_stiffness = 5000.f, m_dampening = 10.f;
+        std::size_t m_qt_build_period = 100, m_qt_build_calls = 0;
         coldet_method m_coldet_method = QUAD_TREE;
 
         void sort_intervals();

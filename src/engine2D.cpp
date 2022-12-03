@@ -79,6 +79,8 @@ namespace phys
         for (const force2D *f : m_forces)
             for (const const_entity_ptr &e : f->entities())
             {
+                if (!e->dynamic())
+                    continue;
                 const std::size_t index = 6 * e.index();
                 const auto [force, torque] = f->force(*e);
                 load_force(stchanges, force, torque, index);
@@ -88,12 +90,16 @@ namespace phys
             const std::size_t index1 = 6 * s.e1().index(),
                               index2 = 6 * s.e2().index();
             const auto [force, t1, t2] = s.force();
-            load_force(stchanges, force, t1, index1);
-            load_force(stchanges, -force, t2, index2);
+            if (s.e1()->dynamic())
+                load_force(stchanges, force, t1, index1);
+            if (s.e2()->dynamic())
+                load_force(stchanges, -force, t2, index2);
         }
         for (const interaction2D *i : m_inters)
             for (const const_entity_ptr &e1 : i->entities())
             {
+                if (!e1->dynamic())
+                    continue;
                 const std::size_t index = 6 * e1.index();
                 for (const const_entity_ptr &e2 : i->entities())
                     if (e1 != e2)
