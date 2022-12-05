@@ -15,7 +15,8 @@ namespace phys
         quad_tree2D(const alg::vec2 &pos, const alg::vec2 &dim, std::size_t max_entities = 5);
 
         void partitions(std::vector<const std::vector<const_entity_ptr> *> &partitions) const;
-        void build(const std::vector<entity2D> &entities);
+        void update(const std::vector<entity2D> &entities);
+        void rebuild(const std::vector<entity2D> &entities);
 
         bool full() const;
 

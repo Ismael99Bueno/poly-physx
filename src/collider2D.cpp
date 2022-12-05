@@ -12,7 +12,7 @@ namespace phys
 {
     collider2D::collider2D(const std::vector<entity2D> &entities,
                            const std::size_t allocations) : m_entities(entities),
-                                                            m_quad_tree({0.f, 0.f}, {1000.f, 1000.f})
+                                                            m_quad_tree({0.f, 0.f}, {192.f, 128.f})
     {
         m_intervals.reserve(allocations);
     }
@@ -42,7 +42,14 @@ namespace phys
 
     void collider2D::update_quad_tree()
     {
-        m_quad_tree.build(m_entities);
+        m_quad_tree.update(m_entities);
+        m_qt_build_calls = 0;
+    }
+
+    void collider2D::rebuild_quad_tree()
+    {
+        m_quad_tree.rebuild(m_entities);
+        m_qt_build_calls = 0;
     }
 
     std::vector<collider2D::collision> collider2D::detect_collisions()
@@ -131,10 +138,8 @@ namespace phys
         PERF_FUNCTION()
 
         if (m_qt_build_calls++ >= m_qt_build_period)
-        {
-            m_qt_build_calls = 0;
             update_quad_tree();
-        }
+
         std::vector<const std::vector<const_entity_ptr> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);

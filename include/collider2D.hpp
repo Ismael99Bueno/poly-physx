@@ -26,6 +26,7 @@ namespace phys
         void add_entity_intervals(const const_entity_ptr &e); // TODO: Implement remove
         void solve_and_load_collisions(std::vector<float> &stchanges);
         void update_quad_tree();
+        void rebuild_quad_tree();
 
         float stiffness() const;
         float dampening() const;
