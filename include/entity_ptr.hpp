@@ -17,11 +17,15 @@ namespace phys
         const entity2D *operator->() const;
         const entity2D &operator*() const;
 
+        bool is_valid() const;
+        bool validate();
+
         explicit operator bool() const;
 
     private:
         const std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
+        std::uint64_t m_id = 0;
 
         friend struct std::hash<const_entity_ptr>;
     };
@@ -40,12 +44,16 @@ namespace phys
         entity2D *operator->() const;
         entity2D &operator*() const;
 
+        bool is_valid() const;
+        bool validate();
+
         explicit operator bool() const;
         operator const_entity_ptr() const;
 
     private:
         std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
+        std::uint64_t m_id = 0;
 
         friend struct std::hash<entity_ptr>;
     };

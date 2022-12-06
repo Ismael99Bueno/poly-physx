@@ -1,7 +1,7 @@
 #include "engine2D.hpp"
 #include "ode2D.hpp"
 #include "perf.hpp"
-#include <iostream>
+#include <random>
 
 namespace phys
 {
@@ -136,10 +136,15 @@ namespace phys
     entity_ptr engine2D::add_entity(const body2D &body,
                                     const std::vector<alg::vec2> &vertices)
     {
+        static std::random_device rd;
+        static std::mt19937_64 eng(rd());
+        static std::uniform_int_distribution<std::uint64_t> dist;
+
         entity2D &e = m_entities.emplace_back(body, vertices);
         const entity_ptr e_ptr = {m_entities, m_entities.size() - 1};
 
         e.m_index = m_entities.size() - 1;
+        e.m_id = dist(eng);
         e.m_buffer = utils::vec_ptr(m_state, m_state.size());
 
         m_state.insert(m_state.end(), {body.pos().x, body.pos().y, body.angpos(),

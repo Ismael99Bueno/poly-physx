@@ -3,12 +3,29 @@
 namespace phys
 {
     const_entity_ptr::const_entity_ptr(const std::vector<entity2D> &buffer,
-                                       const std::size_t index) : m_buffer(&buffer), m_index(index) {}
+                                       const std::size_t index) : m_buffer(&buffer),
+                                                                  m_index(index),
+                                                                  m_id(buffer[index].id()) {}
 
     std::size_t const_entity_ptr::index() const { return m_index; }
     const entity2D *const_entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
     const entity2D *const_entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     const entity2D &const_entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
+
+    bool const_entity_ptr::is_valid() const { return m_id == (*m_buffer)[m_index].id(); }
+    bool const_entity_ptr::validate()
+    {
+        if (is_valid())
+            return true;
+        for (const entity2D &e : *m_buffer)
+            if (e.id() == m_id)
+            {
+                m_id = e.id();
+                m_index = e.index();
+                return true;
+            }
+        return false;
+    }
 
     const_entity_ptr::operator bool() const { return m_buffer; }
 
@@ -16,12 +33,29 @@ namespace phys
     bool operator!=(const const_entity_ptr &e1, const const_entity_ptr &e2) { return !(e1 == e2); }
 
     entity_ptr::entity_ptr(std::vector<entity2D> &buffer,
-                           const std::size_t index) : m_buffer(&buffer), m_index(index) {}
+                           const std::size_t index) : m_buffer(&buffer),
+                                                      m_index(index),
+                                                      m_id(buffer[index].id()) {}
 
     std::size_t entity_ptr::index() const { return m_index; }
     entity2D *entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
     entity2D *entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     entity2D &entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
+
+    bool entity_ptr::is_valid() const { return m_id == (*m_buffer)[m_index].id(); }
+    bool entity_ptr::validate()
+    {
+        if (is_valid())
+            return true;
+        for (const entity2D &e : *m_buffer)
+            if (e.id() == m_id)
+            {
+                m_id = e.id();
+                m_index = e.index();
+                return true;
+            }
+        return false;
+    }
 
     entity_ptr::operator bool() const { return m_buffer; }
     entity_ptr::operator const_entity_ptr() const { return const_entity_ptr(*m_buffer, m_index); }

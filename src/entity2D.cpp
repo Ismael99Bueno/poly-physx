@@ -56,6 +56,7 @@ namespace phys
     }
 
     std::size_t entity2D::index() const { return m_index; }
+    std::uint64_t entity2D::id() const { return m_id; }
 
     const alg::vec2 &entity2D::pos() const { return m_pos; }
 
