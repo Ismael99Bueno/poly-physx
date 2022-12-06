@@ -27,6 +27,7 @@ namespace phys
     }
 
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
+    bool collider2D::interval::try_validate() { return m_entity.try_validate(); }
 
     void collider2D::add_entity_intervals(const const_entity_ptr &e)
     {
@@ -50,6 +51,21 @@ namespace phys
     {
         m_quad_tree.rebuild(m_entities);
         m_qt_build_calls = 0;
+    }
+
+    bool collider2D::validate()
+    {
+        std::vector<std::size_t> invalids;
+        invalids.reserve(2);
+        for (std::size_t i = 0; i < m_intervals.size(); i++)
+            if (!m_intervals[i].try_validate())
+                invalids.emplace_back(i);
+        for (const std::size_t index : invalids)
+        {
+            m_intervals[index] = m_intervals.back();
+            m_intervals.pop_back();
+        }
+        return !invalids.empty();
     }
 
     std::vector<collider2D::collision> collider2D::detect_collisions()

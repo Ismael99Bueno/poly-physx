@@ -29,9 +29,12 @@ namespace phys
                                       float mass = 1.f, float charge = 1.f,
                                       const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
 
-        void add_constrain(const constrain_interface *c);
-        void add_force(const force2D *force);
-        void add_interaction(const interaction2D *inter);
+        virtual void remove_entity(std::size_t index);
+        virtual void remove_entity(const const_entity_ptr &e);
+
+        void add_constraint(constraint_interface *c);
+        void add_force(force2D *force);
+        void add_interaction(interaction2D *inter);
         void add_spring(const spring2D &spring);
 
         const_entity_ptr operator[](std::size_t index) const;
@@ -59,8 +62,8 @@ namespace phys
         std::vector<float> m_state;
         compeller2D m_compeller;
         collider2D m_collider;
-        std::vector<const force2D *> m_forces;
-        std::vector<const interaction2D *> m_inters;
+        std::vector<force2D *> m_forces;
+        std::vector<interaction2D *> m_inters;
         std::vector<spring2D> m_springs;
 
         rk::integrator m_integ;

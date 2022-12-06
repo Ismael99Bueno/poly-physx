@@ -1,5 +1,5 @@
 #include "compeller2D.hpp"
-#include "constrain_interface.hpp"
+#include "constraint_interface.hpp"
 #include "perf.hpp"
 
 namespace phys
@@ -7,46 +7,60 @@ namespace phys
     compeller2D::compeller2D(std::vector<entity2D> &entities,
                              const std::size_t allocations) : m_entities(entities)
     {
-        m_constrains.reserve(allocations);
+        m_constraints.reserve(allocations);
     }
 
-    void compeller2D::add_constrain(const constrain_interface *c) { m_constrains.push_back(c); }
+    void compeller2D::add_constraint(constraint_interface *c) { m_constraints.push_back(c); }
+    bool compeller2D::validate()
+    {
+        std::vector<std::size_t> invalids;
+        invalids.reserve(m_constraints.size());
+        for (std::size_t i = 0; i < m_constraints.size(); i++)
+            if (!m_constraints[i]->try_validate())
+                invalids.emplace_back(i);
+        for (std::size_t index : invalids)
+        {
+            m_constraints[index] = m_constraints.back();
+            m_constraints.pop_back();
+        }
+        return !invalids.empty();
+    }
 
-    void compeller2D::solve_and_load_constrains(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const
+    void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const
     {
         const std::vector<float> jcb = jacobian(), djcb = jacobian_derivative();
         const std::vector<float> A = lhs(jcb, inv_masses);
         const std::vector<float> b = rhs(jcb, djcb, stchanges, inv_masses);
         const std::vector<float> lambda = lu_decomposition(A, b);
-        return load_constrain_accels(jcb, lambda, stchanges);
+        return load_constraint_accels(jcb, lambda, stchanges);
     }
 
-    const std::vector<const constrain_interface *> &compeller2D::constrains() const { return m_constrains; }
+    const std::vector<constraint_interface *> &compeller2D::constraints() const { return m_constraints; }
 
-    std::vector<float> compeller2D::constrain_matrix(std::array<float, 3> (constrain_interface::*constrain_grad)(entity2D &e) const) const
+    std::vector<float> compeller2D::constraint_matrix(std::array<float, 3> (constraint_interface::*constraint_grad)(entity2D &e) const) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constrains.size(), cols = 3 * m_entities.size();
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         std::vector<float> cmatrix(rows * cols, 0.f);
         for (std::size_t i = 0; i < rows; i++)
-            for (std::size_t j = 0; j < m_constrains[i]->size(); j++)
+            for (std::size_t j = 0; j < m_constraints[i]->size(); j++)
             {
-                entity2D &e = m_constrains[i]->operator[](j);
-                const std::array<float, 3> state = (m_constrains[i]->*constrain_grad)(e);
+                entity2D &e = m_constraints[i]->operator[](j);
+                const std::array<float, 3> state = (m_constraints[i]->*constraint_grad)(e);
                 for (std::size_t k = 0; k < 3; k++)
                     cmatrix[i * cols + e.index() * 3 + k] = state[k];
             }
         return cmatrix;
     }
 
-    std::vector<float> compeller2D::jacobian() const { return constrain_matrix(&constrain_interface::constrain_grad); }
-    std::vector<float> compeller2D::jacobian_derivative() const { return constrain_matrix(&constrain_interface::constrain_grad_derivative); }
+    std::vector<float> compeller2D::jacobian() const { return constraint_matrix(&constraint_interface::constraint_grad); }
+    std::vector<float> compeller2D::jacobian_derivative() const { return constraint_matrix(&constraint_interface::constraint_grad_derivative); }
 
     std::vector<float> compeller2D::lhs(const std::vector<float> &jcb,
                                         const std::vector<float> &inv_masses) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constrains.size(), cols = 3 * m_entities.size();
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         std::vector<float> A(rows * rows, 0.f);
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t j = 0; j < rows; j++)
@@ -67,7 +81,7 @@ namespace phys
                                         const std::vector<float> &inv_masses) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constrains.size(), cols = 3 * m_entities.size();
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         std::vector<float> b(rows, 0.f), qdot(stchanges.size() / 2, 0.f), accels(stchanges.size() / 2, 0.f);
 
         for (std::size_t i = 0; i < rows; i++)
@@ -81,8 +95,8 @@ namespace phys
                              jcb[id] * stchanges[index2 + 3]) *
                             inv_masses[index1];
                 }
-            b[i] -= (m_constrains[i]->stiffness() * m_constrains[i]->value() +
-                     m_constrains[i]->dampening() * m_constrains[i]->derivative());
+            b[i] -= (m_constraints[i]->stiffness() * m_constraints[i]->value() +
+                     m_constraints[i]->dampening() * m_constraints[i]->derivative());
         }
 
         // std::size_t index = 0;
@@ -100,7 +114,7 @@ namespace phys
         //         const std::size_t id = i * cols + j;
         //         b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
         //     }
-        //     b[i] -= (m_stiffness * m_constrains[i]->value() + m_dampening * m_constrains[i]->derivative());
+        //     b[i] -= (m_stiffness * m_constraints[i]->value() + m_dampening * m_constraints[i]->derivative());
         // }
         return b;
     }
@@ -109,7 +123,7 @@ namespace phys
                                                      const std::vector<float> &b) const
     {
         PERF_FUNCTION()
-        const std::size_t size = m_constrains.size();
+        const std::size_t size = m_constraints.size();
         std::vector<float> L(size * size, 0.f), U(size * size, 0.f), sol(size, 0.f);
         for (std::size_t i = 0; i < size; i++)
         {
@@ -148,12 +162,12 @@ namespace phys
         return sol;
     }
 
-    void compeller2D::load_constrain_accels(const std::vector<float> &jcb,
-                                            const std::vector<float> &lambda,
-                                            std::vector<float> &stchanges) const
+    void compeller2D::load_constraint_accels(const std::vector<float> &jcb,
+                                             const std::vector<float> &lambda,
+                                             std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constrains.size();
+        const std::size_t rows = m_constraints.size();
         for (std::size_t i = 0; i < m_entities.size(); i++)
             if (m_entities[i].dynamic())
                 for (std::size_t j = 0; j < 3; j++)

@@ -21,6 +21,8 @@ namespace phys
 
         std::tuple<alg::vec2, float, float> force() const;
 
+        bool try_validate();
+
         float stiffness() const;
         float dampening() const;
         float length() const;

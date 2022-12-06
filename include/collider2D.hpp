@@ -3,7 +3,7 @@
 
 #include "entity2D.hpp"
 #include "entity_ptr.hpp"
-#include "constrain2D.hpp"
+#include "constraint2D.hpp"
 #include "quad_tree2D.hpp"
 #include <vector>
 #include <utility>
@@ -27,6 +27,7 @@ namespace phys
         void solve_and_load_collisions(std::vector<float> &stchanges);
         void update_quad_tree();
         void rebuild_quad_tree();
+        bool validate();
 
         float stiffness() const;
         float dampening() const;
@@ -58,6 +59,7 @@ namespace phys
             const entity2D *entity() const;
             float value() const;
             end type() const;
+            bool try_validate();
 
         private:
             const_entity_ptr m_entity;

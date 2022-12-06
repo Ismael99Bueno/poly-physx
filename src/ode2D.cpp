@@ -14,7 +14,7 @@ namespace phys
         const std::vector<float> inv_masses = engine.inverse_masses();
 
         engine.m_collider.solve_and_load_collisions(stchanges);
-        engine.m_compeller.solve_and_load_constrains(stchanges, inv_masses);
+        engine.m_compeller.solve_and_load_constraints(stchanges, inv_masses);
         for (std::size_t i = 0; i < engine.m_entities.size(); i++)
         {
             stchanges[6 * i + 3] *= inv_masses[3 * i];

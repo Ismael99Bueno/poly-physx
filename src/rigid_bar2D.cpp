@@ -4,7 +4,7 @@ namespace phys
 {
     rigid_bar2D::rigid_bar2D(const entity_ptr &e1,
                              const entity_ptr &e2,
-                             const float length) : constrain2D<2>({e1, e2}),
+                             const float length) : constraint2D<2>({e1, e2}),
                                                    m_length(length),
                                                    m_has_joints(false) {}
 
@@ -12,35 +12,35 @@ namespace phys
                              const entity_ptr &e2,
                              const alg::vec2 &joint1,
                              const alg::vec2 &joint2,
-                             const float length) : constrain2D<2>({e1, e2}),
+                             const float length) : constraint2D<2>({e1, e2}),
                                                    m_joint1(joint1),
                                                    m_joint2(joint2),
                                                    m_length(length),
                                                    m_has_joints(true) {}
 
-    float rigid_bar2D::constrain(const std::array<const_entity_ptr, 2> &entities) const
+    float rigid_bar2D::constraint(const std::array<const_entity_ptr, 2> &entities) const
     {
-        return m_has_joints ? with_joints_constrain(entities) : without_joints_constrain(entities);
+        return m_has_joints ? with_joints_constraint(entities) : without_joints_constraint(entities);
     }
 
-    float rigid_bar2D::constrain_derivative(const std::array<const_entity_ptr, 2> &entities) const
+    float rigid_bar2D::constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const
     {
-        return m_has_joints ? with_joints_constrain_derivative(entities) : without_joints_constrain_derivative(entities);
+        return m_has_joints ? with_joints_constraint_derivative(entities) : without_joints_constraint_derivative(entities);
     }
 
-    float rigid_bar2D::without_joints_constrain(const std::array<const_entity_ptr, 2> &entities) const
+    float rigid_bar2D::without_joints_constraint(const std::array<const_entity_ptr, 2> &entities) const
     {
         const phys::const_entity_ptr &e1 = entities[0], &e2 = entities[1];
         return e1->pos().sq_dist(e2->pos()) - m_length * m_length;
     }
-    float rigid_bar2D::without_joints_constrain_derivative(const std::array<const_entity_ptr, 2> &entities) const
+    float rigid_bar2D::without_joints_constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const
     {
         const phys::const_entity_ptr &e1 = entities[0], &e2 = entities[1];
         return 2.f * (e1->pos() - e2->pos())
                          .dot(e1->vel() - e2->vel());
     }
 
-    float rigid_bar2D::with_joints_constrain(const std::array<const_entity_ptr, 2> &entities) const
+    float rigid_bar2D::with_joints_constraint(const std::array<const_entity_ptr, 2> &entities) const
     {
         const phys::const_entity_ptr &e1 = entities[0], &e2 = entities[1];
         const alg::vec2 abs_joint1 = m_joint1.rotated(e1->angpos()) + e1->pos(),
@@ -48,7 +48,7 @@ namespace phys
 
         return abs_joint1.sq_dist(abs_joint2) - m_length * m_length;
     }
-    float rigid_bar2D::with_joints_constrain_derivative(const std::array<const_entity_ptr, 2> &entities) const
+    float rigid_bar2D::with_joints_constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const
     {
         const phys::const_entity_ptr &e1 = entities[0], &e2 = entities[1];
         const alg::vec2 rot_joint1 = m_joint1.rotated(e1->angpos()),

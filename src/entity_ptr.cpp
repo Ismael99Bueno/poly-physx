@@ -13,7 +13,7 @@ namespace phys
     const entity2D &const_entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
     bool const_entity_ptr::is_valid() const { return m_id == (*m_buffer)[m_index].id(); }
-    bool const_entity_ptr::validate()
+    bool const_entity_ptr::try_validate()
     {
         if (is_valid())
             return true;

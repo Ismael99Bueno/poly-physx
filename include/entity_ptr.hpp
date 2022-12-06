@@ -18,7 +18,7 @@ namespace phys
         const entity2D &operator*() const;
 
         bool is_valid() const;
-        bool validate();
+        bool try_validate();
 
         explicit operator bool() const;
 

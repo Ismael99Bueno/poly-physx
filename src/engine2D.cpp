@@ -166,9 +166,47 @@ namespace phys
         return add_entity(body2D(pos, vel, angpos, angvel, mass, charge), vertices);
     }
 
-    void engine2D::add_constrain(const constrain_interface *c) { m_compeller.add_constrain(c); }
-    void engine2D::add_force(const force2D *force) { m_forces.emplace_back(force); }
-    void engine2D::add_interaction(const interaction2D *inter) { m_inters.emplace_back(inter); }
+    void engine2D::remove_entity(const std::size_t index)
+    {
+        if (index == m_entities.size() - 1)
+            m_entities.pop_back();
+        else
+        {
+            m_entities[index] = m_entities.back();
+            m_entities.pop_back();
+            m_entities[index].m_index = index;
+            m_entities[index].m_buffer = utils::vec_ptr(m_state, 6 * index);
+        }
+
+        for (std::size_t i = 0; i < 6; i++)
+            m_state[6 * index + i] = m_state[m_state.size() - 6 + i];
+        m_state.resize(6 * m_entities.size());
+        m_collider.validate();
+        m_compeller.validate();
+        for (force2D *f : m_forces)
+            f->validate();
+        for (interaction2D *i : m_inters)
+            i->validate();
+        std::vector<std::size_t> invalids;
+        invalids.reserve(m_springs.size());
+        for (std::size_t i = 0; i < m_springs.size(); i++)
+            if (!m_springs[i].try_validate())
+                invalids.emplace_back(i);
+        for (std::size_t index : invalids)
+        {
+            m_springs[index] = m_springs.back();
+            m_springs.pop_back();
+        }
+
+        m_integ.resize();
+        m_collider.update_quad_tree();
+    }
+
+    void engine2D::remove_entity(const const_entity_ptr &e) { remove_entity(e.index()); }
+
+    void engine2D::add_constraint(constraint_interface *c) { m_compeller.add_constraint(c); }
+    void engine2D::add_force(force2D *force) { m_forces.emplace_back(force); }
+    void engine2D::add_interaction(interaction2D *inter) { m_inters.emplace_back(inter); }
     void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
 
     const_entity_ptr engine2D::operator[](std::size_t index) const { return {m_entities, index}; }

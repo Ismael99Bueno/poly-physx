@@ -51,6 +51,8 @@ namespace phys
         return {force, torque1, torque2};
     }
 
+    bool spring2D::try_validate() { return m_e1.try_validate() && m_e2.try_validate(); }
+
     float spring2D::stiffness() const { return m_stiffness; }
     float spring2D::dampening() const { return m_dampening; }
     float spring2D::length() const { return m_length; }
