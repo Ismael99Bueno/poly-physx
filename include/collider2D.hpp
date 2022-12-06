@@ -55,7 +55,7 @@ namespace phys
 
             interval(const const_entity_ptr &e, end end_type);
 
-            const const_entity_ptr &entity() const;
+            const entity2D *entity() const;
             float value() const;
             end type() const;
 
@@ -66,7 +66,7 @@ namespace phys
 
         struct collision
         {
-            const_entity_ptr e1, e2;
+            const entity2D *e1, *e2;
             alg::vec2 touch1, touch2;
         };
 
@@ -78,7 +78,7 @@ namespace phys
         coldet_method m_coldet_method = QUAD_TREE;
 
         void sort_intervals();
-        static bool collide(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c);
+        static bool collide(const entity2D *e1, const entity2D *e2, collision *c);
         std::vector<collision> detect_collisions();
         void brute_force_coldet(std::vector<collision> &collisions) const;
         void sort_and_sweep_coldet(std::vector<collision> &collisions);
@@ -88,7 +88,7 @@ namespace phys
                              std::vector<float> &stchanges) const;
         std::array<float, 6> forces_upon_collision(const collision &c) const;
 
-        static bool gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &col);
+        static bool gjk_epa(const entity2D *e1, const entity2D *e2, collision *c);
 
         static bool gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex);
         static void line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir);

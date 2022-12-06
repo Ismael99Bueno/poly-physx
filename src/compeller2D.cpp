@@ -10,7 +10,7 @@ namespace phys
         m_constrains.reserve(allocations);
     }
 
-    void compeller2D::add_constrain(const constrain_interface &c) { m_constrains.push_back(&c); }
+    void compeller2D::add_constrain(const constrain_interface *c) { m_constrains.push_back(c); }
 
     void compeller2D::solve_and_load_constrains(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const
     {
@@ -23,7 +23,7 @@ namespace phys
 
     const std::vector<const constrain_interface *> &compeller2D::constrains() const { return m_constrains; }
 
-    std::vector<float> compeller2D::constrain_matrix(std::array<float, 3> (constrain_interface::*constrain_grad)(const entity_ptr &e) const) const
+    std::vector<float> compeller2D::constrain_matrix(std::array<float, 3> (constrain_interface::*constrain_grad)(entity2D &e) const) const
     {
         PERF_FUNCTION()
         const std::size_t rows = m_constrains.size(), cols = 3 * m_entities.size();
@@ -31,7 +31,7 @@ namespace phys
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t j = 0; j < m_constrains[i]->size(); j++)
             {
-                const entity_ptr &e = m_constrains[i]->operator[](j);
+                entity2D &e = m_constrains[i]->operator[](j);
                 const std::array<float, 3> state = (m_constrains[i]->*constrain_grad)(e);
                 for (std::size_t k = 0; k < 3; k++)
                     cmatrix[i * cols + e.index() * 3 + k] = state[k];

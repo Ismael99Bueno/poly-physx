@@ -26,13 +26,15 @@ namespace phys
         void add_force(const alg::vec2 &force);
         void add_torque(float torque);
 
-        alg::vec2 added_force() const;
+        const alg::vec2 &added_force() const;
         float added_torque() const;
 
         const geo::box2D &bounding_box() const;
-        const geo::polygon2D &shape() const;
 
-        const geo::polygon2D &shape(const geo::polygon2D &poly);
+        const geo::polygon2D &shape() const;
+        void shape(const geo::polygon2D &poly);
+
+        std::size_t index() const;
 
         const alg::vec2 &pos() const override;
         void pos(const alg::vec2 &pos) override;
@@ -49,6 +51,7 @@ namespace phys
         geo::polygon2D m_shape;
         utils::vec_ptr m_buffer;
         alg::vec2 m_added_force;
+        std::size_t m_index = 0;
         float m_added_torque = 0.f;
         bool m_dynamic = true;
 

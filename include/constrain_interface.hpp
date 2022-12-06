@@ -1,7 +1,7 @@
 #ifndef CONSTRAIN_INTERFACE_HPP
 #define CONSTRAIN_INTERFACE_HPP
 
-#include "entity_ptr.hpp"
+#include "entity2D.hpp"
 #include <vector>
 #include <array>
 
@@ -19,14 +19,14 @@ namespace phys
 
     private:
         float m_stiffness = 50.f, m_dampening = 10.f;
-        std::array<float, 3> constrain_grad(const entity_ptr &e) const;
-        std::array<float, 3> constrain_grad_derivative(const entity_ptr &e) const;
-        std::array<float, 3> gradient(const entity_ptr &e,
+        std::array<float, 3> constrain_grad(entity2D &e) const;
+        std::array<float, 3> constrain_grad_derivative(entity2D &e) const;
+        std::array<float, 3> gradient(entity2D &e,
                                       float (constrain_interface::*constrain)() const) const;
 
         virtual float derivative() const = 0;
         virtual std::size_t size() const = 0;
-        virtual const entity_ptr &operator[](std::size_t index) const = 0;
+        virtual entity2D &operator[](std::size_t index) const = 0;
 
         friend class compeller2D;
     };

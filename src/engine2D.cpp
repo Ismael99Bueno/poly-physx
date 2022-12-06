@@ -137,14 +137,18 @@ namespace phys
                                     const std::vector<alg::vec2> &vertices)
     {
         entity2D &e = m_entities.emplace_back(body, vertices);
+        const entity_ptr e_ptr = {m_entities, m_entities.size() - 1};
+
+        e.m_index = m_entities.size() - 1;
         e.m_buffer = utils::vec_ptr(m_state, m_state.size());
+
         m_state.insert(m_state.end(), {body.pos().x, body.pos().y, body.angpos(),
                                        body.vel().x, body.vel().y, body.angvel()});
-        m_collider.add_entity_intervals({m_entities, m_entities.size() - 1});
+        m_collider.add_entity_intervals(e_ptr);
 
         e.retrieve();
         m_integ.resize();
-        return entity_ptr(m_entities, m_entities.size() - 1);
+        return e_ptr;
     }
     entity_ptr engine2D::add_entity(const alg::vec2 &pos,
                                     const alg::vec2 &vel,
@@ -157,15 +161,16 @@ namespace phys
         return add_entity(body2D(pos, vel, angpos, angvel, mass, charge), vertices);
     }
 
-    void engine2D::add_constrain(const constrain_interface &c) { m_compeller.add_constrain(c); }
-    void engine2D::add_force(const force2D &force) { m_forces.emplace_back(&force); }
-    void engine2D::add_interaction(const interaction2D &inter) { m_inters.emplace_back(&inter); }
+    void engine2D::add_constrain(const constrain_interface *c) { m_compeller.add_constrain(c); }
+    void engine2D::add_force(const force2D *force) { m_forces.emplace_back(force); }
+    void engine2D::add_interaction(const interaction2D *inter) { m_inters.emplace_back(inter); }
     void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
 
     const_entity_ptr engine2D::operator[](std::size_t index) const { return {m_entities, index}; }
     entity_ptr engine2D::operator[](std::size_t index) { return {m_entities, index}; }
 
     const std::vector<entity2D> &engine2D::entities() const { return m_entities; }
+    std::vector<entity2D> &engine2D::entities() { return m_entities; }
     std::size_t engine2D::size() const { return m_entities.size(); }
 
     const rk::integrator &engine2D::integrator() const { return m_integ; }

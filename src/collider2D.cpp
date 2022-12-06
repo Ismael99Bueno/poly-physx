@@ -19,7 +19,7 @@ namespace phys
 
     collider2D::interval::interval(const const_entity_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
 
-    const const_entity_ptr &collider2D::interval::entity() const { return m_entity; }
+    const entity2D *collider2D::interval::entity() const { return m_entity.raw(); }
 
     float collider2D::interval::value() const
     {
@@ -94,7 +94,7 @@ namespace phys
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    bool collider2D::collide(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c)
+    bool collider2D::collide(const entity2D *e1, const entity2D *e2, collision *c)
     {
         return e1 != e2 && e1->bounding_box().overlaps(e2->bounding_box()) && gjk_epa(e1, e2, c);
     }
@@ -106,7 +106,7 @@ namespace phys
             for (std::size_t j = i + 1; j < m_entities.size(); j++)
             {
                 collision c;
-                if (collide({m_entities, i}, {m_entities, j}, c))
+                if (collide(&m_entities[i], &m_entities[j], &c))
                     collisions.emplace_back(c);
             }
     }
@@ -114,17 +114,17 @@ namespace phys
     void collider2D::sort_and_sweep_coldet(std::vector<collision> &collisions)
     {
         PERF_FUNCTION()
-        std::unordered_set<const_entity_ptr> eligible;
+        std::unordered_set<const entity2D *> eligible;
         sort_intervals();
 
         eligible.reserve(6);
         for (const interval &itrv : m_intervals)
             if (itrv.type() == interval::LOWER)
             {
-                for (const const_entity_ptr &e : eligible)
+                for (const entity2D *e : eligible)
                 {
                     collision c;
-                    if (collide(e, itrv.entity(), c))
+                    if (collide(e, itrv.entity(), &c))
                         collisions.emplace_back(c);
                 }
                 eligible.insert(itrv.entity());
@@ -148,7 +148,7 @@ namespace phys
                 for (std::size_t j = i + 1; j < partition->size(); j++)
                 {
                     collision c;
-                    if (collide(partition->operator[](i), partition->operator[](j), c))
+                    if (collide(partition->operator[](i).raw(), partition->operator[](j).raw(), &c))
                         collisions.emplace_back(c);
                 }
     }
@@ -163,9 +163,9 @@ namespace phys
             for (std::size_t i = 0; i < 3; i++)
             {
                 if (c.e1->dynamic())
-                    stchanges[c.e1.index() * 6 + i + 3] += forces[i];
+                    stchanges[c.e1->index() * 6 + i + 3] += forces[i];
                 if (c.e2->dynamic())
-                    stchanges[c.e2.index() * 6 + i + 3] += forces[i + 3];
+                    stchanges[c.e2->index() * 6 + i + 3] += forces[i + 3];
             }
         }
     }
@@ -186,14 +186,14 @@ namespace phys
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
 
-    bool collider2D::gjk_epa(const const_entity_ptr &e1, const const_entity_ptr &e2, collision &c)
+    bool collider2D::gjk_epa(const entity2D *e1, const entity2D *e2, collision *c)
     {
         std::vector<alg::vec2> simplex;
         if (!gjk(e1->shape(), e2->shape(), simplex))
             return false;
         const alg::vec2 mtv = epa(e1->shape(), e2->shape(), simplex);
         const auto [t1, t2] = touch_points(e1->shape(), e2->shape(), mtv);
-        c = {e1, e2, t1, t2};
+        *c = {e1, e2, t1, t2};
         return true;
     }
 

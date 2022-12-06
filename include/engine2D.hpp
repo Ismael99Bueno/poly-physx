@@ -29,15 +29,16 @@ namespace phys
                                       float mass = 1.f, float charge = 1.f,
                                       const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
 
-        void add_constrain(const constrain_interface &c);
-        void add_force(const force2D &force);
-        void add_interaction(const interaction2D &inter);
+        void add_constrain(const constrain_interface *c);
+        void add_force(const force2D *force);
+        void add_interaction(const interaction2D *inter);
         void add_spring(const spring2D &spring);
 
         const_entity_ptr operator[](std::size_t index) const;
         entity_ptr operator[](std::size_t index);
 
         const std::vector<entity2D> &entities() const;
+        std::vector<entity2D> &entities();
         std::size_t size() const;
 
         const rk::integrator &integrator() const;
@@ -53,10 +54,8 @@ namespace phys
 
         float elapsed() const;
 
-    protected:
-        std::vector<entity2D> m_entities;
-
     private:
+        std::vector<entity2D> m_entities;
         std::vector<float> m_state;
         compeller2D m_compeller;
         collider2D m_collider;

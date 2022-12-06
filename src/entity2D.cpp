@@ -41,20 +41,21 @@ namespace phys
     void entity2D::add_force(const alg::vec2 &force) { m_added_force += force; }
     void entity2D::add_torque(const float torque) { m_added_torque += torque; }
 
-    alg::vec2 entity2D::added_force() const { return m_added_force; }
+    const alg::vec2 &entity2D::added_force() const { return m_added_force; }
     float entity2D::added_torque() const { return m_added_torque; }
 
     const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
     const geo::polygon2D &entity2D::shape() const { return m_shape; }
 
-    const geo::polygon2D &entity2D::shape(const geo::polygon2D &poly)
+    void entity2D::shape(const geo::polygon2D &poly)
     {
         m_shape = poly;
         m_shape.pos(m_pos);
         m_shape.rotation(m_angpos);
         m_bbox.bound(m_shape.vertices(), m_shape.centroid());
-        return m_shape;
     }
+
+    std::size_t entity2D::index() const { return m_index; }
 
     const alg::vec2 &entity2D::pos() const { return m_pos; }
 

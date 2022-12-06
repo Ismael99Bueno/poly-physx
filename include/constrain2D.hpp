@@ -2,6 +2,7 @@
 #define CONSTRAIN2D_HPP
 
 #include "constrain_interface.hpp"
+#include "entity_ptr.hpp"
 
 namespace phys
 {
@@ -35,7 +36,7 @@ namespace phys
 
         float derivative() const override { return constrain_derivative(m_entities); }
         std::size_t size() const override { return N; }
-        const entity_ptr &operator[](std::size_t index) const override { return m_grad_entities[index]; }
+        entity2D &operator[](std::size_t index) const override { return *m_grad_entities[index]; }
     };
 }
 

@@ -14,7 +14,7 @@ namespace phys
         compeller2D(std::vector<entity2D> &entities,
                     std::size_t allocations);
 
-        void add_constrain(const constrain_interface &c); // Implement remove
+        void add_constrain(const constrain_interface *c); // Implement remove
 
         void solve_and_load_constrains(std::vector<float> &stchanges,
                                        const std::vector<float> &inv_masses) const;
@@ -25,7 +25,7 @@ namespace phys
         std::vector<entity2D> &m_entities;
         std::vector<const constrain_interface *> m_constrains;
 
-        std::vector<float> constrain_matrix(std::array<float, 3> (constrain_interface::*constrain)(const entity_ptr &e) const) const;
+        std::vector<float> constrain_matrix(std::array<float, 3> (constrain_interface::*constrain)(entity2D &e) const) const;
         std::vector<float> jacobian() const;
         std::vector<float> jacobian_derivative() const;
 
