@@ -1,4 +1,5 @@
 #include "entity_set.hpp"
+#include "debug.h"
 
 namespace phys
 {
@@ -17,6 +18,8 @@ namespace phys
         for (const_entity_ptr &e : invalids)
             if (e.try_validate())
                 m_entities.insert(e);
+        DBG_LOG_IF(invalids.empty() && !m_intervals.empty(), "Validate method did not find any invalid entity pointers.\n")
+        DBG_LOG_IF(!invalids.empty() && !m_intervals.empty(), "Validate method found %zu invalid entity pointers.\n", invalids.size())
         return !invalids.empty();
     }
 

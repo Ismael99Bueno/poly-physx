@@ -1,6 +1,7 @@
 #include "compeller2D.hpp"
 #include "constraint_interface.hpp"
 #include "perf.hpp"
+#include "debug.h"
 
 namespace phys
 {
@@ -23,6 +24,8 @@ namespace phys
             m_constraints[index] = m_constraints.back();
             m_constraints.pop_back();
         }
+        DBG_LOG_IF(invalids.empty() && !m_constraints.empty(), "Validate method did not find any invalid constraints.\n")
+        DBG_LOG_IF(!invalids.empty() && !m_constraints.empty(), "Validate method found %zu invalid constraints.\n", invalids.size())
         return !invalids.empty();
     }
 

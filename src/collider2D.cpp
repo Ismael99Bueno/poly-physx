@@ -65,6 +65,8 @@ namespace phys
             m_intervals[index] = m_intervals.back();
             m_intervals.pop_back();
         }
+        DBG_LOG_IF(invalids.empty() && !m_intervals.empty(), "Validate method did not find any invalid entity pointers.\n")
+        DBG_LOG_IF(!invalids.empty() && !m_intervals.empty(), "Validate method found %zu invalid entity pointers.\n", invalids.size())
         return !invalids.empty();
     }
 

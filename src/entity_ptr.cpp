@@ -1,4 +1,5 @@
 #include "entity_ptr.hpp"
+#include "debug.h"
 
 namespace phys
 {
@@ -20,10 +21,12 @@ namespace phys
         for (const entity2D &e : *m_buffer)
             if (e.id() == m_id)
             {
+                DBG_LOG("Validating pointer, from index %zu and id %llu to index %zu and id %llu.\n", m_index, m_id, e.index(), e.id())
                 m_id = e.id();
                 m_index = e.index();
                 return true;
             }
+        DBG_LOG("Failed to validate pointer with index %zu and id %llu.\n", m_index, m_id)
         return false;
     }
 
@@ -50,10 +53,12 @@ namespace phys
         for (const entity2D &e : *m_buffer)
             if (e.id() == m_id)
             {
+                DBG_LOG("Validating pointer, from index %zu and id %llu to index %zu and id %llu.\n", m_index, m_id, e.index(), e.id())
                 m_id = e.id();
                 m_index = e.index();
                 return true;
             }
+        DBG_LOG("Failed to validate pointer with index %zu and id %llu.\n", m_index, m_id)
         return false;
     }
 

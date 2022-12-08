@@ -116,7 +116,7 @@ namespace phys
     const std::array<std::unique_ptr<quad_tree2D>, 4> &quad_tree2D::children() const { return m_children; }
     const quad_tree2D &quad_tree2D::child(std::size_t index) const
     {
-        DBG_ASSERT(index < 4, "Index outside of array bounds.\n")
+        DBG_ASSERT(index < 4, "Index outside of array bounds. A quad tree can only have 4 children - index: %zu\n", index)
         return *m_children[index];
     }
     const quad_tree2D &quad_tree2D::operator[](std::size_t index) const { return child(index); }
