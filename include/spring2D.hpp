@@ -41,13 +41,28 @@ namespace phys
         void joint1(const alg::vec2 &joint1);
 
     private:
-        float m_stiffness = 1.f, m_dampening = 0.f, m_length;
+        float m_stiffness = 1.f, m_dampening = 0.f,
+              m_angle1, m_angle2, m_length;
         const_entity_ptr m_e1, m_e2;
         alg::vec2 m_joint1, m_joint2;
         bool m_has_joints;
 
         std::tuple<alg::vec2, float, float> without_joints_force() const;
         std::tuple<alg::vec2, float, float> with_joints_force() const;
+
+        static alg::vec2 without_joints_force(const alg::vec2 &pos1,
+                                              const alg::vec2 &pos2,
+                                              const alg::vec2 &vel1,
+                                              const alg::vec2 &vel2,
+                                              float stiffness, float dampening, float length);
+        static std::tuple<alg::vec2, float, float> with_joints_force(const alg::vec2 &pos1,
+                                                                     const alg::vec2 &pos2,
+                                                                     const alg::vec2 &joint1,
+                                                                     const alg::vec2 &joint2,
+                                                                     const alg::vec2 &vel1,
+                                                                     const alg::vec2 &vel2,
+                                                                     float angle1, float angle2,
+                                                                     float stiffness, float dampening, float length);
     };
 }
 

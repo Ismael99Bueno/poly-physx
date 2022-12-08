@@ -47,7 +47,7 @@ namespace phys
     {
         clear();
         for (std::size_t i = 0; i < entities.size(); i++)
-            add_if_inside({entities, i});
+            add_if_inside({&entities, i});
     }
 
     void quad_tree2D::rebuild(const std::vector<entity2D> &entities)

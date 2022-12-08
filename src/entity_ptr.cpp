@@ -3,10 +3,10 @@
 
 namespace phys
 {
-    const_entity_ptr::const_entity_ptr(const std::vector<entity2D> &buffer,
-                                       const std::size_t index) : m_buffer(&buffer),
+    const_entity_ptr::const_entity_ptr(const std::vector<entity2D> *buffer,
+                                       const std::size_t index) : m_buffer(buffer),
                                                                   m_index(index),
-                                                                  m_id(buffer[index].id()) {}
+                                                                  m_id((*buffer)[index].id()) {}
 
     std::size_t const_entity_ptr::index() const { return m_index; }
     const entity2D *const_entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
@@ -35,10 +35,10 @@ namespace phys
     bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2) { return &(*e1) == &(*e2); }
     bool operator!=(const const_entity_ptr &e1, const const_entity_ptr &e2) { return !(e1 == e2); }
 
-    entity_ptr::entity_ptr(std::vector<entity2D> &buffer,
-                           const std::size_t index) : m_buffer(&buffer),
+    entity_ptr::entity_ptr(std::vector<entity2D> *buffer,
+                           const std::size_t index) : m_buffer(buffer),
                                                       m_index(index),
-                                                      m_id(buffer[index].id()) {}
+                                                      m_id((*buffer)[index].id()) {}
 
     std::size_t entity_ptr::index() const { return m_index; }
     entity2D *entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
@@ -63,7 +63,7 @@ namespace phys
     }
 
     entity_ptr::operator bool() const { return m_buffer; }
-    entity_ptr::operator const_entity_ptr() const { return const_entity_ptr(*m_buffer, m_index); }
+    entity_ptr::operator const_entity_ptr() const { return const_entity_ptr(m_buffer, m_index); }
 
     bool operator==(const entity_ptr &e1, const entity_ptr &e2) { return &(*e1) == &(*e2); }
     bool operator!=(const entity_ptr &e1, const entity_ptr &e2) { return !(e1 == e2); }

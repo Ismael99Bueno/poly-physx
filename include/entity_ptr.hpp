@@ -10,7 +10,7 @@ namespace phys
     {
     public:
         const_entity_ptr() = default;
-        const_entity_ptr(const std::vector<entity2D> &buffer, std::size_t index = 0);
+        const_entity_ptr(const std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
         const entity2D *raw() const;
@@ -37,7 +37,7 @@ namespace phys
     {
     public:
         entity_ptr() = default;
-        entity_ptr(std::vector<entity2D> &buffer, std::size_t index = 0);
+        entity_ptr(std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
         entity2D *raw() const;

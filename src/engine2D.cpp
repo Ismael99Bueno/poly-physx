@@ -141,7 +141,7 @@ namespace phys
         static std::uniform_int_distribution<std::uint64_t> dist;
 
         entity2D &e = m_entities.emplace_back(body, vertices);
-        const entity_ptr e_ptr = {m_entities, m_entities.size() - 1};
+        const entity_ptr e_ptr = {&m_entities, m_entities.size() - 1};
 
         e.m_index = m_entities.size() - 1;
         e.m_id = dist(eng);
@@ -215,8 +215,8 @@ namespace phys
     void engine2D::add_interaction(interaction2D *inter) { m_inters.emplace_back(inter); }
     void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
 
-    const_entity_ptr engine2D::operator[](std::size_t index) const { return {m_entities, index}; }
-    entity_ptr engine2D::operator[](std::size_t index) { return {m_entities, index}; }
+    const_entity_ptr engine2D::operator[](std::size_t index) const { return {&m_entities, index}; }
+    entity_ptr engine2D::operator[](std::size_t index) { return {&m_entities, index}; }
 
     const std::vector<entity2D> &engine2D::entities() const { return m_entities; }
     std::vector<entity2D> &engine2D::entities() { return m_entities; }

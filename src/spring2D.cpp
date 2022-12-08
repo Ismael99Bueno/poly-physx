@@ -8,6 +8,8 @@ namespace phys
                                              m_e2(e2),
                                              m_joint1(e1->pos()),
                                              m_joint2(e2->pos()),
+                                             m_angle1(e1->angpos()),
+                                             m_angle2(e2->angpos()),
                                              m_length(length),
                                              m_has_joints(false) {}
 
@@ -19,6 +21,8 @@ namespace phys
                                              m_e2(e2),
                                              m_joint1(joint1),
                                              m_joint2(joint2),
+                                             m_angle1(e1->angpos()),
+                                             m_angle2(e2->angpos()),
                                              m_length(length),
                                              m_has_joints(true) {}
 
@@ -29,24 +33,57 @@ namespace phys
 
     std::tuple<alg::vec2, float, float> spring2D::without_joints_force() const
     {
-        const alg::vec2 relpos = m_e2->pos() - m_e1->pos(),
-                        direction = relpos.normalized(),
-                        relvel = direction * (m_e2->vel() - m_e1->vel()).dot(direction),
-                        vlen = m_length * direction;
-        return {m_stiffness * (relpos - vlen) + m_dampening * relvel, 0.f, 0.f};
+        return {without_joints_force(m_e1->pos(), m_e2->pos(),
+                                     m_e1->vel(), m_e2->vel(),
+                                     m_stiffness, m_dampening, m_length),
+                0.f, 0.f};
     }
 
     std::tuple<alg::vec2, float, float> spring2D::with_joints_force() const
     {
-        const alg::vec2 rot_joint1 = m_joint1.rotated(m_e1->angpos()),
-                        rot_joint2 = m_joint2.rotated(m_e2->angpos());
-        const alg::vec2 p1 = m_e1->pos() + rot_joint1,
-                        p2 = m_e2->pos() + rot_joint2;
+        return with_joints_force(m_e1->pos(), m_e2->pos(),
+                                 m_joint1, m_joint2,
+                                 m_e1->vel(), m_e2->vel(),
+                                 m_e1->angpos() - m_angle1,
+                                 m_e2->angpos() - m_angle2,
+                                 m_stiffness, m_dampening, m_length);
+    }
+
+    alg::vec2 spring2D::without_joints_force(const alg::vec2 &pos1,
+                                             const alg::vec2 &pos2,
+                                             const alg::vec2 &vel1,
+                                             const alg::vec2 &vel2,
+                                             const float stiffness,
+                                             const float dampening,
+                                             const float length)
+    {
+        const alg::vec2 relpos = pos2 - pos1,
+                        direction = relpos.normalized(),
+                        relvel = direction * (vel2 - vel1).dot(direction),
+                        vlen = length * direction;
+        return stiffness * (relpos - vlen) + dampening * relvel;
+    }
+    std::tuple<alg::vec2, float, float> spring2D::with_joints_force(const alg::vec2 &pos1,
+                                                                    const alg::vec2 &pos2,
+                                                                    const alg::vec2 &joint1,
+                                                                    const alg::vec2 &joint2,
+                                                                    const alg::vec2 &vel1,
+                                                                    const alg::vec2 &vel2,
+                                                                    const float angle1,
+                                                                    const float angle2,
+                                                                    const float stiffness,
+                                                                    const float dampening,
+                                                                    const float length)
+    {
+        const alg::vec2 rot_joint1 = joint1.rotated(angle1),
+                        rot_joint2 = joint2.rotated(angle2);
+        const alg::vec2 p1 = pos1 + rot_joint1,
+                        p2 = pos2 + rot_joint2;
         const alg::vec2 relpos = p2 - p1,
                         direction = relpos.normalized(),
-                        relvel = direction * (m_e2->vel(rot_joint2) - m_e1->vel(rot_joint1)).dot(direction),
-                        vlen = m_length * direction;
-        const alg::vec2 force = m_stiffness * (relpos - vlen) + m_dampening * relvel;
+                        relvel = direction * (vel2 - vel1).dot(direction),
+                        vlen = length * direction;
+        const alg::vec2 force = stiffness * (relpos - vlen) + dampening * relvel;
         const float torque1 = rot_joint1.cross(force), torque2 = force.cross(rot_joint2);
         return {force, torque1, torque2};
     }
