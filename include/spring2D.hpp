@@ -49,20 +49,6 @@ namespace phys
 
         std::tuple<alg::vec2, float, float> without_joints_force() const;
         std::tuple<alg::vec2, float, float> with_joints_force() const;
-
-        static alg::vec2 without_joints_force(const alg::vec2 &pos1,
-                                              const alg::vec2 &pos2,
-                                              const alg::vec2 &vel1,
-                                              const alg::vec2 &vel2,
-                                              float stiffness, float dampening, float length);
-        static std::tuple<alg::vec2, float, float> with_joints_force(const alg::vec2 &pos1,
-                                                                     const alg::vec2 &pos2,
-                                                                     const alg::vec2 &joint1,
-                                                                     const alg::vec2 &joint2,
-                                                                     const alg::vec2 &vel1,
-                                                                     const alg::vec2 &vel2,
-                                                                     float angle1, float angle2,
-                                                                     float stiffness, float dampening, float length);
     };
 }
 

@@ -18,7 +18,7 @@ namespace phys
 
         virtual const alg::vec2 &pos() const;
         const alg::vec2 &vel() const;
-        const alg::vec2 vel(const alg::vec2 &at) const;
+        const alg::vec2 vel_at(const alg::vec2 &at) const;
         virtual float angpos() const;
         float angvel() const;
         float mass() const;

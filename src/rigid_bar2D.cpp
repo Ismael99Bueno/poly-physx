@@ -55,7 +55,7 @@ namespace phys
                         rot_joint2 = m_joint2.rotated(e2->angpos());
 
         return 2.f * (rot_joint1 - rot_joint2 + e1->pos() - e2->pos())
-                         .dot(e1->vel(rot_joint1) - e2->vel(rot_joint2));
+                         .dot(e1->vel_at(rot_joint1) - e2->vel_at(rot_joint2));
     }
 
     float rigid_bar2D::length() const { return m_length; }

@@ -57,9 +57,12 @@ namespace phys
             stchanges[index] = vel.x;
             stchanges[index + 1] = vel.y;
             stchanges[index + 2] = angvel;
-            const alg::vec2 &force = m_entities[i].added_force();
-            const float torque = m_entities[i].added_torque();
-            load_force(stchanges, force, torque, index);
+            if (m_entities[i].dynamic())
+            {
+                const alg::vec2 &force = m_entities[i].added_force();
+                const float torque = m_entities[i].added_torque();
+                load_force(stchanges, force, torque, index);
+            }
         }
     }
 

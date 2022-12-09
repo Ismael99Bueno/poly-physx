@@ -5,8 +5,11 @@ namespace phys
 {
     const_entity_ptr::const_entity_ptr(const std::vector<entity2D> *buffer,
                                        const std::size_t index) : m_buffer(buffer),
-                                                                  m_index(index),
-                                                                  m_id((*buffer)[index].id()) {}
+                                                                  m_index(index)
+    {
+        if (buffer)
+            m_id = (*buffer)[index].id();
+    }
 
     std::size_t const_entity_ptr::index() const { return m_index; }
     const entity2D *const_entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
@@ -37,8 +40,11 @@ namespace phys
 
     entity_ptr::entity_ptr(std::vector<entity2D> *buffer,
                            const std::size_t index) : m_buffer(buffer),
-                                                      m_index(index),
-                                                      m_id((*buffer)[index].id()) {}
+                                                      m_index(index)
+    {
+        if (buffer)
+            m_id = (*buffer)[index].id();
+    }
 
     std::size_t entity_ptr::index() const { return m_index; }
     entity2D *entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
@@ -46,7 +52,7 @@ namespace phys
     entity2D &entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
     bool entity_ptr::is_valid() const { return m_id == (*m_buffer)[m_index].id(); }
-    bool entity_ptr::validate()
+    bool entity_ptr::try_validate()
     {
         if (is_valid())
             return true;

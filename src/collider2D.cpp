@@ -193,8 +193,8 @@ namespace phys
         const alg::vec2 rel1 = c.touch1 - c.e1->pos(),
                         rel2 = c.touch2 - c.e2->pos();
 
-        const alg::vec2 vel1 = c.e1->vel(rel1),
-                        vel2 = c.e2->vel(rel2);
+        const alg::vec2 vel1 = c.e1->vel_at(rel1),
+                        vel2 = c.e2->vel_at(rel2);
 
         const float director = (c.touch1 - c.touch2).dot(c.e1->pos() - c.e2->pos());
         const float mass_factor = (c.e1->mass() + c.e2->mass()) / 2.f;
