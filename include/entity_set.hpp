@@ -10,7 +10,6 @@ namespace phys
     {
     public:
         entity_set(std::size_t allocations = 50);
-        virtual std::pair<alg::vec2, float> force(const entity2D &e) const = 0;
 
         bool validate();
 
