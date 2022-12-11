@@ -81,13 +81,12 @@ namespace phys
 
         void sort_intervals();
         static bool collide(const entity2D *e1, const entity2D *e2, collision *c);
-        std::vector<collision> detect_collisions();
-        void brute_force_coldet(std::vector<collision> &collisions) const;
-        void sort_and_sweep_coldet(std::vector<collision> &collisions);
-        void quad_tree_coldet(std::vector<collision> &collisions);
+        void brute_force_coldet(std::vector<float> &stchanges) const;
+        void sort_and_sweep_coldet(std::vector<float> &stchanges);
+        void quad_tree_coldet(std::vector<float> &stchanges);
 
-        void load_collisions(const std::vector<collision> &collisions,
-                             std::vector<float> &stchanges) const;
+        void solve(const collision &c,
+                   std::vector<float> &stchanges) const;
         std::array<float, 6> forces_upon_collision(const collision &c) const;
 
         static bool gjk_epa(const entity2D *e1, const entity2D *e2, collision *c);

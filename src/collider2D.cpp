@@ -37,8 +37,18 @@ namespace phys
 
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
-        const std::vector<collision> collisions = detect_collisions();
-        load_collisions(collisions, stchanges);
+        switch (m_coldet_method)
+        {
+        case BRUTE_FORCE:
+            brute_force_coldet(stchanges);
+            break;
+        case SORT_AND_SWEEP:
+            sort_and_sweep_coldet(stchanges);
+            break;
+        case QUAD_TREE:
+            quad_tree_coldet(stchanges);
+            break;
+        }
     }
 
     void collider2D::update_quad_tree()
@@ -70,25 +80,6 @@ namespace phys
         return !invalids.empty();
     }
 
-    std::vector<collider2D::collision> collider2D::detect_collisions()
-    {
-        std::vector<collider2D::collision> collisions;
-        collisions.reserve(m_entities.size() / 2);
-        switch (m_coldet_method)
-        {
-        case BRUTE_FORCE:
-            brute_force_coldet(collisions);
-            break;
-        case SORT_AND_SWEEP:
-            sort_and_sweep_coldet(collisions);
-            break;
-        case QUAD_TREE:
-            quad_tree_coldet(collisions);
-            break;
-        }
-        return collisions;
-    }
-
     float collider2D::stiffness() const { return m_stiffness; }
     float collider2D::dampening() const { return m_dampening; }
 
@@ -117,7 +108,7 @@ namespace phys
         return e1 != e2 && e1->bounding_box().overlaps(e2->bounding_box()) && gjk_epa(e1, e2, c);
     }
 
-    void collider2D::brute_force_coldet(std::vector<collision> &collisions) const
+    void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
         for (std::size_t i = 0; i < m_entities.size(); i++)
@@ -125,11 +116,11 @@ namespace phys
             {
                 collision c;
                 if (collide(&m_entities[i], &m_entities[j], &c))
-                    collisions.emplace_back(c);
+                    solve(c, stchanges);
             }
     }
 
-    void collider2D::sort_and_sweep_coldet(std::vector<collision> &collisions)
+    void collider2D::sort_and_sweep_coldet(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
         std::unordered_set<const entity2D *> eligible;
@@ -143,7 +134,7 @@ namespace phys
                 {
                     collision c;
                     if (collide(e, itrv.entity(), &c))
-                        collisions.emplace_back(c);
+                        solve(c, stchanges);
                 }
                 eligible.insert(itrv.entity());
             }
@@ -151,7 +142,7 @@ namespace phys
                 eligible.erase(itrv.entity());
     }
 
-    void collider2D::quad_tree_coldet(std::vector<collision> &collisions)
+    void collider2D::quad_tree_coldet(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
 
@@ -167,24 +158,21 @@ namespace phys
                 {
                     collision c;
                     if (collide(partition->operator[](i).raw(), partition->operator[](j).raw(), &c))
-                        collisions.emplace_back(c);
+                        solve(c, stchanges);
                 }
     }
 
-    void collider2D::load_collisions(const std::vector<collision> &collisions,
-                                     std::vector<float> &stchanges) const
+    void collider2D::solve(const collision &c,
+                           std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        for (const collision &c : collisions)
+        const std::array<float, 6> forces = forces_upon_collision(c);
+        for (std::size_t i = 0; i < 3; i++)
         {
-            const std::array<float, 6> forces = forces_upon_collision(c);
-            for (std::size_t i = 0; i < 3; i++)
-            {
-                if (c.e1->dynamic())
-                    stchanges[c.e1->index() * 6 + i + 3] += forces[i];
-                if (c.e2->dynamic())
-                    stchanges[c.e2->index() * 6 + i + 3] += forces[i + 3];
-            }
+            if (c.e1->dynamic())
+                stchanges[c.e1->index() * 6 + i + 3] += forces[i];
+            if (c.e2->dynamic())
+                stchanges[c.e2->index() * 6 + i + 3] += forces[i + 3];
         }
     }
 
@@ -324,6 +312,6 @@ namespace phys
                 t1 = v + mtv;
             }
         }
-        return {t1, t2};
+        return std::make_pair(t1, t2);
     }
 }
