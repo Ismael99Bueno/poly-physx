@@ -9,12 +9,14 @@ namespace phys
     {
         std::vector<const_entity_ptr> invalids;
         invalids.reserve(m_entities.size());
-        for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
+        for (auto it = m_entities.begin(); it != m_entities.end();)
             if (!it->is_valid())
             {
                 invalids.emplace_back(*it);
                 it = m_entities.erase(it);
             }
+            else
+                ++it;
         for (const_entity_ptr &e : invalids)
             if (e.try_validate())
                 m_entities.insert(e);

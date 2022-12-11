@@ -16,7 +16,7 @@ namespace phys
     const entity2D *const_entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     const entity2D &const_entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
-    bool const_entity_ptr::is_valid() const { return m_id == (*m_buffer)[m_index].id(); }
+    bool const_entity_ptr::is_valid() const { return m_index < m_buffer->size() && m_id == (*m_buffer)[m_index].id(); }
     bool const_entity_ptr::try_validate()
     {
         if (is_valid())
@@ -51,7 +51,7 @@ namespace phys
     entity2D *entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     entity2D &entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
-    bool entity_ptr::is_valid() const { return m_id == (*m_buffer)[m_index].id(); }
+    bool entity_ptr::is_valid() const { return m_index < m_buffer->size() && m_id == (*m_buffer)[m_index].id(); }
     bool entity_ptr::try_validate()
     {
         if (is_valid())
