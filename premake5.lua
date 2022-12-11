@@ -1,6 +1,6 @@
 project "engine"
    language "C++"
-   cppdialect "C++17"
+   cppdialect "C++20"
    staticruntime "on"
    kind "StaticLib"
 
