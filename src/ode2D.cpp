@@ -5,7 +5,7 @@ namespace phys
 {
     std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine)
     {
-        PERF_FUNCTION()
+        
         DBG_ASSERT(state.size() == 6 * engine.size(), "State vector size must be exactly 6 times greater than the entity array size - state: %zu, entity array: %zu\n", state.size(), engine.size())
         std::vector<float> stchanges(state.size(), 0.f);
 

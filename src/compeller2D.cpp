@@ -42,7 +42,7 @@ namespace phys
 
     std::vector<float> compeller2D::constraint_matrix(std::array<float, 3> (constraint_interface::*constraint_grad)(entity2D &e) const) const
     {
-        PERF_FUNCTION()
+        
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         std::vector<float> cmatrix(rows * cols, 0.f);
         for (std::size_t i = 0; i < rows; i++)
@@ -62,7 +62,7 @@ namespace phys
     std::vector<float> compeller2D::lhs(const std::vector<float> &jcb,
                                         const std::vector<float> &inv_masses) const
     {
-        PERF_FUNCTION()
+        
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         std::vector<float> A(rows * rows, 0.f);
         for (std::size_t i = 0; i < rows; i++)
@@ -83,7 +83,7 @@ namespace phys
                                         const std::vector<float> &stchanges,
                                         const std::vector<float> &inv_masses) const
     {
-        PERF_FUNCTION()
+        
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         std::vector<float> b(rows, 0.f), qdot(stchanges.size() / 2, 0.f), accels(stchanges.size() / 2, 0.f);
 
@@ -125,7 +125,7 @@ namespace phys
     std::vector<float> compeller2D::lu_decomposition(const std::vector<float> &A,
                                                      const std::vector<float> &b) const
     {
-        PERF_FUNCTION()
+        
         const std::size_t size = m_constraints.size();
         std::vector<float> L(size * size, 0.f), U(size * size, 0.f), sol(size, 0.f);
         for (std::size_t i = 0; i < size; i++)
@@ -169,7 +169,7 @@ namespace phys
                                              const std::vector<float> &lambda,
                                              std::vector<float> &stchanges) const
     {
-        PERF_FUNCTION()
+        
         const std::size_t rows = m_constraints.size();
         for (std::size_t i = 0; i < m_entities.size(); i++)
             if (m_entities[i].dynamic())
