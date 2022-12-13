@@ -29,7 +29,7 @@ namespace phys
                 m_index = e.index();
                 return true;
             }
-        DBG_LOG("Failed to validate pointer with index %zu and id %llu.\n", m_index, m_id)
+        DBG_LOG("Failed to validate pointer with index %zu and id %llu (THIS IS OK).\n", m_index, m_id)
         return false;
     }
 
@@ -64,7 +64,7 @@ namespace phys
                 m_index = e.index();
                 return true;
             }
-        DBG_LOG("Failed to validate pointer with index %zu and id %llu.\n", m_index, m_id)
+        DBG_LOG("Failed to validate pointer with index %zu and id %llu (THIS IS OK).\n", m_index, m_id)
         return false;
     }
 
