@@ -13,8 +13,7 @@ namespace phys
 
     std::array<float, 3> constraint_interface::constraint_grad(entity2D &e) const { return gradient(e, &constraint_interface::value); }
     std::array<float, 3> constraint_interface::constraint_grad_derivative(entity2D &e) const { return gradient(e, &constraint_interface::derivative); }
-    std::array<float, 3> constraint_interface::gradient(entity2D &e,
-                                                        std::function<float(const constraint_interface &)> constraint) const
+    std::array<float, 3> constraint_interface::gradient(entity2D &e, const constraint_fun &constraint) const
     {
         const float x = e.pos().x;
         e.translate({-TOLERANCE, 0.f});

@@ -41,7 +41,7 @@ namespace phys
 
     const std::vector<constraint_interface *> &compeller2D::constraints() const { return m_constraints; }
 
-    std::vector<float> compeller2D::constraint_matrix(std::function<std::array<float, 3>(const constraint_interface &, entity2D &)> constraint) const
+    std::vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
     {
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
@@ -50,7 +50,7 @@ namespace phys
             for (std::size_t j = 0; j < m_constraints[i]->size(); j++)
             {
                 entity2D &e = m_constraints[i]->operator[](j);
-                const std::array<float, 3> state = constraint(*m_constraints[i], e);
+                const std::array<float, 3> state = constraint_grad(*m_constraints[i], e);
                 for (std::size_t k = 0; k < 3; k++)
                     cmatrix[i * cols + e.index() * 3 + k] = state[k];
             }

@@ -27,7 +27,8 @@ namespace phys
         std::vector<entity2D> &m_entities;
         std::vector<constraint_interface *> m_constraints;
 
-        std::vector<float> constraint_matrix(std::function<std::array<float, 3>(const constraint_interface &, entity2D &)> constraint) const;
+        using constraint_grad_fun = std::function<std::array<float, 3>(const constraint_interface &, entity2D &)>;
+        std::vector<float> constraint_matrix(const constraint_grad_fun &constraint_grad) const;
         std::vector<float> jacobian() const;
         std::vector<float> jacobian_derivative() const;
 
