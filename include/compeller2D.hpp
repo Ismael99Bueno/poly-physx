@@ -3,6 +3,7 @@
 
 #include "entity2D.hpp"
 #include <vector>
+#include <functional>
 
 namespace phys
 {
@@ -26,7 +27,7 @@ namespace phys
         std::vector<entity2D> &m_entities;
         std::vector<constraint_interface *> m_constraints;
 
-        std::vector<float> constraint_matrix(std::array<float, 3> (constraint_interface::*constraint)(entity2D &e) const) const;
+        std::vector<float> constraint_matrix(std::function<std::array<float, 3>(const constraint_interface &, entity2D &)> constraint) const;
         std::vector<float> jacobian() const;
         std::vector<float> jacobian_derivative() const;
 
