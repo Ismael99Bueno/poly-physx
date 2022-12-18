@@ -176,9 +176,6 @@ namespace phys
     void engine2D::remove_entity(const std::size_t index)
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds entity array bounds - index: %zu, size: %zu\n", index, m_entities.size())
-        for (const add_remove_callback &cb : m_on_entity_removal)
-            cb(m_entities[index]);
-
         if (index == m_entities.size() - 1)
             m_entities.pop_back();
         else
@@ -211,6 +208,8 @@ namespace phys
 
         m_integ.resize();
         m_collider.update_quad_tree();
+        for (const add_remove_callback &cb : m_on_entity_removal)
+            cb(m_entities[index]);
     }
 
     void engine2D::remove_entity(const const_entity_ptr &e) { remove_entity(e.index()); }
