@@ -158,6 +158,8 @@ namespace phys
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
             DBG_ASSERT(m_entities[i].m_id != e.m_id, "Added entity has the same id as entity with index %zu.\n", i)
 #endif
+        for (const add_remove_callback &cb : m_on_entity_addition)
+            cb(e);
         return e_ptr;
     }
     entity_ptr engine2D::add_entity(const alg::vec2 &pos,
@@ -174,6 +176,9 @@ namespace phys
     void engine2D::remove_entity(const std::size_t index)
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds entity array bounds - index: %zu, size: %zu\n", index, m_entities.size())
+        for (const add_remove_callback &cb : m_on_entity_removal)
+            cb(m_entities[index]);
+
         if (index == m_entities.size() - 1)
             m_entities.pop_back();
         else
@@ -214,6 +219,9 @@ namespace phys
     void engine2D::add_force(force2D *force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(interaction2D *inter) { m_inters.emplace_back(inter); }
     void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
+
+    void engine2D::on_entity_addition(const add_remove_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
+    void engine2D::on_entity_removal(const add_remove_callback &on_remove) { m_on_entity_removal.emplace_back(on_remove); }
 
     const_entity_ptr engine2D::operator[](std::size_t index) const { return {&m_entities, index}; }
     entity_ptr engine2D::operator[](std::size_t index) { return {&m_entities, index}; }

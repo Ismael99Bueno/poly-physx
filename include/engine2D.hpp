@@ -37,6 +37,10 @@ namespace phys
         void add_interaction(interaction2D *inter);
         void add_spring(const spring2D &spring);
 
+        using add_remove_callback = std::function<void(entity2D &)>;
+        void on_entity_addition(const add_remove_callback &on_add);
+        void on_entity_removal(const add_remove_callback &on_remove);
+
         const_entity_ptr operator[](std::size_t index) const;
         entity_ptr operator[](std::size_t index);
 
@@ -65,6 +69,7 @@ namespace phys
         std::vector<force2D *> m_forces;
         std::vector<interaction2D *> m_inters;
         std::vector<spring2D> m_springs;
+        std::vector<add_remove_callback> m_on_entity_addition, m_on_entity_removal;
 
         rk::integrator m_integ;
         float m_t = 0.f;
