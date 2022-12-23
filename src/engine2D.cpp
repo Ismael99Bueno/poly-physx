@@ -144,7 +144,6 @@ namespace phys
         const entity_ptr e_ptr = {&m_entities, m_entities.size() - 1};
 
         e.m_index = m_entities.size() - 1;
-        e.m_id = dist(eng);
         e.m_buffer = utils::vec_ptr(m_state, m_state.size());
 
         m_state.insert(m_state.end(), {body.pos().x, body.pos().y, body.angpos(),

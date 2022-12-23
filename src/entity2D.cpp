@@ -5,9 +5,11 @@
 
 namespace phys
 {
+    std::size_t entity2D::s_id = 0;
     entity2D::entity2D(const body2D &body,
                        const std::vector<alg::vec2> &vertices) : body2D(body),
-                                                                 m_shape(body.pos(), vertices) {}
+                                                                 m_shape(body.pos(), vertices),
+                                                                 m_id(s_id++) {}
 
     entity2D::entity2D(const alg::vec2 &pos,
                        const alg::vec2 &vel,
