@@ -35,6 +35,9 @@ namespace phys
         void stiffness(float stiffness);
         void dampening(float dampening);
 
+        bool enabled() const;
+        void enabled(bool enabled);
+
         coldet_method coldet() const;
         void coldet(coldet_method coldet);
 
@@ -78,6 +81,7 @@ namespace phys
         float m_stiffness = 5000.f, m_dampening = 10.f;
         std::size_t m_qt_build_period = 100, m_qt_build_calls = 0;
         coldet_method m_coldet_method = QUAD_TREE;
+        bool m_enabled = true;
 
         void sort_intervals();
         static bool collide(const entity2D *e1, const entity2D *e2, collision *c);

@@ -38,6 +38,8 @@ namespace phys
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
+        if (!m_enabled)
+            return;
         switch (m_coldet_method)
         {
         case BRUTE_FORCE:
@@ -86,6 +88,9 @@ namespace phys
 
     void collider2D::stiffness(float stiffness) { m_stiffness = stiffness; }
     void collider2D::dampening(float dampening) { m_dampening = dampening; }
+
+    bool collider2D::enabled() const { return m_enabled; }
+    void collider2D::enabled(const bool enabled) { m_enabled = enabled; }
 
     collider2D::coldet_method collider2D::coldet() const { return m_coldet_method; }
     void collider2D::coldet(coldet_method coldet) { m_coldet_method = coldet; }
