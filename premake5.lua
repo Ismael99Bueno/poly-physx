@@ -3,13 +3,14 @@ project "engine"
    cppdialect "C++20"
    staticruntime "on"
    kind "StaticLib"
+   buildoptions "-Xclang -fopenmp"
 
    targetdir("../bin/" .. outputdir)
    objdir("../build/" .. outputdir .. "/%{prj.name}")
 
    files {"src/**.cpp", "include/**.hpp"}
 
-   includedirs {"../**/include", "/opt/homebrew/Cellar/sfml/2.5.1_2/include"}
+   includedirs {"../**/include", "/opt/homebrew/Cellar/sfml/2.5.1_2/include", "/opt/homebrew/Cellar/libomp/15.0.6/include"}
 
    filter "configurations:debug"
       defines { "DEBUG" }
@@ -20,7 +21,6 @@ project "engine"
       defines { "NDEBUG" }
       runtime "Release"
       optimize "On"
-      removefiles "src/test.cpp"
 
    filter "configurations:test"
       defines { "DEBUG" }

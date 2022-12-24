@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <unordered_set>
+#include <omp.h>
 
 #define EPA_EPSILON 1.e-3f
 
@@ -98,7 +99,6 @@ namespace phys
 
     void collider2D::sort_intervals()
     {
-
         const auto cmp = [](const interval &itrv1, const interval &itrv2)
         { return itrv1.value() < itrv2.value(); };
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
@@ -112,6 +112,7 @@ namespace phys
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
+#pragma omp parallel for
         for (std::size_t i = 0; i < m_entities.size(); i++)
             for (std::size_t j = i + 1; j < m_entities.size(); j++)
             {
@@ -152,6 +153,7 @@ namespace phys
         std::vector<const std::vector<const_entity_ptr> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
+#pragma omp parallel for
         for (const std::vector<const_entity_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)

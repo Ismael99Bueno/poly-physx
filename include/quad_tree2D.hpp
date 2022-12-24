@@ -12,13 +12,17 @@ namespace phys
     {
     public:
         quad_tree2D() = delete;
-        quad_tree2D(const alg::vec2 &pos, const alg::vec2 &dim, std::size_t max_entities = 5);
+        quad_tree2D(const alg::vec2 &pos,
+                    const alg::vec2 &dim,
+                    std::size_t max_entities = 5,
+                    std::uint32_t depth = 0);
 
         void partitions(std::vector<const std::vector<const_entity_ptr> *> &partitions) const;
         void update(const std::vector<entity2D> &entities);
         void rebuild(const std::vector<entity2D> &entities);
 
         bool full() const;
+        bool rock_bottom() const;
 
         const alg::vec2 &pos() const;
         const alg::vec2 &dim() const;
@@ -36,10 +40,15 @@ namespace phys
         const quad_tree2D &child(std::size_t index) const;
         const quad_tree2D &operator[](std::size_t index) const;
 
+        static std::uint32_t max_depth();
+        static void max_depth(std::uint32_t max_depth);
+
     private:
         std::array<std::unique_ptr<quad_tree2D>, 4> m_children; // TL, TR, BL, BR
         alg::vec2 m_pos, m_dim;
         std::size_t m_max_entities;
+        std::uint32_t m_depth;
+        static std::uint32_t s_max_depth;
         bool m_partitioned, m_has_children;
         std::vector<const_entity_ptr> m_entities;
 

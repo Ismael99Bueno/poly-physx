@@ -3,44 +3,40 @@
 
 namespace phys
 {
+    std::uint32_t quad_tree2D::s_max_depth = 4;
     quad_tree2D::quad_tree2D(const alg::vec2 &pos,
                              const alg::vec2 &dim,
-                             const std::size_t max_entities) : m_pos(pos),
-                                                               m_dim(dim),
-                                                               m_max_entities(max_entities),
-                                                               m_partitioned(false),
-                                                               m_has_children(false)
+                             const std::size_t max_entities,
+                             const std::uint32_t depth) : m_pos(pos),
+                                                          m_dim(dim),
+                                                          m_max_entities(max_entities),
+                                                          m_partitioned(false),
+                                                          m_has_children(false),
+                                                          m_depth(depth)
     {
         m_entities.reserve(max_entities);
     }
 
     void quad_tree2D::add_if_inside(const const_entity_ptr &e)
     {
+        DBG_ASSERT(m_entities.size() <= m_max_entities || rock_bottom(), "Quad tree contains more entities than allowed! - Contained entities: %zu, maximum entities: %zu\n", m_entities.size(), m_max_entities)
         if (!contains(e->bounding_box()))
             return;
-        if (full())
-        {
-            if (!m_partitioned)
-            {
-                if (!m_has_children)
-                    create_children();
-                partition();
-            }
+        if (full() && !rock_bottom())
+            partition();
+        if (m_partitioned)
             add_to_children(e);
-            return;
-        }
-        m_entities.emplace_back(e);
+        else
+            m_entities.emplace_back(e);
     }
 
     void quad_tree2D::partitions(std::vector<const std::vector<const_entity_ptr> *> &partitions) const
     {
-        if (!full() || !m_partitioned)
-        {
+        if (!m_partitioned)
             partitions.emplace_back(&m_entities);
-            return;
-        }
-        for (const auto &q : m_children)
-            q->partitions(partitions);
+        else
+            for (const auto &q : m_children)
+                q->partitions(partitions);
     }
 
     void quad_tree2D::update(const std::vector<entity2D> &entities)
@@ -73,17 +69,20 @@ namespace phys
         const alg::vec2 offset = m_dim / 4.f,
                         inv_offset = {-m_dim.x / 4.f, m_dim.y / 4.f},
                         half_dim = m_dim / 2.f;
-        m_children[0] = std::make_unique<quad_tree2D>(m_pos + inv_offset, half_dim, m_max_entities);
-        m_children[1] = std::make_unique<quad_tree2D>(m_pos + offset, half_dim, m_max_entities);
-        m_children[2] = std::make_unique<quad_tree2D>(m_pos - offset, half_dim, m_max_entities);
-        m_children[3] = std::make_unique<quad_tree2D>(m_pos - inv_offset, half_dim, m_max_entities);
+        m_children[0] = std::make_unique<quad_tree2D>(m_pos + inv_offset, half_dim, m_max_entities, m_depth + 1);
+        m_children[1] = std::make_unique<quad_tree2D>(m_pos + offset, half_dim, m_max_entities, m_depth + 1);
+        m_children[2] = std::make_unique<quad_tree2D>(m_pos - offset, half_dim, m_max_entities, m_depth + 1);
+        m_children[3] = std::make_unique<quad_tree2D>(m_pos - inv_offset, half_dim, m_max_entities, m_depth + 1);
     }
 
     void quad_tree2D::partition()
     {
+        if (!m_has_children)
+            create_children();
         m_partitioned = true;
         for (const const_entity_ptr &e : m_entities)
             add_to_children(e);
+        m_entities.clear();
     }
 
     bool quad_tree2D::contains(const geo::box2D &bbox) const
@@ -99,7 +98,8 @@ namespace phys
             q->add_if_inside(e);
     }
 
-    bool quad_tree2D::full() const { return m_entities.size() == m_max_entities; }
+    bool quad_tree2D::full() const { return m_entities.size() >= m_max_entities; }
+    bool quad_tree2D::rock_bottom() const { return m_depth >= s_max_depth; }
 
     const alg::vec2 &quad_tree2D::pos() const { return m_pos; }
     const alg::vec2 &quad_tree2D::dim() const { return m_dim; }
@@ -120,4 +120,7 @@ namespace phys
         return *m_children[index];
     }
     const quad_tree2D &quad_tree2D::operator[](std::size_t index) const { return child(index); }
+
+    std::uint32_t quad_tree2D::max_depth() { return s_max_depth; }
+    void quad_tree2D::max_depth(std::uint32_t max_depth) { s_max_depth = max_depth; }
 }
