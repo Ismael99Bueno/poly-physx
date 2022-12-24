@@ -289,30 +289,12 @@ namespace phys
                                                              const alg::vec2 &mtv)
     {
         PERF_FUNCTION()
-        alg::vec2 t1, t2;
-        float min_dist = std::numeric_limits<float>::max();
-        for (const alg::vec2 &v : poly1.vertices())
-        {
-            const alg::vec2 towards = poly2.towards_closest_edge_from(v - mtv);
-            const float dist = towards.sq_norm();
-            if (min_dist > dist)
-            {
-                min_dist = dist;
-                t1 = v;
-                t2 = v - mtv;
-            }
-        }
-        for (const alg::vec2 &v : poly2.vertices())
-        {
-            const alg::vec2 towards = poly1.towards_closest_edge_from(v + mtv);
-            const float dist = towards.sq_norm();
-            if (min_dist > dist)
-            {
-                min_dist = dist;
-                t2 = v;
-                t1 = v + mtv;
-            }
-        }
-        return std::make_pair(t1, t2);
+        const alg::vec2 sup1 = poly1.support_vertex(mtv),
+                        sup2 = poly2.support_vertex(-mtv);
+        const float d1 = (sup1 - poly1.centroid()).normalized().dot(mtv),
+                    d2 = (poly2.centroid() - sup2).normalized().dot(mtv);
+        if (d1 > d2)
+            return std::make_pair(sup1, sup1 - mtv);
+        return std::make_pair(sup2 + mtv, sup2);
     }
 }
