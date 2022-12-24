@@ -156,6 +156,7 @@ namespace phys
         std::vector<const std::vector<const_entity_ptr> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
+#pragma omp parallel for
         for (const std::vector<const_entity_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
@@ -296,9 +297,9 @@ namespace phys
         PERF_FUNCTION()
         const alg::vec2 sup1 = poly1.support_vertex(mtv),
                         sup2 = poly2.support_vertex(-mtv);
-        const float d1 = (sup1 - poly1.centroid()).normalized().dot(mtv),
-                    d2 = (poly2.centroid() - sup2).normalized().dot(mtv);
-        if (d1 > d2)
+        const float d1 = poly2.towards_closest_edge_from(sup1 - mtv).sq_norm(),
+                    d2 = poly1.towards_closest_edge_from(sup2 + mtv).sq_norm();
+        if (d1 < d2)
             return std::make_pair(sup1, sup1 - mtv);
         return std::make_pair(sup2 + mtv, sup2);
     }
