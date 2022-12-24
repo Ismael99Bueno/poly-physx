@@ -43,6 +43,8 @@ namespace phys
     void entity2D::add_force(const alg::vec2 &force) { m_added_force += force; }
     void entity2D::add_torque(const float torque) { m_added_torque += torque; }
 
+    const alg::vec2 &entity2D::force() const { return m_force; }
+    float entity2D::torque() const { return m_torque; }
     const alg::vec2 &entity2D::added_force() const { return m_added_force; }
     float entity2D::added_torque() const { return m_added_torque; }
 

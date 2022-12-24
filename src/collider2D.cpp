@@ -188,9 +188,9 @@ namespace phys
                         vel2 = c.e2->vel_at(rel2);
 
         const float director = (c.touch1 - c.touch2).dot(c.e1->pos() - c.e2->pos());
-        const float mass_factor = (c.e1->mass() + c.e2->mass()) / 2.f;
+        // const float mass_factor = (c.e1->mass() + c.e2->mass()) / 2.f;
 
-        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1)) * mass_factor;
+        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1)); // mass_factor;
         const float torque1 = rel1.cross(force), torque2 = force.cross(rel2);
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }

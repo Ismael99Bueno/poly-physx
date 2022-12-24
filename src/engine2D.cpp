@@ -27,18 +27,21 @@ namespace phys
     bool engine2D::raw_forward(float &dt)
     {
         const bool valid = m_integ.raw_forward(m_t, dt, *this, ode);
+        register_forces_onto_entities();
         reset_forces();
         return valid;
     }
     bool engine2D::reiterative_forward(float &dt, const std::size_t reiterations)
     {
         const bool valid = m_integ.reiterative_forward(m_t, dt, *this, ode, reiterations);
+        register_forces_onto_entities();
         reset_forces();
         return valid;
     }
     bool engine2D::embedded_forward(float &dt)
     {
         const bool valid = m_integ.embedded_forward(m_t, dt, *this, ode);
+        register_forces_onto_entities();
         reset_forces();
         return valid;
     }
@@ -60,6 +63,17 @@ namespace phys
                 const float torque = m_entities[i].added_torque();
                 load_force(stchanges, force, torque, index);
             }
+        }
+    }
+
+    void engine2D::register_forces_onto_entities()
+    {
+        const std::vector<float> step = m_integ.step();
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+        {
+            const std::size_t index = 6 * i;
+            m_entities[i].m_force = {step[index + 3], step[index + 4]};
+            m_entities[i].m_torque = step[index + 5];
         }
     }
 
