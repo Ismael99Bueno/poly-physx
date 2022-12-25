@@ -190,10 +190,7 @@ namespace phys
         const alg::vec2 vel1 = c.e1->vel_at(rel1),
                         vel2 = c.e2->vel_at(rel2);
 
-        const float director = (c.touch1 - c.touch2).dot(c.e1->pos() - c.e2->pos());
-        // const float mass_factor = (c.e1->mass() + c.e2->mass()) / 2.f;
-
-        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1)); // mass_factor;
+        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1));
         const float torque1 = rel1.cross(force), torque2 = force.cross(rel2);
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
@@ -222,7 +219,7 @@ namespace phys
         for (;;)
         {
             const alg::vec2 A = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
-            if (A.dot(dir) < 0.f)
+            if (A.dot(dir) <= 0.f)
                 return false;
             simplex.emplace_back(A);
             if (simplex.size() == 2)
@@ -240,13 +237,14 @@ namespace phys
     {
         const alg::vec2 AB = simplex[1] - simplex[2], AC = simplex[0] - simplex[2], AO = -simplex[2];
         const alg::vec2 ABperp = alg::vec2::triple_cross(AC, AB, AB);
-        if (ABperp.dot(AO) > 0.f)
+        if (ABperp.dot(AO) >= 0.f)
         {
             simplex.erase(simplex.begin());
+            dir = ABperp;
             return false;
         }
         const alg::vec2 ACperp = alg::vec2::triple_cross(AB, AC, AC);
-        if (ACperp.dot(AO) > 0.f)
+        if (ACperp.dot(AO) >= 0.f)
         {
             simplex.erase(simplex.begin() + 1);
             dir = ACperp;
@@ -258,6 +256,7 @@ namespace phys
     alg::vec2 collider2D::epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex)
     {
         PERF_FUNCTION()
+        DBG_ASSERT(geo::polygon2D(simplex).contains_origin(), "Simplex passed to EPA algorithm does not contain the origin!\nx1: %f, y1: %f\nx2: %f, y2: %f\nx3: %f, y3: %f\n", simplex[0].x, simplex[0].y, simplex[1].x, simplex[1].y, simplex[2].x, simplex[2].y)
         float min_dist = std::numeric_limits<float>::max();
         alg::vec2 mtv;
         for (;;)
@@ -270,8 +269,13 @@ namespace phys
                 const alg::vec2 &p1 = simplex[i], &p2 = simplex[j];
                 const alg::vec2 edge = p2 - p1;
 
-                const alg::vec2 normal = alg::vec2(edge.y, -edge.x).normalized();
-                const float dist = normal.dot(p1);
+                alg::vec2 normal = alg::vec2(edge.y, -edge.x).normalized();
+                float dist = normal.dot(p1);
+                if (dist < 0.f)
+                {
+                    dist *= -1.f;
+                    normal *= -1.f;
+                }
                 if (dist < min_dist)
                 {
                     min_dist = dist;
