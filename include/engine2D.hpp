@@ -22,15 +22,15 @@ namespace phys
         bool reiterative_forward(float &dt, std::size_t reiterations = 2);
         bool embedded_forward(float &dt);
 
-        virtual entity_ptr add_entity(const body2D &body, const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
-        virtual entity_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
-                                      const alg::vec2 &vel = {0.f, 0.f},
-                                      float angpos = 0.f, float angvel = 0.f,
-                                      float mass = 1.f, float charge = 1.f,
-                                      const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
+        entity_ptr add_entity(const body2D &body, const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
+        entity_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
+                              const alg::vec2 &vel = {0.f, 0.f},
+                              float angpos = 0.f, float angvel = 0.f,
+                              float mass = 1.f, float charge = 1.f,
+                              const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
 
-        virtual void remove_entity(std::size_t index);
-        virtual void remove_entity(const const_entity_ptr &e);
+        void remove_entity(std::size_t index);
+        void remove_entity(const const_entity_ptr &e);
 
         void add_constraint(constraint_interface *c);
         void add_force(force2D *force);
