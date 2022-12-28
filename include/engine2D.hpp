@@ -22,7 +22,6 @@ namespace phys
         bool reiterative_forward(float &dt, std::size_t reiterations = 2);
         bool embedded_forward(float &dt);
 
-        entity_ptr add_entity(const body2D &body, const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
         entity_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
                               const alg::vec2 &vel = {0.f, 0.f},
                               float angpos = 0.f, float angvel = 0.f,

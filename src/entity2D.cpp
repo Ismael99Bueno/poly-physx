@@ -6,19 +6,17 @@
 namespace phys
 {
     std::size_t entity2D::s_id = 0;
-    entity2D::entity2D(const body2D &body,
-                       const std::vector<alg::vec2> &vertices) : body2D(body),
-                                                                 m_shape(body.pos(), vertices),
-                                                                 m_id(s_id++) {}
-
     entity2D::entity2D(const alg::vec2 &pos,
                        const alg::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
-                       const std::vector<alg::vec2> &vertices) : body2D(pos, vel, angpos,
-                                                                        angvel, mass, charge),
+                       const std::vector<alg::vec2> &vertices) : m_id(s_id++),
+                                                                 m_vel(vel),
+                                                                 m_angvel(angvel),
+                                                                 m_mass(mass),
+                                                                 m_charge(charge),
                                                                  m_shape(pos, vertices),
-                                                                 m_bbox() {}
+                                                                 m_bbox() { m_shape.rotate(angpos); }
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
@@ -32,9 +30,11 @@ namespace phys
     void entity2D::retrieve() { retrieve(m_buffer); }
     void entity2D::dispatch() const
     {
-        m_buffer[0] = m_pos.x;
-        m_buffer[1] = m_pos.y;
-        m_buffer[2] = m_angpos;
+        const alg::vec2 &pos = m_shape.centroid();
+        const float angpos = m_shape.rotation();
+        m_buffer[0] = pos.x;
+        m_buffer[1] = pos.y;
+        m_buffer[2] = angpos;
         m_buffer[3] = m_vel.x;
         m_buffer[4] = m_vel.y;
         m_buffer[5] = m_angvel;
@@ -54,35 +54,45 @@ namespace phys
     void entity2D::shape(const geo::polygon2D &poly)
     {
         m_shape = poly;
-        m_shape.pos(m_pos);
-        m_shape.rotation(m_angpos);
         m_bbox.bound(m_shape.vertices(), m_shape.centroid());
     }
 
     std::size_t entity2D::index() const { return m_index; }
     std::uint64_t entity2D::id() const { return m_id; }
 
-    const alg::vec2 &entity2D::pos() const { return m_pos; }
-
-    void entity2D::pos(const alg::vec2 &pos)
-    {
-        m_pos = pos;
-        m_shape.pos(pos);
-        m_bbox.recentre(m_shape.centroid());
-        // m_bbox.bound(m_shape.vertices(), m_shape.centroid());
-    }
-
-    float entity2D::angpos() const { return m_angpos; }
-
-    void entity2D::angpos(const float angpos)
-    {
-        m_angpos = angpos;
-        m_shape.rotation(angpos);
-        m_bbox.bound(m_shape.vertices(), m_shape.centroid());
-    }
-
     float entity2D::inertia() const { return m_shape.inertia() * m_mass; }
 
     bool entity2D::dynamic() const { return m_dynamic; }
-    void entity2D::dynamic(bool dynamic) { m_dynamic = dynamic; }
+    void entity2D::dynamic(const bool dynamic) { m_dynamic = dynamic; }
+
+    void entity2D::translate(const alg::vec2 &dpos) { m_shape.translate(dpos); }
+    void entity2D::rotate(const float dangle) { m_shape.rotate(dangle); }
+
+    const alg::vec2 &entity2D::pos() const { return m_shape.centroid(); }
+    const alg::vec2 &entity2D::vel() const { return m_vel; }
+    const alg::vec2 entity2D::vel_at(const alg::vec2 &at) const { return m_vel + m_angvel * alg::vec2(-at.y, at.x); }
+
+    float entity2D::angpos() const { return m_shape.rotation(); }
+    float entity2D::angvel() const { return m_angvel; }
+
+    float entity2D::mass() const { return m_mass; }
+    float entity2D::charge() const { return m_charge; }
+
+    void entity2D::pos(const alg::vec2 &pos)
+    {
+        m_shape.pos(pos);
+        m_bbox.recentre(m_shape.centroid());
+    }
+    void entity2D::vel(const alg::vec2 &vel) { m_vel = vel; }
+
+    void entity2D::angpos(const float angpos)
+    {
+        m_shape.rotation(angpos);
+        m_bbox.bound(m_shape.vertices(), m_shape.centroid());
+    }
+    void entity2D::angvel(const float angvel) { m_angvel = angvel; }
+
+    void entity2D::mass(const float mass) { m_mass = mass; }
+    void entity2D::charge(const float charge) { m_charge = charge; }
+
 }

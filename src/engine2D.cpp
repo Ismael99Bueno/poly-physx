@@ -147,21 +147,22 @@ namespace phys
         }
     }
 
-    entity_ptr engine2D::add_entity(const body2D &body,
+    entity_ptr engine2D::add_entity(const alg::vec2 &pos,
+                                    const alg::vec2 &vel,
+                                    const float angpos,
+                                    const float angvel,
+                                    const float mass,
+                                    const float charge,
                                     const std::vector<alg::vec2> &vertices)
     {
-        static std::random_device rd;
-        static std::mt19937_64 eng(rd());
-        static std::uniform_int_distribution<std::uint64_t> dist;
-
-        entity2D &e = m_entities.emplace_back(body, vertices);
+        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices);
         const entity_ptr e_ptr = {&m_entities, m_entities.size() - 1};
 
         e.m_index = m_entities.size() - 1;
         e.m_buffer = utils::vec_ptr(&m_state, m_state.size());
 
-        m_state.insert(m_state.end(), {body.pos().x, body.pos().y, body.angpos(),
-                                       body.vel().x, body.vel().y, body.angvel()});
+        m_state.insert(m_state.end(), {pos.x, pos.y, angpos,
+                                       vel.x, vel.y, angvel});
         m_collider.add_entity_intervals(e_ptr);
 
         e.retrieve();
@@ -174,16 +175,6 @@ namespace phys
         for (const add_callback &cb : m_on_entity_addition)
             cb(e_ptr);
         return e_ptr;
-    }
-    entity_ptr engine2D::add_entity(const alg::vec2 &pos,
-                                    const alg::vec2 &vel,
-                                    const float angpos,
-                                    const float angvel,
-                                    const float mass,
-                                    const float charge,
-                                    const std::vector<alg::vec2> &vertices)
-    {
-        return add_entity(body2D(pos, vel, angpos, angvel, mass, charge), vertices);
     }
 
     void engine2D::remove_entity(const std::size_t index)
