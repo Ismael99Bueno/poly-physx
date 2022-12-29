@@ -16,6 +16,7 @@ namespace phys
         void include(const const_entity_ptr &e);
         void exclude(const const_entity_ptr &e);
         bool contains(const const_entity_ptr &e) const;
+        void clear();
         std::size_t size() const;
 
         const std::unordered_set<const_entity_ptr> &entities() const;

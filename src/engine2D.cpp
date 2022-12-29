@@ -229,6 +229,42 @@ namespace phys
     const_entity_ptr engine2D::operator[](std::size_t index) const { return {&m_entities, index}; }
     entity_ptr engine2D::operator[](std::size_t index) { return {&m_entities, index}; }
 
+    std::unordered_set<const_entity_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
+    {
+        std::unordered_set<const_entity_ptr> in_area;
+        in_area.reserve(m_entities.size() / 2);
+        for (const entity2D &e : m_entities)
+            if (e.aabb().overlaps(aabb))
+                in_area.insert({&m_entities, e.index()});
+        return in_area;
+    }
+    std::unordered_set<entity_ptr> engine2D::operator[](const geo::aabb2D &aabb)
+    {
+        std::unordered_set<entity_ptr> in_area;
+        in_area.reserve(m_entities.size() / 2);
+        for (const entity2D &e : m_entities)
+            if (e.aabb().overlaps(aabb))
+                in_area.insert({&m_entities, e.index()});
+        return in_area;
+    }
+
+    const_entity_ptr engine2D::operator[](const alg::vec2 &point) const
+    {
+        const geo::aabb2D aabb = point;
+        for (const entity2D &e : m_entities)
+            if (e.aabb().overlaps(aabb))
+                return {&m_entities, e.index()};
+        return nullptr;
+    }
+    entity_ptr engine2D::operator[](const alg::vec2 &point)
+    {
+        const geo::aabb2D aabb = point;
+        for (const entity2D &e : m_entities)
+            if (e.aabb().overlaps(aabb))
+                return {&m_entities, e.index()};
+        return nullptr;
+    }
+
     const std::vector<entity2D> &engine2D::entities() const { return m_entities; }
     std::vector<entity2D> &engine2D::entities() { return m_entities; }
     std::size_t engine2D::size() const { return m_entities.size(); }

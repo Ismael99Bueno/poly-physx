@@ -44,6 +44,12 @@ namespace phys
         const_entity_ptr operator[](std::size_t index) const;
         entity_ptr operator[](std::size_t index);
 
+        std::unordered_set<const_entity_ptr> operator[](const geo::aabb2D &aabb) const;
+        std::unordered_set<entity_ptr> operator[](const geo::aabb2D &aabb);
+
+        const_entity_ptr operator[](const alg::vec2 &point) const;
+        entity_ptr operator[](const alg::vec2 &point);
+
         const std::vector<entity2D> &entities() const;
         std::vector<entity2D> &entities();
         std::size_t size() const;
