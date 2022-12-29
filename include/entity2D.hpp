@@ -1,7 +1,7 @@
 #ifndef ENTITY2D_HPP
 #define ENTITY2D_HPP
 
-#include "box2D.hpp"
+#include "aabb2D.hpp"
 #include "polygon2D.hpp"
 #include "vec_ptr.hpp"
 
@@ -27,7 +27,7 @@ namespace phys
         const alg::vec2 &added_force() const;
         float added_torque() const;
 
-        const geo::box2D &bounding_box() const;
+        const geo::aabb2D &aabb() const;
 
         const geo::polygon2D &shape() const;
         void shape(const geo::polygon2D &poly);
@@ -59,7 +59,7 @@ namespace phys
         void charge(float charge);
 
     private:
-        geo::box2D m_bbox;
+        geo::aabb2D m_aabb;
         geo::polygon2D m_shape;
         utils::vec_ptr m_buffer;
         alg::vec2 m_vel, m_force, m_added_force;

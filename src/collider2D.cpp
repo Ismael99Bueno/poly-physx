@@ -12,7 +12,8 @@ namespace phys
 {
     collider2D::collider2D(const std::vector<entity2D> &entities,
                            const std::size_t allocations) : m_entities(entities),
-                                                            m_quad_tree({0.f, 0.f}, {192.f, 128.f})
+                                                            m_quad_tree(-0.5f * alg::vec2(192.f, 128.f),
+                                                                        0.5f * alg::vec2(192.f, 128.f))
     {
         m_intervals.reserve(allocations);
     }
@@ -23,7 +24,7 @@ namespace phys
 
     float collider2D::interval::value() const
     {
-        return (m_end == LOWER) ? m_entity->bounding_box().min().x : m_entity->bounding_box().max().x;
+        return (m_end == LOWER) ? m_entity->aabb().min().x : m_entity->aabb().max().x;
     }
 
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
@@ -110,7 +111,7 @@ namespace phys
 
     bool collider2D::collide(const entity2D *e1, const entity2D *e2, collision *c)
     {
-        return e1 != e2 && e1->bounding_box().overlaps(e2->bounding_box()) && gjk_epa(e1, e2, c);
+        return e1 != e2 && e1->aabb().overlaps(e2->aabb()) && gjk_epa(e1, e2, c);
     }
 
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const

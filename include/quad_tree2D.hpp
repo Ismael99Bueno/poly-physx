@@ -1,7 +1,6 @@
 #ifndef QUAD_TREE2D_HPP
 #define QUAD_TREE2D_HPP
 
-#include "vec2.hpp"
 #include "entity_ptr.hpp"
 #include <memory>
 #include <array>
@@ -12,8 +11,8 @@ namespace phys
     {
     public:
         quad_tree2D() = delete;
-        quad_tree2D(const alg::vec2 &pos,
-                    const alg::vec2 &dim,
+        quad_tree2D(const alg::vec2 &min,
+                    const alg::vec2 &max,
                     std::size_t max_entities = 5,
                     std::uint32_t depth = 0);
 
@@ -24,11 +23,8 @@ namespace phys
         bool full() const;
         bool rock_bottom() const;
 
-        const alg::vec2 &pos() const;
-        const alg::vec2 &dim() const;
-
-        void pos(const alg::vec2 &pos); // quad tree gets invalid when calling these. must call build
-        void dim(const alg::vec2 &dim);
+        const geo::aabb2D &aabb() const;
+        void aabb(const geo::aabb2D &aabb);
 
         std::size_t max_entities() const;
         void max_entities(std::size_t max_entities);
@@ -45,7 +41,7 @@ namespace phys
 
     private:
         std::array<std::unique_ptr<quad_tree2D>, 4> m_children; // TL, TR, BL, BR
-        alg::vec2 m_pos, m_dim;
+        geo::aabb2D m_aabb;
         std::size_t m_max_entities;
         std::uint32_t m_depth;
         static std::uint32_t s_max_depth;
@@ -56,7 +52,6 @@ namespace phys
         void clear();
         void create_children();
         void partition();
-        bool contains(const geo::box2D &bbox) const;
         void add_to_children(const const_entity_ptr &e);
     };
 }

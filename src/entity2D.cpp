@@ -16,7 +16,7 @@ namespace phys
                                                                  m_mass(mass),
                                                                  m_charge(charge),
                                                                  m_shape(pos, vertices),
-                                                                 m_bbox() { m_shape.rotate(angpos); }
+                                                                 m_aabb() { m_shape.rotate(angpos); }
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {
@@ -48,13 +48,13 @@ namespace phys
     const alg::vec2 &entity2D::added_force() const { return m_added_force; }
     float entity2D::added_torque() const { return m_added_torque; }
 
-    const geo::box2D &entity2D::bounding_box() const { return m_bbox; }
+    const geo::aabb2D &entity2D::aabb() const { return m_aabb; }
     const geo::polygon2D &entity2D::shape() const { return m_shape; }
 
     void entity2D::shape(const geo::polygon2D &poly)
     {
         m_shape = poly;
-        m_bbox.bound(m_shape.vertices(), m_shape.centroid());
+        m_aabb.bound(m_shape.vertices());
     }
 
     std::size_t entity2D::index() const { return m_index; }
@@ -81,14 +81,14 @@ namespace phys
     void entity2D::pos(const alg::vec2 &pos)
     {
         m_shape.pos(pos);
-        m_bbox.recentre(m_shape.centroid());
+        m_aabb.bound(m_shape.vertices());
     }
     void entity2D::vel(const alg::vec2 &vel) { m_vel = vel; }
 
     void entity2D::angpos(const float angpos)
     {
         m_shape.rotation(angpos);
-        m_bbox.bound(m_shape.vertices(), m_shape.centroid());
+        m_aabb.bound(m_shape.vertices());
     }
     void entity2D::angvel(const float angvel) { m_angvel = angvel; }
 
