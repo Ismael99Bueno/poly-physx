@@ -12,6 +12,12 @@ namespace phys
     }
 
     void compeller2D::add_constraint(constraint_interface *c) { m_constraints.push_back(c); }
+    void compeller2D::remove_constraint(const constraint_interface *c)
+    {
+        m_constraints.erase(std::remove(m_constraints.begin(), m_constraints.end(), c), m_constraints.end());
+    }
+    void compeller2D::clear_constraints() { m_constraints.clear(); }
+
     bool compeller2D::validate()
     {
         std::vector<std::size_t> invalids;

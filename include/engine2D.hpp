@@ -31,10 +31,19 @@ namespace phys
         void remove_entity(std::size_t index);
         void remove_entity(const const_entity_ptr &e);
 
-        void add_constraint(constraint_interface *c);
         void add_force(force2D *force);
         void add_interaction(interaction2D *inter);
         void add_spring(const spring2D &spring);
+
+        void remove_force(force2D *force);
+        void remove_interaction(interaction2D *inter);
+        void remove_spring(std::size_t index);
+
+        void clear_entities();
+        void clear_forces();
+        void clear_interactions();
+        void clear_springs();
+        void clear();
 
         using add_callback = std::function<void(entity_ptr)>;
         using remove_callback = std::function<void(std::size_t)>;
@@ -72,8 +81,8 @@ namespace phys
         std::vector<float> m_state;
         compeller2D m_compeller;
         collider2D m_collider;
-        std::vector<force2D *> m_forces;
-        std::vector<interaction2D *> m_inters;
+        std::unordered_set<force2D *> m_forces;
+        std::unordered_set<interaction2D *> m_inters;
         std::vector<spring2D> m_springs;
         std::vector<add_callback> m_on_entity_addition;
         std::vector<remove_callback> m_on_entity_removal;

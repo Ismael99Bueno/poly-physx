@@ -16,6 +16,9 @@ namespace phys
                     std::size_t allocations);
 
         void add_constraint(constraint_interface *c);
+        void remove_constraint(const constraint_interface *c);
+        void clear_constraints();
+
         bool validate();
 
         void solve_and_load_constraints(std::vector<float> &stchanges,

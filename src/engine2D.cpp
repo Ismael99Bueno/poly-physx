@@ -218,10 +218,34 @@ namespace phys
 
     void engine2D::remove_entity(const const_entity_ptr &e) { remove_entity(e.index()); }
 
-    void engine2D::add_constraint(constraint_interface *c) { m_compeller.add_constraint(c); }
-    void engine2D::add_force(force2D *force) { m_forces.emplace_back(force); }
-    void engine2D::add_interaction(interaction2D *inter) { m_inters.emplace_back(inter); }
+    void engine2D::add_force(force2D *force) { m_forces.insert(force); }
+    void engine2D::add_interaction(interaction2D *inter) { m_inters.insert(inter); }
     void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
+
+    void engine2D::remove_force(force2D *force) { m_forces.erase(force); }
+    void engine2D::remove_interaction(interaction2D *inter) { m_inters.erase(inter); }
+    void engine2D::remove_spring(std::size_t index)
+    {
+        DBG_ASSERT(index < m_springs.size(), "Index outside of array bounds! - index: %zu\n", index)
+        m_springs.erase(m_springs.begin() + index);
+    }
+
+    void engine2D::clear_entities()
+    {
+        for (std::size_t i = m_entities.size() - 1; i >= 0 && i < m_entities.size(); i--)
+            remove_entity(i);
+    }
+    void engine2D::clear_forces() { m_forces.clear(); }
+    void engine2D::clear_interactions() { m_inters.clear(); }
+    void engine2D::clear_springs() { m_springs.clear(); }
+    void engine2D::clear()
+    {
+        m_forces.clear();
+        m_inters.clear();
+        m_springs.clear();
+        m_compeller.clear_constraints();
+        clear_entities();
+    }
 
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
     void engine2D::on_entity_removal(const remove_callback &on_remove) { m_on_entity_removal.emplace_back(on_remove); }
