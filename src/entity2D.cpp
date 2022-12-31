@@ -10,13 +10,15 @@ namespace phys
                        const alg::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
-                       const std::vector<alg::vec2> &vertices) : m_id(s_id++),
-                                                                 m_vel(vel),
-                                                                 m_angvel(angvel),
-                                                                 m_mass(mass),
-                                                                 m_charge(charge),
-                                                                 m_shape(pos, vertices),
-                                                                 m_aabb() { m_shape.rotate(angpos); }
+                       const std::vector<alg::vec2> &vertices,
+                       const bool dynamic) : m_id(s_id++),
+                                             m_vel(vel),
+                                             m_angvel(angvel),
+                                             m_mass(mass),
+                                             m_charge(charge),
+                                             m_shape(pos, vertices),
+                                             m_aabb(),
+                                             m_dynamic(dynamic) { m_shape.rotate(angpos); }
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
     {

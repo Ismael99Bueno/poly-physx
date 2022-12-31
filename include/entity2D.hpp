@@ -10,11 +10,12 @@ namespace phys
     class entity2D
     {
     public:
-        entity2D(const alg::vec2 &pos = {0.f, 0.f},
-                 const alg::vec2 &vel = {0.f, 0.f},
-                 float angpos = 0.f, float angvel = 0.f,
-                 float mass = 1.f, float charge = 1.f,
-                 const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
+        entity2D(const alg::vec2 &pos,
+                 const alg::vec2 &vel,
+                 float angpos, float angvel,
+                 float mass, float charge,
+                 const std::vector<alg::vec2> &vertices,
+                 bool dynamic);
 
         void retrieve();
         void dispatch() const;
@@ -66,7 +67,7 @@ namespace phys
         std::size_t m_index = 0;
         std::uint64_t m_id;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
-        bool m_dynamic = true;
+        bool m_dynamic;
 
         static std::size_t s_id;
 

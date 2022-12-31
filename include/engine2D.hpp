@@ -26,7 +26,8 @@ namespace phys
                               const alg::vec2 &vel = {0.f, 0.f},
                               float angpos = 0.f, float angvel = 0.f,
                               float mass = 1.f, float charge = 1.f,
-                              const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f));
+                              const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f),
+                              bool dynamic = true);
 
         void remove_entity(std::size_t index);
         void remove_entity(const const_entity_ptr &e);

@@ -153,9 +153,10 @@ namespace phys
                                     const float angvel,
                                     const float mass,
                                     const float charge,
-                                    const std::vector<alg::vec2> &vertices)
+                                    const std::vector<alg::vec2> &vertices,
+                                    const bool dynamic)
     {
-        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices);
+        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices, dynamic);
         const entity_ptr e_ptr = {&m_entities, m_entities.size() - 1};
 
         e.m_index = m_entities.size() - 1;
