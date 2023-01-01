@@ -273,6 +273,9 @@ namespace phys
         return in_area;
     }
 
+    const std::unordered_set<force2D *> engine2D::forces() const { return m_forces; }
+    const std::unordered_set<interaction2D *> engine2D::interactions() const { return m_inters; }
+
     const_entity_ptr engine2D::operator[](const alg::vec2 &point) const
     {
         const geo::aabb2D aabb = point;
