@@ -8,8 +8,6 @@ namespace phys
                                              m_e2(e2),
                                              m_joint1(e1->pos()),
                                              m_joint2(e2->pos()),
-                                             m_angle1(e1->angpos()),
-                                             m_angle2(e2->angpos()),
                                              m_length(length),
                                              m_has_joints(false) {}
 
@@ -68,17 +66,19 @@ namespace phys
     const_entity_ptr spring2D::e1() const { return m_e1; }
     const_entity_ptr spring2D::e2() const { return m_e2; }
 
-    const alg::vec2 &spring2D::joint1() const { return m_joint1; }
-    const alg::vec2 &spring2D::joint2() const { return m_joint2; }
+    alg::vec2 spring2D::joint1() const { return m_joint1.rotated(m_e1->angpos() - m_angle1); }
+    alg::vec2 spring2D::joint2() const { return m_joint2.rotated(m_e2->angpos() - m_angle2); }
 
     void spring2D::joint1(const alg::vec2 &joint1)
     {
         m_joint1 = joint1;
+        m_angle1 = m_e1->angpos();
         m_has_joints = true;
     }
     void spring2D::joint2(const alg::vec2 &joint2)
     {
         m_joint2 = joint2;
+        m_angle2 = m_e2->angpos();
         m_has_joints = true;
     }
 }

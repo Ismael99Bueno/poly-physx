@@ -34,8 +34,8 @@ namespace phys
         const_entity_ptr e1() const;
         const_entity_ptr e2() const;
 
-        const alg::vec2 &joint1() const;
-        const alg::vec2 &joint2() const;
+        alg::vec2 joint1() const;
+        alg::vec2 joint2() const;
 
         void joint2(const alg::vec2 &joint2);
         void joint1(const alg::vec2 &joint1);

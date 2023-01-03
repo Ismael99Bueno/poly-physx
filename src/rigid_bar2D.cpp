@@ -15,6 +15,8 @@ namespace phys
                              const float length) : constraint2D<2>({e1, e2}),
                                                    m_joint1(joint1),
                                                    m_joint2(joint2),
+                                                   m_angle1(e1->angpos()),
+                                                   m_angle2(e2->angpos()),
                                                    m_length(length),
                                                    m_has_joints(true) {}
 
@@ -43,10 +45,10 @@ namespace phys
     float rigid_bar2D::with_joints_constraint(const std::array<const_entity_ptr, 2> &entities) const
     {
         const phys::const_entity_ptr &e1 = entities[0], &e2 = entities[1];
-        const alg::vec2 abs_joint1 = m_joint1.rotated(e1->angpos()) + e1->pos(),
-                        abs_joint2 = m_joint2.rotated(e2->angpos()) + e2->pos();
+        const alg::vec2 p1 = m_joint1.rotated(e1->angpos() - m_angle1) + e1->pos(),
+                        p2 = m_joint2.rotated(e2->angpos() - m_angle2) + e2->pos();
 
-        return abs_joint1.sq_dist(abs_joint2) - m_length * m_length;
+        return p1.sq_dist(p2) - m_length * m_length;
     }
     float rigid_bar2D::with_joints_constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const
     {
@@ -64,17 +66,19 @@ namespace phys
     const_entity_ptr rigid_bar2D::e1() const { return m_entities[0]; }
     const_entity_ptr rigid_bar2D::e2() const { return m_entities[1]; }
 
-    const alg::vec2 &rigid_bar2D::joint1() const { return m_joint1; }
-    const alg::vec2 &rigid_bar2D::joint2() const { return m_joint2; }
+    alg::vec2 rigid_bar2D::joint1() const { return m_joint1.rotated(m_entities[0]->angpos() - m_angle1); }
+    alg::vec2 rigid_bar2D::joint2() const { return m_joint2.rotated(m_entities[1]->angpos() - m_angle2); }
 
     void rigid_bar2D::joint1(const alg::vec2 &joint1)
     {
         m_joint1 = joint1;
+        m_angle1 = m_entities[0]->angpos();
         m_has_joints = true;
     }
     void rigid_bar2D::joint2(const alg::vec2 &joint2)
     {
         m_joint2 = joint2;
+        m_angle2 = m_entities[1]->angpos();
         m_has_joints = true;
     }
 }
