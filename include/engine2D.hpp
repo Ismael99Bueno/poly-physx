@@ -60,8 +60,9 @@ namespace phys
         const_entity_ptr operator[](const alg::vec2 &point) const;
         entity_ptr operator[](const alg::vec2 &point);
 
-        const std::unordered_set<force2D *> forces() const;
-        const std::unordered_set<interaction2D *> interactions() const;
+        const std::unordered_set<force2D *> &forces() const;
+        const std::unordered_set<interaction2D *> &interactions() const;
+        const std::vector<spring2D> &springs() const;
 
         const std::vector<entity2D> &entities() const;
         std::vector<entity2D> &entities();
