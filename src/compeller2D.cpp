@@ -55,12 +55,16 @@ namespace phys
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         std::vector<float> cmatrix(rows * cols, 0.f);
         for (std::size_t i = 0; i < rows; i++)
-            for (std::size_t j = 0; j < m_constraints[i]->size(); j++)
+            for (std::size_t ct_idx = 0; ct_idx < m_constraints[i]->size(); ct_idx++)
             {
-                entity2D &e = m_constraints[i]->operator[](j);
+                entity2D &e = (*m_constraints[i])[ct_idx];
                 const std::array<float, 3> state = constraint_grad(*m_constraints[i], e);
+
                 for (std::size_t k = 0; k < 3; k++)
-                    cmatrix[i * cols + e.index() * 3 + k] = state[k];
+                {
+                    const std::size_t j = e.index() * 3 + k;
+                    cmatrix[i * cols + j] = state[k];
+                }
             }
         return cmatrix;
     }
@@ -104,8 +108,7 @@ namespace phys
                     const std::size_t index1 = j * 3 + k, index2 = j * 6 + k;
                     const std::size_t id = i * cols + index1;
                     b[i] -= (djcb[id] * stchanges[index2] +
-                             jcb[id] * stchanges[index2 + 3]) *
-                            inv_masses[index1];
+                             jcb[id] * stchanges[index2 + 3] * inv_masses[index1]);
                 }
             b[i] -= (m_constraints[i]->stiffness() * m_constraints[i]->value() +
                      m_constraints[i]->dampening() * m_constraints[i]->derivative());
@@ -179,14 +182,14 @@ namespace phys
                                              std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constraints.size();
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
         for (std::size_t i = 0; i < m_entities.size(); i++)
             if (m_entities[i].dynamic())
                 for (std::size_t j = 0; j < 3; j++)
                     for (std::size_t k = 0; k < rows; k++)
                     {
                         const std::size_t id1 = 6 * i + j + 3,
-                                          id2 = (3 * i + j) * rows + k;
+                                          id2 = k * cols + 3 * i + j;
                         stchanges[id1] += jcb[id2] * lambda[k];
                     }
     }
