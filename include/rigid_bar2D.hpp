@@ -38,6 +38,9 @@ namespace phys
         alg::vec2 m_joint1, m_joint2;
         bool m_has_joints;
 
+        std::array<float, 3> constraint_grad(entity2D &e) const override;
+        std::array<float, 3> constraint_grad_derivative(entity2D &e) const override;
+
         float without_joints_constraint(const std::array<const_entity_ptr, 2> &entities) const;
         float without_joints_constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const;
 

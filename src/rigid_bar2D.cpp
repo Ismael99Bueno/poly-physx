@@ -1,4 +1,6 @@
 #include "rigid_bar2D.hpp"
+#include "debug.h"
+#include <cmath>
 
 namespace phys
 {
@@ -53,11 +55,60 @@ namespace phys
     float rigid_bar2D::with_joints_constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const
     {
         const phys::const_entity_ptr &e1 = entities[0], &e2 = entities[1];
-        const alg::vec2 rot_joint1 = m_joint1.rotated(e1->angpos()),
-                        rot_joint2 = m_joint2.rotated(e2->angpos());
+        const alg::vec2 rot_joint1 = m_joint1.rotated(e1->angpos() - m_angle1),
+                        rot_joint2 = m_joint2.rotated(e2->angpos() - m_angle2);
 
         return 2.f * (rot_joint1 - rot_joint2 + e1->pos() - e2->pos())
                          .dot(e1->vel_at(rot_joint1) - e2->vel_at(rot_joint2));
+    }
+
+    std::array<float, 3> rigid_bar2D::constraint_grad(entity2D &e) const
+    {
+        const const_entity_ptr &e1 = m_entities[0], &e2 = m_entities[1];
+        DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
+        if (!m_has_joints)
+        {
+            const alg::vec2 cg = 2.f * (e1->pos() - e2->pos());
+            if (e == *e1)
+                return {cg.x, cg.y, 0.f};
+            return {-cg.x, -cg.y, 0.f};
+        }
+        const float a1 = e1->angpos() - m_angle1,
+                    a2 = e2->angpos() - m_angle2;
+        const alg::vec2 rot_joint1 = m_joint1.rotated(a1),
+                        rot_joint2 = m_joint2.rotated(a2);
+        const alg::vec2 cg = 2.f * (e1->pos() + rot_joint1 - e2->pos() - rot_joint2);
+        if (e == *e1)
+        {
+            const float cga = -cg.x * (m_joint1.x * std::sinf(a1) + m_joint1.y * std::cosf(a1)) +
+                              cg.y * (m_joint1.x * std::cosf(a1) - m_joint1.y * std::sinf(a1));
+            return {cg.x, cg.y, cga};
+        }
+        const float cga = cg.x * (m_joint2.x * std::sinf(a2) + m_joint2.y * std::cosf(a2)) +
+                          cg.y * (-m_joint2.x * std::cosf(a2) + m_joint2.y * std::sinf(a2));
+        return {-cg.x, -cg.y, cga};
+    }
+    std::array<float, 3> rigid_bar2D::constraint_grad_derivative(entity2D &e) const
+    {
+        const const_entity_ptr &e1 = m_entities[0], &e2 = m_entities[1];
+        DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
+        if (!m_has_joints)
+        {
+            const alg::vec2 cgd = 2.f * (e1->vel() - e2->vel());
+            if (e == *e1)
+                return {cgd.x, cgd.y, 0.f};
+            return {-cgd.x, -cgd.y, 0.f};
+        }
+        const alg::vec2 rot_joint1 = m_joint1.rotated(e1->angpos() - m_angle1),
+                        rot_joint2 = m_joint2.rotated(e2->angpos() - m_angle2);
+        const alg::vec2 cgd = 2.f * (e1->vel_at(rot_joint1) - e2->vel_at(rot_joint2));
+        if (e == *e1)
+        {
+            const float cgda = -cgd.x * rot_joint1.x - cgd.y * rot_joint1.y;
+            return {cgd.x, cgd.y, cgda};
+        }
+        const float cgda = cgd.x * rot_joint2.x + cgd.y * rot_joint2.y;
+        return {-cgd.x, -cgd.y, cgda};
     }
 
     float rigid_bar2D::length() const { return m_length; }

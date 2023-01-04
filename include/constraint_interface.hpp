@@ -21,9 +21,9 @@ namespace phys
         virtual bool try_validate() = 0;
 
     private:
-        float m_stiffness = 50.f, m_dampening = 10.f;
-        std::array<float, 3> constraint_grad(entity2D &e) const;
-        std::array<float, 3> constraint_grad_derivative(entity2D &e) const;
+        float m_stiffness = 500.f, m_dampening = 30.f;
+        virtual std::array<float, 3> constraint_grad(entity2D &e) const;
+        virtual std::array<float, 3> constraint_grad_derivative(entity2D &e) const;
         using constraint_fun = std::function<float(const constraint_interface &)>;
         std::array<float, 3> gradient(entity2D &e,
                                       const constraint_fun &constraint) const;
