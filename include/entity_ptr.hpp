@@ -13,6 +13,8 @@ namespace phys
         const_entity_ptr(const std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
+        std::size_t id() const;
+
         const entity2D *raw() const;
         const entity2D *operator->() const;
         const entity2D &operator*() const;
@@ -26,8 +28,6 @@ namespace phys
         const std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
         std::uint64_t m_id = 0;
-
-        friend struct std::hash<const_entity_ptr>;
     };
 
     bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2);
@@ -40,6 +40,8 @@ namespace phys
         entity_ptr(std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
+        std::size_t id() const;
+
         entity2D *raw() const;
         entity2D *operator->() const;
         entity2D &operator*() const;
@@ -54,8 +56,6 @@ namespace phys
         std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0;
         std::uint64_t m_id = 0;
-
-        friend struct std::hash<entity_ptr>;
     };
 
     bool operator==(const entity_ptr &e1, const entity_ptr &e2);

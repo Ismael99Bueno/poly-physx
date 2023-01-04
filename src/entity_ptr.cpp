@@ -12,6 +12,8 @@ namespace phys
     }
 
     std::size_t const_entity_ptr::index() const { return m_index; }
+    std::size_t const_entity_ptr::id() const { return m_id; }
+
     const entity2D *const_entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
     const entity2D *const_entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     const entity2D &const_entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
@@ -35,8 +37,8 @@ namespace phys
 
     const_entity_ptr::operator bool() const { return m_buffer; }
 
-    bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2) { return &(*e1) == &(*e2); }
-    bool operator!=(const const_entity_ptr &e1, const const_entity_ptr &e2) { return !(e1 == e2); }
+    bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2) { return e1.id() == e2.id(); }
+    bool operator!=(const const_entity_ptr &e1, const const_entity_ptr &e2) { return e1.id() != e2.id(); }
 
     entity_ptr::entity_ptr(std::vector<entity2D> *buffer,
                            const std::size_t index) : m_buffer(buffer),
@@ -47,6 +49,8 @@ namespace phys
     }
 
     std::size_t entity_ptr::index() const { return m_index; }
+    std::size_t entity_ptr::id() const { return m_id; }
+
     entity2D *entity_ptr::raw() const { return &((*m_buffer)[m_index]); }
     entity2D *entity_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     entity2D &entity_ptr::operator*() const { return (*m_buffer)[m_index]; }
@@ -71,19 +75,19 @@ namespace phys
     entity_ptr::operator bool() const { return m_buffer; }
     entity_ptr::operator const_entity_ptr() const { return const_entity_ptr(m_buffer, m_index); }
 
-    bool operator==(const entity_ptr &e1, const entity_ptr &e2) { return &(*e1) == &(*e2); }
-    bool operator!=(const entity_ptr &e1, const entity_ptr &e2) { return !(e1 == e2); }
+    bool operator==(const entity_ptr &e1, const entity_ptr &e2) { return e1.id() == e2.id(); }
+    bool operator!=(const entity_ptr &e1, const entity_ptr &e2) { return e1.id() != e2.id(); }
 }
 
 namespace std
 {
     size_t hash<phys::const_entity_ptr>::operator()(const phys::const_entity_ptr &key) const
     {
-        return hash<std::size_t>()(key.m_index);
+        return hash<std::size_t>()(key.id());
     }
 
     size_t hash<phys::entity_ptr>::operator()(const phys::entity_ptr &key) const
     {
-        return hash<std::size_t>()(key.m_index);
+        return hash<std::size_t>()(key.id());
     }
 }

@@ -97,4 +97,6 @@ namespace phys
     void entity2D::mass(const float mass) { m_mass = mass; }
     void entity2D::charge(const float charge) { m_charge = charge; }
 
+    bool operator==(const entity2D &lhs, const entity2D &rhs) { return lhs.id() == rhs.id(); }
+    bool operator!=(const entity2D &lhs, const entity2D &rhs) { return lhs.id() != rhs.id(); }
 }

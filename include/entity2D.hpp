@@ -74,6 +74,9 @@ namespace phys
         void retrieve(const utils::const_vec_ptr &buffer);
         friend class engine2D;
     };
+
+    bool operator==(const entity2D &lhs, const entity2D &rhs);
+    bool operator!=(const entity2D &lhs, const entity2D &rhs);
 }
 
 #endif
