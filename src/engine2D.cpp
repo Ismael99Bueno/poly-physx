@@ -277,6 +277,10 @@ namespace phys
     const std::unordered_set<interaction2D *> &engine2D::interactions() const { return m_inters; }
     const std::vector<spring2D> &engine2D::springs() const { return m_springs; }
 
+    std::unordered_set<force2D *> &engine2D::forces() { return m_forces; }
+    std::unordered_set<interaction2D *> &engine2D::interactions() { return m_inters; }
+    std::vector<spring2D> &engine2D::springs() { return m_springs; }
+
     const_entity_ptr engine2D::operator[](const alg::vec2 &point) const
     {
         const geo::aabb2D aabb = point;

@@ -64,6 +64,10 @@ namespace phys
         const std::unordered_set<interaction2D *> &interactions() const;
         const std::vector<spring2D> &springs() const;
 
+        std::unordered_set<force2D *> &forces();
+        std::unordered_set<interaction2D *> &interactions();
+        std::vector<spring2D> &springs();
+
         const std::vector<entity2D> &entities() const;
         std::vector<entity2D> &entities();
         std::size_t size() const;
