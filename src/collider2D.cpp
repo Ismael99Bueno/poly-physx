@@ -111,7 +111,10 @@ namespace phys
 
     bool collider2D::collide(const entity2D *e1, const entity2D *e2, collision *c)
     {
-        return e1 != e2 && e1->aabb().overlaps(e2->aabb()) && gjk_epa(e1, e2, c);
+        return e1 != e2 &&
+               (e1->dynamic() || e2->dynamic()) &&
+               e1->aabb().overlaps(e2->aabb()) &&
+               gjk_epa(e1, e2, c);
     }
 
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
