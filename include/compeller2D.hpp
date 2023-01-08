@@ -15,8 +15,8 @@ namespace phys
         compeller2D(std::vector<entity2D> &entities,
                     std::size_t allocations);
 
-        void add_constraint(constraint_interface *c);
-        void remove_constraint(const constraint_interface *c);
+        void add_constraint(const std::shared_ptr<constraint_interface> &c);
+        void remove_constraint(const std::shared_ptr<const constraint_interface> &c);
         void clear_constraints();
 
         bool validate();
@@ -24,11 +24,11 @@ namespace phys
         void solve_and_load_constraints(std::vector<float> &stchanges,
                                         const std::vector<float> &inv_masses) const;
 
-        const std::vector<constraint_interface *> &constraints() const;
+        const std::vector<std::shared_ptr<constraint_interface>> &constraints() const;
 
     private:
         std::vector<entity2D> &m_entities;
-        std::vector<constraint_interface *> m_constraints;
+        std::vector<std::shared_ptr<constraint_interface>> m_constraints;
 
         using constraint_grad_fun = std::function<std::array<float, 3>(const constraint_interface &, entity2D &)>;
         std::vector<float> constraint_matrix(const constraint_grad_fun &constraint_grad) const;

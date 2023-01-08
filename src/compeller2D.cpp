@@ -11,8 +11,8 @@ namespace phys
         m_constraints.reserve(allocations);
     }
 
-    void compeller2D::add_constraint(constraint_interface *c) { m_constraints.push_back(c); }
-    void compeller2D::remove_constraint(const constraint_interface *c)
+    void compeller2D::add_constraint(const std::shared_ptr<constraint_interface> &c) { m_constraints.emplace_back(c); }
+    void compeller2D::remove_constraint(const std::shared_ptr<const constraint_interface> &c)
     {
         m_constraints.erase(std::remove(m_constraints.begin(), m_constraints.end(), c), m_constraints.end());
     }
@@ -47,7 +47,7 @@ namespace phys
         return load_constraint_accels(jcb, lambda, stchanges);
     }
 
-    const std::vector<constraint_interface *> &compeller2D::constraints() const { return m_constraints; }
+    const std::vector<std::shared_ptr<constraint_interface>> &compeller2D::constraints() const { return m_constraints; }
 
     std::vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
     {

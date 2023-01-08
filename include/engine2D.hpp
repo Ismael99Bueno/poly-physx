@@ -32,12 +32,12 @@ namespace phys
         void remove_entity(std::size_t index);
         void remove_entity(const const_entity_ptr &e);
 
-        void add_force(force2D *force);
-        void add_interaction(interaction2D *inter);
+        void add_force(const std::shared_ptr<force2D> &force);
+        void add_interaction(const std::shared_ptr<interaction2D> &inter);
         void add_spring(const spring2D &spring);
 
-        void remove_force(force2D *force);
-        void remove_interaction(interaction2D *inter);
+        void remove_force(const std::shared_ptr<force2D> &force);
+        void remove_interaction(const std::shared_ptr<interaction2D> &inter);
         void remove_spring(std::size_t index);
 
         void clear_entities();
@@ -54,18 +54,18 @@ namespace phys
         const_entity_ptr operator[](std::size_t index) const;
         entity_ptr operator[](std::size_t index);
 
-        std::unordered_set<const_entity_ptr> operator[](const geo::aabb2D &aabb) const;
-        std::unordered_set<entity_ptr> operator[](const geo::aabb2D &aabb);
+        std::vector<const_entity_ptr> operator[](const geo::aabb2D &aabb) const;
+        std::vector<entity_ptr> operator[](const geo::aabb2D &aabb);
 
         const_entity_ptr operator[](const alg::vec2 &point) const;
         entity_ptr operator[](const alg::vec2 &point);
 
-        const std::unordered_set<force2D *> &forces() const;
-        const std::unordered_set<interaction2D *> &interactions() const;
+        const std::vector<std::shared_ptr<force2D>> &forces() const;
+        const std::vector<std::shared_ptr<interaction2D>> &interactions() const;
         const std::vector<spring2D> &springs() const;
 
-        std::unordered_set<force2D *> &forces();
-        std::unordered_set<interaction2D *> &interactions();
+        std::vector<std::shared_ptr<force2D>> &forces();
+        std::vector<std::shared_ptr<interaction2D>> &interactions();
         std::vector<spring2D> &springs();
 
         const std::vector<entity2D> &entities() const;
@@ -90,8 +90,8 @@ namespace phys
         std::vector<float> m_state;
         compeller2D m_compeller;
         collider2D m_collider;
-        std::unordered_set<force2D *> m_forces;
-        std::unordered_set<interaction2D *> m_inters;
+        std::vector<std::shared_ptr<force2D>> m_forces;
+        std::vector<std::shared_ptr<interaction2D>> m_inters;
         std::vector<spring2D> m_springs;
         std::vector<add_callback> m_on_entity_addition;
         std::vector<remove_callback> m_on_entity_removal;

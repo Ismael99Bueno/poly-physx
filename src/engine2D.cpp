@@ -90,7 +90,7 @@ namespace phys
     void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        for (const force2D *f : m_forces)
+        for (const std::shared_ptr<const force2D> &f : m_forces)
             for (const const_entity_ptr &e : f->entities())
             {
                 if (!e->dynamic())
@@ -109,7 +109,7 @@ namespace phys
             if (s.e2()->dynamic())
                 load_force(stchanges, -force, t2, index2);
         }
-        for (const interaction2D *i : m_inters)
+        for (const std::shared_ptr<const interaction2D> &i : m_inters)
             for (const const_entity_ptr &e1 : i->entities())
             {
                 if (!e1->dynamic())
@@ -196,9 +196,9 @@ namespace phys
         m_state.resize(6 * m_entities.size());
         m_collider.validate();
         m_compeller.validate();
-        for (force2D *f : m_forces)
+        for (const std::shared_ptr<force2D> &f : m_forces)
             f->validate();
-        for (interaction2D *i : m_inters)
+        for (const std::shared_ptr<interaction2D> &i : m_inters)
             i->validate();
         std::vector<std::size_t> invalids;
         invalids.reserve(m_springs.size());
@@ -219,12 +219,18 @@ namespace phys
 
     void engine2D::remove_entity(const const_entity_ptr &e) { remove_entity(e.index()); }
 
-    void engine2D::add_force(force2D *force) { m_forces.insert(force); }
-    void engine2D::add_interaction(interaction2D *inter) { m_inters.insert(inter); }
+    void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
+    void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_inters.emplace_back(inter); }
     void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
 
-    void engine2D::remove_force(force2D *force) { m_forces.erase(force); }
-    void engine2D::remove_interaction(interaction2D *inter) { m_inters.erase(inter); }
+    void engine2D::remove_force(const std::shared_ptr<force2D> &force)
+    {
+        m_forces.erase(std::remove(m_forces.begin(), m_forces.end(), force), m_forces.end());
+    }
+    void engine2D::remove_interaction(const std::shared_ptr<interaction2D> &inter)
+    {
+        m_inters.erase(std::remove(m_inters.begin(), m_inters.end(), inter), m_inters.end());
+    }
     void engine2D::remove_spring(std::size_t index)
     {
         DBG_ASSERT(index < m_springs.size(), "Index outside of array bounds! - index: %zu\n", index)
@@ -254,31 +260,31 @@ namespace phys
     const_entity_ptr engine2D::operator[](std::size_t index) const { return {&m_entities, index}; }
     entity_ptr engine2D::operator[](std::size_t index) { return {&m_entities, index}; }
 
-    std::unordered_set<const_entity_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
+    std::vector<const_entity_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
     {
-        std::unordered_set<const_entity_ptr> in_area;
+        std::vector<const_entity_ptr> in_area;
         in_area.reserve(m_entities.size() / 2);
         for (const entity2D &e : m_entities)
             if (e.aabb().overlaps(aabb))
-                in_area.insert({&m_entities, e.index()});
+                in_area.emplace_back(&m_entities, e.index());
         return in_area;
     }
-    std::unordered_set<entity_ptr> engine2D::operator[](const geo::aabb2D &aabb)
+    std::vector<entity_ptr> engine2D::operator[](const geo::aabb2D &aabb)
     {
-        std::unordered_set<entity_ptr> in_area;
+        std::vector<entity_ptr> in_area;
         in_area.reserve(m_entities.size() / 2);
         for (const entity2D &e : m_entities)
             if (e.aabb().overlaps(aabb))
-                in_area.insert({&m_entities, e.index()});
+                in_area.emplace_back(&m_entities, e.index());
         return in_area;
     }
 
-    const std::unordered_set<force2D *> &engine2D::forces() const { return m_forces; }
-    const std::unordered_set<interaction2D *> &engine2D::interactions() const { return m_inters; }
+    const std::vector<std::shared_ptr<force2D>> &engine2D::forces() const { return m_forces; }
+    const std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() const { return m_inters; }
     const std::vector<spring2D> &engine2D::springs() const { return m_springs; }
 
-    std::unordered_set<force2D *> &engine2D::forces() { return m_forces; }
-    std::unordered_set<interaction2D *> &engine2D::interactions() { return m_inters; }
+    std::vector<std::shared_ptr<force2D>> &engine2D::forces() { return m_forces; }
+    std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() { return m_inters; }
     std::vector<spring2D> &engine2D::springs() { return m_springs; }
 
     const_entity_ptr engine2D::operator[](const alg::vec2 &point) const

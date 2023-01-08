@@ -10,7 +10,7 @@ namespace phys
         std::vector<const_entity_ptr> invalids;
         invalids.reserve(m_entities.size());
         for (auto it = m_entities.begin(); it != m_entities.end();)
-            if (!it->is_valid())
+            if (!it->try_validate())
             {
                 invalids.emplace_back(*it);
                 it = m_entities.erase(it);
@@ -25,11 +25,14 @@ namespace phys
         return !invalids.empty();
     }
 
-    void entity_set::include(const const_entity_ptr &e) { m_entities.insert(e); }
-    void entity_set::exclude(const const_entity_ptr &e) { m_entities.erase(e); }
-    bool entity_set::contains(const const_entity_ptr &e) const { return m_entities.find(e) != m_entities.end(); }
+    void entity_set::include(const const_entity_ptr &e) { m_entities.emplace_back(e); }
+    void entity_set::exclude(const const_entity_ptr &e)
+    {
+        m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), e), m_entities.end());
+    }
+    bool entity_set::contains(const const_entity_ptr &e) const { return std::find(m_entities.begin(), m_entities.end(), e) != m_entities.end(); }
     void entity_set::clear() { m_entities.clear(); }
     std::size_t entity_set::size() const { return m_entities.size(); }
 
-    const std::unordered_set<const_entity_ptr> &entity_set::entities() const { return m_entities; }
+    const std::vector<const_entity_ptr> &entity_set::entities() const { return m_entities; }
 }

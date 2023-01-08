@@ -2,7 +2,6 @@
 #define ENTITY_SET_HPP
 
 #include "entity_ptr.hpp"
-#include <unordered_set>
 
 namespace phys
 {
@@ -19,10 +18,10 @@ namespace phys
         void clear();
         std::size_t size() const;
 
-        const std::unordered_set<const_entity_ptr> &entities() const;
+        const std::vector<const_entity_ptr> &entities() const;
 
     private:
-        std::unordered_set<const_entity_ptr> m_entities;
+        std::vector<const_entity_ptr> m_entities;
     };
 }
 
