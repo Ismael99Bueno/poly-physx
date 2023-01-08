@@ -10,7 +10,7 @@ namespace phys
     public:
         entity_set(std::size_t allocations = 50);
 
-        bool validate();
+        void validate();
 
         void include(const const_entity_ptr &e);
         void exclude(const const_entity_ptr &e);

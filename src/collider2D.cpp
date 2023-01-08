@@ -67,21 +67,13 @@ namespace phys
         m_qt_build_calls = 0;
     }
 
-    bool collider2D::validate()
+    void collider2D::validate()
     {
-        std::vector<std::size_t> invalids;
-        invalids.reserve(2);
-        for (std::size_t i = 0; i < m_intervals.size(); i++)
-            if (!m_intervals[i].try_validate())
-                invalids.emplace_back(i);
-        for (const std::size_t index : invalids)
-        {
-            m_intervals[index] = m_intervals.back();
-            m_intervals.pop_back();
-        }
-        DBG_LOG_IF(invalids.empty() && !m_intervals.empty(), "Validate method did not find any invalid entity pointers.\n")
-        DBG_LOG_IF(!invalids.empty() && !m_intervals.empty(), "Validate method found %zu invalid entity pointers.\n", invalids.size())
-        return !invalids.empty();
+        for (auto it = m_intervals.begin(); it != m_intervals.end();)
+            if (!it->try_validate())
+                it = m_intervals.erase(it);
+            else
+                ++it;
     }
 
     float collider2D::stiffness() const { return m_stiffness; }

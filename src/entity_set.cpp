@@ -5,24 +5,13 @@ namespace phys
 {
     entity_set::entity_set(const std::size_t allocations) { m_entities.reserve(allocations); }
 
-    bool entity_set::validate()
+    void entity_set::validate()
     {
-        std::vector<const_entity_ptr> invalids;
-        invalids.reserve(m_entities.size());
         for (auto it = m_entities.begin(); it != m_entities.end();)
             if (!it->try_validate())
-            {
-                invalids.emplace_back(*it);
                 it = m_entities.erase(it);
-            }
             else
                 ++it;
-        for (const_entity_ptr &e : invalids)
-            if (e.try_validate())
-                m_entities.insert(e);
-        DBG_LOG_IF(invalids.empty() && !m_entities.empty(), "Validate method did not find any invalid entity pointers.\n")
-        DBG_LOG_IF(!invalids.empty() && !m_entities.empty(), "Validate method found %zu invalid entity pointers.\n", invalids.size())
-        return !invalids.empty();
     }
 
     void entity_set::include(const const_entity_ptr &e) { m_entities.emplace_back(e); }

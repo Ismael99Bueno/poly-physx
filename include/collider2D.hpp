@@ -27,7 +27,7 @@ namespace phys
         void solve_and_load_collisions(std::vector<float> &stchanges);
         void update_quad_tree();
         void rebuild_quad_tree();
-        bool validate();
+        void validate();
 
         float stiffness() const;
         float dampening() const;

@@ -19,7 +19,7 @@ namespace phys
         void remove_constraint(const std::shared_ptr<const constraint_interface> &c);
         void clear_constraints();
 
-        bool validate();
+        void validate();
 
         void solve_and_load_constraints(std::vector<float> &stchanges,
                                         const std::vector<float> &inv_masses) const;

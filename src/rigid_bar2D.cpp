@@ -65,7 +65,7 @@ namespace phys
     std::array<float, 3> rigid_bar2D::constraint_grad(entity2D &e) const
     {
         const const_entity_ptr &e1 = m_entities[0], &e2 = m_entities[1];
-        DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
+        DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!\n")
         if (!m_has_joints)
         {
             const alg::vec2 cg = 2.f * (e1->pos() - e2->pos());
@@ -91,7 +91,7 @@ namespace phys
     std::array<float, 3> rigid_bar2D::constraint_grad_derivative(entity2D &e) const
     {
         const const_entity_ptr &e1 = m_entities[0], &e2 = m_entities[1];
-        DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
+        DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!\n")
         if (!m_has_joints)
         {
             const alg::vec2 cgd = 2.f * (e1->vel() - e2->vel());

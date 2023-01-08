@@ -200,16 +200,11 @@ namespace phys
             f->validate();
         for (const std::shared_ptr<interaction2D> &i : m_inters)
             i->validate();
-        std::vector<std::size_t> invalids;
-        invalids.reserve(m_springs.size());
-        for (std::size_t i = 0; i < m_springs.size(); i++)
-            if (!m_springs[i].try_validate())
-                invalids.emplace_back(i);
-        for (std::size_t index : invalids)
-        {
-            m_springs[index] = m_springs.back();
-            m_springs.pop_back();
-        }
+        for (auto it = m_springs.begin(); it != m_springs.end();)
+            if (!it->try_validate())
+                it = m_springs.erase(it);
+            else
+                ++it;
 
         m_integ.resize();
         m_collider.update_quad_tree();

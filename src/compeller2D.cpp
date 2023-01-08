@@ -18,21 +18,13 @@ namespace phys
     }
     void compeller2D::clear_constraints() { m_constraints.clear(); }
 
-    bool compeller2D::validate()
+    void compeller2D::validate()
     {
-        std::vector<std::size_t> invalids;
-        invalids.reserve(m_constraints.size());
-        for (std::size_t i = 0; i < m_constraints.size(); i++)
-            if (!m_constraints[i]->try_validate())
-                invalids.emplace_back(i);
-        for (std::size_t index : invalids)
-        {
-            m_constraints[index] = m_constraints.back();
-            m_constraints.pop_back();
-        }
-        DBG_LOG_IF(invalids.empty() && !m_constraints.empty(), "Validate method did not find any invalid constraints.\n")
-        DBG_LOG_IF(!invalids.empty() && !m_constraints.empty(), "Validate method found %zu invalid constraints.\n", invalids.size())
-        return !invalids.empty();
+        for (auto it = m_constraints.begin(); it != m_constraints.end();)
+            if (!((*it)->try_validate()))
+                it = m_constraints.erase(it);
+            else
+                ++it;
     }
 
     void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const
