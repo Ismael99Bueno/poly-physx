@@ -30,6 +30,9 @@ namespace phys
             for (const_entity_ptr &e : m_entities)
                 if (!e.try_validate())
                     return false;
+            for (entity_ptr &e : m_grad_entities)
+                if (!e.try_validate())
+                    return false;
             return true;
         }
 
