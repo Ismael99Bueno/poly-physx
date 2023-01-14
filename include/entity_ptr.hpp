@@ -26,8 +26,7 @@ namespace phys
 
     private:
         const std::vector<entity2D> *m_buffer = nullptr;
-        std::size_t m_index = 0;
-        std::uint64_t m_id = 0;
+        std::size_t m_index = 0, m_id = 0;
     };
 
     bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2);
@@ -54,8 +53,7 @@ namespace phys
 
     private:
         std::vector<entity2D> *m_buffer = nullptr;
-        std::size_t m_index = 0;
-        std::uint64_t m_id = 0;
+        std::size_t m_index = 0, m_id = 0;
     };
 
     bool operator==(const entity_ptr &e1, const entity_ptr &e2);

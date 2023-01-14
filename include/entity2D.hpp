@@ -34,7 +34,7 @@ namespace phys
         void shape(const geo::polygon2D &poly);
 
         std::size_t index() const;
-        std::uint64_t id() const;
+        std::size_t id() const;
 
         float inertia() const;
 
@@ -64,8 +64,7 @@ namespace phys
         geo::polygon2D m_shape;
         utils::vec_ptr m_buffer;
         alg::vec2 m_vel, m_force, m_added_force;
-        std::size_t m_index = 0;
-        std::uint64_t m_id;
+        std::size_t m_index = 0, m_id;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
         bool m_dynamic;
 

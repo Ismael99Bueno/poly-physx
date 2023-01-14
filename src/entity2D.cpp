@@ -60,7 +60,7 @@ namespace phys
     }
 
     std::size_t entity2D::index() const { return m_index; }
-    std::uint64_t entity2D::id() const { return m_id; }
+    std::size_t entity2D::id() const { return m_id; }
 
     float entity2D::inertia() const { return m_shape.inertia() * m_mass; }
 

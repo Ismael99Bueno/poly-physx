@@ -168,7 +168,7 @@ namespace phys
 
         e.retrieve();
         m_integ.resize();
-        DBG_LOG("Added entity with index %zu and id %llu.\n", e.m_index, e.m_id)
+        DBG_LOG("Added entity with index %zu and id %zu.\n", e.m_index, e.m_id)
 #ifdef DEBUG
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
             DBG_ASSERT(m_entities[i].m_id != e.m_id, "Added entity has the same id as entity with index %zu.\n", i)
