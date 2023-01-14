@@ -1,5 +1,5 @@
 #include "entity_ptr.hpp"
-#include "debug.h"
+#include "debug.hpp"
 
 namespace phys
 {

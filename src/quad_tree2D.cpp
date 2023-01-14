@@ -1,5 +1,6 @@
 #include "quad_tree2D.hpp"
-#include "debug.h"
+#include "debug.hpp"
+#include "perf.hpp"
 
 namespace phys
 {
@@ -31,6 +32,7 @@ namespace phys
 
     void quad_tree2D::partitions(std::vector<const std::vector<const_entity_ptr> *> &partitions) const
     {
+        PERF_FUNCTION()
         if (!m_partitioned)
             partitions.emplace_back(&m_entities);
         else

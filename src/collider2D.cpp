@@ -1,5 +1,5 @@
 #include "collider2D.hpp"
-#include "debug.h"
+#include "debug.hpp"
 #include "perf.hpp"
 #include <limits>
 #include <cmath>
@@ -152,7 +152,7 @@ namespace phys
         std::vector<const std::vector<const_entity_ptr> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
-#pragma omp parallel for
+
         for (const std::vector<const_entity_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)

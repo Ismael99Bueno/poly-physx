@@ -1,5 +1,5 @@
 #include "rigid_bar2D.hpp"
-#include "debug.h"
+#include "debug.hpp"
 #include <cmath>
 
 namespace phys

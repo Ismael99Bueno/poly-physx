@@ -1,7 +1,7 @@
 #include "entity2D.hpp"
 #include "force2D.hpp"
 #include "interaction2D.hpp"
-#include "debug.h"
+#include "debug.hpp"
 
 namespace phys
 {

@@ -1,6 +1,6 @@
 #include "compeller2D.hpp"
 #include "perf.hpp"
-#include "debug.h"
+#include "debug.hpp"
 #include "constraint_interface.hpp"
 
 namespace phys
