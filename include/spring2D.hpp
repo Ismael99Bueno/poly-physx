@@ -34,11 +34,14 @@ namespace phys
         const_entity_ptr e1() const;
         const_entity_ptr e2() const;
 
+        void e1(const_entity_ptr e);
+        void e2(const_entity_ptr e);
+
         alg::vec2 joint1() const;
         alg::vec2 joint2() const;
 
-        void joint2(const alg::vec2 &joint2);
         void joint1(const alg::vec2 &joint1);
+        void joint2(const alg::vec2 &joint2);
 
     private:
         float m_stiffness = 1.f, m_dampening = 0.f,

@@ -66,6 +66,19 @@ namespace phys
     const_entity_ptr spring2D::e1() const { return m_e1; }
     const_entity_ptr spring2D::e2() const { return m_e2; }
 
+    void spring2D::e1(const_entity_ptr e)
+    {
+        m_joint1.rotate(m_e1->angpos() - m_angle1);
+        m_e1 = e;
+        m_angle1 = e->angpos();
+    }
+    void spring2D::e2(const_entity_ptr e)
+    {
+        m_joint2.rotate(m_e2->angpos() - m_angle2);
+        m_e2 = e;
+        m_angle2 = e->angpos();
+    };
+
     alg::vec2 spring2D::joint1() const { return m_joint1.rotated(m_e1->angpos() - m_angle1); }
     alg::vec2 spring2D::joint2() const { return m_joint2.rotated(m_e2->angpos() - m_angle2); }
 
