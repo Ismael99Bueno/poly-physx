@@ -228,7 +228,6 @@ namespace phys
     }
     void engine2D::remove_spring(std::size_t index)
     {
-        DBG_LOG_IF(index >= m_springs.size(), "Failed to remove spring, index outside array bounds! - index: %zu, size: %zu\n", index, m_springs.size())
         if (index >= m_springs.size())
             return;
         m_springs.erase(m_springs.begin() + index);
