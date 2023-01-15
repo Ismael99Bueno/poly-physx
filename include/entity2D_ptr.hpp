@@ -1,16 +1,16 @@
-#ifndef ENTITY_PTR_HPP
-#define ENTITY_PTR_HPP
+#ifndef ENTITY2D_PTR_HPP
+#define ENTITY2D_PTR_HPP
 
 #include "entity2D.hpp"
 #include <vector>
 
 namespace phys
 {
-    class const_entity_ptr
+    class const_entity2D_ptr
     {
     public:
-        const_entity_ptr() = default;
-        const_entity_ptr(const std::vector<entity2D> *buffer, std::size_t index = 0);
+        const_entity2D_ptr() = default;
+        const_entity2D_ptr(const std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
         std::size_t id() const;
@@ -29,14 +29,14 @@ namespace phys
         std::size_t m_index = 0, m_id = 0;
     };
 
-    bool operator==(const const_entity_ptr &e1, const const_entity_ptr &e2);
-    bool operator!=(const const_entity_ptr &e1, const const_entity_ptr &e2);
+    bool operator==(const const_entity2D_ptr &e1, const const_entity2D_ptr &e2);
+    bool operator!=(const const_entity2D_ptr &e1, const const_entity2D_ptr &e2);
 
-    class entity_ptr
+    class entity2D_ptr
     {
     public:
-        entity_ptr() = default;
-        entity_ptr(std::vector<entity2D> *buffer, std::size_t index = 0);
+        entity2D_ptr() = default;
+        entity2D_ptr(std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
         std::size_t id() const;
@@ -49,29 +49,29 @@ namespace phys
         bool try_validate();
 
         explicit operator bool() const;
-        operator const_entity_ptr() const;
+        operator const_entity2D_ptr() const;
 
     private:
         std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0, m_id = 0;
     };
 
-    bool operator==(const entity_ptr &e1, const entity_ptr &e2);
-    bool operator!=(const entity_ptr &e1, const entity_ptr &e2);
+    bool operator==(const entity2D_ptr &e1, const entity2D_ptr &e2);
+    bool operator!=(const entity2D_ptr &e1, const entity2D_ptr &e2);
 }
 
 namespace std
 {
     template <>
-    struct hash<phys::const_entity_ptr>
+    struct hash<phys::const_entity2D_ptr>
     {
-        size_t operator()(const phys::const_entity_ptr &key) const;
+        size_t operator()(const phys::const_entity2D_ptr &key) const;
     };
 
     template <>
-    struct hash<phys::entity_ptr>
+    struct hash<phys::entity2D_ptr>
     {
-        size_t operator()(const phys::entity_ptr &key) const;
+        size_t operator()(const phys::entity2D_ptr &key) const;
     };
 }
 

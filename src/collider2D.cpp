@@ -18,7 +18,7 @@ namespace phys
         m_intervals.reserve(allocations);
     }
 
-    collider2D::interval::interval(const const_entity_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
+    collider2D::interval::interval(const const_entity2D_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
 
     const entity2D *collider2D::interval::entity() const { return m_entity.raw(); }
 
@@ -30,7 +30,7 @@ namespace phys
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
     bool collider2D::interval::try_validate() { return m_entity.try_validate(); }
 
-    void collider2D::add_entity_intervals(const const_entity_ptr &e)
+    void collider2D::add_entity_intervals(const const_entity2D_ptr &e)
     {
         m_intervals.emplace_back(e, interval::LOWER);
         m_intervals.emplace_back(e, interval::HIGHER);
@@ -149,11 +149,11 @@ namespace phys
         if (m_qt_build_calls++ >= m_qt_build_period)
             update_quad_tree();
 
-        std::vector<const std::vector<const_entity_ptr> *> partitions;
+        std::vector<const std::vector<const_entity2D_ptr> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
 
-        for (const std::vector<const_entity_ptr> *partition : partitions)
+        for (const std::vector<const_entity2D_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
                 {

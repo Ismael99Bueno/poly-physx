@@ -1,19 +1,19 @@
-#include "constraint_interface.hpp"
+#include "constraint_interface2D.hpp"
 #include <algorithm>
 
 #define TOLERANCE 1.e-3f
 
 namespace phys
 {
-    float constraint_interface::stiffness() const { return m_stiffness; }
-    float constraint_interface::dampening() const { return m_dampening; }
+    float constraint_interface2D::stiffness() const { return m_stiffness; }
+    float constraint_interface2D::dampening() const { return m_dampening; }
 
-    void constraint_interface::stiffness(float stiffness) { m_stiffness = stiffness; }
-    void constraint_interface::dampening(float dampening) { m_dampening = dampening; }
+    void constraint_interface2D::stiffness(float stiffness) { m_stiffness = stiffness; }
+    void constraint_interface2D::dampening(float dampening) { m_dampening = dampening; }
 
-    std::array<float, 3> constraint_interface::constraint_grad(entity2D &e) const { return gradient(e, &constraint_interface::value); }
-    std::array<float, 3> constraint_interface::constraint_grad_derivative(entity2D &e) const { return gradient(e, &constraint_interface::derivative); }
-    std::array<float, 3> constraint_interface::gradient(entity2D &e, const constraint_fun &constraint) const
+    std::array<float, 3> constraint_interface2D::constraint_grad(entity2D &e) const { return gradient(e, &constraint_interface2D::value); }
+    std::array<float, 3> constraint_interface2D::constraint_grad_derivative(entity2D &e) const { return gradient(e, &constraint_interface2D::derivative); }
+    std::array<float, 3> constraint_interface2D::gradient(entity2D &e, const constraint_fun &constraint) const
     {
         const alg::vec2 pos = e.pos();
         e.translate({-TOLERANCE, 0.f});

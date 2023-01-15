@@ -2,7 +2,7 @@
 #define ENGINE2D_HPP
 
 #include "integrator.hpp"
-#include "entity_ptr.hpp"
+#include "entity2D_ptr.hpp"
 #include "compeller2D.hpp"
 #include "collider2D.hpp"
 #include "force2D.hpp"
@@ -22,7 +22,7 @@ namespace phys
         bool reiterative_forward(float &dt, std::size_t reiterations = 2);
         bool embedded_forward(float &dt);
 
-        entity_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
+        entity2D_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
                               const alg::vec2 &vel = {0.f, 0.f},
                               float angpos = 0.f, float angvel = 0.f,
                               float mass = 1.f, float charge = 1.f,
@@ -30,7 +30,7 @@ namespace phys
                               bool dynamic = true);
 
         void remove_entity(std::size_t index);
-        void remove_entity(const const_entity_ptr &e);
+        void remove_entity(const const_entity2D_ptr &e);
 
         void add_force(const std::shared_ptr<force2D> &force);
         void add_interaction(const std::shared_ptr<interaction2D> &inter);
@@ -46,19 +46,19 @@ namespace phys
         void clear_springs();
         void clear();
 
-        using add_callback = std::function<void(entity_ptr)>;
+        using add_callback = std::function<void(entity2D_ptr)>;
         using remove_callback = std::function<void(std::size_t)>;
         void on_entity_addition(const add_callback &on_add);
         void on_entity_removal(const remove_callback &on_remove);
 
-        const_entity_ptr operator[](std::size_t index) const;
-        entity_ptr operator[](std::size_t index);
+        const_entity2D_ptr operator[](std::size_t index) const;
+        entity2D_ptr operator[](std::size_t index);
 
-        std::vector<const_entity_ptr> operator[](const geo::aabb2D &aabb) const;
-        std::vector<entity_ptr> operator[](const geo::aabb2D &aabb);
+        std::vector<const_entity2D_ptr> operator[](const geo::aabb2D &aabb) const;
+        std::vector<entity2D_ptr> operator[](const geo::aabb2D &aabb);
 
-        const_entity_ptr operator[](const alg::vec2 &point) const;
-        entity_ptr operator[](const alg::vec2 &point);
+        const_entity2D_ptr operator[](const alg::vec2 &point) const;
+        entity2D_ptr operator[](const alg::vec2 &point);
 
         const std::vector<std::shared_ptr<force2D>> &forces() const;
         const std::vector<std::shared_ptr<interaction2D>> &interactions() const;

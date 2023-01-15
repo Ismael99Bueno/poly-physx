@@ -2,7 +2,7 @@
 #define COLLIDER_HPP
 
 #include "entity2D.hpp"
-#include "entity_ptr.hpp"
+#include "entity2D_ptr.hpp"
 #include "constraint2D.hpp"
 #include "quad_tree2D.hpp"
 #include <vector>
@@ -23,7 +23,7 @@ namespace phys
         collider2D(const std::vector<entity2D> &entities,
                    std::size_t allocations);
 
-        void add_entity_intervals(const const_entity_ptr &e); // TODO: Implement remove
+        void add_entity_intervals(const const_entity2D_ptr &e); // TODO: Implement remove
         void solve_and_load_collisions(std::vector<float> &stchanges);
         void update_quad_tree();
         void rebuild_quad_tree();
@@ -57,7 +57,7 @@ namespace phys
                 HIGHER
             };
 
-            interval(const const_entity_ptr &e, end end_type);
+            interval(const const_entity2D_ptr &e, end end_type);
 
             const entity2D *entity() const;
             float value() const;
@@ -65,7 +65,7 @@ namespace phys
             bool try_validate();
 
         private:
-            const_entity_ptr m_entity;
+            const_entity2D_ptr m_entity;
             end m_end;
         };
 

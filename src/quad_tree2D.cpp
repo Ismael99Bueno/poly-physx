@@ -17,7 +17,7 @@ namespace phys
         m_entities.reserve(max_entities);
     }
 
-    void quad_tree2D::add_if_inside(const const_entity_ptr &e)
+    void quad_tree2D::add_if_inside(const const_entity2D_ptr &e)
     {
         DBG_ASSERT(m_entities.size() <= m_max_entities || rock_bottom(), "Quad tree contains more entities than allowed! - Contained entities: %zu, maximum entities: %zu\n", m_entities.size(), m_max_entities)
         if (!m_aabb.overlaps(e->aabb()))
@@ -30,7 +30,7 @@ namespace phys
             m_entities.emplace_back(e);
     }
 
-    void quad_tree2D::partitions(std::vector<const std::vector<const_entity_ptr> *> &partitions) const
+    void quad_tree2D::partitions(std::vector<const std::vector<const_entity2D_ptr> *> &partitions) const
     {
         PERF_FUNCTION()
         if (!m_partitioned)
@@ -82,12 +82,12 @@ namespace phys
         if (!m_has_children)
             create_children();
         m_partitioned = true;
-        for (const const_entity_ptr &e : m_entities)
+        for (const const_entity2D_ptr &e : m_entities)
             add_to_children(e);
         m_entities.clear();
     }
 
-    void quad_tree2D::add_to_children(const const_entity_ptr &e)
+    void quad_tree2D::add_to_children(const const_entity2D_ptr &e)
     {
         for (const auto &q : m_children)
             q->add_if_inside(e);
@@ -103,7 +103,7 @@ namespace phys
     void quad_tree2D::max_entities(const std::size_t max_entities) { m_max_entities = max_entities; }
 
     bool quad_tree2D::partitioned() const { return m_partitioned; }
-    const std::vector<const_entity_ptr> &quad_tree2D::entities() const { return m_entities; }
+    const std::vector<const_entity2D_ptr> &quad_tree2D::entities() const { return m_entities; }
 
     const std::array<std::unique_ptr<quad_tree2D>, 4> &quad_tree2D::children() const { return m_children; }
     const quad_tree2D &quad_tree2D::child(std::size_t index) const

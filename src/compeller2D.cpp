@@ -1,7 +1,7 @@
 #include "compeller2D.hpp"
 #include "perf.hpp"
 #include "debug.hpp"
-#include "constraint_interface.hpp"
+#include "constraint_interface2D.hpp"
 
 namespace phys
 {
@@ -11,8 +11,8 @@ namespace phys
         m_constraints.reserve(allocations);
     }
 
-    void compeller2D::add_constraint(const std::shared_ptr<constraint_interface> &c) { m_constraints.emplace_back(c); }
-    void compeller2D::remove_constraint(const std::shared_ptr<const constraint_interface> &c)
+    void compeller2D::add_constraint(const std::shared_ptr<constraint_interface2D> &c) { m_constraints.emplace_back(c); }
+    void compeller2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &c)
     {
         m_constraints.erase(std::remove(m_constraints.begin(), m_constraints.end(), c), m_constraints.end());
     }
@@ -39,7 +39,7 @@ namespace phys
         return load_constraint_accels(jcb, lambda, stchanges);
     }
 
-    const std::vector<std::shared_ptr<constraint_interface>> &compeller2D::constraints() const { return m_constraints; }
+    const std::vector<std::shared_ptr<constraint_interface2D>> &compeller2D::constraints() const { return m_constraints; }
 
     std::vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
     {
@@ -61,8 +61,8 @@ namespace phys
         return cmatrix;
     }
 
-    std::vector<float> compeller2D::jacobian() const { return constraint_matrix(&constraint_interface::constraint_grad); }
-    std::vector<float> compeller2D::jacobian_derivative() const { return constraint_matrix(&constraint_interface::constraint_grad_derivative); }
+    std::vector<float> compeller2D::jacobian() const { return constraint_matrix(&constraint_interface2D::constraint_grad); }
+    std::vector<float> compeller2D::jacobian_derivative() const { return constraint_matrix(&constraint_interface2D::constraint_grad_derivative); }
 
     std::vector<float> compeller2D::lhs(const std::vector<float> &jcb,
                                         const std::vector<float> &inv_masses) const

@@ -9,23 +9,23 @@ namespace phys
     {
     public:
         rigid_bar2D() = delete;
-        rigid_bar2D(const entity_ptr &e1,
-                    const entity_ptr &e2,
+        rigid_bar2D(const entity2D_ptr &e1,
+                    const entity2D_ptr &e2,
                     float length = 10.f);
-        rigid_bar2D(const entity_ptr &e1,
-                    const entity_ptr &e2,
+        rigid_bar2D(const entity2D_ptr &e1,
+                    const entity2D_ptr &e2,
                     const alg::vec2 &joint1,
                     const alg::vec2 &joint2,
                     float length = 10.f);
 
-        float constraint(const std::array<const_entity_ptr, 2> &entities) const override;
-        float constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const override;
+        float constraint(const std::array<const_entity2D_ptr, 2> &entities) const override;
+        float constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const override;
 
         float length() const;
         void length(float length);
 
-        const_entity_ptr e1() const;
-        const_entity_ptr e2() const;
+        const_entity2D_ptr e1() const;
+        const_entity2D_ptr e2() const;
 
         alg::vec2 joint1() const;
         alg::vec2 joint2() const;
@@ -41,11 +41,11 @@ namespace phys
         std::array<float, 3> constraint_grad(entity2D &e) const override;
         std::array<float, 3> constraint_grad_derivative(entity2D &e) const override;
 
-        float without_joints_constraint(const std::array<const_entity_ptr, 2> &entities) const;
-        float without_joints_constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const;
+        float without_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const;
+        float without_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const;
 
-        float with_joints_constraint(const std::array<const_entity_ptr, 2> &entities) const;
-        float with_joints_constraint_derivative(const std::array<const_entity_ptr, 2> &entities) const;
+        float with_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const;
+        float with_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const;
     };
 }
 

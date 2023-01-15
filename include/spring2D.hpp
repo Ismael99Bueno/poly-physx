@@ -1,7 +1,7 @@
 #ifndef SPRING2D_HPP
 #define SPRING2D_HPP
 
-#include "entity_ptr.hpp"
+#include "entity2D_ptr.hpp"
 #include <utility>
 
 namespace phys
@@ -10,11 +10,11 @@ namespace phys
     {
     public:
         spring2D() = delete;
-        spring2D(const const_entity_ptr &e1,
-                 const const_entity_ptr &e2,
+        spring2D(const const_entity2D_ptr &e1,
+                 const const_entity2D_ptr &e2,
                  float length = 0.f);
-        spring2D(const const_entity_ptr &e1,
-                 const const_entity_ptr &e2,
+        spring2D(const const_entity2D_ptr &e1,
+                 const const_entity2D_ptr &e2,
                  const alg::vec2 &joint1,
                  const alg::vec2 &joint2,
                  float length = 0.f);
@@ -31,8 +31,8 @@ namespace phys
         void dampening(float dampening);
         void length(float length);
 
-        const_entity_ptr e1() const;
-        const_entity_ptr e2() const;
+        const_entity2D_ptr e1() const;
+        const_entity2D_ptr e2() const;
 
         alg::vec2 joint1() const;
         alg::vec2 joint2() const;
@@ -43,7 +43,7 @@ namespace phys
     private:
         float m_stiffness = 1.f, m_dampening = 0.f,
               m_angle1, m_angle2, m_length;
-        const_entity_ptr m_e1, m_e2;
+        const_entity2D_ptr m_e1, m_e2;
         alg::vec2 m_joint1, m_joint2;
         bool m_has_joints;
 

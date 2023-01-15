@@ -2,8 +2,8 @@
 
 namespace phys
 {
-    spring2D::spring2D(const const_entity_ptr &e1,
-                       const const_entity_ptr &e2,
+    spring2D::spring2D(const const_entity2D_ptr &e1,
+                       const const_entity2D_ptr &e2,
                        const float length) : m_e1(e1),
                                              m_e2(e2),
                                              m_joint1(e1->pos()),
@@ -11,8 +11,8 @@ namespace phys
                                              m_length(length),
                                              m_has_joints(false) {}
 
-    spring2D::spring2D(const const_entity_ptr &e1,
-                       const const_entity_ptr &e2,
+    spring2D::spring2D(const const_entity2D_ptr &e1,
+                       const const_entity2D_ptr &e2,
                        const alg::vec2 &joint1,
                        const alg::vec2 &joint2,
                        const float length) : m_e1(e1),
@@ -63,8 +63,8 @@ namespace phys
     void spring2D::dampening(const float dampening) { m_dampening = dampening; }
     void spring2D::length(const float length) { m_length = length; }
 
-    const_entity_ptr spring2D::e1() const { return m_e1; }
-    const_entity_ptr spring2D::e2() const { return m_e2; }
+    const_entity2D_ptr spring2D::e1() const { return m_e1; }
+    const_entity2D_ptr spring2D::e2() const { return m_e2; }
 
     alg::vec2 spring2D::joint1() const { return m_joint1.rotated(m_e1->angpos() - m_angle1); }
     alg::vec2 spring2D::joint2() const { return m_joint2.rotated(m_e2->angpos() - m_angle2); }

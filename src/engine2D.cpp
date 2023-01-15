@@ -91,7 +91,7 @@ namespace phys
     {
         PERF_FUNCTION()
         for (const std::shared_ptr<const force2D> &f : m_forces)
-            for (const const_entity_ptr &e : f->entities())
+            for (const const_entity2D_ptr &e : f->entities())
             {
                 if (!e->dynamic())
                     continue;
@@ -110,12 +110,12 @@ namespace phys
                 load_force(stchanges, -force, t2, index2);
         }
         for (const std::shared_ptr<const interaction2D> &i : m_inters)
-            for (const const_entity_ptr &e1 : i->entities())
+            for (const const_entity2D_ptr &e1 : i->entities())
             {
                 if (!e1->dynamic())
                     continue;
                 const std::size_t index = 6 * e1.index();
-                for (const const_entity_ptr &e2 : i->entities())
+                for (const const_entity2D_ptr &e2 : i->entities())
                     if (e1 != e2)
                     {
                         const auto [force, torque] = i->force(*e1, *e2);
@@ -147,17 +147,17 @@ namespace phys
         }
     }
 
-    entity_ptr engine2D::add_entity(const alg::vec2 &pos,
-                                    const alg::vec2 &vel,
-                                    const float angpos,
-                                    const float angvel,
-                                    const float mass,
-                                    const float charge,
-                                    const std::vector<alg::vec2> &vertices,
-                                    const bool dynamic)
+    entity2D_ptr engine2D::add_entity(const alg::vec2 &pos,
+                                      const alg::vec2 &vel,
+                                      const float angpos,
+                                      const float angvel,
+                                      const float mass,
+                                      const float charge,
+                                      const std::vector<alg::vec2> &vertices,
+                                      const bool dynamic)
     {
         entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices, dynamic);
-        const entity_ptr e_ptr = {&m_entities, m_entities.size() - 1};
+        const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
 
         e.m_index = m_entities.size() - 1;
         e.m_buffer = utils::vec_ptr(&m_state, m_state.size());
@@ -212,7 +212,7 @@ namespace phys
             cb(index);
     }
 
-    void engine2D::remove_entity(const const_entity_ptr &e) { remove_entity(e.index()); }
+    void engine2D::remove_entity(const const_entity2D_ptr &e) { remove_entity(e.index()); }
 
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_inters.emplace_back(inter); }
@@ -254,21 +254,21 @@ namespace phys
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
     void engine2D::on_entity_removal(const remove_callback &on_remove) { m_on_entity_removal.emplace_back(on_remove); }
 
-    const_entity_ptr engine2D::operator[](std::size_t index) const { return {&m_entities, index}; }
-    entity_ptr engine2D::operator[](std::size_t index) { return {&m_entities, index}; }
+    const_entity2D_ptr engine2D::operator[](std::size_t index) const { return {&m_entities, index}; }
+    entity2D_ptr engine2D::operator[](std::size_t index) { return {&m_entities, index}; }
 
-    std::vector<const_entity_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
+    std::vector<const_entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
     {
-        std::vector<const_entity_ptr> in_area;
+        std::vector<const_entity2D_ptr> in_area;
         in_area.reserve(m_entities.size() / 2);
         for (const entity2D &e : m_entities)
             if (e.aabb().overlaps(aabb))
                 in_area.emplace_back(&m_entities, e.index());
         return in_area;
     }
-    std::vector<entity_ptr> engine2D::operator[](const geo::aabb2D &aabb)
+    std::vector<entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb)
     {
-        std::vector<entity_ptr> in_area;
+        std::vector<entity2D_ptr> in_area;
         in_area.reserve(m_entities.size() / 2);
         for (const entity2D &e : m_entities)
             if (e.aabb().overlaps(aabb))
@@ -284,7 +284,7 @@ namespace phys
     std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() { return m_inters; }
     std::vector<spring2D> &engine2D::springs() { return m_springs; }
 
-    const_entity_ptr engine2D::operator[](const alg::vec2 &point) const
+    const_entity2D_ptr engine2D::operator[](const alg::vec2 &point) const
     {
         const geo::aabb2D aabb = point;
         for (const entity2D &e : m_entities)
@@ -292,7 +292,7 @@ namespace phys
                 return {&m_entities, e.index()};
         return nullptr;
     }
-    entity_ptr engine2D::operator[](const alg::vec2 &point)
+    entity2D_ptr engine2D::operator[](const alg::vec2 &point)
     {
         const geo::aabb2D aabb = point;
         for (const entity2D &e : m_entities)
