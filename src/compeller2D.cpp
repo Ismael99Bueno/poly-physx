@@ -90,7 +90,7 @@ namespace phys
     {
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
-        std::vector<float> b(rows, 0.f), qdot(stchanges.size() / 2, 0.f), accels(stchanges.size() / 2, 0.f);
+        std::vector<float> b(rows, 0.f);
 
         for (std::size_t i = 0; i < rows; i++)
         {
@@ -99,11 +99,14 @@ namespace phys
                 {
                     const std::size_t index1 = j * 3 + k, index2 = j * 6 + k;
                     const std::size_t id = i * cols + index1;
-                    b[i] -= (djcb[id] * stchanges[index2] +
-                             jcb[id] * stchanges[index2 + 3] * inv_masses[index1]);
+
+                    const float to_substract = djcb[id] * stchanges[index2] +
+                                               jcb[id] * stchanges[index2 + 3] * inv_masses[index1];
+                    b[i] -= to_substract;
                 }
-            b[i] -= (m_constraints[i]->stiffness() * m_constraints[i]->value() +
-                     m_constraints[i]->dampening() * m_constraints[i]->derivative());
+            const float anti_drift = (m_constraints[i]->stiffness() * m_constraints[i]->value() +
+                                      m_constraints[i]->dampening() * m_constraints[i]->derivative());
+            b[i] -= anti_drift;
         }
 
         // std::size_t index = 0;
