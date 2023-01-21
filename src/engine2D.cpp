@@ -235,7 +235,7 @@ namespace phys
 
     void engine2D::clear_entities()
     {
-        for (std::size_t i = m_entities.size() - 1; i >= 0 && i < m_entities.size(); i--)
+        for (std::size_t i = m_entities.size() - 1; i < m_entities.size(); i--)
             remove_entity(i);
     }
     void engine2D::clear_forces() { m_forces.clear(); }

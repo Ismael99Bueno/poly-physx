@@ -144,7 +144,7 @@ namespace phys
                 val -= L[i * size + j] * sol[j];
             sol[i] = val / L[i * size + i];
         }
-        for (std::size_t i = size - 1; i >= 0 && i < size; i--)
+        for (std::size_t i = size - 1; i < size; i--)
         {
             float val = sol[i];
             for (std::size_t j = i + 1; j < size; j++)
