@@ -108,24 +108,6 @@ namespace phys
                                       m_constraints[i]->dampening() * m_constraints[i]->derivative());
             b[i] -= anti_drift;
         }
-
-        // std::size_t index = 0;
-        // for (std::size_t i = 0; i < m_entities.size(); i++)
-        //     for (std::size_t j = 0; j < 3; j++)
-        //     {
-        //         qdot[index] = stchanges[6 * i + j];
-        //         accels[index++] = stchanges[6 * i + j + 3];
-        //     }
-
-        // for (std::size_t i = 0; i < rows; i++)
-        // {
-        //     for (std::size_t j = 0; j < cols; j++)
-        //     {
-        //         const std::size_t id = i * cols + j;
-        //         b[i] -= (djcb[id] * qdot[j] + jcb[id] * accels[j]);
-        //     }
-        //     b[i] -= (m_constraints[i]->stiffness() * m_constraints[i]->value() + m_constraints[i]->dampening() * m_constraints[i]->derivative());
-        // }
         return b;
     }
 
