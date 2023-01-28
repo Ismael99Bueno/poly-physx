@@ -13,6 +13,26 @@ namespace phys
         m_entities.reserve(allocations);
         m_integ.reserve(6 * allocations);
     }
+    engine2D::engine2D(const engine2D &eng) : m_entities(eng.m_entities),
+                                              m_collider(&m_entities, 2 * eng.size(),
+                                                         eng.m_collider.quad_tree().aabb().min(),
+                                                         eng.m_collider.quad_tree().aabb().max()),
+                                              m_compeller(&m_entities, eng.size()),
+                                              m_integ(eng.m_integ),
+                                              m_elapsed(eng.m_elapsed)
+    {
+        for (entity2D &e : m_entities)
+        {
+            e.m_buffer = utils::vec_ptr(&m_integ.state(), e.index());
+            m_collider.add_entity_intervals({&m_entities, e.index()});
+        }
+        m_springs.reserve(eng.m_springs.capacity());
+        for (const spring2D &sp : eng.m_springs)
+            if (sp.has_joints())
+                m_springs.emplace_back(sp.e1(), sp.e2(), sp.joint1(), sp.joint2(), sp.length());
+            else
+                m_springs.emplace_back(sp.e1(), sp.e2(), sp.length());
+    }
 
     void engine2D::retrieve(const std::vector<float> &state)
     {
@@ -23,23 +43,23 @@ namespace phys
 
     void engine2D::retrieve() { retrieve(m_integ.state()); }
 
-    bool engine2D::raw_forward(float &dt)
+    bool engine2D::raw_forward(float &timestep)
     {
-        const bool valid = m_integ.raw_forward(m_t, dt, *this, ode);
+        const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this, ode);
         register_forces_onto_entities();
         reset_forces();
         return valid;
     }
-    bool engine2D::reiterative_forward(float &dt, const std::size_t reiterations)
+    bool engine2D::reiterative_forward(float &timestep, const std::size_t reiterations)
     {
-        const bool valid = m_integ.reiterative_forward(m_t, dt, *this, ode, reiterations);
+        const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, ode, reiterations);
         register_forces_onto_entities();
         reset_forces();
         return valid;
     }
-    bool engine2D::embedded_forward(float &dt)
+    bool engine2D::embedded_forward(float &timestep)
     {
-        const bool valid = m_integ.embedded_forward(m_t, dt, *this, ode);
+        const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this, ode);
         register_forces_onto_entities();
         reset_forces();
         return valid;
@@ -316,5 +336,5 @@ namespace phys
     const collider2D &engine2D::collider() const { return m_collider; }
     collider2D &engine2D::collider() { return m_collider; }
 
-    float engine2D::elapsed() const { return m_t; }
+    float engine2D::elapsed() const { return m_elapsed; }
 }

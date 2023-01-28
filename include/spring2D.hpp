@@ -40,6 +40,8 @@ namespace phys
         void joint1(const alg::vec2 &joint1);
         void joint2(const alg::vec2 &joint2);
 
+        bool has_joints() const;
+
     private:
         float m_stiffness = 1.f, m_dampening = 0.f,
               m_angle1, m_angle2, m_length;

@@ -15,12 +15,13 @@ namespace phys
     {
     public:
         engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);
+        engine2D(const engine2D &eng);
 
         void retrieve();
 
-        bool raw_forward(float &dt);
-        bool reiterative_forward(float &dt, std::size_t reiterations = 2);
-        bool embedded_forward(float &dt);
+        bool raw_forward(float &timestep);
+        bool reiterative_forward(float &timestep, std::size_t reiterations = 2);
+        bool embedded_forward(float &timestep);
 
         entity2D_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
                                 const alg::vec2 &vel = {0.f, 0.f},
@@ -85,8 +86,8 @@ namespace phys
 
     private:
         std::vector<entity2D> m_entities;
-        compeller2D m_compeller;
         collider2D m_collider;
+        compeller2D m_compeller;
         std::vector<std::shared_ptr<force2D>> m_forces;
         std::vector<std::shared_ptr<interaction2D>> m_inters;
         std::vector<spring2D> m_springs;
@@ -94,7 +95,7 @@ namespace phys
         std::vector<remove_callback> m_on_entity_removal;
 
         rk::integrator m_integ;
-        float m_t = 0.f;
+        float m_elapsed = 0.f;
 
         void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
         void load_interactions_and_externals(std::vector<float> &stchanges) const;

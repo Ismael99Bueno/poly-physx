@@ -11,9 +11,10 @@
 namespace phys
 {
     collider2D::collider2D(const std::vector<entity2D> *entities,
-                           const std::size_t allocations) : m_entities(entities),
-                                                            m_quad_tree(-0.5f * alg::vec2(192.f, 128.f),
-                                                                        0.5f * alg::vec2(192.f, 128.f))
+                           const std::size_t allocations,
+                           const alg::vec2 &min,
+                           const alg::vec2 &max) : m_entities(entities),
+                                                   m_quad_tree(min, max)
     {
         m_intervals.reserve(allocations);
     }

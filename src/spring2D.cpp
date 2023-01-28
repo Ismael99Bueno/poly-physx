@@ -81,4 +81,6 @@ namespace phys
         m_angle2 = m_e2->angpos();
         m_has_joints = true;
     }
+
+    bool spring2D::has_joints() const { return m_has_joints; }
 }
