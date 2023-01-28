@@ -23,11 +23,11 @@ namespace phys
         bool embedded_forward(float &dt);
 
         entity2D_ptr add_entity(const alg::vec2 &pos = {0.f, 0.f},
-                              const alg::vec2 &vel = {0.f, 0.f},
-                              float angpos = 0.f, float angvel = 0.f,
-                              float mass = 1.f, float charge = 1.f,
-                              const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f),
-                              bool dynamic = true);
+                                const alg::vec2 &vel = {0.f, 0.f},
+                                float angpos = 0.f, float angvel = 0.f,
+                                float mass = 1.f, float charge = 1.f,
+                                const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f),
+                                bool dynamic = true);
 
         void remove_entity(std::size_t index);
         void remove_entity(const const_entity2D_ptr &e);
@@ -75,8 +75,6 @@ namespace phys
         const rk::integrator &integrator() const;
         rk::integrator &integrator();
 
-        const std::vector<float> &state() const;
-
         const compeller2D &compeller() const;
         compeller2D &compeller();
 
@@ -87,7 +85,6 @@ namespace phys
 
     private:
         std::vector<entity2D> m_entities;
-        std::vector<float> m_state;
         compeller2D m_compeller;
         collider2D m_collider;
         std::vector<std::shared_ptr<force2D>> m_forces;
