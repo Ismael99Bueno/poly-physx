@@ -11,6 +11,8 @@ namespace phys
     class constraint_interface2D
     {
     public:
+        virtual ~constraint_interface2D() = default;
+
         virtual float value() const = 0;
         float stiffness() const;
         float dampening() const;

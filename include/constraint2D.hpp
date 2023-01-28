@@ -11,6 +11,8 @@ namespace phys
     {
     public:
         constraint2D() = default;
+        virtual ~constraint2D() = default;
+
         constraint2D(const std::array<entity2D_ptr, N> &entities) : m_grad_entities(entities)
         {
             for (std::size_t i = 0; i < N; i++)

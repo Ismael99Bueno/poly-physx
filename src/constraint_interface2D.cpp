@@ -22,7 +22,6 @@ namespace phys
         const float cx2 = constraint(*this);
         e.pos(pos);
 
-        const float y = e.pos().y;
         e.translate({0.f, -TOLERANCE});
         const float cy1 = constraint(*this);
         e.translate({0.f, 2.f * TOLERANCE});

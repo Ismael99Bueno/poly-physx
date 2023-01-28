@@ -15,12 +15,14 @@ namespace phys
                              const alg::vec2 &joint1,
                              const alg::vec2 &joint2,
                              const float length) : constraint2D<2>({e1, e2}),
-                                                   m_joint1(joint1),
-                                                   m_joint2(joint2),
+                                                   m_length(length),
                                                    m_angle1(e1->angpos()),
                                                    m_angle2(e2->angpos()),
-                                                   m_length(length),
-                                                   m_has_joints(true) {}
+                                                   m_joint1(joint1),
+                                                   m_joint2(joint2),
+                                                   m_has_joints(true)
+    {
+    }
 
     float rigid_bar2D::constraint(const std::array<const_entity2D_ptr, 2> &entities) const
     {

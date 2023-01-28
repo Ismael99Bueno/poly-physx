@@ -6,9 +6,9 @@
 namespace phys
 {
     engine2D::engine2D(const rk::butcher_tableau &table,
-                       const std::size_t allocations) : m_integ(table),
-                                                        m_collider(&m_entities, 2 * allocations),
-                                                        m_compeller(&m_entities, allocations)
+                       const std::size_t allocations) : m_collider(&m_entities, 2 * allocations),
+                                                        m_compeller(&m_entities, allocations),
+                                                        m_integ(table)
     {
         m_entities.reserve(allocations);
         m_integ.reserve(6 * allocations);
@@ -109,7 +109,7 @@ namespace phys
     void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        for (const std::shared_ptr<const force2D> &f : m_forces)
+        for (const std::shared_ptr<const force2D> f : m_forces)
             for (const const_entity2D_ptr &e : f->entities())
             {
                 if (!e->dynamic())
@@ -128,7 +128,7 @@ namespace phys
             if (s.e2()->dynamic())
                 load_force(stchanges, -force, t2, index2);
         }
-        for (const std::shared_ptr<const interaction2D> &i : m_inters)
+        for (const std::shared_ptr<const interaction2D> i : m_inters)
             for (const const_entity2D_ptr &e1 : i->entities())
             {
                 if (!e1->dynamic())

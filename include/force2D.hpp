@@ -9,6 +9,7 @@ namespace phys
     {
     public:
         using entity2D_set::entity2D_set;
+        virtual ~force2D() = default;
         virtual std::pair<alg::vec2, float> force(const entity2D &e) const = 0;
     };
 }

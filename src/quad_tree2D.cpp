@@ -10,9 +10,9 @@ namespace phys
                              const std::size_t max_entities,
                              const std::uint32_t depth) : m_aabb(min, max),
                                                           m_max_entities(max_entities),
+                                                          m_depth(depth),
                                                           m_partitioned(false),
-                                                          m_has_children(false),
-                                                          m_depth(depth)
+                                                          m_has_children(false)
     {
         m_entities.reserve(max_entities);
     }

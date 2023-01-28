@@ -43,10 +43,10 @@ namespace phys
         bool has_joints() const;
 
     private:
-        float m_stiffness = 1.f, m_dampening = 0.f,
-              m_angle1, m_angle2, m_length;
         const_entity2D_ptr m_e1, m_e2;
         alg::vec2 m_joint1, m_joint2;
+        float m_stiffness = 1.f, m_dampening = 0.f,
+              m_angle1, m_angle2, m_length;
         bool m_has_joints;
 
         std::tuple<alg::vec2, float, float> without_joints_force() const;
