@@ -10,7 +10,7 @@
 
 namespace phys
 {
-    collider2D::collider2D(const std::vector<entity2D> &entities,
+    collider2D::collider2D(const std::vector<entity2D> *entities,
                            const std::size_t allocations) : m_entities(entities),
                                                             m_quad_tree(-0.5f * alg::vec2(192.f, 128.f),
                                                                         0.5f * alg::vec2(192.f, 128.f))
@@ -57,13 +57,13 @@ namespace phys
 
     void collider2D::update_quad_tree()
     {
-        m_quad_tree.update(m_entities);
+        m_quad_tree.update(*m_entities);
         m_qt_build_calls = 0;
     }
 
     void collider2D::rebuild_quad_tree()
     {
-        m_quad_tree.rebuild(m_entities);
+        m_quad_tree.rebuild(*m_entities);
         m_qt_build_calls = 0;
     }
 
@@ -112,11 +112,11 @@ namespace phys
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        for (std::size_t i = 0; i < m_entities.size(); i++)
-            for (std::size_t j = i + 1; j < m_entities.size(); j++)
+        for (std::size_t i = 0; i < m_entities->size(); i++)
+            for (std::size_t j = i + 1; j < m_entities->size(); j++)
             {
                 collision c;
-                if (collide(&m_entities[i], &m_entities[j], &c))
+                if (collide(&(*m_entities)[i], &(*m_entities)[j], &c))
                     solve(c, stchanges);
             }
     }

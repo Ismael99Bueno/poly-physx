@@ -12,7 +12,7 @@ namespace phys
     {
     public:
         compeller2D() = delete;
-        compeller2D(std::vector<entity2D> &entities,
+        compeller2D(std::vector<entity2D> *entities,
                     std::size_t allocations);
 
         void add_constraint(const std::shared_ptr<constraint_interface2D> &c);
@@ -27,7 +27,7 @@ namespace phys
         const std::vector<std::shared_ptr<constraint_interface2D>> &constraints() const;
 
     private:
-        std::vector<entity2D> &m_entities;
+        std::vector<entity2D> *m_entities;
         std::vector<std::shared_ptr<constraint_interface2D>> m_constraints;
 
         using constraint_grad_fun = std::function<std::array<float, 3>(const constraint_interface2D &, entity2D &)>;

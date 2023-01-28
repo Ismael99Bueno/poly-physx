@@ -5,7 +5,7 @@
 
 namespace phys
 {
-    compeller2D::compeller2D(std::vector<entity2D> &entities,
+    compeller2D::compeller2D(std::vector<entity2D> *entities,
                              const std::size_t allocations) : m_entities(entities)
     {
         m_constraints.reserve(allocations);
@@ -44,7 +44,7 @@ namespace phys
     std::vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
         std::vector<float> cmatrix(rows * cols, 0.f);
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t ct_idx = 0; ct_idx < m_constraints[i]->size(); ct_idx++)
@@ -68,7 +68,7 @@ namespace phys
                                         const std::vector<float> &inv_masses) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
         std::vector<float> A(rows * rows, 0.f);
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t j = 0; j < rows; j++)
@@ -89,12 +89,12 @@ namespace phys
                                         const std::vector<float> &inv_masses) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
         std::vector<float> b(rows, 0.f);
 
         for (std::size_t i = 0; i < rows; i++)
         {
-            for (std::size_t j = 0; j < m_entities.size(); j++)
+            for (std::size_t j = 0; j < m_entities->size(); j++)
                 for (std::size_t k = 0; k < 3; k++)
                 {
                     const std::size_t index1 = j * 3 + k, index2 = j * 6 + k;
@@ -159,9 +159,9 @@ namespace phys
                                              std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities.size();
-        for (std::size_t i = 0; i < m_entities.size(); i++)
-            if (m_entities[i].dynamic())
+        const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
+        for (std::size_t i = 0; i < m_entities->size(); i++)
+            if ((*m_entities)[i].dynamic())
                 for (std::size_t j = 0; j < 3; j++)
                     for (std::size_t k = 0; k < rows; k++)
                     {

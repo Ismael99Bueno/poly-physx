@@ -20,7 +20,7 @@ namespace phys
             QUAD_TREE
         };
 
-        collider2D(const std::vector<entity2D> &entities,
+        collider2D(const std::vector<entity2D> *entities,
                    std::size_t allocations);
 
         void add_entity_intervals(const const_entity2D_ptr &e); // TODO: Implement remove
@@ -75,7 +75,7 @@ namespace phys
             alg::vec2 touch1, touch2;
         };
 
-        const std::vector<entity2D> &m_entities;
+        const std::vector<entity2D> *m_entities;
         std::vector<interval> m_intervals;
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
