@@ -134,4 +134,6 @@ namespace phys
         m_angle2 = m_entities[1]->angpos();
         m_has_joints = true;
     }
+
+    bool rigid_bar2D::has_joints() const { return m_has_joints; }
 }

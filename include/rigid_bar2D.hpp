@@ -33,6 +33,8 @@ namespace phys
         void joint1(const alg::vec2 &joint1);
         void joint2(const alg::vec2 &joint2);
 
+        bool has_joints() const;
+
     private:
         float m_length, m_angle1, m_angle2;
         alg::vec2 m_joint1, m_joint2;
