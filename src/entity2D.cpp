@@ -73,6 +73,39 @@ namespace phys
     void entity2D::translate(const alg::vec2 &dpos) { m_shape.translate(dpos); }
     void entity2D::rotate(const float dangle) { m_shape.rotate(dangle); }
 
+    void entity2D::write(ini::output &out) const
+    {
+        m_shape.write(out);
+        out.begin_section("velocity");
+        m_vel.write(out);
+        out.end_section();
+        out.begin_section("added_force");
+        m_added_force.write(out);
+        out.end_section();
+        out.write("mass", m_mass);
+        out.write("charge", m_charge);
+        out.write("dynamic", m_dynamic);
+        out.write("angvel", m_angvel);
+        out.write("added_torque", m_added_torque);
+    }
+    void entity2D::read(ini::input &in)
+    {
+        m_shape.read(in);
+        m_aabb.bound(m_shape.vertices());
+
+        in.begin_section("velocity");
+        m_vel.read(in);
+        in.end_section();
+        in.begin_section("added_force");
+        m_added_force.read(in);
+        in.end_section();
+        m_mass = in.readf("mass");
+        m_charge = in.readf("charge");
+        m_dynamic = (bool)in.readi("dynamic");
+        m_angvel = in.readf("angvel");
+        m_added_torque = in.readf("added_torque");
+    }
+
     const alg::vec2 &entity2D::pos() const { return m_shape.centroid(); }
     const alg::vec2 &entity2D::vel() const { return m_vel; }
     const alg::vec2 entity2D::vel_at(const alg::vec2 &at) const { return m_vel + m_angvel * alg::vec2(-at.y, at.x); }

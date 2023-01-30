@@ -4,10 +4,11 @@
 #include "aabb2D.hpp"
 #include "polygon2D.hpp"
 #include "vec_ptr.hpp"
+#include "saveable.hpp"
 
 namespace phys
 {
-    class entity2D
+    class entity2D : public ini::saveable
     {
     public:
         entity2D(const alg::vec2 &pos,
@@ -43,6 +44,9 @@ namespace phys
 
         void translate(const alg::vec2 &dpos);
         void rotate(float dangle);
+
+        void write(ini::output &out) const override;
+        void read(ini::input &in) override;
 
         const alg::vec2 &pos() const;
         const alg::vec2 &vel() const;
