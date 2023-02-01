@@ -6,7 +6,7 @@
 
 namespace phys
 {
-    class spring2D
+    class spring2D : public ini::saveable
     {
     public:
         spring2D() = delete;
@@ -30,6 +30,9 @@ namespace phys
         void stiffness(float stiffness);
         void dampening(float dampening);
         void length(float length);
+
+        void write(ini::output &out) const override;
+        void read(ini::input &in) override;
 
         const_entity2D_ptr e1() const;
         const_entity2D_ptr e2() const;

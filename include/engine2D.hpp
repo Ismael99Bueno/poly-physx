@@ -11,7 +11,7 @@
 
 namespace phys
 {
-    class engine2D
+    class engine2D : public ini::saveable
     {
     public:
         engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);
@@ -46,6 +46,9 @@ namespace phys
         void clear_interactions();
         void clear_springs();
         void clear();
+
+        void write(ini::output &out) const override;
+        void read(ini::input &in) override;
 
         using add_callback = std::function<void(entity2D_ptr)>;
         using remove_callback = std::function<void(std::size_t)>;

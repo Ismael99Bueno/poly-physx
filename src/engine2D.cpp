@@ -1,6 +1,7 @@
 #include "engine2D.hpp"
 #include "ode2D.hpp"
 #include "perf.hpp"
+#include "rigid_bar2D.hpp"
 #include <random>
 
 namespace phys
@@ -271,6 +272,137 @@ namespace phys
         m_springs.clear();
         m_compeller.clear_constraints();
         clear_entities();
+    }
+
+    void engine2D::write(ini::output &out) const
+    {
+        std::string section = "entity";
+        for (const entity2D &e : m_entities)
+        {
+            out.begin_section(section + std::to_string(e.index()));
+            e.write(out);
+            out.end_section();
+        }
+
+        section = "spring";
+        std::size_t index = 0;
+        for (const spring2D &sp : m_springs)
+        {
+            out.begin_section(section + std::to_string(index++));
+            sp.write(out);
+            out.end_section();
+        }
+
+        section = "rigid_bar";
+        index = 0;
+        for (const auto &ctr : m_compeller.constraints())
+        {
+            const rigid_bar2D *rb = nullptr;
+            try
+            {
+                rb = &dynamic_cast<rigid_bar2D &>(*ctr);
+            }
+            catch (const std::bad_cast &e)
+            {
+                DBG_LOG("%s\n", e.what())
+                continue;
+            }
+            out.begin_section(section + std::to_string(index++));
+            rb->write(out);
+            out.end_section();
+        }
+    }
+
+    void engine2D::read(ini::input &in)
+    {
+        clear_entities();
+        std::string section = "entity";
+        std::size_t index = 0;
+        while (true)
+        {
+            in.begin_section(section + std::to_string(index++));
+            if (!in.contains_section())
+            {
+                in.end_section();
+                break;
+            }
+            add_entity()->read(in);
+            in.end_section();
+        }
+
+        section = "spring";
+        index = 0;
+        while (true)
+        {
+            in.begin_section(section + std::to_string(index++));
+            if (!in.contains_section())
+            {
+                in.end_section();
+                break;
+            }
+            const bool has_joints = (bool)in.readi("has_joints");
+            const std::size_t idx1 = in.readi("e1"), idx2 = in.readi("e2");
+            const entity2D_ptr e1 = (*this)[idx1], e2 = (*this)[idx2];
+
+            if (has_joints)
+            {
+                alg::vec2 joint1, joint2;
+                in.begin_section("joint1");
+                joint1.read(in);
+                in.end_section();
+                in.begin_section("joint2");
+                joint2.read(in);
+                in.end_section();
+
+                spring2D sp(e1, e2, joint1, joint2);
+                sp.read(in);
+                add_spring(sp);
+            }
+            else
+            {
+                spring2D sp(e1, e2);
+                sp.read(in);
+                add_spring(sp);
+            }
+            in.end_section();
+        }
+
+        section = "rigid_bar";
+        index = 0;
+        while (true)
+        {
+            in.begin_section(section + std::to_string(index++));
+            if (!in.contains_section())
+            {
+                in.end_section();
+                break;
+            }
+            const bool has_joints = (bool)in.readi("has_joints");
+            const std::size_t idx1 = in.readi("e1"), idx2 = in.readi("e2");
+            const entity2D_ptr e1 = (*this)[idx1], e2 = (*this)[idx2];
+
+            if (has_joints)
+            {
+                alg::vec2 joint1, joint2;
+                in.begin_section("joint1");
+                joint1.read(in);
+                in.end_section();
+                in.begin_section("joint2");
+                joint2.read(in);
+                in.end_section();
+
+                const auto rb = std::make_shared<rigid_bar2D>(e1, e2, joint1, joint2);
+                rb->read(in);
+                m_compeller.add_constraint(rb);
+            }
+            else
+            {
+                const auto rb = std::make_shared<rigid_bar2D>(e1, e2);
+                rb->read(in);
+                m_compeller.add_constraint(rb);
+            }
+            in.end_section();
+        }
     }
 
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }

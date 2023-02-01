@@ -6,8 +6,6 @@ namespace phys
                        const const_entity2D_ptr &e2,
                        const float length) : m_e1(e1),
                                              m_e2(e2),
-                                             m_joint1(e1->pos()),
-                                             m_joint2(e2->pos()),
                                              m_length(length),
                                              m_has_joints(false) {}
 
@@ -62,6 +60,29 @@ namespace phys
     void spring2D::stiffness(const float stiffness) { m_stiffness = stiffness; }
     void spring2D::dampening(const float dampening) { m_dampening = dampening; }
     void spring2D::length(const float length) { m_length = length; }
+
+    void spring2D::write(ini::output &out) const
+    {
+        out.write("e1", m_e1->index());
+        out.write("e2", m_e2->index());
+        out.begin_section("joint1");
+        joint1().write(out);
+        out.end_section();
+        out.begin_section("joint2");
+        joint2().write(out);
+        out.end_section();
+        out.write("stiffness", m_stiffness);
+        out.write("dampening", m_dampening);
+        out.write("length", m_length);
+        out.write("has_joints", m_has_joints);
+    }
+
+    void spring2D::read(ini::input &in)
+    {
+        m_stiffness = in.readf("stiffness");
+        m_dampening = in.readf("dampening");
+        m_length = in.readf("length");
+    }
 
     const_entity2D_ptr spring2D::e1() const { return m_e1; }
     const_entity2D_ptr spring2D::e2() const { return m_e2; }

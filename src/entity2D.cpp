@@ -21,6 +21,7 @@ namespace phys
                                              m_dynamic(dynamic)
     {
         m_shape.rotate(angpos);
+        m_aabb.bound(vertices);
     }
 
     void entity2D::retrieve(const utils::const_vec_ptr &buffer)
@@ -56,9 +57,9 @@ namespace phys
     const geo::aabb2D &entity2D::aabb() const { return m_aabb; }
     const geo::polygon2D &entity2D::shape() const { return m_shape; }
 
-    void entity2D::shape(const geo::polygon2D &poly)
+    void entity2D::shape(const std::vector<alg::vec2> &vertices)
     {
-        m_shape = poly;
+        m_shape = geo::polygon2D(pos(), vertices);
         m_aabb.bound(m_shape.vertices());
     }
 
@@ -87,6 +88,7 @@ namespace phys
         out.write("dynamic", m_dynamic);
         out.write("angvel", m_angvel);
         out.write("added_torque", m_added_torque);
+        out.write("index", m_index);
     }
     void entity2D::read(ini::input &in)
     {
@@ -104,6 +106,8 @@ namespace phys
         m_dynamic = (bool)in.readi("dynamic");
         m_angvel = in.readf("angvel");
         m_added_torque = in.readf("added_torque");
+        dispatch();
+        DBG_ASSERT((size_t)in.readi("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readi("index"), m_index)
     }
 
     const alg::vec2 &entity2D::pos() const { return m_shape.centroid(); }

@@ -32,7 +32,7 @@ namespace phys
         const geo::aabb2D &aabb() const;
 
         const geo::polygon2D &shape() const;
-        void shape(const geo::polygon2D &poly);
+        void shape(const std::vector<alg::vec2> &vertices);
 
         std::size_t index() const;
         std::size_t id() const;

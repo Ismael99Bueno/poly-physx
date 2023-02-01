@@ -113,6 +113,29 @@ namespace phys
         return {-cgd.x, -cgd.y, cgda};
     }
 
+    void rigid_bar2D::write(ini::output &out) const
+    {
+        out.write("e1", m_entities[0]->index());
+        out.write("e2", m_entities[1]->index());
+        out.begin_section("joint1");
+        joint1().write(out);
+        out.end_section();
+        out.begin_section("joint2");
+        joint2().write(out);
+        out.end_section();
+        out.write("stiffness", stiffness());
+        out.write("dampening", dampening());
+        out.write("length", length());
+        out.write("has_joints", m_has_joints);
+    }
+
+    void rigid_bar2D::read(ini::input &in)
+    {
+        stiffness(in.readf("stiffness"));
+        dampening(in.readf("dampening"));
+        length(in.readf("length"));
+    }
+
     float rigid_bar2D::length() const { return m_length; }
     void rigid_bar2D::length(const float length) { m_length = length; }
 

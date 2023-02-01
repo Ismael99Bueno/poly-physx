@@ -5,7 +5,7 @@
 
 namespace phys
 {
-    class rigid_bar2D : public constraint2D<2>
+    class rigid_bar2D : public constraint2D<2>, public ini::saveable
     {
     public:
         rigid_bar2D() = delete;
@@ -23,6 +23,9 @@ namespace phys
 
         float length() const;
         void length(float length);
+
+        void write(ini::output &out) const override;
+        void read(ini::input &in) override;
 
         const_entity2D_ptr e1() const;
         const_entity2D_ptr e2() const;
