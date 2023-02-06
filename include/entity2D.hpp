@@ -8,7 +8,7 @@
 
 namespace phys
 {
-    class entity2D : public ini::saveable
+    class entity2D : ini::saveable
     {
     public:
         entity2D(const alg::vec2 &pos,

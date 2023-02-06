@@ -5,7 +5,7 @@
 
 namespace phys
 {
-    class rigid_bar2D : public constraint2D<2>, public ini::saveable
+    class rigid_bar2D : public constraint2D<2>, ini::saveable
     {
     public:
         rigid_bar2D() = delete;

@@ -6,7 +6,7 @@
 
 namespace phys
 {
-    class spring2D : public ini::saveable
+    class spring2D : ini::saveable
     {
     public:
         spring2D() = delete;
