@@ -276,6 +276,9 @@ namespace phys
 
     void engine2D::write(ini::output &out) const
     {
+        out.begin_section("tableau");
+        m_integ.tableau().write(out);
+        out.end_section();
         std::string section = "entity";
         for (const entity2D &e : m_entities)
         {
@@ -316,6 +319,12 @@ namespace phys
     void engine2D::read(ini::input &in)
     {
         clear_entities();
+        in.begin_section("tableau");
+        rk::butcher_tableau tb;
+        tb.read(in);
+        m_integ.tableau(tb);
+        in.end_section();
+
         std::string section = "entity";
         std::size_t index = 0;
         while (true)
