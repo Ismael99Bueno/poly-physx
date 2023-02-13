@@ -10,7 +10,7 @@
 
 namespace phys
 {
-    class collider2D
+    class collider2D : ini::saveable
     {
     public:
         enum coldet_method
@@ -30,6 +30,9 @@ namespace phys
         void update_quad_tree();
         void rebuild_quad_tree();
         void validate();
+
+        void write(ini::output &out) const override;
+        void read(ini::input &in) override;
 
         float stiffness() const;
         float dampening() const;

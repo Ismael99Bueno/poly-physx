@@ -77,6 +77,24 @@ namespace phys
                 ++it;
     }
 
+    void collider2D::write(ini::output &out) const
+    {
+        out.write("stiffness", m_stiffness);
+        out.write("dampening", m_dampening);
+        out.write("qt_build_period", m_qt_build_period);
+        out.write("coldet_method", m_coldet_method);
+        out.write("enabled", m_enabled);
+    }
+
+    void collider2D::read(ini::input &in)
+    {
+        m_stiffness = in.readf("stiffness");
+        m_dampening = in.readf("dampening");
+        m_qt_build_period = in.readi("qt_build_period");
+        m_coldet_method = (coldet_method)in.readi("coldet_method");
+        m_enabled = (bool)in.readi("enabled");
+    }
+
     float collider2D::stiffness() const { return m_stiffness; }
     float collider2D::dampening() const { return m_dampening; }
 

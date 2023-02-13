@@ -279,6 +279,10 @@ namespace phys
         out.begin_section("tableau");
         m_integ.tableau().write(out);
         out.end_section();
+        out.begin_section("collider");
+        m_collider.write(out);
+        out.end_section();
+
         std::string section = "entity";
         for (const entity2D &e : m_entities)
         {
@@ -323,6 +327,9 @@ namespace phys
         rk::butcher_tableau tb;
         tb.read(in);
         m_integ.tableau(tb);
+        in.end_section();
+        in.begin_section("collider");
+        m_collider.read(in);
         in.end_section();
 
         std::string section = "entity";
