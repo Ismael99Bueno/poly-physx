@@ -3,8 +3,8 @@
 
 #include "aabb2D.hpp"
 #include "polygon2D.hpp"
-#include "vec_ptr.hpp"
 #include "saveable.hpp"
+#include "state.hpp"
 
 namespace phys
 {
@@ -66,7 +66,7 @@ namespace phys
     private:
         geo::aabb2D m_aabb;
         geo::polygon2D m_shape;
-        utils::vec_ptr m_buffer;
+        rk::state *m_state = nullptr;
         alg::vec2 m_vel, m_force, m_added_force;
         std::size_t m_index = 0, m_id;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
@@ -74,7 +74,7 @@ namespace phys
 
         static std::size_t s_id;
 
-        void retrieve(const utils::const_vec_ptr &buffer);
+        void retrieve(const std::vector<float> &vars_buffer);
         friend class engine2D;
     };
 

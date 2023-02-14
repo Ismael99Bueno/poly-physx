@@ -3,13 +3,13 @@
 
 namespace phys
 {
-    std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine)
+    std::vector<float> ode(float t, const std::vector<float> &vars, engine2D &engine)
     {
         PERF_FUNCTION()
-        DBG_ASSERT(state.size() == 6 * engine.size(), "State vector size must be exactly 6 times greater than the entity array size - state: %zu, entity array: %zu\n", state.size(), engine.size())
-        std::vector<float> stchanges(state.size(), 0.f);
+        DBG_ASSERT(vars.size() == 6 * engine.size(), "State vector size must be exactly 6 times greater than the entity array size - vars: %zu, entity array: %zu\n", vars.size(), engine.size())
+        std::vector<float> stchanges(vars.size(), 0.f);
 
-        engine.retrieve(state);
+        engine.retrieve(vars);
         engine.load_velocities_and_added_forces(stchanges);
         engine.load_interactions_and_externals(stchanges);
         const std::vector<float> inv_masses = engine.inverse_masses();

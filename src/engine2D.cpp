@@ -24,7 +24,7 @@ namespace phys
     {
         for (entity2D &e : m_entities)
         {
-            e.m_buffer = utils::vec_ptr(&m_integ.state(), e.index());
+            e.m_state = &m_integ.state();
             m_collider.add_entity_intervals({&m_entities, e.index()});
         }
         m_springs.reserve(eng.m_springs.capacity());
@@ -35,14 +35,14 @@ namespace phys
                 m_springs.emplace_back(sp.e1(), sp.e2(), sp.length());
     }
 
-    void engine2D::retrieve(const rk::state &state)
+    void engine2D::retrieve(const std::vector<float> &vars_buffer)
     {
         PERF_FUNCTION()
         for (std::size_t i = 0; i < m_entities.size(); i++)
-            m_entities[i].retrieve(utils::const_vec_ptr(&state, 6 * i));
+            m_entities[i].retrieve(vars_buffer);
     }
 
-    void engine2D::retrieve() { retrieve(m_integ.state()); }
+    void engine2D::retrieve() { retrieve(m_integ.state().vars()); }
 
     bool engine2D::raw_forward(float &timestep)
     {
@@ -181,7 +181,7 @@ namespace phys
 
         rk::state &state = m_integ.state();
         e.m_index = m_entities.size() - 1;
-        e.m_buffer = utils::vec_ptr(&state, state.size());
+        e.m_state = &state;
 
         state.append({pos.x, pos.y, angpos,
                       vel.x, vel.y, angvel});
@@ -210,7 +210,7 @@ namespace phys
             m_entities[index] = m_entities.back();
             m_entities.pop_back();
             m_entities[index].m_index = index;
-            m_entities[index].m_buffer = utils::vec_ptr(&state, 6 * index);
+            m_entities[index].m_state = &state;
         }
 
         for (std::size_t i = 0; i < 6; i++)

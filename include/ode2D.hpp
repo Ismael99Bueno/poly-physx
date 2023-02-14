@@ -5,7 +5,7 @@
 
 namespace phys
 {
-    std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
+    std::vector<float> ode(float t, const std::vector<float> &vars, engine2D &engine);
 }
 
 #endif

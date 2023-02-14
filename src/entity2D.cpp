@@ -24,26 +24,33 @@ namespace phys
         m_aabb.bound(vertices);
     }
 
-    void entity2D::retrieve(const utils::const_vec_ptr &buffer)
+    void entity2D::retrieve(const std::vector<float> &vars_buffer)
     {
-        DBG_ASSERT(buffer, "Cannot retrieve from a null buffer.\n")
-        pos({buffer[0], buffer[1]});
-        vel({buffer[3], buffer[4]});
-        angpos(buffer[2]);
-        angvel(buffer[5]);
+        const std::size_t idx = 6 * m_index;
+        pos({vars_buffer[idx + 0], vars_buffer[idx + 1]});
+        vel({vars_buffer[idx + 3], vars_buffer[idx + 4]});
+        angpos(vars_buffer[idx + 2]);
+        angvel(vars_buffer[idx + 5]);
     }
 
-    void entity2D::retrieve() { retrieve(m_buffer); }
+    void entity2D::retrieve()
+    {
+        DBG_ASSERT(m_state, "Cannot retrieve from a null state.\n")
+        retrieve(m_state->vars());
+    }
     void entity2D::dispatch() const
     {
         const alg::vec2 &pos = m_shape.centroid();
         const float angpos = m_shape.rotation();
-        m_buffer[0] = pos.x;
-        m_buffer[1] = pos.y;
-        m_buffer[2] = angpos;
-        m_buffer[3] = m_vel.x;
-        m_buffer[4] = m_vel.y;
-        m_buffer[5] = m_angvel;
+        rk::state &st = *m_state;
+
+        const std::size_t idx = 6 * m_index;
+        st[idx + 0] = pos.x;
+        st[idx + 1] = pos.y;
+        st[idx + 2] = angpos;
+        st[idx + 3] = m_vel.x;
+        st[idx + 4] = m_vel.y;
+        st[idx + 5] = m_angvel;
     }
 
     void entity2D::add_force(const alg::vec2 &force) { m_added_force += force; }
