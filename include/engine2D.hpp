@@ -104,7 +104,7 @@ namespace phys
         void load_interactions_and_externals(std::vector<float> &stchanges) const;
         std::vector<float> inverse_masses() const;
         void reset_forces();
-        void retrieve(const std::vector<float> &state);
+        void retrieve(const rk::state &state);
         void register_forces_onto_entities();
 
         static void load_force(std::vector<float> &stchanges,
