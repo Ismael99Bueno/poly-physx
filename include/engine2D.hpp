@@ -105,7 +105,7 @@ namespace phys
         std::vector<float> inverse_masses() const;
         void reset_forces();
         void retrieve(const std::vector<float> &vars_buffer);
-        void register_forces_onto_entities();
+        void register_forces_into_entities();
 
         static void load_force(std::vector<float> &stchanges,
                                const alg::vec2 &force,

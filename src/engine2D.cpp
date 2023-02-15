@@ -47,22 +47,25 @@ namespace phys
     bool engine2D::raw_forward(float &timestep)
     {
         const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this, ode);
-        register_forces_onto_entities();
+        register_forces_into_entities();
         reset_forces();
+        retrieve();
         return valid;
     }
     bool engine2D::reiterative_forward(float &timestep, const std::size_t reiterations)
     {
         const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, ode, reiterations);
-        register_forces_onto_entities();
+        register_forces_into_entities();
         reset_forces();
+        retrieve();
         return valid;
     }
     bool engine2D::embedded_forward(float &timestep)
     {
         const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this, ode);
-        register_forces_onto_entities();
+        register_forces_into_entities();
         reset_forces();
+        retrieve();
         return valid;
     }
 
@@ -86,7 +89,7 @@ namespace phys
         }
     }
 
-    void engine2D::register_forces_onto_entities()
+    void engine2D::register_forces_into_entities()
     {
         const std::vector<float> step = m_integ.state().step();
         for (std::size_t i = 0; i < m_entities.size(); i++)
