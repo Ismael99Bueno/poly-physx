@@ -459,7 +459,6 @@ namespace phys
                    "Cannot revert to a checkpoint where the number of entities differ. Entities now: %zu, entities before: %zu.\n", m_entities.size(), m_checkpoint.second.size())
         m_integ.state().vars(m_checkpoint.first);
         m_entities = m_checkpoint.second;
-        validate();
     }
 
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
