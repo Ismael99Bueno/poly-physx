@@ -51,8 +51,8 @@ namespace phys
                 DBG_LOG("%s\n", e.what())
                 continue;
             }
-            const const_entity2D_ptr e1 = {&m_entities, rb->e1().index()},
-                                     e2 = {&m_entities, rb->e2().index()};
+            const entity2D_ptr e1 = {&m_entities, rb->e1().index()},
+                               e2 = {&m_entities, rb->e2().index()};
             if (rb->has_joints())
                 m_compeller.add_constraint(std::make_shared<rigid_bar2D>(e1, e2, rb->joint1(), rb->joint2(), rb->length()));
             else
@@ -133,6 +133,21 @@ namespace phys
         stchanges[index + 3] += force.x;
         stchanges[index + 4] += force.y;
         stchanges[index + 5] += torque;
+    }
+
+    void engine2D::validate()
+    {
+        m_collider.validate();
+        m_compeller.validate();
+        for (const std::shared_ptr<force2D> &f : m_forces)
+            f->validate();
+        for (const std::shared_ptr<interaction2D> &i : m_inters)
+            i->validate();
+        for (auto it = m_springs.begin(); it != m_springs.end();)
+            if (!it->try_validate())
+                it = m_springs.erase(it);
+            else
+                ++it;
     }
 
     void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
@@ -245,18 +260,7 @@ namespace phys
             state[6 * index + i] = state[state.size() - 6 + i];
         state.resize(6 * m_entities.size());
 
-        m_collider.validate();
-        m_compeller.validate();
-        for (const std::shared_ptr<force2D> &f : m_forces)
-            f->validate();
-        for (const std::shared_ptr<interaction2D> &i : m_inters)
-            i->validate();
-        for (auto it = m_springs.begin(); it != m_springs.end();)
-            if (!it->try_validate())
-                it = m_springs.erase(it);
-            else
-                ++it;
-
+        validate();
         m_collider.update_quad_tree();
         for (const remove_callback &cb : m_on_entity_removal)
             cb(index);
@@ -445,6 +449,17 @@ namespace phys
             }
             in.end_section();
         }
+    }
+
+    void engine2D::checkpoint() { m_checkpoint = {m_integ.state().vars(), m_entities}; }
+    void engine2D::revert()
+    {
+        DBG_ASSERT(m_integ.state().vars().size() == m_checkpoint.first.size() &&
+                       m_entities.size() == m_checkpoint.second.size(),
+                   "Cannot revert to a checkpoint where the number of entities differ. Entities now: %zu, entities before: %zu.\n", m_entities.size(), m_checkpoint.second.size())
+        m_integ.state().vars(m_checkpoint.first);
+        m_entities = m_checkpoint.second;
+        validate();
     }
 
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }

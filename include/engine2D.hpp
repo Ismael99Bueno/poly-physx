@@ -50,6 +50,9 @@ namespace phys
         void write(ini::output &out) const override;
         void read(ini::input &in) override;
 
+        void checkpoint();
+        void revert();
+
         using add_callback = std::function<void(entity2D_ptr)>;
         using remove_callback = std::function<void(std::size_t)>;
         void on_entity_addition(const add_callback &on_add);
@@ -96,6 +99,7 @@ namespace phys
         std::vector<spring2D> m_springs;
         std::vector<add_callback> m_on_entity_addition;
         std::vector<remove_callback> m_on_entity_removal;
+        std::pair<std::vector<float>, std::vector<entity2D>> m_checkpoint;
 
         rk::integrator m_integ;
         float m_elapsed = 0.f;
@@ -106,6 +110,7 @@ namespace phys
         void reset_forces();
         void retrieve(const std::vector<float> &vars_buffer);
         void register_forces_into_entities();
+        void validate();
 
         static void load_force(std::vector<float> &stchanges,
                                const alg::vec2 &force,
