@@ -16,6 +16,7 @@ namespace phys
     public:
         engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);
         engine2D(const engine2D &eng);
+        engine2D &operator=(const engine2D &eng) = delete;
 
         void retrieve();
 
