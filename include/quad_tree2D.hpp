@@ -11,6 +11,9 @@ namespace phys
     {
     public:
         quad_tree2D() = delete;
+        quad_tree2D(const quad_tree2D &) = delete;
+        quad_tree2D &operator=(const quad_tree2D &) = delete;
+
         quad_tree2D(const alg::vec2 &min,
                     const alg::vec2 &max,
                     std::size_t max_entities = 5,

@@ -490,9 +490,9 @@ namespace phys
     const std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() const { return m_inters; }
     const std::vector<spring2D> &engine2D::springs() const { return m_springs; }
 
-    std::vector<std::shared_ptr<force2D>> &engine2D::forces() { return m_forces; }
-    std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() { return m_inters; }
-    std::vector<spring2D> &engine2D::springs() { return m_springs; }
+    engine2D::vector_view<std::shared_ptr<force2D>> engine2D::forces() { return m_forces; }
+    engine2D::vector_view<std::shared_ptr<interaction2D>> engine2D::interactions() { return m_inters; }
+    engine2D::vector_view<spring2D> engine2D::springs() { return m_springs; }
 
     const_entity2D_ptr engine2D::operator[](const alg::vec2 &point) const
     {
@@ -512,7 +512,7 @@ namespace phys
     }
 
     const std::vector<entity2D> &engine2D::entities() const { return m_entities; }
-    std::vector<entity2D> &engine2D::entities() { return m_entities; }
+    engine2D::vector_view<entity2D> engine2D::entities() { return m_entities; }
     std::size_t engine2D::size() const { return m_entities.size(); }
 
     const rk::integrator &engine2D::integrator() const { return m_integ; }

@@ -12,6 +12,9 @@ namespace phys
     {
     public:
         compeller2D() = delete;
+        compeller2D(const compeller2D &) = delete;
+        compeller2D &operator=(const compeller2D &) = delete;
+
         compeller2D(std::vector<entity2D> *entities,
                     std::size_t allocations);
 
