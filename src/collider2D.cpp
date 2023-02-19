@@ -93,6 +93,7 @@ namespace phys
         m_qt_build_period = in.readi("qt_build_period");
         m_coldet_method = (coldet_method)in.readi("coldet_method");
         m_enabled = (bool)in.readi("enabled");
+        rebuild_quad_tree();
     }
 
     float collider2D::stiffness() const { return m_stiffness; }

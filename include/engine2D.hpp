@@ -72,6 +72,7 @@ namespace phys
         const std::vector<std::shared_ptr<interaction2D>> &interactions() const;
         const std::vector<spring2D> &springs() const;
 
+    private:
         template <typename T>
         class vector_view
         {
@@ -90,6 +91,7 @@ namespace phys
             std::vector<T> &m_vec;
         };
 
+    public:
         vector_view<std::shared_ptr<force2D>> forces();
         vector_view<std::shared_ptr<interaction2D>> interactions();
         vector_view<spring2D> springs();
