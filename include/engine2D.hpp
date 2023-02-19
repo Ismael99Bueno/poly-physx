@@ -8,6 +8,7 @@
 #include "force2D.hpp"
 #include "interaction2D.hpp"
 #include "spring2D.hpp"
+#include "vector_view.hpp"
 
 namespace phys
 {
@@ -72,32 +73,12 @@ namespace phys
         const std::vector<std::shared_ptr<interaction2D>> &interactions() const;
         const std::vector<spring2D> &springs() const;
 
-    private:
-        template <typename T>
-        class vector_view
-        {
-        public:
-            vector_view(std::vector<T> &vec) : m_vec(vec) {}
-            auto begin() const { return m_vec.begin(); }
-            auto begin() { return m_vec.begin(); }
-            auto end() const { return m_vec.end(); }
-            auto end() { return m_vec.end(); }
-
-            const T &operator[](const std::size_t index) const { return m_vec[index]; }
-            T &operator[](const std::size_t index) { return m_vec[index]; }
-            const std::vector<T> &unwrap() const { return m_vec; }
-
-        private:
-            std::vector<T> &m_vec;
-        };
-
-    public:
-        vector_view<std::shared_ptr<force2D>> forces();
-        vector_view<std::shared_ptr<interaction2D>> interactions();
-        vector_view<spring2D> springs();
+        utils::vector_view<std::shared_ptr<force2D>> forces();
+        utils::vector_view<std::shared_ptr<interaction2D>> interactions();
+        utils::vector_view<spring2D> springs();
 
         const std::vector<entity2D> &entities() const;
-        vector_view<entity2D> entities();
+        utils::vector_view<entity2D> entities();
         std::size_t size() const;
 
         const rk::integrator &integrator() const;
