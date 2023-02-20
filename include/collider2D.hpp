@@ -87,7 +87,7 @@ namespace phys
         std::vector<interval> m_intervals;
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
-        std::size_t m_qt_build_period = 35, m_qt_build_calls = 0;
+        std::uint32_t m_qt_build_period = 35;
         coldet_method m_coldet_method = BRUTE_FORCE;
         bool m_enabled = true;
 

@@ -59,13 +59,11 @@ namespace phys
     void collider2D::update_quad_tree()
     {
         m_quad_tree.update(*m_entities);
-        m_qt_build_calls = 0;
     }
 
     void collider2D::rebuild_quad_tree()
     {
         m_quad_tree.rebuild(*m_entities);
-        m_qt_build_calls = 0;
     }
 
     void collider2D::validate()
@@ -166,8 +164,12 @@ namespace phys
     void collider2D::quad_tree_coldet(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
-        if (m_qt_build_calls++ >= m_qt_build_period)
+        static std::uint32_t qt_build_calls = 0;
+        if (qt_build_calls++ >= m_qt_build_period)
+        {
             update_quad_tree();
+            qt_build_calls = 0;
+        }
 
         std::vector<const std::vector<const_entity2D_ptr> *> partitions;
         partitions.reserve(20);
