@@ -266,7 +266,7 @@ namespace phys
             cb(index);
     }
 
-    void engine2D::remove_entity(const const_entity2D_ptr &e) { remove_entity(e.index()); }
+    void engine2D::remove_entity(const entity2D &e) { remove_entity(e.index()); }
 
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_inters.emplace_back(inter); }

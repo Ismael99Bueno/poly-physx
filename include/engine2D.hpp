@@ -33,7 +33,7 @@ namespace phys
                                 bool dynamic = true);
 
         void remove_entity(std::size_t index);
-        void remove_entity(const const_entity2D_ptr &e);
+        void remove_entity(const entity2D &e);
 
         void add_force(const std::shared_ptr<force2D> &force);
         void add_interaction(const std::shared_ptr<interaction2D> &inter);
