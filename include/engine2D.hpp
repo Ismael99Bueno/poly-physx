@@ -12,7 +12,7 @@
 
 namespace phys
 {
-    class engine2D : ini::saveable
+    class engine2D : public ini::saveable
     {
     public:
         engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);

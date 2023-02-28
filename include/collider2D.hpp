@@ -10,7 +10,7 @@
 
 namespace phys
 {
-    class collider2D : ini::saveable
+    class collider2D : public ini::saveable
     {
     public:
         enum coldet_method
