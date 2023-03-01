@@ -83,6 +83,12 @@ namespace phys
 
     void entity2D::write(ini::output &out) const
     {
+        out.write("mass", m_mass);
+        out.write("charge", m_charge);
+        out.write("kynematic", m_kynematic);
+        out.write("angvel", m_angvel);
+        out.write("added_torque", m_added_torque);
+        out.write("index", m_index);
         m_shape.write(out);
         out.begin_section("velocity");
         m_vel.write(out);
@@ -90,15 +96,15 @@ namespace phys
         out.begin_section("added_force");
         m_added_force.write(out);
         out.end_section();
-        out.write("mass", m_mass);
-        out.write("charge", m_charge);
-        out.write("kynematic", m_kynematic);
-        out.write("angvel", m_angvel);
-        out.write("added_torque", m_added_torque);
-        out.write("index", m_index);
     }
     void entity2D::read(ini::input &in)
     {
+        m_mass = in.readf("mass");
+        m_charge = in.readf("charge");
+        m_kynematic = (bool)in.readi("kynematic");
+        m_angvel = in.readf("angvel");
+        m_added_torque = in.readf("added_torque");
+
         m_shape.read(in);
         m_aabb.bound(m_shape.vertices());
 
@@ -108,11 +114,7 @@ namespace phys
         in.begin_section("added_force");
         m_added_force.read(in);
         in.end_section();
-        m_mass = in.readf("mass");
-        m_charge = in.readf("charge");
-        m_kynematic = (bool)in.readi("kynematic");
-        m_angvel = in.readf("angvel");
-        m_added_torque = in.readf("added_torque");
+
         dispatch();
         DBG_ASSERT((size_t)in.readi("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readi("index"), m_index)
     }
