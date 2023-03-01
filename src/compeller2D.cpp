@@ -161,7 +161,7 @@ namespace phys
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
         for (std::size_t i = 0; i < m_entities->size(); i++)
-            if ((*m_entities)[i].dynamic())
+            if ((*m_entities)[i].kynematic())
                 for (std::size_t j = 0; j < 3; j++)
                     for (std::size_t k = 0; k < rows; k++)
                     {

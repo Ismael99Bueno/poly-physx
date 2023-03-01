@@ -11,14 +11,14 @@ namespace phys
                        const float angpos, const float angvel,
                        const float mass, const float charge,
                        const std::vector<alg::vec2> &vertices,
-                       const bool dynamic) : m_aabb(),
-                                             m_shape(pos, vertices),
-                                             m_vel(vel),
-                                             m_id(s_id++),
-                                             m_angvel(angvel),
-                                             m_mass(mass),
-                                             m_charge(charge),
-                                             m_dynamic(dynamic)
+                       const bool kynematic) : m_aabb(),
+                                               m_shape(pos, vertices),
+                                               m_vel(vel),
+                                               m_id(s_id++),
+                                               m_angvel(angvel),
+                                               m_mass(mass),
+                                               m_charge(charge),
+                                               m_kynematic(kynematic)
     {
         m_shape.rotate(angpos);
         m_aabb.bound(vertices);
@@ -75,8 +75,8 @@ namespace phys
 
     float entity2D::inertia() const { return m_shape.inertia() * m_mass; }
 
-    bool entity2D::dynamic() const { return m_dynamic; }
-    void entity2D::dynamic(const bool dynamic) { m_dynamic = dynamic; }
+    bool entity2D::kynematic() const { return m_kynematic; }
+    void entity2D::kynematic(const bool kynematic) { m_kynematic = kynematic; }
 
     void entity2D::translate(const alg::vec2 &dpos) { m_shape.translate(dpos); }
     void entity2D::rotate(const float dangle) { m_shape.rotate(dangle); }
@@ -92,7 +92,7 @@ namespace phys
         out.end_section();
         out.write("mass", m_mass);
         out.write("charge", m_charge);
-        out.write("dynamic", m_dynamic);
+        out.write("kynematic", m_kynematic);
         out.write("angvel", m_angvel);
         out.write("added_torque", m_added_torque);
         out.write("index", m_index);
@@ -110,7 +110,7 @@ namespace phys
         in.end_section();
         m_mass = in.readf("mass");
         m_charge = in.readf("charge");
-        m_dynamic = (bool)in.readi("dynamic");
+        m_kynematic = (bool)in.readi("kynematic");
         m_angvel = in.readf("angvel");
         m_added_torque = in.readf("added_torque");
         dispatch();

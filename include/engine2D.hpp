@@ -30,7 +30,7 @@ namespace phys
                                 float angpos = 0.f, float angvel = 0.f,
                                 float mass = 1.f, float charge = 1.f,
                                 const std::vector<alg::vec2> &vertices = geo::polygon2D::box(1.f),
-                                bool dynamic = true);
+                                bool kynematic = true);
 
         void remove_entity(std::size_t index);
         void remove_entity(const entity2D &e);
