@@ -122,7 +122,7 @@ namespace phys
     bool collider2D::collide(const entity2D *e1, const entity2D *e2, collision *c)
     {
         return e1 != e2 &&
-               (e1->kynematic() || e2->kynematic()) &&
+               (e1->kinematic() || e2->kinematic()) &&
                e1->aabb().overlaps(e2->aabb()) &&
                gjk_epa(e1, e2, c);
     }
@@ -192,9 +192,9 @@ namespace phys
         const std::array<float, 6> forces = forces_upon_collision(c);
         for (std::size_t i = 0; i < 3; i++)
         {
-            if (c.e1->kynematic())
+            if (c.e1->kinematic())
                 stchanges[c.e1->index() * 6 + i + 3] += forces[i];
-            if (c.e2->kynematic())
+            if (c.e2->kinematic())
                 stchanges[c.e2->index() * 6 + i + 3] += forces[i + 3];
         }
     }

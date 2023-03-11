@@ -16,7 +16,7 @@ namespace phys
                  float angpos, float angvel,
                  float mass, float charge,
                  const std::vector<alg::vec2> &vertices,
-                 bool kynematic);
+                 bool kinematic);
 
         void retrieve();
         void dispatch() const;
@@ -39,8 +39,8 @@ namespace phys
 
         float inertia() const;
 
-        bool kynematic() const;
-        void kynematic(bool kynematic);
+        bool kinematic() const;
+        void kinematic(bool kinematic);
 
         void translate(const alg::vec2 &dpos);
         void rotate(float dangle);
@@ -70,7 +70,7 @@ namespace phys
         alg::vec2 m_vel, m_force, m_added_force;
         std::size_t m_index = 0, m_id;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
-        bool m_kynematic;
+        bool m_kinematic;
 
         static std::size_t s_id;
 

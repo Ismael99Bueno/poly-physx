@@ -105,7 +105,7 @@ namespace phys
             stchanges[index] = vel.x;
             stchanges[index + 1] = vel.y;
             stchanges[index + 2] = angvel;
-            if (m_entities[i].kynematic())
+            if (m_entities[i].kinematic())
             {
                 const alg::vec2 &force = m_entities[i].added_force();
                 const float torque = m_entities[i].added_torque();
@@ -156,7 +156,7 @@ namespace phys
         for (const std::shared_ptr<const force2D> f : m_forces)
             for (const const_entity2D_ptr &e : f->entities())
             {
-                if (!e->kynematic())
+                if (!e->kinematic())
                     continue;
                 const std::size_t index = 6 * e.index();
                 const auto [force, torque] = f->force(*e);
@@ -167,15 +167,15 @@ namespace phys
             const std::size_t index1 = 6 * s.e1().index(),
                               index2 = 6 * s.e2().index();
             const auto [force, t1, t2] = s.force();
-            if (s.e1()->kynematic())
+            if (s.e1()->kinematic())
                 load_force(stchanges, force, t1, index1);
-            if (s.e2()->kynematic())
+            if (s.e2()->kinematic())
                 load_force(stchanges, -force, t2, index2);
         }
         for (const std::shared_ptr<const interaction2D> i : m_inters)
             for (const const_entity2D_ptr &e1 : i->entities())
             {
-                if (!e1->kynematic())
+                if (!e1->kinematic())
                     continue;
                 const std::size_t index = 6 * e1.index();
                 for (const const_entity2D_ptr &e2 : i->entities())
@@ -217,9 +217,9 @@ namespace phys
                                       const float mass,
                                       const float charge,
                                       const std::vector<alg::vec2> &vertices,
-                                      const bool kynematic)
+                                      const bool kinematic)
     {
-        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices, kynematic);
+        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices, kinematic);
         const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
 
         rk::state &state = m_integ.state();
