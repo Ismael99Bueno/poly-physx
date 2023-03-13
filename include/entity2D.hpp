@@ -20,6 +20,7 @@ namespace phys
 
         void retrieve();
         void dispatch() const;
+        float kinetic_energy() const;
 
         void add_force(const alg::vec2 &force);
         void add_torque(float torque);
