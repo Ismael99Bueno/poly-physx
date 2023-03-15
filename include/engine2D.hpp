@@ -101,7 +101,7 @@ namespace phys
         std::vector<spring2D> m_springs;
         std::vector<add_callback> m_on_entity_addition;
         std::vector<remove_callback> m_on_entity_removal;
-        std::pair<std::vector<float>, std::vector<entity2D>> m_checkpoint;
+        std::tuple<float, std::vector<float>, std::vector<entity2D>> m_checkpoint;
 
         rk::integrator m_integ;
         float m_elapsed = 0.f;

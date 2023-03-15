@@ -306,6 +306,7 @@ namespace phys
 
     void engine2D::write(ini::output &out) const
     {
+        out.write("elapsed", m_elapsed);
         out.begin_section("tableau");
         m_integ.tableau().write(out);
         out.end_section();
@@ -353,6 +354,7 @@ namespace phys
     void engine2D::read(ini::input &in)
     {
         clear_entities();
+        m_elapsed = in.readf("elapsed");
         in.begin_section("tableau");
         rk::butcher_tableau tb;
         tb.read(in);
@@ -451,14 +453,17 @@ namespace phys
         }
     }
 
-    void engine2D::checkpoint() { m_checkpoint = {m_integ.state().vars(), m_entities}; }
+    void engine2D::checkpoint() { m_checkpoint = std::make_tuple(m_elapsed, m_integ.state().vars(), m_entities); }
     void engine2D::revert()
     {
-        DBG_ASSERT(m_integ.state().vars().size() == m_checkpoint.first.size() &&
-                       m_entities.size() == m_checkpoint.second.size(),
-                   "Cannot revert to a checkpoint where the number of entities differ. Entities now: %zu, entities before: %zu.\n", m_entities.size(), m_checkpoint.second.size())
-        m_integ.state().vars(m_checkpoint.first);
-        m_entities = m_checkpoint.second;
+        const auto &[elapsed, vars, entities] = m_checkpoint;
+        DBG_ASSERT(m_integ.state().vars().size() == vars.size() &&
+                       m_entities.size() == entities.size(),
+                   "Cannot revert to a checkpoint where the number of entities differ. Entities now: %zu, entities before: %zu.\n", m_entities.size(), entities.size())
+
+        m_elapsed = elapsed;
+        m_integ.state().vars(vars);
+        m_entities = entities;
     }
 
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
