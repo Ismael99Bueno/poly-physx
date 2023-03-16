@@ -15,11 +15,30 @@ namespace phys
     }
 
     void entity2D_set::include(const const_entity2D_ptr &e) { m_entities.emplace_back(e); }
-    void entity2D_set::exclude(const const_entity2D_ptr &e)
+    void entity2D_set::exclude(const entity2D &e)
     {
-        m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), e), m_entities.end());
+        for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
+            if (*(*it) == e)
+            {
+                m_entities.erase(it);
+                break;
+            }
     }
-    bool entity2D_set::contains(const const_entity2D_ptr &e) const { return std::find(m_entities.begin(), m_entities.end(), e) != m_entities.end(); }
+    bool entity2D_set::contains(const entity2D &e) const
+    {
+        for (const const_entity2D_ptr &entt : m_entities)
+            if (*entt == e)
+                return true;
+        return false;
+    }
+    float entity2D_set::kinetic_energy() const
+    {
+        float ke = 0.f;
+        for (const auto &e : m_entities)
+            ke += e->kinetic_energy();
+        return ke;
+    }
+
     void entity2D_set::clear() { m_entities.clear(); }
     std::size_t entity2D_set::size() const { return m_entities.size(); }
 

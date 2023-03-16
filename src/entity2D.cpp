@@ -53,7 +53,10 @@ namespace phys
         st[idx + 5] = m_angvel;
     }
 
-    float entity2D::kinetic_energy() const { return (0.5f * m_mass) * m_vel.sq_norm(); }
+    float entity2D::kinetic_energy() const
+    {
+        return 0.5f * (m_mass * m_vel.sq_norm() + m_angvel * m_angvel * m_shape.inertia());
+    }
 
     void entity2D::add_force(const alg::vec2 &force) { m_added_force += force; }
     void entity2D::add_torque(const float torque) { m_added_torque += torque; }

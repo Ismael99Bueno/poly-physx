@@ -13,14 +13,15 @@ namespace phys
         void validate();
 
         void include(const const_entity2D_ptr &e);
-        void exclude(const const_entity2D_ptr &e);
-        bool contains(const const_entity2D_ptr &e) const;
+        void exclude(const entity2D &e);
+        bool contains(const entity2D &e) const;
+        float kinetic_energy() const;
         void clear();
         std::size_t size() const;
 
         const std::vector<const_entity2D_ptr> &entities() const;
 
-    private:
+    protected:
         std::vector<const_entity2D_ptr> m_entities;
     };
 }
