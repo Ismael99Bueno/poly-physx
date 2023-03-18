@@ -55,6 +55,10 @@ namespace phys
         void checkpoint();
         void revert();
 
+        float kinetic_energy() const;
+        float potential_energy() const;
+        float energy() const;
+
         using add_callback = std::function<void(entity2D_ptr)>;
         using remove_callback = std::function<void(std::size_t)>;
         void on_entity_addition(const add_callback &on_add);
@@ -97,7 +101,7 @@ namespace phys
         collider2D m_collider;
         compeller2D m_compeller;
         std::vector<std::shared_ptr<force2D>> m_forces;
-        std::vector<std::shared_ptr<interaction2D>> m_inters;
+        std::vector<std::shared_ptr<interaction2D>> m_interactions;
         std::vector<spring2D> m_springs;
         std::vector<add_callback> m_on_entity_addition;
         std::vector<remove_callback> m_on_entity_removal;

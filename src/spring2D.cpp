@@ -38,8 +38,8 @@ namespace phys
 
     std::tuple<alg::vec2, float, float> spring2D::with_joints_force() const
     {
-        const alg::vec2 rot_joint1 = m_joint1.rotated(m_e1->angpos() - m_angle1),
-                        rot_joint2 = m_joint2.rotated(m_e2->angpos() - m_angle2);
+        const alg::vec2 rot_joint1 = joint1(),
+                        rot_joint2 = joint2();
         const alg::vec2 p1 = m_e1->pos() + rot_joint1,
                         p2 = m_e2->pos() + rot_joint2;
         const alg::vec2 relpos = p2 - p1,
@@ -83,6 +83,15 @@ namespace phys
         m_dampening = in.readf("dampening");
         m_length = in.readf("length");
     }
+
+    float spring2D::kinetic_energy() const { return m_e1->kinetic_energy() + m_e2->kinetic_energy(); }
+    float spring2D::potential_energy() const
+    {
+        const alg::vec2 p1 = m_e1->pos() + joint1(),
+                        p2 = m_e2->pos() + joint2();
+        return 0.5f * m_stiffness * p1.sq_dist(p2);
+    }
+    float spring2D::energy() const { return kinetic_energy() + potential_energy(); }
 
     const_entity2D_ptr spring2D::e1() const { return m_e1; }
     const_entity2D_ptr spring2D::e2() const { return m_e2; }

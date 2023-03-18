@@ -141,7 +141,7 @@ namespace phys
         m_compeller.validate();
         for (const std::shared_ptr<force2D> &f : m_forces)
             f->validate();
-        for (const std::shared_ptr<interaction2D> &i : m_inters)
+        for (const std::shared_ptr<interaction2D> &i : m_interactions)
             i->validate();
         for (auto it = m_springs.begin(); it != m_springs.end();)
             if (!it->try_validate())
@@ -172,7 +172,7 @@ namespace phys
             if (s.e2()->kinematic())
                 load_force(stchanges, -force, t2, index2);
         }
-        for (const std::shared_ptr<const interaction2D> i : m_inters)
+        for (const std::shared_ptr<const interaction2D> i : m_interactions)
             for (const const_entity2D_ptr &e1 : i->entities())
             {
                 if (!e1->kinematic())
@@ -269,7 +269,7 @@ namespace phys
     void engine2D::remove_entity(const entity2D &e) { remove_entity(e.index()); }
 
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
-    void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_inters.emplace_back(inter); }
+    void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.emplace_back(inter); }
     void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
 
     void engine2D::remove_force(const std::shared_ptr<force2D> &force)
@@ -278,7 +278,7 @@ namespace phys
     }
     void engine2D::remove_interaction(const std::shared_ptr<interaction2D> &inter)
     {
-        m_inters.erase(std::remove(m_inters.begin(), m_inters.end(), inter), m_inters.end());
+        m_interactions.erase(std::remove(m_interactions.begin(), m_interactions.end(), inter), m_interactions.end());
     }
     void engine2D::remove_spring(std::size_t index)
     {
@@ -293,12 +293,12 @@ namespace phys
             remove_entity(i);
     }
     void engine2D::clear_forces() { m_forces.clear(); }
-    void engine2D::clear_interactions() { m_inters.clear(); }
+    void engine2D::clear_interactions() { m_interactions.clear(); }
     void engine2D::clear_springs() { m_springs.clear(); }
     void engine2D::clear()
     {
         m_forces.clear();
-        m_inters.clear();
+        m_interactions.clear();
         m_springs.clear();
         m_compeller.clear_constraints();
         clear_entities();
@@ -466,6 +466,26 @@ namespace phys
         m_entities = entities;
     }
 
+    float engine2D::kinetic_energy() const
+    {
+        float ke = 0.f;
+        for (const entity2D &e : m_entities)
+            ke += e.kinetic_energy();
+        return ke;
+    }
+    float engine2D::potential_energy() const
+    {
+        float pot = 0.f;
+        for (const auto &force : m_forces)
+            pot += force->potential_energy();
+        for (const auto &inter : m_interactions)
+            pot += inter->potential_energy();
+        for (const spring2D &sp : m_springs)
+            pot += sp.potential_energy();
+        return pot;
+    }
+    float engine2D::energy() const { return kinetic_energy() + potential_energy(); }
+
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
     void engine2D::on_entity_removal(const remove_callback &on_remove) { m_on_entity_removal.emplace_back(on_remove); }
 
@@ -492,11 +512,11 @@ namespace phys
     }
 
     const std::vector<std::shared_ptr<force2D>> &engine2D::forces() const { return m_forces; }
-    const std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() const { return m_inters; }
+    const std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() const { return m_interactions; }
     const std::vector<spring2D> &engine2D::springs() const { return m_springs; }
 
     utils::vector_view<std::shared_ptr<force2D>> engine2D::forces() { return m_forces; }
-    utils::vector_view<std::shared_ptr<interaction2D>> engine2D::interactions() { return m_inters; }
+    utils::vector_view<std::shared_ptr<interaction2D>> engine2D::interactions() { return m_interactions; }
     utils::vector_view<spring2D> engine2D::springs() { return m_springs; }
 
     const_entity2D_ptr engine2D::operator[](const alg::vec2 &point) const

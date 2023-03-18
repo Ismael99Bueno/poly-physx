@@ -34,6 +34,10 @@ namespace phys
         void write(ini::output &out) const override;
         void read(ini::input &in) override;
 
+        float kinetic_energy() const;
+        float potential_energy() const;
+        float energy() const;
+
         const_entity2D_ptr e1() const;
         const_entity2D_ptr e2() const;
 

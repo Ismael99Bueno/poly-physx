@@ -49,16 +49,16 @@ namespace phys
     float rigid_bar2D::with_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const
     {
         const phys::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
-        const alg::vec2 p1 = m_joint1.rotated(e1->angpos() - m_angle1) + e1->pos(),
-                        p2 = m_joint2.rotated(e2->angpos() - m_angle2) + e2->pos();
+        const alg::vec2 p1 = joint1() + e1->pos(),
+                        p2 = joint2() + e2->pos();
 
         return p1.sq_dist(p2) - m_length * m_length;
     }
     float rigid_bar2D::with_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
     {
         const phys::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
-        const alg::vec2 rot_joint1 = m_joint1.rotated(e1->angpos() - m_angle1),
-                        rot_joint2 = m_joint2.rotated(e2->angpos() - m_angle2);
+        const alg::vec2 rot_joint1 = joint1(),
+                        rot_joint2 = joint2();
 
         return 2.f * (rot_joint1 - rot_joint2 + e1->pos() - e2->pos())
                          .dot(e1->vel_at(rot_joint1) - e2->vel_at(rot_joint2));
@@ -101,8 +101,8 @@ namespace phys
                 return {cgd.x, cgd.y, 0.f};
             return {-cgd.x, -cgd.y, 0.f};
         }
-        const alg::vec2 rot_joint1 = m_joint1.rotated(e1->angpos() - m_angle1),
-                        rot_joint2 = m_joint2.rotated(e2->angpos() - m_angle2);
+        const alg::vec2 rot_joint1 = joint1(),
+                        rot_joint2 = joint2();
         const alg::vec2 cgd = 2.f * (e1->vel_at(rot_joint1) - e2->vel_at(rot_joint2));
         if (e == *e1)
         {
