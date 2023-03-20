@@ -28,7 +28,7 @@ namespace phys
     {
         float pot = 0.f;
         for (std::size_t i = 0; i < m_entities.size(); i++)
-            for (std::size_t j = i; j < m_entities.size(); j++)
+            for (std::size_t j = i + 1; j < m_entities.size(); j++)
                 pot += potential_energy_pair(*m_entities[i], *m_entities[j]);
         return pot;
     }
