@@ -114,7 +114,7 @@ namespace phys
         }
     }
 
-    void engine2D::register_forces_into_entities()
+    void engine2D::register_forces_into_entities() // TODO: Change name register to load wtf
     {
         const std::vector<float> step = m_integ.state().step();
         for (std::size_t i = 0; i < m_entities.size(); i++)
@@ -205,7 +205,7 @@ namespace phys
     {
         for (entity2D &e : m_entities)
         {
-            e.m_added_force = {0.f, 0.f};
+            e.m_added_force = alg::vec2::zero;
             e.m_added_torque = 0.f;
         }
     }

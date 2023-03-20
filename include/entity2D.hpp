@@ -11,8 +11,8 @@ namespace phys
     class entity2D : public ini::saveable
     {
     public:
-        entity2D(const alg::vec2 &pos = {0.f, 0.f},
-                 const alg::vec2 &vel = {0.f, 0.f},
+        entity2D(const alg::vec2 &pos = alg::vec2::zero,
+                 const alg::vec2 &vel = alg::vec2::zero,
                  float angpos = 0.f, float angvel = 0.f,
                  float mass = 1.f, float charge = 1.f,
                  const std::vector<alg::vec2> &vertices = geo::polygon2D::ngon(1.f, 3),

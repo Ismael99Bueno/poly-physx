@@ -175,6 +175,7 @@ namespace phys
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
 
+        // TODO: Paralelizar esto
         for (const std::vector<const_entity2D_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
