@@ -5,6 +5,10 @@
 
 namespace phys
 {
+    constraint_interface2D::constraint_interface2D(const float stiffness,
+                                                   const float dampening) : m_stiffness(stiffness),
+                                                                            m_dampening(dampening) {}
+
     float constraint_interface2D::stiffness() const { return m_stiffness; }
     float constraint_interface2D::dampening() const { return m_dampening; }
 

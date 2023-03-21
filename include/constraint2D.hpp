@@ -13,17 +13,24 @@ namespace phys
         constraint2D() = default;
         virtual ~constraint2D() = default;
 
-        constraint2D(const std::array<entity2D_ptr, N> &entities) : m_grad_entities(entities)
+        constraint2D(const std::array<entity2D_ptr, N> &entities) : constraint_interface2D(),
+                                                                    m_grad_entities(entities)
         {
-            for (std::size_t i = 0; i < N; i++)
-                m_entities[i] = entities[i];
+            copy_to_const_entities(entities);
+        }
+
+        constraint2D(const std::array<entity2D_ptr, N> &entities,
+                     float stiffness,
+                     float dampening) : constraint_interface2D(stiffness, dampening),
+                                        m_grad_entities(entities)
+        {
+            copy_to_const_entities(entities);
         }
 
         void add_entities(const std::array<entity2D_ptr, N> &entities)
         {
             m_grad_entities = entities;
-            for (std::size_t i = 0; i < N; i++)
-                m_entities[i] = entities[i];
+            copy_to_const_entities(entities);
         }
 
         float value() const override { return constraint(m_entities); }
@@ -43,6 +50,13 @@ namespace phys
 
     private:
         std::array<entity2D_ptr, N> m_grad_entities;
+
+        void copy_to_const_entities(const std::array<entity2D_ptr, N> &entities)
+        {
+            for (std::size_t i = 0; i < N; i++)
+                m_entities[i] = entities[i];
+        }
+
         virtual float constraint(const std::array<const_entity2D_ptr, N> &entities) const = 0;
         virtual float constraint_derivative(const std::array<const_entity2D_ptr, N> &entities) const = 0;
 

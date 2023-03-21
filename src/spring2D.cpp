@@ -4,8 +4,12 @@ namespace phys
 {
     spring2D::spring2D(const const_entity2D_ptr &e1,
                        const const_entity2D_ptr &e2,
+                       const float stiffness,
+                       const float dampening,
                        const float length) : m_e1(e1),
                                              m_e2(e2),
+                                             m_stiffness(stiffness),
+                                             m_dampening(dampening),
                                              m_length(length),
                                              m_has_joints(false) {}
 
@@ -13,10 +17,14 @@ namespace phys
                        const const_entity2D_ptr &e2,
                        const alg::vec2 &joint1,
                        const alg::vec2 &joint2,
+                       const float stiffness,
+                       const float dampening,
                        const float length) : m_e1(e1),
                                              m_e2(e2),
                                              m_joint1(joint1),
                                              m_joint2(joint2),
+                                             m_stiffness(stiffness),
+                                             m_dampening(dampening),
                                              m_angle1(e1->angpos()),
                                              m_angle2(e2->angpos()),
                                              m_length(length),

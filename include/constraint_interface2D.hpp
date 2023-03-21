@@ -11,6 +11,7 @@ namespace phys
     class constraint_interface2D
     {
     public:
+        constraint_interface2D(float stiffness = 500.f, float dampening = 30.f);
         virtual ~constraint_interface2D() = default;
 
         virtual float value() const = 0;
@@ -22,8 +23,10 @@ namespace phys
 
         virtual bool try_validate() = 0;
 
+    protected:
+        float m_stiffness, m_dampening;
+
     private:
-        float m_stiffness = 500.f, m_dampening = 30.f;
         virtual std::array<float, 3> constraint_grad(entity2D &e) const;
         virtual std::array<float, 3> constraint_grad_derivative(entity2D &e) const;
 

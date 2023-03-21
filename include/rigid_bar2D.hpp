@@ -11,12 +11,14 @@ namespace phys
         rigid_bar2D() = delete;
         rigid_bar2D(const entity2D_ptr &e1,
                     const entity2D_ptr &e2,
-                    float length = 10.f);
+                    float stiffness = 1.f,
+                    float dampening = 0.f);
         rigid_bar2D(const entity2D_ptr &e1,
                     const entity2D_ptr &e2,
                     const alg::vec2 &joint1,
                     const alg::vec2 &joint2,
-                    float length = 10.f);
+                    float stiffness = 1.f,
+                    float dampening = 0.f);
 
         float constraint(const std::array<const_entity2D_ptr, 2> &entities) const override;
         float constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const override;

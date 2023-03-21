@@ -270,7 +270,26 @@ namespace phys
 
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.emplace_back(inter); }
-    void engine2D::add_spring(const spring2D &spring) { m_springs.emplace_back(spring); }
+
+    spring2D &engine2D::add_spring(const const_entity2D_ptr &e1,
+                                   const const_entity2D_ptr &e2,
+                                   const float stiffness,
+                                   const float dampening,
+                                   const float length)
+    {
+        return m_springs.emplace_back(e1, e2, stiffness, dampening, length);
+    }
+
+    spring2D &engine2D::add_spring(const const_entity2D_ptr &e1,
+                                   const const_entity2D_ptr &e2,
+                                   const alg::vec2 &joint1,
+                                   const alg::vec2 &joint2,
+                                   const float stiffness,
+                                   const float dampening,
+                                   const float length)
+    {
+        return m_springs.emplace_back(e1, e2, joint1, joint2, stiffness, dampening, length);
+    }
 
     void engine2D::remove_force(const std::shared_ptr<force2D> &force)
     {
@@ -402,16 +421,10 @@ namespace phys
                 joint2.read(in);
                 in.end_section();
 
-                spring2D sp(e1, e2, joint1, joint2);
-                sp.read(in);
-                add_spring(sp);
+                add_spring(e1, e2, joint1, joint2).read(in);
             }
             else
-            {
-                spring2D sp(e1, e2);
-                sp.read(in);
-                add_spring(sp);
-            }
+                add_spring(e1, e2).read(in);
             in.end_section();
         }
 

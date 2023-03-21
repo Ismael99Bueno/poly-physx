@@ -37,7 +37,20 @@ namespace phys
 
         void add_force(const std::shared_ptr<force2D> &force);
         void add_interaction(const std::shared_ptr<interaction2D> &inter);
-        void add_spring(const spring2D &spring);
+
+        spring2D &add_spring(const const_entity2D_ptr &e1,
+                             const const_entity2D_ptr &e2,
+                             float stiffness = 1.f,
+                             float dampening = 0.f,
+                             float length = 0.f);
+
+        spring2D &add_spring(const const_entity2D_ptr &e1,
+                             const const_entity2D_ptr &e2,
+                             const alg::vec2 &joint1,
+                             const alg::vec2 &joint2,
+                             float stiffness = 1.f,
+                             float dampening = 0.f,
+                             float length = 0.f);
 
         void remove_force(const std::shared_ptr<force2D> &force);
         void remove_interaction(const std::shared_ptr<interaction2D> &inter);

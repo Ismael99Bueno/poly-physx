@@ -6,21 +6,23 @@ namespace phys
 {
     rigid_bar2D::rigid_bar2D(const entity2D_ptr &e1,
                              const entity2D_ptr &e2,
-                             const float length) : constraint2D<2>({e1, e2}),
-                                                   m_length(length),
-                                                   m_has_joints(false) {}
+                             const float stiffness,
+                             const float dampening) : constraint2D<2>({e1, e2}, stiffness, dampening),
+                                                      m_length(e1->pos().dist(e2->pos())),
+                                                      m_has_joints(false) {}
 
     rigid_bar2D::rigid_bar2D(const entity2D_ptr &e1,
                              const entity2D_ptr &e2,
                              const alg::vec2 &joint1,
                              const alg::vec2 &joint2,
-                             const float length) : constraint2D<2>({e1, e2}),
-                                                   m_length(length),
-                                                   m_angle1(e1->angpos()),
-                                                   m_angle2(e2->angpos()),
-                                                   m_joint1(joint1),
-                                                   m_joint2(joint2),
-                                                   m_has_joints(true)
+                             const float stiffness,
+                             const float dampening) : constraint2D<2>({e1, e2}, stiffness, dampening),
+                                                      m_length((e1->pos() + joint1).dist(e2->pos() + joint2)),
+                                                      m_angle1(e1->angpos()),
+                                                      m_angle2(e2->angpos()),
+                                                      m_joint1(joint1),
+                                                      m_joint2(joint2),
+                                                      m_has_joints(true)
     {
     }
 
