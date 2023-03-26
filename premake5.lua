@@ -1,4 +1,4 @@
-project "engine"
+project "poly-physx"
    language "C++"
    cppdialect "C++20"
    staticruntime "on"
