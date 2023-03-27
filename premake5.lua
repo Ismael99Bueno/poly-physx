@@ -5,8 +5,8 @@ project "poly-physx"
    kind "StaticLib"
    --buildoptions "-Xclang -fopenmp"
 
-   targetdir("../bin/" .. outputdir)
-   objdir("../build/" .. outputdir .. "/%{prj.name}")
+   targetdir("bin/" .. outputdir)
+   objdir("build/" .. outputdir .. "/%{prj.name}")
 
    files {"src/**.cpp", "include/**.hpp"}
 
