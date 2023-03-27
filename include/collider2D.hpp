@@ -103,13 +103,13 @@ namespace phys
 
         static bool gjk_epa(const entity2D *e1, const entity2D *e2, collision *c);
 
-        static bool gjk(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex);
+        static bool gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex);
         static void line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir);
         static bool triangle_case(std::vector<alg::vec2> &simplex, alg::vec2 &dir);
 
-        static alg::vec2 epa(const geo::polygon2D &poly1, const geo::polygon2D &poly2, std::vector<alg::vec2> &simplex);
-        static std::pair<alg::vec2, alg::vec2> touch_points(const geo::polygon2D &poly1,
-                                                            const geo::polygon2D &poly2,
+        static alg::vec2 epa(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex);
+        static std::pair<alg::vec2, alg::vec2> touch_points(const geo::polygon &poly1,
+                                                            const geo::polygon &poly2,
                                                             const alg::vec2 &mtv);
     };
 }

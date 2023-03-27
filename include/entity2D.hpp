@@ -2,7 +2,7 @@
 #define ENTITY2D_HPP
 
 #include "aabb2D.hpp"
-#include "polygon2D.hpp"
+#include "polygon.hpp"
 #include "saveable.hpp"
 #include "state.hpp"
 
@@ -15,7 +15,7 @@ namespace phys
                  const alg::vec2 &vel = alg::vec2::zero,
                  float angpos = 0.f, float angvel = 0.f,
                  float mass = 1.f, float charge = 1.f,
-                 const std::vector<alg::vec2> &vertices = geo::polygon2D::ngon(1.f, 3),
+                 const std::vector<alg::vec2> &vertices = geo::polygon::ngon(1.f, 3),
                  bool kinematic = true);
 
         void retrieve();
@@ -32,7 +32,7 @@ namespace phys
 
         const geo::aabb2D &aabb() const;
 
-        const geo::polygon2D &shape() const;
+        const geo::polygon &shape() const;
         void shape(const std::vector<alg::vec2> &vertices);
 
         std::size_t index() const;
@@ -66,7 +66,7 @@ namespace phys
 
     private:
         geo::aabb2D m_aabb;
-        geo::polygon2D m_shape;
+        geo::polygon m_shape;
         rk::state *m_state = nullptr;
         alg::vec2 m_vel, m_force, m_added_force;
         std::size_t m_index = 0, m_id;

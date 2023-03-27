@@ -67,11 +67,11 @@ namespace phys
     float entity2D::added_torque() const { return m_added_torque; }
 
     const geo::aabb2D &entity2D::aabb() const { return m_aabb; }
-    const geo::polygon2D &entity2D::shape() const { return m_shape; }
+    const geo::polygon &entity2D::shape() const { return m_shape; }
 
     void entity2D::shape(const std::vector<alg::vec2> &vertices)
     {
-        m_shape = geo::polygon2D(pos(), vertices);
+        m_shape = geo::polygon(pos(), vertices);
         m_aabb.bound(m_shape.vertices());
     }
 
