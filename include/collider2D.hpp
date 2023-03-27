@@ -8,7 +8,7 @@
 #include <vector>
 #include <utility>
 
-namespace phys
+namespace ppx
 {
     class collider2D : public ini::saveable
     {

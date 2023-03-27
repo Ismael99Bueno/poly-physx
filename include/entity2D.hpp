@@ -6,7 +6,7 @@
 #include "saveable.hpp"
 #include "state.hpp"
 
-namespace phys
+namespace ppx
 {
     class entity2D : public ini::saveable
     {

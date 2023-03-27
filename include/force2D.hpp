@@ -3,7 +3,7 @@
 
 #include "entity2D_set.hpp"
 
-namespace phys
+namespace ppx
 {
     class force2D : public entity2D_set
     {

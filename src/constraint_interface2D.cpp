@@ -3,7 +3,7 @@
 
 #define TOLERANCE 1.e-3f
 
-namespace phys
+namespace ppx
 {
     constraint_interface2D::constraint_interface2D(const float stiffness,
                                                    const float dampening) : m_stiffness(stiffness),

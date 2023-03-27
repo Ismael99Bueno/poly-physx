@@ -2,7 +2,7 @@
 #include "debug.hpp"
 #include "perf.hpp"
 
-namespace phys
+namespace ppx
 {
     std::uint32_t quad_tree2D::s_max_depth = 4;
     quad_tree2D::quad_tree2D(const alg::vec2 &min,

@@ -3,7 +3,7 @@
 
 #include "engine2D.hpp"
 
-namespace phys
+namespace ppx
 {
     std::vector<float> ode(float t, const std::vector<float> &vars, engine2D &engine);
 }

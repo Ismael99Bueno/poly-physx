@@ -4,7 +4,7 @@
 #include "constraint_interface2D.hpp"
 #include "entity2D_ptr.hpp"
 
-namespace phys
+namespace ppx
 {
     template <std::size_t N>
     class constraint2D : public constraint_interface2D

@@ -3,7 +3,7 @@
 
 #include "constraint2D.hpp"
 
-namespace phys
+namespace ppx
 {
     class rigid_bar2D : public constraint2D<2>, ini::saveable
     {

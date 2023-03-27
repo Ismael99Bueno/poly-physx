@@ -5,7 +5,7 @@
 #include <memory>
 #include <array>
 
-namespace phys
+namespace ppx
 {
     class quad_tree2D
     {

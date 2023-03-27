@@ -3,7 +3,7 @@
 #include "debug.hpp"
 #include "constraint_interface2D.hpp"
 
-namespace phys
+namespace ppx
 {
     compeller2D::compeller2D(std::vector<entity2D> *entities,
                              const std::size_t allocations) : m_entities(entities)

@@ -10,7 +10,7 @@
 #include "spring2D.hpp"
 #include "vector_view.hpp"
 
-namespace phys
+namespace ppx
 {
     class engine2D : public ini::saveable
     {

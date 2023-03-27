@@ -1,6 +1,6 @@
 #include "spring2D.hpp"
 
-namespace phys
+namespace ppx
 {
     spring2D::spring2D(const const_entity2D_ptr &e1,
                        const const_entity2D_ptr &e2,

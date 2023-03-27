@@ -1,7 +1,7 @@
 #include "entity2D_ptr.hpp"
 #include "debug.hpp"
 
-namespace phys
+namespace ppx
 {
     const_entity2D_ptr::const_entity2D_ptr(const std::vector<entity2D> *buffer,
                                            const std::size_t index) : m_buffer(buffer),
@@ -81,12 +81,12 @@ namespace phys
 
 namespace std
 {
-    size_t hash<phys::const_entity2D_ptr>::operator()(const phys::const_entity2D_ptr &key) const
+    size_t hash<ppx::const_entity2D_ptr>::operator()(const ppx::const_entity2D_ptr &key) const
     {
         return hash<std::size_t>()(key.id());
     }
 
-    size_t hash<phys::entity2D_ptr>::operator()(const phys::entity2D_ptr &key) const
+    size_t hash<ppx::entity2D_ptr>::operator()(const ppx::entity2D_ptr &key) const
     {
         return hash<std::size_t>()(key.id());
     }

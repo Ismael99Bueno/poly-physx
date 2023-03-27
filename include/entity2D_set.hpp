@@ -3,7 +3,7 @@
 
 #include "entity2D_ptr.hpp"
 
-namespace phys
+namespace ppx
 {
     class entity2D_set
     {

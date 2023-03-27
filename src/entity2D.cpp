@@ -3,7 +3,7 @@
 #include "interaction2D.hpp"
 #include "debug.hpp"
 
-namespace phys
+namespace ppx
 {
     std::size_t entity2D::s_id = 0;
     entity2D::entity2D(const alg::vec2 &pos,

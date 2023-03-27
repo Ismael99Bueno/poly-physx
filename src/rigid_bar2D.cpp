@@ -2,7 +2,7 @@
 #include "debug.hpp"
 #include <cmath>
 
-namespace phys
+namespace ppx
 {
     rigid_bar2D::rigid_bar2D(const entity2D_ptr &e1,
                              const entity2D_ptr &e2,
@@ -38,19 +38,19 @@ namespace phys
 
     float rigid_bar2D::without_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const phys::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
         return e1->pos().sq_dist(e2->pos()) - m_length * m_length;
     }
     float rigid_bar2D::without_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const phys::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
         return 2.f * (e1->pos() - e2->pos())
                          .dot(e1->vel() - e2->vel());
     }
 
     float rigid_bar2D::with_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const phys::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
         const alg::vec2 p1 = joint1() + e1->pos(),
                         p2 = joint2() + e2->pos();
 
@@ -58,7 +58,7 @@ namespace phys
     }
     float rigid_bar2D::with_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const phys::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
         const alg::vec2 rot_joint1 = joint1(),
                         rot_joint2 = joint2();
 

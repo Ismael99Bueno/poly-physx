@@ -5,7 +5,7 @@
 #include <vector>
 #include <functional>
 
-namespace phys
+namespace ppx
 {
     class constraint_interface2D;
     class compeller2D

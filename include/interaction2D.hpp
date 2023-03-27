@@ -3,7 +3,7 @@
 
 #include "entity2D_set.hpp"
 
-namespace phys
+namespace ppx
 {
     class interaction2D : public entity2D_set
     {
@@ -23,7 +23,7 @@ namespace phys
         float energy() const;
 
     private:
-        mutable phys::entity2D m_unit;
+        mutable ppx::entity2D m_unit;
     };
 }
 #endif

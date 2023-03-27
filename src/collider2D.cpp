@@ -8,7 +8,7 @@
 
 #define EPA_EPSILON 1.e-3f
 
-namespace phys
+namespace ppx
 {
     collider2D::collider2D(const std::vector<entity2D> *entities,
                            const std::size_t allocations,

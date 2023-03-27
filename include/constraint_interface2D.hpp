@@ -6,7 +6,7 @@
 #include <array>
 #include <functional>
 
-namespace phys
+namespace ppx
 {
     class constraint_interface2D
     {

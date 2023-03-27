@@ -4,7 +4,7 @@
 #include "rigid_bar2D.hpp"
 #include <random>
 
-namespace phys
+namespace ppx
 {
     engine2D::engine2D(const rk::butcher_tableau &table,
                        const std::size_t allocations) : m_collider(&m_entities, 2 * allocations),

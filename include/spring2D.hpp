@@ -4,7 +4,7 @@
 #include "entity2D_ptr.hpp"
 #include <utility>
 
-namespace phys
+namespace ppx
 {
     class spring2D : public ini::saveable
     {

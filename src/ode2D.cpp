@@ -1,7 +1,7 @@
 #include "ode2D.hpp"
 #include "perf.hpp"
 
-namespace phys
+namespace ppx
 {
     std::vector<float> ode(float t, const std::vector<float> &vars, engine2D &engine)
     {

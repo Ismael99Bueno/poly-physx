@@ -1,6 +1,6 @@
 #include "interaction2D.hpp"
 
-namespace phys
+namespace ppx
 {
     float interaction2D::potential(const entity2D &e, const alg::vec2 &pos) const
     {

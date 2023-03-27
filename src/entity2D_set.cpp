@@ -1,7 +1,7 @@
 #include "entity2D_set.hpp"
 #include "debug.hpp"
 
-namespace phys
+namespace ppx
 {
     entity2D_set::entity2D_set(const std::size_t allocations) { m_entities.reserve(allocations); }
 
