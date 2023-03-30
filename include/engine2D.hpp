@@ -9,6 +9,7 @@
 #include "interaction2D.hpp"
 #include "spring2D.hpp"
 #include "vector_view.hpp"
+#include "rigid_bar2D.hpp"
 
 namespace ppx
 {
@@ -75,11 +76,23 @@ namespace ppx
         void on_entity_addition(const add_callback &on_add);
         void on_entity_removal(const remove_callback &on_remove);
 
-        const_entity2D_ptr from_index(std::size_t index) const;
-        entity2D_ptr from_index(std::size_t index);
+        const_entity2D_ptr entity_from_index(std::size_t index) const;
+        entity2D_ptr entity_from_index(std::size_t index);
 
-        const_entity2D_ptr from_id(std::size_t id) const;
-        entity2D_ptr from_id(std::size_t id);
+        const_entity2D_ptr entity_from_id(std::size_t id) const;
+        entity2D_ptr entity_from_id(std::size_t id);
+
+        const spring2D *spring_from_indices(std::size_t index1, std::size_t index2) const;
+        spring2D *spring_from_indices(std::size_t index1, std::size_t index2);
+
+        const spring2D *spring_from_ids(std::size_t id1, std::size_t id2) const;
+        spring2D *spring_from_ids(std::size_t id1, std::size_t id2);
+
+        std::shared_ptr<const rigid_bar2D> rb_from_indices(std::size_t index1, std::size_t index2) const;
+        std::shared_ptr<rigid_bar2D> rb_from_indices(std::size_t index1, std::size_t index2);
+
+        std::shared_ptr<const rigid_bar2D> rb_from_ids(std::size_t id1, std::size_t id2) const;
+        std::shared_ptr<rigid_bar2D> rb_from_ids(std::size_t id1, std::size_t id2);
 
         const_entity2D_ptr operator[](std::size_t index) const;
         entity2D_ptr operator[](std::size_t index);

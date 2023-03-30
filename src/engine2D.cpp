@@ -1,7 +1,6 @@
 #include "engine2D.hpp"
 #include "ode2D.hpp"
 #include "perf.hpp"
-#include "rigid_bar2D.hpp"
 #include <random>
 
 namespace ppx
@@ -457,25 +456,25 @@ namespace ppx
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
     void engine2D::on_entity_removal(const remove_callback &on_remove) { m_on_entity_removal.emplace_back(on_remove); }
 
-    const_entity2D_ptr engine2D::from_index(std::size_t index) const
+    const_entity2D_ptr engine2D::entity_from_index(const std::size_t index) const
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
         return {&m_entities, index};
     }
-    entity2D_ptr engine2D::from_index(std::size_t index)
+    entity2D_ptr engine2D::entity_from_index(const std::size_t index)
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
         return {&m_entities, index};
     }
 
-    const_entity2D_ptr engine2D::from_id(std::size_t id) const
+    const_entity2D_ptr engine2D::entity_from_id(const std::size_t id) const
     {
         for (std::size_t i = 0; i < m_entities.size(); i++)
             if (m_entities[i].id() == id)
                 return {&m_entities, i};
         return nullptr;
     }
-    entity2D_ptr engine2D::from_id(std::size_t id)
+    entity2D_ptr engine2D::entity_from_id(const std::size_t id)
     {
         for (std::size_t i = 0; i < m_entities.size(); i++)
             if (m_entities[i].id() == id)
@@ -483,8 +482,94 @@ namespace ppx
         return nullptr;
     }
 
-    const_entity2D_ptr engine2D::operator[](std::size_t index) const { return from_index(index); }
-    entity2D_ptr engine2D::operator[](std::size_t index) { return from_index(index); }
+    const spring2D *engine2D::spring_from_indices(const std::size_t index1,
+                                                  const std::size_t index2) const
+    {
+        for (const spring2D &sp : m_springs)
+            if (sp.e1()->index() == index1 && sp.e2().index() == index2)
+                return &sp;
+        return nullptr;
+    }
+    spring2D *engine2D::spring_from_indices(const std::size_t index1,
+                                            const std::size_t index2)
+    {
+        for (spring2D &sp : m_springs)
+            if (sp.e1()->index() == index1 && sp.e2().index() == index2)
+                return &sp;
+        return nullptr;
+    }
+    const spring2D *engine2D::spring_from_ids(const std::size_t id1,
+                                              const std::size_t id2) const
+    {
+        for (const spring2D &sp : m_springs)
+            if (sp.e1()->id() == id1 && sp.e2().id() == id2)
+                return &sp;
+        return nullptr;
+    }
+    spring2D *engine2D::spring_from_ids(const std::size_t id1,
+                                        const std::size_t id2)
+    {
+        for (spring2D &sp : m_springs)
+            if (sp.e1()->id() == id1 && sp.e2().id() == id2)
+                return &sp;
+        return nullptr;
+    }
+
+    std::shared_ptr<const rigid_bar2D> engine2D::rb_from_indices(const std::size_t index1,
+                                                                 const std::size_t index2) const
+    {
+        for (const auto &ctr : m_compeller.constraints())
+        {
+            const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
+            if (!rb)
+                continue;
+            if (rb->e1()->index() == index1 && rb->e2()->index() == index2)
+                return rb;
+        }
+        return nullptr;
+    }
+    std::shared_ptr<rigid_bar2D> engine2D::rb_from_indices(const std::size_t index1,
+                                                           const std::size_t index2)
+    {
+        for (const auto &ctr : m_compeller.constraints())
+        {
+            const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
+            if (!rb)
+                continue;
+            if (rb->e1()->index() == index1 && rb->e2()->index() == index2)
+                return rb;
+        }
+        return nullptr;
+    }
+    std::shared_ptr<const rigid_bar2D> engine2D::rb_from_ids(const std::size_t id1,
+                                                             const std::size_t id2) const
+    {
+        for (const auto &ctr : m_compeller.constraints())
+        {
+            const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
+            if (!rb)
+                continue;
+            if (rb->e1()->id() == id1 && rb->e2()->id() == id2)
+                return rb;
+        }
+        return nullptr;
+    }
+    std::shared_ptr<rigid_bar2D> engine2D::rb_from_ids(const std::size_t id1,
+                                                       const std::size_t id2)
+    {
+        for (const auto &ctr : m_compeller.constraints())
+        {
+            const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
+            if (!rb)
+                continue;
+            if (rb->e1()->id() == id1 && rb->e2()->id() == id2)
+                return rb;
+        }
+        return nullptr;
+    }
+
+    const_entity2D_ptr engine2D::operator[](const std::size_t index) const { return entity_from_index(index); }
+    entity2D_ptr engine2D::operator[](const std::size_t index) { return entity_from_index(index); }
 
     std::vector<const_entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
     {
