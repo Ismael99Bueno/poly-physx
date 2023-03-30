@@ -8,7 +8,6 @@ namespace ppx
     class rigid_bar2D : public constraint2D<2>, ini::saveable
     {
     public:
-        rigid_bar2D() = delete;
         rigid_bar2D(const entity2D_ptr &e1,
                     const entity2D_ptr &e2,
                     float stiffness = 1.f,
@@ -53,6 +52,8 @@ namespace ppx
 
         float with_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const;
         float with_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const;
+
+        rigid_bar2D() = delete;
     };
 }
 

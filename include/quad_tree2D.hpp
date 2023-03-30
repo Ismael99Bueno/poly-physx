@@ -10,10 +10,6 @@ namespace ppx
     class quad_tree2D
     {
     public:
-        quad_tree2D() = delete;
-        quad_tree2D(const quad_tree2D &) = delete;
-        quad_tree2D &operator=(const quad_tree2D &) = delete;
-
         quad_tree2D(const alg::vec2 &min,
                     const alg::vec2 &max,
                     std::size_t max_entities = 5,
@@ -56,6 +52,10 @@ namespace ppx
         void create_children();
         void partition();
         void add_to_children(const const_entity2D_ptr &e);
+
+        quad_tree2D() = delete;
+        quad_tree2D(const quad_tree2D &) = delete;
+        quad_tree2D &operator=(const quad_tree2D &) = delete;
     };
 }
 

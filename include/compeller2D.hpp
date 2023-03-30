@@ -11,10 +11,6 @@ namespace ppx
     class compeller2D
     {
     public:
-        compeller2D() = delete;
-        compeller2D(const compeller2D &) = delete;
-        compeller2D &operator=(const compeller2D &) = delete;
-
         compeller2D(std::vector<entity2D> *entities,
                     std::size_t allocations);
 
@@ -50,6 +46,10 @@ namespace ppx
         void load_constraint_accels(const std::vector<float> &jcb,
                                     const std::vector<float> &lambda,
                                     std::vector<float> &stchanges) const;
+
+        compeller2D() = delete;
+        compeller2D(const compeller2D &) = delete;
+        compeller2D &operator=(const compeller2D &) = delete;
     };
 }
 

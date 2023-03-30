@@ -9,7 +9,6 @@ namespace ppx
     class spring2D : public ini::saveable
     {
     public:
-        spring2D() = delete;
         spring2D(const const_entity2D_ptr &e1,
                  const const_entity2D_ptr &e2,
                  float stiffness = 1.f,
@@ -62,6 +61,8 @@ namespace ppx
 
         std::tuple<alg::vec2, float, float> without_joints_force() const;
         std::tuple<alg::vec2, float, float> with_joints_force() const;
+
+        spring2D() = delete;
     };
 }
 

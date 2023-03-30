@@ -20,9 +20,6 @@ namespace ppx
             QUAD_TREE
         };
 
-        collider2D() = delete;
-        collider2D(const collider2D &) = delete;
-        collider2D &operator=(const collider2D &) = delete;
         collider2D(const std::vector<entity2D> *entities,
                    std::size_t allocations,
                    const alg::vec2 &min = -0.5f * alg::vec2(192.f, 128.f),
@@ -111,6 +108,10 @@ namespace ppx
         static std::pair<alg::vec2, alg::vec2> touch_points(const geo::polygon &poly1,
                                                             const geo::polygon &poly2,
                                                             const alg::vec2 &mtv);
+
+        collider2D() = delete;
+        collider2D(const collider2D &) = delete;
+        collider2D &operator=(const collider2D &) = delete;
     };
 }
 
