@@ -14,51 +14,6 @@ namespace ppx
         m_entities.reserve(allocations);
         m_integ.state().reserve(6 * allocations);
     }
-    engine2D::engine2D(const engine2D &eng) : m_entities(eng.m_entities),
-                                              m_collider(&m_entities, 2 * eng.size(),
-                                                         eng.m_collider.quad_tree().aabb().min(),
-                                                         eng.m_collider.quad_tree().aabb().max()),
-                                              m_compeller(&m_entities, eng.compeller().constraints().capacity()),
-                                              m_integ(eng.m_integ),
-                                              m_elapsed(eng.m_elapsed)
-    {
-        for (entity2D &e : m_entities)
-        {
-            e.m_state = &m_integ.state();
-            m_collider.add_entity_intervals({&m_entities, e.index()});
-        }
-
-        m_springs.reserve(eng.m_springs.capacity());
-        for (const spring2D &sp : eng.m_springs)
-        {
-            const const_entity2D_ptr e1 = {&m_entities, sp.e1().index()},
-                                     e2 = {&m_entities, sp.e2().index()};
-            if (sp.has_joints())
-                m_springs.emplace_back(e1, e2, sp.joint1(), sp.joint2(), sp.length());
-            else
-                m_springs.emplace_back(e1, e2, sp.length());
-        }
-
-        for (const auto &ctr : eng.m_compeller.constraints())
-        {
-            const rigid_bar2D *rb = nullptr;
-            try
-            {
-                rb = &dynamic_cast<const rigid_bar2D &>(*ctr);
-            }
-            catch (const std::bad_cast &e)
-            {
-                DBG_LOG("%s\n", e.what())
-                continue;
-            }
-            const entity2D_ptr e1 = {&m_entities, rb->e1().index()},
-                               e2 = {&m_entities, rb->e2().index()};
-            if (rb->has_joints())
-                m_compeller.add_constraint(std::make_shared<rigid_bar2D>(e1, e2, rb->joint1(), rb->joint2(), rb->length()));
-            else
-                m_compeller.add_constraint(std::make_shared<rigid_bar2D>(e1, e2, rb->length()));
-        }
-    }
 
     void engine2D::retrieve(const std::vector<float> &vars_buffer)
     {

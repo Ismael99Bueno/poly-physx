@@ -16,8 +16,6 @@ namespace ppx
     {
     public:
         engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);
-        engine2D(const engine2D &eng);
-        engine2D &operator=(const engine2D &eng) = delete;
 
         void retrieve();
 
@@ -143,6 +141,8 @@ namespace ppx
                                std::size_t index);
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
+        engine2D &operator=(const engine2D &eng) = delete;
+        engine2D(const engine2D &eng) = delete;
     };
 }
 
