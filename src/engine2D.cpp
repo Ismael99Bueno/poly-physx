@@ -502,8 +502,34 @@ namespace ppx
     void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
     void engine2D::on_entity_removal(const remove_callback &on_remove) { m_on_entity_removal.emplace_back(on_remove); }
 
-    const_entity2D_ptr engine2D::operator[](std::size_t index) const { return {&m_entities, index}; }
-    entity2D_ptr engine2D::operator[](std::size_t index) { return {&m_entities, index}; }
+    const_entity2D_ptr engine2D::from_index(std::size_t index) const
+    {
+        DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
+        return {&m_entities, index};
+    }
+    entity2D_ptr engine2D::from_index(std::size_t index)
+    {
+        DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
+        return {&m_entities, index};
+    }
+
+    const_entity2D_ptr engine2D::from_id(std::size_t id) const
+    {
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+            if (m_entities[i].id() == id)
+                return {&m_entities, i};
+        return nullptr;
+    }
+    entity2D_ptr engine2D::from_id(std::size_t id)
+    {
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+            if (m_entities[i].id() == id)
+                return {&m_entities, i};
+        return nullptr;
+    }
+
+    const_entity2D_ptr engine2D::operator[](std::size_t index) const { return from_index(index); }
+    entity2D_ptr engine2D::operator[](std::size_t index) { return from_index(index); }
 
     std::vector<const_entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
     {

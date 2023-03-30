@@ -77,6 +77,12 @@ namespace ppx
         void on_entity_addition(const add_callback &on_add);
         void on_entity_removal(const remove_callback &on_remove);
 
+        const_entity2D_ptr from_index(std::size_t index) const;
+        entity2D_ptr from_index(std::size_t index);
+
+        const_entity2D_ptr from_id(std::size_t id) const;
+        entity2D_ptr from_id(std::size_t id);
+
         const_entity2D_ptr operator[](std::size_t index) const;
         entity2D_ptr operator[](std::size_t index);
 
