@@ -2,6 +2,7 @@
 #define COMPELLER2D_HPP
 
 #include "entity2D.hpp"
+#include "pass_key.hpp"
 #include <vector>
 #include <functional>
 
@@ -11,7 +12,8 @@ namespace ppx
     class compeller2D final
     {
     public:
-        compeller2D(std::vector<entity2D> *entities,
+        compeller2D(engine_key,
+                    std::vector<entity2D> *entities,
                     std::size_t allocations);
 
         void add_constraint(const std::shared_ptr<constraint_interface2D> &c);

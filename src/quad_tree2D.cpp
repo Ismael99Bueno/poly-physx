@@ -5,7 +5,8 @@
 namespace ppx
 {
     std::uint32_t quad_tree2D::s_max_depth = 4;
-    quad_tree2D::quad_tree2D(const alg::vec2 &min,
+    quad_tree2D::quad_tree2D(collider_key,
+                             const alg::vec2 &min,
                              const alg::vec2 &max,
                              const std::size_t max_entities,
                              const std::uint32_t depth) : m_aabb(min, max),
@@ -71,10 +72,10 @@ namespace ppx
                         &mx = m_aabb.max();
         const alg::vec2 mid_point = 0.5f * (mm + mx),
                         hdim = 0.5f * (mx - mm);
-        m_children[0] = std::make_unique<quad_tree2D>(alg::vec2(mm.x, mm.y + hdim.y), alg::vec2(mx.x - hdim.x, mx.y), m_max_entities, m_depth + 1);
-        m_children[1] = std::make_unique<quad_tree2D>(mid_point, mx, m_max_entities, m_depth + 1);
-        m_children[2] = std::make_unique<quad_tree2D>(mm, mid_point, m_max_entities, m_depth + 1);
-        m_children[3] = std::make_unique<quad_tree2D>(alg::vec2(mm.x + hdim.x, mm.y), alg::vec2(mx.x, mx.y - hdim.y), m_max_entities, m_depth + 1);
+        m_children[0] = std::make_unique<quad_tree2D>(collider_key(), alg::vec2(mm.x, mm.y + hdim.y), alg::vec2(mx.x - hdim.x, mx.y), m_max_entities, m_depth + 1);
+        m_children[1] = std::make_unique<quad_tree2D>(collider_key(), mid_point, mx, m_max_entities, m_depth + 1);
+        m_children[2] = std::make_unique<quad_tree2D>(collider_key(), mm, mid_point, m_max_entities, m_depth + 1);
+        m_children[3] = std::make_unique<quad_tree2D>(collider_key(), alg::vec2(mm.x + hdim.x, mm.y), alg::vec2(mx.x, mx.y - hdim.y), m_max_entities, m_depth + 1);
     }
 
     void quad_tree2D::partition()

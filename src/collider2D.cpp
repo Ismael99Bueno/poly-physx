@@ -10,11 +10,12 @@
 
 namespace ppx
 {
-    collider2D::collider2D(const std::vector<entity2D> *entities,
+    collider2D::collider2D(engine_key,
+                           const std::vector<entity2D> *entities,
                            const std::size_t allocations,
                            const alg::vec2 &min,
                            const alg::vec2 &max) : m_entities(entities),
-                                                   m_quad_tree(min, max)
+                                                   m_quad_tree(collider_key(), min, max)
     {
         m_intervals.reserve(allocations);
     }

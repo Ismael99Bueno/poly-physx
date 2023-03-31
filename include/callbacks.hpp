@@ -4,13 +4,14 @@
 #include "entity2D_ptr.hpp"
 #include "constraint_interface2D.hpp"
 #include "spring2D.hpp"
+#include "pass_key.hpp"
 
 namespace ppx
 {
     class callbacks final
     {
     public:
-        callbacks() = default;
+        callbacks(engine_key);
 
         using entity_cb = std::function<void(entity2D_ptr)>;
         using late_remove_entity_cb = std::function<void(std::size_t)>;
@@ -28,15 +29,15 @@ namespace ppx
         void on_constraint_addition(const constraint_cb &on_add);
         void on_constraint_removal(const constraint_cb &on_add);
 
-        void entity_addition() const;
-        void early_entity_removal() const;
-        void late_entity_removal() const;
+        void entity_addition(engine_key) const;
+        void early_entity_removal(engine_key) const;
+        void late_entity_removal(engine_key) const;
 
-        void spring_addition() const;
-        void spring_removal() const;
+        void spring_addition(engine_key) const;
+        void spring_removal(engine_key) const;
 
-        void constraint_addition() const;
-        void constraint_removal() const;
+        void constraint_addition(engine_key) const;
+        void constraint_removal(engine_key) const;
 
     private:
         std::vector<entity_cb> m_on_entity_addition, m_on_early_entity_removal;
