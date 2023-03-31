@@ -283,7 +283,7 @@ namespace ppx
     {
         if (index >= m_springs.size())
         {
-            DBG_LOG("Array index out of bounds. Aborting... - index: %zu, size: %zu", index, m_springs.size())
+            DBG_LOG("Array index out of bounds. Aborting... - index: %zu, size: %zu\n", index, m_springs.size())
             return false;
         }
         m_callbacks.spring_removal(m_springs[index]);
