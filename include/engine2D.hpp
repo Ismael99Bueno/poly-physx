@@ -32,8 +32,8 @@ namespace ppx
                                 const std::vector<alg::vec2> &vertices = geo::polygon::box(1.f),
                                 bool kinematic = true);
 
-        void remove_entity(std::size_t index);
-        void remove_entity(const entity2D &e);
+        bool remove_entity(std::size_t index);
+        bool remove_entity(const entity2D &e);
 
         void add_force(const std::shared_ptr<force2D> &force);
         void add_interaction(const std::shared_ptr<interaction2D> &inter);
@@ -53,16 +53,18 @@ namespace ppx
                              float length = 0.f);
 
         void add_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
-        void remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
+        bool remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
 
-        void remove_force(const std::shared_ptr<force2D> &force);
-        void remove_interaction(const std::shared_ptr<interaction2D> &inter);
-        void remove_spring(std::size_t index);
+        bool remove_force(const std::shared_ptr<force2D> &force);
+        bool remove_interaction(const std::shared_ptr<interaction2D> &inter);
+        bool remove_spring(std::size_t index);
+        bool remove_spring(const spring2D &sp);
 
         void clear_entities();
         void clear_forces();
         void clear_interactions();
         void clear_springs();
+        void clear_constraints();
         void clear();
 
         void write(ini::output &out) const override;

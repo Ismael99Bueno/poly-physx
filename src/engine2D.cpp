@@ -7,7 +7,7 @@ namespace ppx
 {
     engine2D::engine2D(const rk::butcher_tableau &table,
                        const std::size_t allocations) : m_collider(engine_key(), &m_entities, 2 * allocations),
-                                                        m_compeller(engine_key(), &m_entities, allocations),
+                                                        m_compeller(engine_key(), &m_entities, allocations, &m_callbacks),
                                                         m_integ(table), m_callbacks(engine_key())
     {
         m_entities.reserve(allocations);
@@ -99,7 +99,10 @@ namespace ppx
             i->validate();
         for (auto it = m_springs.begin(); it != m_springs.end();)
             if (!it->try_validate())
+            {
+                m_callbacks.spring_removal(*it);
                 it = m_springs.erase(it);
+            }
             else
                 ++it;
     }
@@ -190,15 +193,19 @@ namespace ppx
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
             DBG_ASSERT(m_entities[i].m_id != e.m_id, "Added entity has the same id as entity with index %zu.\n", i)
 #endif
-        m_callbacks.entity_addition(engine_key(), e_ptr);
+        m_callbacks.entity_addition(e_ptr);
         return e_ptr;
     }
 
-    void engine2D::remove_entity(const std::size_t index)
+    bool engine2D::remove_entity(const std::size_t index)
     {
-        DBG_ASSERT(index < m_entities.size(), "Index exceeds entity array bounds - index: %zu, size: %zu\n", index, m_entities.size())
+        if (index >= m_entities.size())
+        {
+            DBG_LOG(index < m_entities.size(), "Index exceeds entity array bounds. Aborting... - index: %zu, size: %zu\n", index, m_entities.size())
+            return false;
+        }
 
-        m_callbacks.early_entity_removal(engine_key(), (*this)[index]);
+        m_callbacks.early_entity_removal(m_entities[index]);
         rk::state &state = m_integ.state();
         if (index == m_entities.size() - 1)
             m_entities.pop_back();
@@ -216,10 +223,11 @@ namespace ppx
 
         validate();
         m_collider.update_quad_tree();
-        m_callbacks.late_entity_removal(engine_key(), index);
+        m_callbacks.late_entity_removal(index);
+        return true;
     }
 
-    void engine2D::remove_entity(const entity2D &e) { remove_entity(e.index()); }
+    bool engine2D::remove_entity(const entity2D &e) { return remove_entity(e.index()); }
 
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.emplace_back(inter); }
@@ -231,7 +239,7 @@ namespace ppx
                                    const float length)
     {
         spring2D &sp = m_springs.emplace_back(e1, e2, stiffness, dampening, length);
-        m_callbacks.spring_addition(engine_key(), &sp);
+        m_callbacks.spring_addition(&sp);
         return sp;
     }
 
@@ -244,34 +252,50 @@ namespace ppx
                                    const float length)
     {
         spring2D &sp = m_springs.emplace_back(e1, e2, joint1, joint2, stiffness, dampening, length);
-        m_callbacks.spring_addition(engine_key(), &sp);
+        m_callbacks.spring_addition(&sp);
         return sp;
     }
 
-    void engine2D::add_constraint(const std::shared_ptr<constraint_interface2D> &ctr)
-    {
-        m_compeller.add_constraint(ctr);
-        m_callbacks.constraint_addition(engine_key(), ctr);
-    }
-    void engine2D::remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr)
-    {
-        m_callbacks.constraint_removal(engine_key(), ctr);
-        m_compeller.remove_constraint(ctr);
-    }
+    void engine2D::add_constraint(const std::shared_ptr<constraint_interface2D> &ctr) { m_compeller.add_constraint(ctr); }
+    bool engine2D::remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr) { return m_compeller.remove_constraint(ctr); }
 
-    void engine2D::remove_force(const std::shared_ptr<force2D> &force)
+    bool engine2D::remove_force(const std::shared_ptr<force2D> &force)
     {
-        m_forces.erase(std::remove(m_forces.begin(), m_forces.end(), force), m_forces.end());
+        for (auto it = m_forces.begin(); it != m_forces.end(); ++it)
+            if (*it == force)
+            {
+                m_forces.erase(it);
+                return true;
+            }
+        return false;
     }
-    void engine2D::remove_interaction(const std::shared_ptr<interaction2D> &inter)
+    bool engine2D::remove_interaction(const std::shared_ptr<interaction2D> &inter)
     {
-        m_interactions.erase(std::remove(m_interactions.begin(), m_interactions.end(), inter), m_interactions.end());
+        for (auto it = m_interactions.begin(); it != m_interactions.end(); ++it)
+            if (*it == inter)
+            {
+                m_interactions.erase(it);
+                return true;
+            }
+        return false;
     }
-    void engine2D::remove_spring(std::size_t index)
+    bool engine2D::remove_spring(std::size_t index)
     {
         if (index >= m_springs.size())
-            return;
+        {
+            DBG_LOG("Array index out of bounds. Aborting... - index: %zu, size: %zu", index, m_springs.size())
+            return false;
+        }
+        m_callbacks.spring_removal(m_springs[index]);
         m_springs.erase(m_springs.begin() + index);
+        return true;
+    }
+    bool engine2D::remove_spring(const spring2D &sp)
+    {
+        for (std::size_t i = 0; i < m_springs.size(); i++)
+            if (sp.e1() == m_springs[i].e1() && sp.e2() == m_springs[i].e2())
+                return remove_spring(i);
+        return false;
     }
 
     void engine2D::clear_entities()
@@ -282,6 +306,7 @@ namespace ppx
     void engine2D::clear_forces() { m_forces.clear(); }
     void engine2D::clear_interactions() { m_interactions.clear(); }
     void engine2D::clear_springs() { m_springs.clear(); }
+    void engine2D::clear_constraints() { m_compeller.clear_constraints(); }
     void engine2D::clear()
     {
         m_forces.clear();
