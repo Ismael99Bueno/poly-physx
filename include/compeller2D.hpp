@@ -8,7 +8,7 @@
 namespace ppx
 {
     class constraint_interface2D;
-    class compeller2D
+    class compeller2D final
     {
     public:
         compeller2D(std::vector<entity2D> *entities,

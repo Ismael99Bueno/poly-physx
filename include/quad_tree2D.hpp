@@ -7,7 +7,7 @@
 
 namespace ppx
 {
-    class quad_tree2D
+    class quad_tree2D final
     {
     public:
         quad_tree2D(const alg::vec2 &min,

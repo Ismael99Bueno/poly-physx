@@ -10,7 +10,7 @@
 
 namespace ppx
 {
-    class collider2D : public ini::saveable
+    class collider2D final : public ini::saveable
     {
     public:
         enum coldet_method

@@ -7,7 +7,7 @@
 
 namespace ppx
 {
-    class callbacks
+    class callbacks final
     {
     public:
         callbacks() = default;
