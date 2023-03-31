@@ -201,7 +201,7 @@ namespace ppx
     {
         if (index >= m_entities.size())
         {
-            DBG_LOG(index < m_entities.size(), "Index exceeds entity array bounds. Aborting... - index: %zu, size: %zu\n", index, m_entities.size())
+            DBG_LOG("Index exceeds entity array bounds. Aborting... - index: %zu, size: %zu\n", index, m_entities.size())
             return false;
         }
 
