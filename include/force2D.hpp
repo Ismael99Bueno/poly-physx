@@ -17,6 +17,10 @@ namespace ppx
 
         float energy(const entity2D &e) const;
         float energy() const;
+
+    private:
+        force2D(const force2D &) = delete;
+        force2D &operator=(const force2D &) = delete;
     };
 }
 

@@ -23,6 +23,9 @@ namespace ppx
 
     protected:
         std::vector<const_entity2D_ptr> m_entities;
+
+        entity2D_set(const entity2D_set &) = delete;
+        entity2D_set &operator=(const entity2D_set &) = delete;
     };
 }
 
