@@ -17,27 +17,27 @@ namespace ppx
         using late_remove_entity_cb = std::function<void(std::size_t)>;
 
         using spring_cb = std::function<void(spring2D *)>;
-        using constraint_cb = std::function<void(std::shared_ptr<constraint_interface2D>)>;
+        using constraint_cb = std::function<void(const std::shared_ptr<constraint_interface2D> &)>;
 
         void on_entity_addition(const entity_cb &on_add);
         void on_early_entity_removal(const entity_cb &on_remove);
         void on_late_entity_removal(const late_remove_entity_cb &on_remove);
 
         void on_spring_addition(const spring_cb &on_add);
-        void on_spring_removal(const spring_cb &on_add);
+        void on_spring_removal(const spring_cb &on_remove);
 
         void on_constraint_addition(const constraint_cb &on_add);
-        void on_constraint_removal(const constraint_cb &on_add);
+        void on_constraint_removal(const constraint_cb &on_remove);
 
-        void entity_addition(engine_key) const;
-        void early_entity_removal(engine_key) const;
-        void late_entity_removal(engine_key) const;
+        void entity_addition(engine_key, entity2D_ptr e) const;
+        void early_entity_removal(engine_key, entity2D_ptr e) const;
+        void late_entity_removal(engine_key, std::size_t index) const;
 
-        void spring_addition(engine_key) const;
-        void spring_removal(engine_key) const;
+        void spring_addition(engine_key, spring2D *sp) const;
+        void spring_removal(engine_key, spring2D *sp) const;
 
-        void constraint_addition(engine_key) const;
-        void constraint_removal(engine_key) const;
+        void constraint_addition(engine_key, const std::shared_ptr<constraint_interface2D> &) const;
+        void constraint_removal(engine_key, const std::shared_ptr<constraint_interface2D> &) const;
 
     private:
         std::vector<entity_cb> m_on_entity_addition, m_on_early_entity_removal;

@@ -10,6 +10,7 @@
 #include "spring2D.hpp"
 #include "vector_view.hpp"
 #include "rigid_bar2D.hpp"
+#include "callbacks.hpp"
 
 namespace ppx
 {
@@ -51,8 +52,8 @@ namespace ppx
                              float dampening = 0.f,
                              float length = 0.f);
 
-        void add_constraint(const std::shared_ptr<constraint_interface2D> &c);
-        void remove_constraint(const std::shared_ptr<const constraint_interface2D> &c);
+        void add_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
+        void remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
 
         void remove_force(const std::shared_ptr<force2D> &force);
         void remove_interaction(const std::shared_ptr<interaction2D> &inter);
@@ -73,11 +74,6 @@ namespace ppx
         float kinetic_energy() const;
         float potential_energy() const;
         float energy() const;
-
-        using add_callback = std::function<void(entity2D_ptr)>;
-        using remove_callback = std::function<void(std::size_t)>;
-        void on_entity_addition(const add_callback &on_add);
-        void on_entity_removal(const remove_callback &on_remove);
 
         const_entity2D_ptr entity_from_index(std::size_t index) const;
         entity2D_ptr entity_from_index(std::size_t index);
@@ -126,6 +122,9 @@ namespace ppx
 
         const compeller2D &compeller() const;
 
+        const ppx::callbacks &callbacks() const;
+        ppx::callbacks &callbacks();
+
         float elapsed() const;
 
     private:
@@ -135,11 +134,10 @@ namespace ppx
         std::vector<std::shared_ptr<force2D>> m_forces;
         std::vector<std::shared_ptr<interaction2D>> m_interactions;
         std::vector<spring2D> m_springs;
-        std::vector<add_callback> m_on_entity_addition;
-        std::vector<remove_callback> m_on_entity_removal;
         std::tuple<float, std::vector<float>, std::vector<entity2D>> m_checkpoint;
-
         rk::integrator m_integ;
+        ppx::callbacks m_callbacks;
+
         float m_elapsed = 0.f;
 
         void load_velocities_and_added_forces(std::vector<float> &stchanges) const;

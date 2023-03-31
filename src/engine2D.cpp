@@ -8,7 +8,7 @@ namespace ppx
     engine2D::engine2D(const rk::butcher_tableau &table,
                        const std::size_t allocations) : m_collider(engine_key(), &m_entities, 2 * allocations),
                                                         m_compeller(engine_key(), &m_entities, allocations),
-                                                        m_integ(table)
+                                                        m_integ(table), m_callbacks(engine_key())
     {
         m_entities.reserve(allocations);
         m_integ.state().reserve(6 * allocations);
@@ -190,16 +190,16 @@ namespace ppx
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
             DBG_ASSERT(m_entities[i].m_id != e.m_id, "Added entity has the same id as entity with index %zu.\n", i)
 #endif
-        for (const add_callback &cb : m_on_entity_addition)
-            cb(e_ptr);
+        m_callbacks.entity_addition(engine_key(), e_ptr);
         return e_ptr;
     }
 
     void engine2D::remove_entity(const std::size_t index)
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds entity array bounds - index: %zu, size: %zu\n", index, m_entities.size())
-        rk::state &state = m_integ.state();
 
+        m_callbacks.early_entity_removal(engine_key(), (*this)[index]);
+        rk::state &state = m_integ.state();
         if (index == m_entities.size() - 1)
             m_entities.pop_back();
         else
@@ -216,8 +216,7 @@ namespace ppx
 
         validate();
         m_collider.update_quad_tree();
-        for (const remove_callback &cb : m_on_entity_removal)
-            cb(index);
+        m_callbacks.late_entity_removal(engine_key(), index);
     }
 
     void engine2D::remove_entity(const entity2D &e) { remove_entity(e.index()); }
@@ -231,7 +230,9 @@ namespace ppx
                                    const float dampening,
                                    const float length)
     {
-        return m_springs.emplace_back(e1, e2, stiffness, dampening, length);
+        spring2D &sp = m_springs.emplace_back(e1, e2, stiffness, dampening, length);
+        m_callbacks.spring_addition(engine_key(), &sp);
+        return sp;
     }
 
     spring2D &engine2D::add_spring(const const_entity2D_ptr &e1,
@@ -242,11 +243,21 @@ namespace ppx
                                    const float dampening,
                                    const float length)
     {
-        return m_springs.emplace_back(e1, e2, joint1, joint2, stiffness, dampening, length);
+        spring2D &sp = m_springs.emplace_back(e1, e2, joint1, joint2, stiffness, dampening, length);
+        m_callbacks.spring_addition(engine_key(), &sp);
+        return sp;
     }
 
-    void engine2D::add_constraint(const std::shared_ptr<constraint_interface2D> &c) { m_compeller.add_constraint(c); }
-    void engine2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &c) { m_compeller.remove_constraint(c); }
+    void engine2D::add_constraint(const std::shared_ptr<constraint_interface2D> &ctr)
+    {
+        m_compeller.add_constraint(ctr);
+        m_callbacks.constraint_addition(engine_key(), ctr);
+    }
+    void engine2D::remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr)
+    {
+        m_callbacks.constraint_removal(engine_key(), ctr);
+        m_compeller.remove_constraint(ctr);
+    }
 
     void engine2D::remove_force(const std::shared_ptr<force2D> &force)
     {
@@ -444,9 +455,6 @@ namespace ppx
     }
     float engine2D::energy() const { return kinetic_energy() + potential_energy(); }
 
-    void engine2D::on_entity_addition(const add_callback &on_add) { m_on_entity_addition.emplace_back(on_add); }
-    void engine2D::on_entity_removal(const remove_callback &on_remove) { m_on_entity_removal.emplace_back(on_remove); }
-
     const_entity2D_ptr engine2D::entity_from_index(const std::size_t index) const
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
@@ -617,6 +625,9 @@ namespace ppx
     collider2D &engine2D::collider() { return m_collider; }
 
     const compeller2D &engine2D::compeller() const { return m_compeller; }
+
+    const callbacks &engine2D::callbacks() const { return m_callbacks; }
+    callbacks &engine2D::callbacks() { return m_callbacks; }
 
     float engine2D::elapsed() const { return m_elapsed; }
 }
