@@ -347,16 +347,9 @@ namespace ppx
         index = 0;
         for (const auto &ctr : m_compeller.constraints())
         {
-            const rigid_bar2D *rb = nullptr;
-            try
-            {
-                rb = &dynamic_cast<const rigid_bar2D &>(*ctr);
-            }
-            catch (const std::bad_cast &e)
-            {
-                DBG_LOG("%s\n", e.what())
+            const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
+            if (!rb)
                 continue;
-            }
             out.begin_section(section + std::to_string(index++));
             rb->write(out);
             out.end_section();
