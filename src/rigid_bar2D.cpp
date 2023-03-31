@@ -119,12 +119,11 @@ namespace ppx
     {
         out.write("e1", m_entities[0]->index());
         out.write("e2", m_entities[1]->index());
-        out.begin_section("joint1");
-        joint1().write(out);
-        out.end_section();
-        out.begin_section("joint2");
-        joint2().write(out);
-        out.end_section();
+        const alg::vec2 j1 = joint1(), j2 = joint2();
+        out.write("joint1x", j1.x);
+        out.write("joint1y", j1.y);
+        out.write("joint2x", j2.x);
+        out.write("joint2y", j2.y);
         out.write("stiffness", stiffness());
         out.write("dampening", dampening());
         out.write("length", length());

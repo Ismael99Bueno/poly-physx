@@ -95,12 +95,8 @@ namespace ppx
         out.write("added_torque", m_added_torque);
         out.write("index", m_index);
         m_shape.write(out);
-        out.begin_section("velocity");
-        m_vel.write(out);
-        out.end_section();
-        out.begin_section("added_force");
-        m_added_force.write(out);
-        out.end_section();
+        out.write("vx", m_vel.x);
+        out.write("vy", m_vel.y);
     }
     void entity2D::read(ini::input &in)
     {
@@ -112,13 +108,7 @@ namespace ppx
 
         m_shape.read(in);
         m_aabb.bound(m_shape.vertices());
-
-        in.begin_section("velocity");
-        m_vel.read(in);
-        in.end_section();
-        in.begin_section("added_force");
-        m_added_force.read(in);
-        in.end_section();
+        m_vel = {in.readf("vx"), in.readf("vy")};
 
         dispatch();
         DBG_ASSERT((size_t)in.readi("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readi("index"), m_index)

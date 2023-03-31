@@ -370,14 +370,8 @@ namespace ppx
 
             if (has_joints)
             {
-                alg::vec2 joint1, joint2;
-                in.begin_section("joint1");
-                joint1.read(in);
-                in.end_section();
-                in.begin_section("joint2");
-                joint2.read(in);
-                in.end_section();
-
+                const alg::vec2 joint1 = {in.readf("joint1x"), in.readf("joint1y")},
+                                joint2 = {in.readf("joint2x"), in.readf("joint2y")};
                 add_spring(e1, e2, joint1, joint2).read(in);
             }
             else
@@ -401,14 +395,8 @@ namespace ppx
 
             if (has_joints)
             {
-                alg::vec2 joint1, joint2;
-                in.begin_section("joint1");
-                joint1.read(in);
-                in.end_section();
-                in.begin_section("joint2");
-                joint2.read(in);
-                in.end_section();
-
+                const alg::vec2 joint1 = {in.readf("joint1x"), in.readf("joint1y")},
+                                joint2 = {in.readf("joint2x"), in.readf("joint2y")};
                 const auto rb = std::make_shared<rigid_bar2D>(e1, e2, joint1, joint2);
                 rb->read(in);
                 m_compeller.add_constraint(rb);
