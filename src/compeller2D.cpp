@@ -7,23 +7,43 @@ namespace ppx
 {
     compeller2D::compeller2D(engine_key,
                              std::vector<entity2D> *entities,
-                             const std::size_t allocations) : m_entities(entities)
+                             const std::size_t allocations,
+                             callbacks *cbs) : m_entities(entities), m_callbacks(cbs)
     {
         m_constraints.reserve(allocations);
     }
 
-    void compeller2D::add_constraint(const std::shared_ptr<constraint_interface2D> &c) { m_constraints.emplace_back(c); }
-    void compeller2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &c)
+    void compeller2D::add_constraint(const std::shared_ptr<constraint_interface2D> &ctr)
     {
-        m_constraints.erase(std::remove(m_constraints.begin(), m_constraints.end(), c), m_constraints.end());
+        m_constraints.emplace_back(ctr);
+        m_callbacks->constraint_addition(ctr);
     }
-    void compeller2D::clear_constraints() { m_constraints.clear(); }
+    bool compeller2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr)
+    {
+        for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
+            if (*it == ctr)
+            {
+                m_callbacks->constraint_removal(*it);
+                m_constraints.erase(it);
+                return true;
+            }
+        return false;
+    }
+    void compeller2D::clear_constraints()
+    {
+        for (const auto &ctr : m_constraints)
+            m_callbacks->constraint_removal(ctr);
+        m_constraints.clear();
+    }
 
     void compeller2D::validate()
     {
         for (auto it = m_constraints.begin(); it != m_constraints.end();)
             if (!((*it)->try_validate()))
+            {
+                m_callbacks->constraint_removal(*it);
                 it = m_constraints.erase(it);
+            }
             else
                 ++it;
     }
