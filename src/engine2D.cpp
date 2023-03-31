@@ -245,6 +245,9 @@ namespace ppx
         return m_springs.emplace_back(e1, e2, joint1, joint2, stiffness, dampening, length);
     }
 
+    void engine2D::add_constraint(const std::shared_ptr<constraint_interface2D> &c) { m_compeller.add_constraint(c); }
+    void engine2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &c) { m_compeller.remove_constraint(c); }
+
     void engine2D::remove_force(const std::shared_ptr<force2D> &force)
     {
         m_forces.erase(std::remove(m_forces.begin(), m_forces.end(), force), m_forces.end());
@@ -622,11 +625,10 @@ namespace ppx
     const rk::integrator &engine2D::integrator() const { return m_integ; }
     rk::integrator &engine2D::integrator() { return m_integ; }
 
-    const compeller2D &engine2D::compeller() const { return m_compeller; }
-    compeller2D &engine2D::compeller() { return m_compeller; }
-
     const collider2D &engine2D::collider() const { return m_collider; }
     collider2D &engine2D::collider() { return m_collider; }
+
+    const compeller2D &engine2D::compeller() const { return m_compeller; }
 
     float engine2D::elapsed() const { return m_elapsed; }
 }

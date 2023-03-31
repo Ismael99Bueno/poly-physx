@@ -51,6 +51,9 @@ namespace ppx
                              float dampening = 0.f,
                              float length = 0.f);
 
+        void add_constraint(const std::shared_ptr<constraint_interface2D> &c);
+        void remove_constraint(const std::shared_ptr<const constraint_interface2D> &c);
+
         void remove_force(const std::shared_ptr<force2D> &force);
         void remove_interaction(const std::shared_ptr<interaction2D> &inter);
         void remove_spring(std::size_t index);
@@ -118,11 +121,10 @@ namespace ppx
         const rk::integrator &integrator() const;
         rk::integrator &integrator();
 
-        const compeller2D &compeller() const;
-        compeller2D &compeller();
-
         const collider2D &collider() const;
         collider2D &collider();
+
+        const compeller2D &compeller() const;
 
         float elapsed() const;
 
