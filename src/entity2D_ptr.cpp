@@ -10,8 +10,16 @@ namespace ppx
         if (buffer)
             m_id = (*buffer)[index].id();
     }
+    const_entity2D_ptr::const_entity2D_ptr(const std::vector<entity2D> *buffer,
+                                           std::size_t index,
+                                           std::size_t id) : m_buffer(buffer),
+                                                             m_index(index),
+                                                             m_id(id) {}
 
-    std::size_t const_entity2D_ptr::index() const { return m_index; }
+    std::size_t const_entity2D_ptr::index() const
+    {
+        return m_index;
+    }
     std::size_t const_entity2D_ptr::id() const { return m_id; }
 
     const entity2D *const_entity2D_ptr::raw() const { return &((*m_buffer)[m_index]); }
@@ -73,7 +81,7 @@ namespace ppx
     }
 
     entity2D_ptr::operator bool() const { return m_buffer; }
-    entity2D_ptr::operator const_entity2D_ptr() const { return const_entity2D_ptr(m_buffer, m_index); }
+    entity2D_ptr::operator const_entity2D_ptr() const { return const_entity2D_ptr(m_buffer, m_index, m_id); }
 
     bool operator==(const entity2D_ptr &e1, const entity2D_ptr &e2) { return e1.id() == e2.id(); }
     bool operator!=(const entity2D_ptr &e1, const entity2D_ptr &e2) { return e1.id() != e2.id(); }

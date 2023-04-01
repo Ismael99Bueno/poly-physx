@@ -25,8 +25,12 @@ namespace ppx
         explicit operator bool() const;
 
     private:
+        // Private ctr ensuring conversion between non const to const acts like a copy
+        const_entity2D_ptr(const std::vector<entity2D> *buffer, std::size_t index, std::size_t id);
+
         const std::vector<entity2D> *m_buffer = nullptr;
         std::size_t m_index = 0, m_id = 0;
+        friend class entity2D_ptr;
     };
 
     bool operator==(const const_entity2D_ptr &e1, const const_entity2D_ptr &e2);
