@@ -86,8 +86,8 @@ namespace ppx
         const spring2D *spring_from_entities(const entity2D &e1, const entity2D &e2) const;
         spring2D *spring_from_entities(const entity2D &e1, const entity2D &e2);
 
-        std::shared_ptr<const rigid_bar2D> rb_from_entities(const entity2D &e1, const entity2D &e2) const;
-        std::shared_ptr<rigid_bar2D> rb_from_entities(const entity2D &e1, const entity2D &e2);
+        std::shared_ptr<const rigid_bar2D> rbar_from_entities(const entity2D &e1, const entity2D &e2) const;
+        std::shared_ptr<rigid_bar2D> rbar_from_entities(const entity2D &e1, const entity2D &e2);
 
         const_entity2D_ptr operator[](std::size_t index) const;
         entity2D_ptr operator[](std::size_t index);

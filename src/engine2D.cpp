@@ -516,8 +516,8 @@ namespace ppx
         return nullptr;
     }
 
-    std::shared_ptr<const rigid_bar2D> engine2D::rb_from_entities(const entity2D &e1,
-                                                                  const entity2D &e2) const
+    std::shared_ptr<const rigid_bar2D> engine2D::rbar_from_entities(const entity2D &e1,
+                                                                    const entity2D &e2) const
     {
         for (const auto &ctr : m_compeller.constraints())
         {
@@ -529,8 +529,8 @@ namespace ppx
         }
         return nullptr;
     }
-    std::shared_ptr<rigid_bar2D> engine2D::rb_from_entities(const entity2D &e1,
-                                                            const entity2D &e2)
+    std::shared_ptr<rigid_bar2D> engine2D::rbar_from_entities(const entity2D &e1,
+                                                              const entity2D &e2)
     {
         for (const auto &ctr : m_compeller.constraints())
         {
