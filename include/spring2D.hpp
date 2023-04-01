@@ -9,13 +9,13 @@ namespace ppx
     class spring2D : public ini::saveable
     {
     public:
-        spring2D(const const_entity2D_ptr &e1,
-                 const const_entity2D_ptr &e2,
+        spring2D(const_entity2D_ptr e1,
+                 const_entity2D_ptr e2,
                  float stiffness = 1.f,
                  float dampening = 0.f,
                  float length = 0.f);
-        spring2D(const const_entity2D_ptr &e1,
-                 const const_entity2D_ptr &e2,
+        spring2D(const_entity2D_ptr e1,
+                 const_entity2D_ptr e2,
                  const alg::vec2 &joint1,
                  const alg::vec2 &joint2,
                  float stiffness = 1.f,

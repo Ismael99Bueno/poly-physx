@@ -18,7 +18,7 @@ namespace ppx
         m_entities.reserve(max_entities);
     }
 
-    void quad_tree2D::add_if_inside(const const_entity2D_ptr &e)
+    void quad_tree2D::add_if_inside(const_entity2D_ptr e)
     {
         DBG_ASSERT(m_entities.size() <= m_max_entities || rock_bottom(), "Quad tree contains more entities than allowed! - Contained entities: %zu, maximum entities: %zu\n", m_entities.size(), m_max_entities)
         if (!m_aabb.overlaps(e->aabb()))
@@ -83,12 +83,12 @@ namespace ppx
         if (!m_has_children)
             create_children();
         m_partitioned = true;
-        for (const const_entity2D_ptr &e : m_entities)
+        for (const_entity2D_ptr e : m_entities)
             add_to_children(e);
         m_entities.clear();
     }
 
-    void quad_tree2D::add_to_children(const const_entity2D_ptr &e)
+    void quad_tree2D::add_to_children(const_entity2D_ptr e)
     {
         for (const auto &q : m_children)
             q->add_if_inside(e);

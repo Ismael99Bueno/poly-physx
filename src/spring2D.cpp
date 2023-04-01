@@ -2,8 +2,8 @@
 
 namespace ppx
 {
-    spring2D::spring2D(const const_entity2D_ptr &e1,
-                       const const_entity2D_ptr &e2,
+    spring2D::spring2D(const_entity2D_ptr e1,
+                       const_entity2D_ptr e2,
                        const float stiffness,
                        const float dampening,
                        const float length) : m_e1(e1),
@@ -13,8 +13,8 @@ namespace ppx
                                              m_length(length),
                                              m_has_joints(false) {}
 
-    spring2D::spring2D(const const_entity2D_ptr &e1,
-                       const const_entity2D_ptr &e2,
+    spring2D::spring2D(const_entity2D_ptr e1,
+                       const_entity2D_ptr e2,
                        const alg::vec2 &joint1,
                        const alg::vec2 &joint2,
                        const float stiffness,

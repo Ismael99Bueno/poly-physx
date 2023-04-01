@@ -14,7 +14,7 @@ namespace ppx
                 ++it;
     }
 
-    void entity2D_set::include(const const_entity2D_ptr &e) { m_entities.emplace_back(e); }
+    void entity2D_set::include(const_entity2D_ptr e) { m_entities.emplace_back(e); }
     void entity2D_set::exclude(const entity2D &e)
     {
         for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
@@ -26,7 +26,7 @@ namespace ppx
     }
     bool entity2D_set::contains(const entity2D &e) const
     {
-        for (const const_entity2D_ptr &entt : m_entities)
+        for (const_entity2D_ptr entt : m_entities)
             if (*entt == e)
                 return true;
         return false;

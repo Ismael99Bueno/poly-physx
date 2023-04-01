@@ -38,14 +38,14 @@ namespace ppx
         void add_force(const std::shared_ptr<force2D> &force);
         void add_interaction(const std::shared_ptr<interaction2D> &inter);
 
-        spring2D &add_spring(const const_entity2D_ptr &e1,
-                             const const_entity2D_ptr &e2,
+        spring2D &add_spring(const_entity2D_ptr e1,
+                             const_entity2D_ptr e2,
                              float stiffness = 1.f,
                              float dampening = 0.f,
                              float length = 0.f);
 
-        spring2D &add_spring(const const_entity2D_ptr &e1,
-                             const const_entity2D_ptr &e2,
+        spring2D &add_spring(const_entity2D_ptr e1,
+                             const_entity2D_ptr e2,
                              const alg::vec2 &joint1,
                              const alg::vec2 &joint2,
                              float stiffness = 1.f,
@@ -83,17 +83,11 @@ namespace ppx
         const_entity2D_ptr entity_from_id(std::size_t id) const;
         entity2D_ptr entity_from_id(std::size_t id);
 
-        const spring2D *spring_from_indices(std::size_t index1, std::size_t index2) const;
-        spring2D *spring_from_indices(std::size_t index1, std::size_t index2);
+        const spring2D *spring_from_entities(const entity2D &e1, const entity2D &e2) const;
+        spring2D *spring_from_entities(const entity2D &e1, const entity2D &e2);
 
-        const spring2D *spring_from_ids(std::size_t id1, std::size_t id2) const;
-        spring2D *spring_from_ids(std::size_t id1, std::size_t id2);
-
-        std::shared_ptr<const rigid_bar2D> rb_from_indices(std::size_t index1, std::size_t index2) const;
-        std::shared_ptr<rigid_bar2D> rb_from_indices(std::size_t index1, std::size_t index2);
-
-        std::shared_ptr<const rigid_bar2D> rb_from_ids(std::size_t id1, std::size_t id2) const;
-        std::shared_ptr<rigid_bar2D> rb_from_ids(std::size_t id1, std::size_t id2);
+        std::shared_ptr<const rigid_bar2D> rb_from_entities(const entity2D &e1, const entity2D &e2) const;
+        std::shared_ptr<rigid_bar2D> rb_from_entities(const entity2D &e1, const entity2D &e2);
 
         const_entity2D_ptr operator[](std::size_t index) const;
         entity2D_ptr operator[](std::size_t index);

@@ -4,15 +4,15 @@
 
 namespace ppx
 {
-    rigid_bar2D::rigid_bar2D(const entity2D_ptr &e1,
-                             const entity2D_ptr &e2,
+    rigid_bar2D::rigid_bar2D(entity2D_ptr e1,
+                             entity2D_ptr e2,
                              const float stiffness,
                              const float dampening) : constraint2D<2>({e1, e2}, stiffness, dampening),
                                                       m_length(e1->pos().dist(e2->pos())),
                                                       m_has_joints(false) {}
 
-    rigid_bar2D::rigid_bar2D(const entity2D_ptr &e1,
-                             const entity2D_ptr &e2,
+    rigid_bar2D::rigid_bar2D(entity2D_ptr e1,
+                             entity2D_ptr e2,
                              const alg::vec2 &joint1,
                              const alg::vec2 &joint2,
                              const float stiffness,
@@ -38,19 +38,19 @@ namespace ppx
 
     float rigid_bar2D::without_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const_entity2D_ptr e1 = entities[0], e2 = entities[1];
         return e1->pos().sq_dist(e2->pos()) - m_length * m_length;
     }
     float rigid_bar2D::without_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const_entity2D_ptr e1 = entities[0], e2 = entities[1];
         return 2.f * (e1->pos() - e2->pos())
                          .dot(e1->vel() - e2->vel());
     }
 
     float rigid_bar2D::with_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const_entity2D_ptr e1 = entities[0], e2 = entities[1];
         const alg::vec2 p1 = joint1() + e1->pos(),
                         p2 = joint2() + e2->pos();
 
@@ -58,7 +58,7 @@ namespace ppx
     }
     float rigid_bar2D::with_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
     {
-        const ppx::const_entity2D_ptr &e1 = entities[0], &e2 = entities[1];
+        const_entity2D_ptr e1 = entities[0], e2 = entities[1];
         const alg::vec2 rot_joint1 = joint1(),
                         rot_joint2 = joint2();
 
@@ -68,7 +68,7 @@ namespace ppx
 
     std::array<float, 3> rigid_bar2D::constraint_grad(entity2D &e) const
     {
-        const const_entity2D_ptr &e1 = m_entities[0], &e2 = m_entities[1];
+        const_entity2D_ptr e1 = m_entities[0], e2 = m_entities[1];
         DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!\n")
         if (!m_has_joints)
         {
@@ -94,7 +94,7 @@ namespace ppx
     }
     std::array<float, 3> rigid_bar2D::constraint_grad_derivative(entity2D &e) const
     {
-        const const_entity2D_ptr &e1 = m_entities[0], &e2 = m_entities[1];
+        const_entity2D_ptr e1 = m_entities[0], e2 = m_entities[1];
         DBG_ASSERT(e == *e1 || e == *e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!\n")
         if (!m_has_joints)
         {

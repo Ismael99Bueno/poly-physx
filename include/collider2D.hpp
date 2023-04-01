@@ -27,7 +27,7 @@ namespace ppx
                    const alg::vec2 &min = -0.5f * alg::vec2(192.f, 128.f),
                    const alg::vec2 &max = 0.5f * alg::vec2(192.f, 128.f));
 
-        void add_entity_intervals(const const_entity2D_ptr &e);
+        void add_entity_intervals(const_entity2D_ptr e);
         void solve_and_load_collisions(std::vector<float> &stchanges);
         void update_quad_tree();
         void rebuild_quad_tree();
@@ -64,7 +64,7 @@ namespace ppx
                 HIGHER
             };
 
-            interval(const const_entity2D_ptr &e, end end_type);
+            interval(const_entity2D_ptr e, end end_type);
 
             const entity2D *entity() const;
             float value() const;

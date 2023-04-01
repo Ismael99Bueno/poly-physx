@@ -111,7 +111,7 @@ namespace ppx
     {
         PERF_FUNCTION()
         for (const std::shared_ptr<const force2D> f : m_forces)
-            for (const const_entity2D_ptr &e : f->entities())
+            for (const_entity2D_ptr e : f->entities())
             {
                 if (!e->kinematic())
                     continue;
@@ -130,12 +130,12 @@ namespace ppx
                 load_force(stchanges, -force, t2, index2);
         }
         for (const std::shared_ptr<const interaction2D> i : m_interactions)
-            for (const const_entity2D_ptr &e1 : i->entities())
+            for (const_entity2D_ptr e1 : i->entities())
             {
                 if (!e1->kinematic())
                     continue;
                 const std::size_t index = 6 * e1.index();
-                for (const const_entity2D_ptr &e2 : i->entities())
+                for (const_entity2D_ptr e2 : i->entities())
                     if (e1 != e2)
                     {
                         const auto [force, torque] = i->force(*e1, *e2);
@@ -232,8 +232,8 @@ namespace ppx
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.emplace_back(inter); }
 
-    spring2D &engine2D::add_spring(const const_entity2D_ptr &e1,
-                                   const const_entity2D_ptr &e2,
+    spring2D &engine2D::add_spring(const_entity2D_ptr e1,
+                                   const_entity2D_ptr e2,
                                    const float stiffness,
                                    const float dampening,
                                    const float length)
@@ -243,8 +243,8 @@ namespace ppx
         return sp;
     }
 
-    spring2D &engine2D::add_spring(const const_entity2D_ptr &e1,
-                                   const const_entity2D_ptr &e2,
+    spring2D &engine2D::add_spring(const_entity2D_ptr e1,
+                                   const_entity2D_ptr e2,
                                    const alg::vec2 &joint1,
                                    const alg::vec2 &joint2,
                                    const float stiffness,
@@ -499,87 +499,45 @@ namespace ppx
         return nullptr;
     }
 
-    const spring2D *engine2D::spring_from_indices(const std::size_t index1,
-                                                  const std::size_t index2) const
+    const spring2D *engine2D::spring_from_entities(const entity2D &e1,
+                                                   const entity2D &e2) const
     {
         for (const spring2D &sp : m_springs)
-            if (sp.e1()->index() == index1 && sp.e2().index() == index2)
+            if (*sp.e1() == e1 && *sp.e2() == e2)
                 return &sp;
         return nullptr;
     }
-    spring2D *engine2D::spring_from_indices(const std::size_t index1,
-                                            const std::size_t index2)
+    spring2D *engine2D::spring_from_entities(const entity2D &e1,
+                                             const entity2D &e2)
     {
         for (spring2D &sp : m_springs)
-            if (sp.e1()->index() == index1 && sp.e2().index() == index2)
-                return &sp;
-        return nullptr;
-    }
-    const spring2D *engine2D::spring_from_ids(const std::size_t id1,
-                                              const std::size_t id2) const
-    {
-        for (const spring2D &sp : m_springs)
-            if (sp.e1()->id() == id1 && sp.e2().id() == id2)
-                return &sp;
-        return nullptr;
-    }
-    spring2D *engine2D::spring_from_ids(const std::size_t id1,
-                                        const std::size_t id2)
-    {
-        for (spring2D &sp : m_springs)
-            if (sp.e1()->id() == id1 && sp.e2().id() == id2)
+            if (*sp.e1() == e1 && *sp.e2() == e2)
                 return &sp;
         return nullptr;
     }
 
-    std::shared_ptr<const rigid_bar2D> engine2D::rb_from_indices(const std::size_t index1,
-                                                                 const std::size_t index2) const
+    std::shared_ptr<const rigid_bar2D> engine2D::rb_from_entities(const entity2D &e1,
+                                                                  const entity2D &e2) const
     {
         for (const auto &ctr : m_compeller.constraints())
         {
             const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
             if (!rb)
                 continue;
-            if (rb->e1()->index() == index1 && rb->e2()->index() == index2)
+            if (*rb->e1() == e1 && *rb->e2() == e2)
                 return rb;
         }
         return nullptr;
     }
-    std::shared_ptr<rigid_bar2D> engine2D::rb_from_indices(const std::size_t index1,
-                                                           const std::size_t index2)
+    std::shared_ptr<rigid_bar2D> engine2D::rb_from_entities(const entity2D &e1,
+                                                            const entity2D &e2)
     {
         for (const auto &ctr : m_compeller.constraints())
         {
             const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
             if (!rb)
                 continue;
-            if (rb->e1()->index() == index1 && rb->e2()->index() == index2)
-                return rb;
-        }
-        return nullptr;
-    }
-    std::shared_ptr<const rigid_bar2D> engine2D::rb_from_ids(const std::size_t id1,
-                                                             const std::size_t id2) const
-    {
-        for (const auto &ctr : m_compeller.constraints())
-        {
-            const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
-            if (!rb)
-                continue;
-            if (rb->e1()->id() == id1 && rb->e2()->id() == id2)
-                return rb;
-        }
-        return nullptr;
-    }
-    std::shared_ptr<rigid_bar2D> engine2D::rb_from_ids(const std::size_t id1,
-                                                       const std::size_t id2)
-    {
-        for (const auto &ctr : m_compeller.constraints())
-        {
-            const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
-            if (!rb)
-                continue;
-            if (rb->e1()->id() == id1 && rb->e2()->id() == id2)
+            if (*rb->e1() == e1 && *rb->e2() == e2)
                 return rb;
         }
         return nullptr;

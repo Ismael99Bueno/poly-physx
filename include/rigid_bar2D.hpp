@@ -8,12 +8,12 @@ namespace ppx
     class rigid_bar2D : public constraint2D<2>, ini::saveable
     {
     public:
-        rigid_bar2D(const entity2D_ptr &e1,
-                    const entity2D_ptr &e2,
+        rigid_bar2D(entity2D_ptr e1,
+                    entity2D_ptr e2,
                     float stiffness = 1.f,
                     float dampening = 0.f);
-        rigid_bar2D(const entity2D_ptr &e1,
-                    const entity2D_ptr &e2,
+        rigid_bar2D(entity2D_ptr e1,
+                    entity2D_ptr e2,
                     const alg::vec2 &joint1,
                     const alg::vec2 &joint2,
                     float stiffness = 1.f,
