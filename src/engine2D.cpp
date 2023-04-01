@@ -503,7 +503,8 @@ namespace ppx
                                                    const entity2D &e2) const
     {
         for (const spring2D &sp : m_springs)
-            if (*sp.e1() == e1 && *sp.e2() == e2)
+            if ((*sp.e1() == e1 && *sp.e2() == e2) ||
+                (*sp.e1() == e2 && *sp.e2() == e1))
                 return &sp;
         return nullptr;
     }
@@ -511,7 +512,8 @@ namespace ppx
                                              const entity2D &e2)
     {
         for (spring2D &sp : m_springs)
-            if (*sp.e1() == e1 && *sp.e2() == e2)
+            if ((*sp.e1() == e1 && *sp.e2() == e2) ||
+                (*sp.e1() == e2 && *sp.e2() == e1))
                 return &sp;
         return nullptr;
     }
@@ -524,7 +526,8 @@ namespace ppx
             const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
             if (!rb)
                 continue;
-            if (*rb->e1() == e1 && *rb->e2() == e2)
+            if ((*rb->e1() == e1 && *rb->e2() == e2) ||
+                (*rb->e1() == e2 && *rb->e2() == e1))
                 return rb;
         }
         return nullptr;
@@ -537,7 +540,8 @@ namespace ppx
             const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
             if (!rb)
                 continue;
-            if (*rb->e1() == e1 && *rb->e2() == e2)
+            if ((*rb->e1() == e1 && *rb->e2() == e2) ||
+                (*rb->e1() == e2 && *rb->e2() == e1))
                 return rb;
         }
         return nullptr;
