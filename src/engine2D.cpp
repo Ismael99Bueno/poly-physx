@@ -232,8 +232,8 @@ namespace ppx
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.emplace_back(inter); }
 
-    spring2D &engine2D::add_spring(const_entity2D_ptr e1,
-                                   const_entity2D_ptr e2,
+    spring2D &engine2D::add_spring(entity2D_ptr e1,
+                                   entity2D_ptr e2,
                                    const float stiffness,
                                    const float dampening,
                                    const float length)
@@ -243,8 +243,8 @@ namespace ppx
         return sp;
     }
 
-    spring2D &engine2D::add_spring(const_entity2D_ptr e1,
-                                   const_entity2D_ptr e2,
+    spring2D &engine2D::add_spring(entity2D_ptr e1,
+                                   entity2D_ptr e2,
                                    const alg::vec2 &joint1,
                                    const alg::vec2 &joint2,
                                    const float stiffness,
@@ -257,7 +257,7 @@ namespace ppx
     }
 
     void engine2D::add_constraint(const std::shared_ptr<constraint_interface2D> &ctr) { m_compeller.add_constraint(ctr); }
-    bool engine2D::remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr) { return m_compeller.remove_constraint(ctr); }
+    bool engine2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr) { return m_compeller.remove_constraint(ctr); }
 
     bool engine2D::remove_force(const std::shared_ptr<force2D> &force)
     {

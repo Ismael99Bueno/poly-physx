@@ -45,10 +45,8 @@ namespace ppx
             return true;
         }
 
-    protected:
-        std::array<const_entity2D_ptr, N> m_entities;
-
     private:
+        std::array<const_entity2D_ptr, N> m_entities;
         std::array<entity2D_ptr, N> m_grad_entities;
 
         void copy_to_const_entities(const std::array<entity2D_ptr, N> &entities)

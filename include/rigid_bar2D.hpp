@@ -28,8 +28,8 @@ namespace ppx
         void write(ini::output &out) const override;
         void read(ini::input &in) override;
 
-        const_entity2D_ptr e1() const;
-        const_entity2D_ptr e2() const;
+        entity2D_ptr e1() const;
+        entity2D_ptr e2() const;
 
         alg::vec2 joint1() const;
         alg::vec2 joint2() const;
@@ -40,6 +40,7 @@ namespace ppx
         bool has_joints() const;
 
     private:
+        entity2D_ptr m_e1, m_e2;
         float m_length, m_angle1, m_angle2;
         alg::vec2 m_joint1, m_joint2;
         bool m_has_joints;

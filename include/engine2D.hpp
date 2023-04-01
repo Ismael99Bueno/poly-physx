@@ -38,14 +38,14 @@ namespace ppx
         void add_force(const std::shared_ptr<force2D> &force);
         void add_interaction(const std::shared_ptr<interaction2D> &inter);
 
-        spring2D &add_spring(const_entity2D_ptr e1,
-                             const_entity2D_ptr e2,
+        spring2D &add_spring(entity2D_ptr e1,
+                             entity2D_ptr e2,
                              float stiffness = 1.f,
                              float dampening = 0.f,
                              float length = 0.f);
 
-        spring2D &add_spring(const_entity2D_ptr e1,
-                             const_entity2D_ptr e2,
+        spring2D &add_spring(entity2D_ptr e1,
+                             entity2D_ptr e2,
                              const alg::vec2 &joint1,
                              const alg::vec2 &joint2,
                              float stiffness = 1.f,
@@ -53,7 +53,7 @@ namespace ppx
                              float length = 0.f);
 
         void add_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
-        bool remove_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
+        bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
 
         bool remove_force(const std::shared_ptr<force2D> &force);
         bool remove_interaction(const std::shared_ptr<interaction2D> &inter);
