@@ -23,7 +23,7 @@ namespace ppx
         float energy() const;
 
     private:
-        mutable ppx::entity2D m_unit;
+        mutable entity2D m_unit;
 
         interaction2D(const interaction2D &) = delete;
         interaction2D &operator=(const interaction2D &) = delete;

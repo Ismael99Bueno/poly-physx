@@ -83,11 +83,11 @@ namespace std
 {
     size_t hash<ppx::const_entity2D_ptr>::operator()(const ppx::const_entity2D_ptr &key) const
     {
-        return hash<std::size_t>()(key.id());
+        return hash<size_t>()(key.id());
     }
 
     size_t hash<ppx::entity2D_ptr>::operator()(const ppx::entity2D_ptr &key) const
     {
-        return hash<std::size_t>()(key.id());
+        return hash<size_t>()(key.id());
     }
 }
