@@ -1,4 +1,4 @@
-# Poly-Physx
+# poly-physx
 
 poly-physx is a 2D physics engine that simulates collisions between convex polygons, forces and interactions between entities, and constraints. It is designed to be flexible and easy to use, allowing developers to create complex 2D physics simulations with ease.
 
@@ -9,16 +9,19 @@ poly-physx is a 2D physics engine that simulates collisions between convex polyg
 - Constraints, including distance constraints and hinge constraints
 - Integration with the Runge-Kutta method for accurate movement of entities
 - Debugging and profiling tools for better development experience
+- Ability to write and read the state of the simulation to and from a file using an ini-parser
 
 ## Dependencies
 
 poly-physx depends on several other projects, all created by the same author:
 
-- vec-2D: a 2D vector implementation with usual operations
-- shapes-2D: a polygon geometry library for creating and manipulating convex polygons
-- rk-integrator: an implementation of the Runge-Kutta method for integrating the movement of entities
-- debug-tools: a set of tools for debugging poly-physx simulations
-- profile-tools: a set of tools for profiling poly-physx simulations
+- [vec-2D](https://github.com/Ismael99Bueno/vec-2D): a 2D vector implementation with usual operations
+- [shapes-2D](https://github.com/Ismael99Bueno/shapes-2D): a polygon geometry library for creating and manipulating convex polygons
+- [rk-integrator](https://github.com/Ismael99Bueno/rk-integrator): an implementation of the Runge-Kutta method for integrating the movement of entities
+- [debug-tools](https://github.com/Ismael99Bueno/debug-tools): a set of tools for debugging poly-physx simulations
+- [profile-tools](https://github.com/Ismael99Bueno/profile-tools): a set of tools for profiling poly-physx simulations
+- [ini-parser](https://github.com/Ismael99Bueno/ini-parser): a simple INI file parser that allows for reading and writing the state of the simulation to and from a file
+- [vector-view](https://github.com/Ismael99Bueno/vector-view): A header only library for modifying the contents of a std::vector without letting the user to modify its size.
 
 ## Usage
 
