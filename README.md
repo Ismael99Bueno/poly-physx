@@ -25,7 +25,7 @@ poly-physx depends on several other projects, all created by the same author:
 
 ## Usage
 
-To use poly-physx, simply include the engine.hpp header in your project. This is typically the only necessary header to include.
+To use poly-physx, simply include the `engine.hpp` header in your project. This is typically the only necessary header to include.
 
 poly-physx is built using premake5 as a static library. To use it, you must create a premake5 workspace with a user-implemented entry point that uses the poly-physx library. You can then build the workspace with premake5 to create an executable.
 
