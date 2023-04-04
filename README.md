@@ -23,13 +23,15 @@ poly-physx depends on several other projects, all created by the same author:
 - [ini-parser](https://github.com/Ismael99Bueno/ini-parser): A simple INI file parser that allows for reading and writing the state of the simulation to and from a file
 - [vector-view](https://github.com/Ismael99Bueno/vector-view): A header only library for modifying the contents of a std::vector without letting the user to modify its size.
 
-## Usage
+There is a Python script located in the `scripts` folder named `fetch_dependencies.py`. This script will automatically add all the dependencies as git submodules, provided that the user has already created their own repository and included the current project as a git submodule (or at least downloaded it into the repository). To ensure all runs smoothly once the script has been executed, do not rename the folders containing the various dependencies. All external dependencies, those not created by the same author, will be added as submodules within a folder called `vendor`.
 
-To use poly-physx, simply include the `engine.hpp` header in your project. This is typically the only necessary header to include.
+## Building and Usage
 
-poly-physx is built using premake5 as a static library. To use it, you must create a premake5 workspace with a user-implemented entry point that uses the poly-physx library. You can then build the workspace with premake5 to create an executable.
-
-It is advisable to include poly-physx in a user-made repository as a git submodule. This allows you to keep the poly-physx code separate from your own code, making it easier to manage dependencies and track changes.
+1. Install both `premake5` and `make` on your system, as they are required for generating build files and compiling the project respectively.
+2. Create a new project folder for your entry point, which will contain the `main.cpp` file. Inside this folder, add a premake5 file that links all necessary libraries and sets the executable kind to `ConsoleApp`.
+3. In the root directory of the repository, create another premake5 file. This file should define the workspace, include all dependency projects, and specify the various distributions for the project.
+4. To compile the entire project, run the `make` command in the terminal. If you wish to build a specific distribution, use the command `make config=the_distribution`.
+5. To use poly-physx, simply include the `engine.hpp` header in your project. This is typically the only necessary header to include.
 
 For more information on how to use poly-physx, please refer to the documentation.
 
