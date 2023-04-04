@@ -27,11 +27,13 @@ There is a Python script located in the `scripts` folder named `fetch_dependenci
 
 ## Building and Usage
 
-1. Install both `premake5` and `make` on your system, as they are required for generating build files and compiling the project respectively.
-2. Create a new project folder for your entry point, which will contain the `main.cpp` file. Inside this folder, add a premake5 file that links all necessary libraries and sets the executable kind to `ConsoleApp`.
-3. In the root directory of the repository, create another premake5 file. This file should define the workspace, include all dependency projects, and specify the various distributions for the project.
-4. To compile the entire project, run the `make` command in the terminal. If you wish to build a specific distribution, use the command `make config=the_distribution`.
-5. To use poly-physx, simply include the `engine.hpp` header in your project. This is typically the only necessary header to include.
+1. Ensure you have `premake5` and `make` installed on your system. `premake5` is used to generate the build files, and `make` is used to compile the project.
+2. Create your own repository and include the current project as a git submodule (or at least download it into the repository).
+3. Run the `fetch_dependencies.py` script located in the `scripts` folder to automatically add all the dependencies as git submodules.
+4. Create an entry point project with a `premake5` file, where the `main.cpp` will be located. Link all libraries and specify the kind of the executable as `ConsoleApp`. Don't forget to specify the different configurations for the project.
+5. Create a `premake5` file at the root of the repository describing the `premake` workspace and including all dependency projects.
+6. Build the entire project by running the `make` command in your terminal. You can specify the configuration by using `make config=the_configuration`.
+7. To use poly-physx, simply include the `engine.hpp` header in your project. This is typically the only necessary header to include.
 
 For more information on how to use poly-physx, please refer to the documentation.
 
