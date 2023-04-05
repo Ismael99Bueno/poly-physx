@@ -1,6 +1,6 @@
 project "poly-physx"
    language "C++"
-   cppdialect "C++20"
+   cppdialect "C++17"
    staticruntime "on"
    kind "StaticLib"
    --buildoptions "-Xclang -fopenmp"
