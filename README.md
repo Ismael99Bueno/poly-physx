@@ -15,13 +15,13 @@ poly-physx is a 2D physics engine that simulates collisions between convex polyg
 
 poly-physx depends on several other projects, all created by the same author:
 
-- [vec-2D](https://github.com/Ismael99Bueno/vec-2D): A 2D vector implementation with usual operations
-- [shapes-2D](https://github.com/Ismael99Bueno/shapes-2D): A polygon geometry library for creating and manipulating convex polygons
-- [rk-integrator](https://github.com/Ismael99Bueno/rk-integrator): An implementation of the Runge-Kutta method for integrating the movement of entities
-- [debug-tools](https://github.com/Ismael99Bueno/debug-tools): A set of tools for debugging poly-physx simulations
-- [profile-tools](https://github.com/Ismael99Bueno/profile-tools): A set of tools for profiling poly-physx simulations
-- [ini-parser](https://github.com/Ismael99Bueno/ini-parser): A simple INI file parser that allows for reading and writing the state of the simulation to and from a file
-- [vector-view](https://github.com/Ismael99Bueno/vector-view): A header only library for modifying the contents of a std::vector without letting the user to modify its size.
+- [vec-2D](https://github.com/ismawno/vec-2D): A 2D vector implementation with usual operations
+- [shapes-2D](https://github.com/ismawno/shapes-2D): A polygon geometry library for creating and manipulating convex polygons
+- [rk-integrator](https://github.com/ismawno/rk-integrator): An implementation of the Runge-Kutta method for integrating the movement of entities
+- [debug-tools](https://github.com/ismawno/debug-tools): A set of tools for debugging poly-physx simulations
+- [profile-tools](https://github.com/ismawno/profile-tools): A set of tools for profiling poly-physx simulations
+- [ini-parser](https://github.com/ismawno/ini-parser): A simple INI file parser that allows for reading and writing the state of the simulation to and from a file
+- [vector-view](https://github.com/ismawno/vector-view): A header only library for modifying the contents of a std::vector without letting the user to modify its size.
 
 There is a Python script located in the `scripts` folder named `fetch_dependencies.py`. This script will automatically add all the dependencies as git submodules, provided that the user has already created their own repository and included the current project as a git submodule (or at least downloaded it into the repository). To ensure all runs smoothly once the script has been executed, do not rename the folders containing the various dependencies. All external dependencies, those not created by the same author, will be added as submodules within a folder called `vendor`.
 
