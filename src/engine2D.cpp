@@ -359,7 +359,7 @@ namespace ppx
     void engine2D::read(ini::input &in)
     {
         clear_entities();
-        m_elapsed = in.readf("elapsed");
+        m_elapsed = in.readf32("elapsed");
         in.begin_section("tableau");
         rk::butcher_tableau tb;
         tb.read(in);
@@ -393,14 +393,14 @@ namespace ppx
                 in.end_section();
                 break;
             }
-            const bool has_joints = (bool)in.readi("has_joints");
-            const std::size_t idx1 = in.readi("e1"), idx2 = in.readi("e2");
+            const bool has_joints = (bool)in.readi16("has_joints");
+            const std::size_t idx1 = in.readui64("e1"), idx2 = in.readui64("e2");
             const entity2D_ptr e1 = (*this)[idx1], e2 = (*this)[idx2];
 
             if (has_joints)
             {
-                const alg::vec2 joint1 = {in.readf("joint1x"), in.readf("joint1y")},
-                                joint2 = {in.readf("joint2x"), in.readf("joint2y")};
+                const alg::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
+                                joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
                 add_spring(e1, e2, joint1, joint2).read(in);
             }
             else
@@ -418,14 +418,14 @@ namespace ppx
                 in.end_section();
                 break;
             }
-            const bool has_joints = (bool)in.readi("has_joints");
-            const std::size_t idx1 = in.readi("e1"), idx2 = in.readi("e2");
+            const bool has_joints = (bool)in.readi16("has_joints");
+            const std::size_t idx1 = in.readui64("e1"), idx2 = in.readui64("e2");
             const entity2D_ptr e1 = (*this)[idx1], e2 = (*this)[idx2];
 
             if (has_joints)
             {
-                const alg::vec2 joint1 = {in.readf("joint1x"), in.readf("joint1y")},
-                                joint2 = {in.readf("joint2x"), in.readf("joint2y")};
+                const alg::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
+                                joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
                 const auto rb = std::make_shared<rigid_bar2D>(e1, e2, joint1, joint2);
                 rb->read(in);
                 m_compeller.add_constraint(rb);

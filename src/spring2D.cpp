@@ -86,9 +86,9 @@ namespace ppx
 
     void spring2D::read(ini::input &in)
     {
-        m_stiffness = in.readf("stiffness");
-        m_dampening = in.readf("dampening");
-        m_length = in.readf("length");
+        m_stiffness = in.readf32("stiffness");
+        m_dampening = in.readf32("dampening");
+        m_length = in.readf32("length");
     }
 
     float spring2D::kinetic_energy() const { return m_e1->kinetic_energy() + m_e2->kinetic_energy(); }

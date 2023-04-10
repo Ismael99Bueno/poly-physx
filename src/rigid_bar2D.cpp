@@ -128,9 +128,9 @@ namespace ppx
 
     void rigid_bar2D::read(ini::input &in)
     {
-        stiffness(in.readf("stiffness"));
-        dampening(in.readf("dampening"));
-        length(in.readf("length"));
+        stiffness(in.readf32("stiffness"));
+        dampening(in.readf32("dampening"));
+        length(in.readf32("length"));
     }
 
     float rigid_bar2D::length() const { return m_length; }

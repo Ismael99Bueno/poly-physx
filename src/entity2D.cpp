@@ -100,18 +100,18 @@ namespace ppx
     }
     void entity2D::read(ini::input &in)
     {
-        m_mass = in.readf("mass");
-        m_charge = in.readf("charge");
-        m_kinematic = (bool)in.readi("kinematic");
-        m_angvel = in.readf("angvel");
-        m_added_torque = in.readf("added_torque");
+        m_mass = in.readf32("mass");
+        m_charge = in.readf32("charge");
+        m_kinematic = (bool)in.readi16("kinematic");
+        m_angvel = in.readf32("angvel");
+        m_added_torque = in.readf32("added_torque");
 
         m_shape.read(in);
         m_aabb.bound(m_shape.vertices());
-        m_vel = {in.readf("vx"), in.readf("vy")};
+        m_vel = {in.readf32("vx"), in.readf32("vy")};
 
         dispatch();
-        DBG_ASSERT((size_t)in.readi("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readi("index"), m_index)
+        DBG_ASSERT((size_t)in.readui64("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readui64("index"), m_index)
     }
 
     const alg::vec2 &entity2D::pos() const { return m_shape.centroid(); }

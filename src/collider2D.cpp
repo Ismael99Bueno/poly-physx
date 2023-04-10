@@ -87,11 +87,11 @@ namespace ppx
 
     void collider2D::read(ini::input &in)
     {
-        m_stiffness = in.readf("stiffness");
-        m_dampening = in.readf("dampening");
-        m_qt_build_period = in.readi("qt_build_period");
-        m_coldet_method = (coldet_method)in.readi("coldet_method");
-        m_enabled = (bool)in.readi("enabled");
+        m_stiffness = in.readf32("stiffness");
+        m_dampening = in.readf32("dampening");
+        m_qt_build_period = in.readui32("qt_build_period");
+        m_coldet_method = (coldet_method)in.readi32("coldet_method");
+        m_enabled = (bool)in.readi16("enabled");
         rebuild_quad_tree();
     }
 
