@@ -51,8 +51,8 @@ namespace ppx
         const quad_tree2D &quad_tree() const;
         quad_tree2D &quad_tree();
 
-        std::size_t quad_tree_build_period() const;
-        void quad_tree_build_period(std::size_t period);
+        std::uint32_t quad_tree_build_period() const;
+        void quad_tree_build_period(std::uint32_t period);
 
     private:
         struct interval

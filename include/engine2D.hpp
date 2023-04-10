@@ -22,7 +22,7 @@ namespace ppx
         void retrieve();
 
         bool raw_forward(float &timestep);
-        bool reiterative_forward(float &timestep, std::size_t reiterations = 2);
+        bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
         bool embedded_forward(float &timestep);
 
         entity2D_ptr add_entity(const alg::vec2 &pos = alg::vec2::zero,

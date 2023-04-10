@@ -31,7 +31,7 @@ namespace ppx
         retrieve();
         return valid;
     }
-    bool engine2D::reiterative_forward(float &timestep, const std::size_t reiterations)
+    bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
     {
         const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, ode, reiterations);
         register_forces_into_entities();
@@ -287,7 +287,7 @@ namespace ppx
             return false;
         }
         m_callbacks.spring_removal(m_springs[index]);
-        m_springs.erase(m_springs.begin() + index);
+        m_springs.erase(m_springs.begin() + (long)index);
         return true;
     }
     bool engine2D::remove_spring(const spring2D &sp)

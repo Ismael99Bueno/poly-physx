@@ -110,8 +110,8 @@ namespace ppx
     const quad_tree2D &collider2D::quad_tree() const { return m_quad_tree; }
     quad_tree2D &collider2D::quad_tree() { return m_quad_tree; }
 
-    std::size_t collider2D::quad_tree_build_period() const { return m_qt_build_period; }
-    void collider2D::quad_tree_build_period(const std::size_t period) { m_qt_build_period = period; }
+    std::uint32_t collider2D::quad_tree_build_period() const { return m_qt_build_period; }
+    void collider2D::quad_tree_build_period(const std::uint32_t period) { m_qt_build_period = period; }
 
     void collider2D::sort_intervals()
     {
@@ -308,7 +308,7 @@ namespace ppx
             const float diff = std::abs(sup_dist - min_dist);
             if (diff <= EPA_EPSILON)
                 break;
-            simplex.insert(simplex.begin() + min_index, support);
+            simplex.insert(simplex.begin() + (long)min_index, support);
             min_dist = std::numeric_limits<float>::max();
         }
         return mtv * min_dist;
