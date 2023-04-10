@@ -1,7 +1,7 @@
 project "poly-physx"
    language "C++"
    cppdialect "C++17"
-   buildoptions "-Wall"
+   buildoptions {"-Wall", "-Wextra", "-Wpedantic", "-Wno-unused-parameter"}
    
    staticruntime "off"
    kind "StaticLib"
