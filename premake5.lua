@@ -2,8 +2,8 @@ project "poly-physx"
    language "C++"
    cppdialect "C++17"
    
-   kind "StaticLib"
    staticruntime "off"
+   kind "StaticLib"
    --buildoptions "-Xclang -fopenmp"
 
    targetdir("bin/" .. outputdir)
