@@ -14,7 +14,7 @@ namespace ppx
     {
         collider_key() = default;
         // collider_key(const collider_key &) = delete;
-        collider_key &operator=(const collider_key &) = delete;
+        // collider_key &operator=(const collider_key &) = delete;
         friend class collider2D;
         friend class quad_tree2D;
     };
