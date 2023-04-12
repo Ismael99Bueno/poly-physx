@@ -3,7 +3,7 @@
 
 #include "entity2D.hpp"
 #include "pass_key.hpp"
-#include "callbacks.hpp"
+#include "engine_callbacks.hpp"
 #include <vector>
 #include <functional>
 
@@ -16,7 +16,7 @@ namespace ppx
         compeller2D(engine_key,
                     std::vector<entity2D> *entities,
                     std::size_t allocations,
-                    callbacks *cbs);
+                    engine_callbacks *cbs);
 
         void add_constraint(const std::shared_ptr<constraint_interface2D> &c);
         bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &c);
@@ -32,7 +32,7 @@ namespace ppx
     private:
         std::vector<entity2D> *m_entities;
         std::vector<std::shared_ptr<constraint_interface2D>> m_constraints;
-        callbacks *m_callbacks;
+        engine_callbacks *m_callbacks;
 
         using constraint_grad_fun = std::function<std::array<float, 3>(const constraint_interface2D &, entity2D &)>;
         std::vector<float> constraint_matrix(const constraint_grad_fun &constraint_grad) const;

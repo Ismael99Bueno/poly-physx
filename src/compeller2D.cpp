@@ -8,7 +8,7 @@ namespace ppx
     compeller2D::compeller2D(engine_key,
                              std::vector<entity2D> *entities,
                              const std::size_t allocations,
-                             callbacks *cbs) : m_entities(entities), m_callbacks(cbs)
+                             engine_callbacks *cbs) : m_entities(entities), m_callbacks(cbs)
     {
         m_constraints.reserve(allocations);
     }

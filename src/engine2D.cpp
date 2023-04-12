@@ -606,8 +606,8 @@ namespace ppx
 
     const compeller2D &engine2D::compeller() const { return m_compeller; }
 
-    const callbacks &engine2D::callbacks() const { return m_callbacks; }
-    callbacks &engine2D::callbacks() { return m_callbacks; }
+    const engine_callbacks &engine2D::callbacks() const { return m_callbacks; }
+    engine_callbacks &engine2D::callbacks() { return m_callbacks; }
 
     float engine2D::elapsed() const { return m_elapsed; }
 }
