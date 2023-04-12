@@ -20,7 +20,7 @@ namespace ppx
         m_intervals.reserve(allocations);
     }
 
-    collider2D::interval::interval(const_entity2D_ptr e, const end end_type) : m_entity(e), m_end(end_type) {}
+    collider2D::interval::interval(const const_entity2D_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
 
     const entity2D *collider2D::interval::entity() const { return m_entity.raw(); }
 
@@ -32,7 +32,7 @@ namespace ppx
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
     bool collider2D::interval::try_validate() { return m_entity.try_validate(); }
 
-    void collider2D::add_entity_intervals(const_entity2D_ptr e)
+    void collider2D::add_entity_intervals(const const_entity2D_ptr &e)
     {
         m_intervals.emplace_back(e, interval::LOWER);
         m_intervals.emplace_back(e, interval::HIGHER);

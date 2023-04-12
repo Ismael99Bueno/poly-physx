@@ -49,11 +49,11 @@ namespace ppx
         bool m_partitioned, m_has_children;
         std::vector<const_entity2D_ptr> m_entities;
 
-        void add_if_inside(const_entity2D_ptr e);
+        void add_if_inside(const const_entity2D_ptr &e);
         void clear();
         void create_children();
         void partition();
-        void add_to_children(const_entity2D_ptr e);
+        void add_to_children(const const_entity2D_ptr &e);
 
         quad_tree2D() = delete;
         quad_tree2D(const quad_tree2D &) = delete;

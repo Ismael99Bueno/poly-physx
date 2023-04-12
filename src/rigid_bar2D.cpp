@@ -4,16 +4,16 @@
 
 namespace ppx
 {
-    rigid_bar2D::rigid_bar2D(entity2D_ptr e1,
-                             entity2D_ptr e2,
+    rigid_bar2D::rigid_bar2D(const entity2D_ptr &e1,
+                             const entity2D_ptr &e2,
                              const float stiffness,
                              const float dampening) : constraint2D<2>({e1, e2}, stiffness, dampening),
                                                       m_e1(e1), m_e2(e2),
                                                       m_length(e1->pos().dist(e2->pos())),
                                                       m_has_joints(false) {}
 
-    rigid_bar2D::rigid_bar2D(entity2D_ptr e1,
-                             entity2D_ptr e2,
+    rigid_bar2D::rigid_bar2D(const entity2D_ptr &e1,
+                             const entity2D_ptr &e2,
                              const alg::vec2 &joint1,
                              const alg::vec2 &joint2,
                              const float stiffness,
@@ -136,8 +136,8 @@ namespace ppx
     float rigid_bar2D::length() const { return m_length; }
     void rigid_bar2D::length(const float length) { m_length = length; }
 
-    entity2D_ptr rigid_bar2D::e1() const { return m_e1; }
-    entity2D_ptr rigid_bar2D::e2() const { return m_e2; }
+    const entity2D_ptr &rigid_bar2D::e1() const { return m_e1; }
+    const entity2D_ptr &rigid_bar2D::e2() const { return m_e2; }
 
     alg::vec2 rigid_bar2D::joint1() const { return m_joint1.rotated(m_e1->angpos() - m_angle1); }
     alg::vec2 rigid_bar2D::joint2() const { return m_joint2.rotated(m_e2->angpos() - m_angle2); }

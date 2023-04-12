@@ -111,7 +111,7 @@ namespace ppx
     {
         PERF_FUNCTION()
         for (const std::shared_ptr<const force2D> f : m_forces)
-            for (const_entity2D_ptr e : f->entities())
+            for (const const_entity2D_ptr &e : f->entities())
             {
                 if (!e->kinematic())
                     continue;
@@ -130,12 +130,12 @@ namespace ppx
                 load_force(stchanges, -force, t2, index2);
         }
         for (const std::shared_ptr<const interaction2D> i : m_interactions)
-            for (const_entity2D_ptr e1 : i->entities())
+            for (const const_entity2D_ptr &e1 : i->entities())
             {
                 if (!e1->kinematic())
                     continue;
                 const std::size_t index = 6 * e1.index();
-                for (const_entity2D_ptr e2 : i->entities())
+                for (const const_entity2D_ptr &e2 : i->entities())
                     if (e1 != e2)
                     {
                         const auto [force, torque] = i->force(*e1, *e2);
@@ -232,8 +232,8 @@ namespace ppx
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.emplace_back(inter); }
 
-    spring2D &engine2D::add_spring(entity2D_ptr e1,
-                                   entity2D_ptr e2,
+    spring2D &engine2D::add_spring(const entity2D_ptr &e1,
+                                   const entity2D_ptr &e2,
                                    const float stiffness,
                                    const float dampening,
                                    const float length)
@@ -243,8 +243,8 @@ namespace ppx
         return sp;
     }
 
-    spring2D &engine2D::add_spring(entity2D_ptr e1,
-                                   entity2D_ptr e2,
+    spring2D &engine2D::add_spring(const entity2D_ptr &e1,
+                                   const entity2D_ptr &e2,
                                    const alg::vec2 &joint1,
                                    const alg::vec2 &joint2,
                                    const float stiffness,

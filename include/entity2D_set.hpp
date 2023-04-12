@@ -12,7 +12,7 @@ namespace ppx
 
         void validate();
 
-        void include(const_entity2D_ptr e);
+        void include(const const_entity2D_ptr &e);
         void exclude(const entity2D &e);
         bool contains(const entity2D &e) const;
         float kinetic_energy() const;

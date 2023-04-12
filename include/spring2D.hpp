@@ -9,13 +9,13 @@ namespace ppx
     class spring2D : public ini::saveable
     {
     public:
-        spring2D(entity2D_ptr e1,
-                 entity2D_ptr e2,
+        spring2D(const entity2D_ptr &e1,
+                 const entity2D_ptr &e2,
                  float stiffness = 1.f,
                  float dampening = 0.f,
                  float length = 0.f);
-        spring2D(entity2D_ptr e1,
-                 entity2D_ptr e2,
+        spring2D(const entity2D_ptr &e1,
+                 const entity2D_ptr &e2,
                  const alg::vec2 &joint1,
                  const alg::vec2 &joint2,
                  float stiffness = 1.f,
@@ -41,8 +41,8 @@ namespace ppx
         float potential_energy() const;
         float energy() const;
 
-        entity2D_ptr e1() const;
-        entity2D_ptr e2() const;
+        const entity2D_ptr &e1() const;
+        const entity2D_ptr &e2() const;
 
         alg::vec2 joint1() const;
         alg::vec2 joint2() const;

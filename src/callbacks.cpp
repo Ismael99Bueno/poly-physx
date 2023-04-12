@@ -14,7 +14,7 @@ namespace ppx
     void callbacks::on_constraint_addition(const constraint_cb &on_add) { m_on_constraint_addition.push_back(on_add); }
     void callbacks::on_constraint_removal(const constraint_cb &on_remove) { m_on_constraint_removal.push_back(on_remove); }
 
-    void callbacks::entity_addition(entity2D_ptr e) const
+    void callbacks::entity_addition(const entity2D_ptr &e) const
     {
         for (const auto &cb : m_on_entity_addition)
             cb(e);
