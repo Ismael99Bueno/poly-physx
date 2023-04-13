@@ -11,7 +11,7 @@
 namespace ppx
 {
     collider2D::collider2D(engine_key,
-                           const std::vector<entity2D> *entities,
+                           std::vector<entity2D> *entities,
                            const std::size_t allocations,
                            const alg::vec2 &min,
                            const alg::vec2 &max) : m_entities(entities),
@@ -120,11 +120,11 @@ namespace ppx
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    bool collider2D::collide(const entity2D *e1, const entity2D *e2, collision *c)
+    bool collider2D::collide(const entity2D &e1, const entity2D &e2, collision *c) const
     {
         return e1 != e2 &&
-               (e1->kinematic() || e2->kinematic()) &&
-               e1->aabb().overlaps(e2->aabb()) &&
+               (e1.kinematic() || e2.kinematic()) &&
+               e1.aabb().overlaps(e2.aabb()) &&
                gjk_epa(e1, e2, c);
     }
 
@@ -135,7 +135,7 @@ namespace ppx
             for (std::size_t j = i + 1; j < m_entities->size(); j++)
             {
                 collision c;
-                if (collide(&(*m_entities)[i], &(*m_entities)[j], &c))
+                if (collide((*m_entities)[i], (*m_entities)[j], &c))
                     solve(c, stchanges);
             }
     }
@@ -153,7 +153,7 @@ namespace ppx
                 for (const entity2D *e : eligible)
                 {
                     collision c;
-                    if (collide(e, itrv.entity(), &c))
+                    if (collide(*e, *itrv.entity(), &c))
                         solve(c, stchanges);
                 }
                 eligible.insert(itrv.entity());
@@ -182,7 +182,7 @@ namespace ppx
                 for (std::size_t j = i + 1; j < partition->size(); j++)
                 {
                     collision c;
-                    if (collide(partition->operator[](i).raw(), partition->operator[](j).raw(), &c))
+                    if (collide(*(*partition)[i], *(*partition)[j], &c))
                         solve(c, stchanges);
                 }
     }
@@ -215,15 +215,15 @@ namespace ppx
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
 
-    bool collider2D::gjk_epa(const entity2D *e1, const entity2D *e2, collision *c)
+    bool collider2D::gjk_epa(const entity2D &e1, const entity2D &e2, collision *c) const
     {
         PERF_FUNCTION()
         std::vector<alg::vec2> simplex;
-        if (!gjk(e1->shape(), e2->shape(), simplex))
+        if (!gjk(e1.shape(), e2.shape(), simplex))
             return false;
-        const alg::vec2 mtv = epa(e1->shape(), e2->shape(), simplex);
-        const auto [t1, t2] = touch_points(e1->shape(), e2->shape(), mtv);
-        *c = {e1, e2, t1, t2};
+        const alg::vec2 mtv = epa(e1.shape(), e2.shape(), simplex);
+        const auto [t1, t2] = touch_points(e1.shape(), e2.shape(), mtv);
+        *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, t1, t2, mtv};
         return true;
     }
 

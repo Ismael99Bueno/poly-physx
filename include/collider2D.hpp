@@ -22,7 +22,7 @@ namespace ppx
         };
 
         collider2D(engine_key,
-                   const std::vector<entity2D> *entities,
+                   std::vector<entity2D> *entities,
                    std::size_t allocations,
                    const alg::vec2 &min = -0.5f * alg::vec2(192.f, 128.f),
                    const alg::vec2 &max = 0.5f * alg::vec2(192.f, 128.f));
@@ -54,6 +54,12 @@ namespace ppx
         std::uint32_t quad_tree_build_period() const;
         void quad_tree_build_period(std::uint32_t period);
 
+        struct collision
+        {
+            entity2D_ptr e1, e2;
+            alg::vec2 touch1, touch2, normal;
+        };
+
     private:
         struct interval
         {
@@ -76,13 +82,7 @@ namespace ppx
             end m_end;
         };
 
-        struct collision
-        {
-            const entity2D *e1, *e2;
-            alg::vec2 touch1, touch2;
-        };
-
-        const std::vector<entity2D> *m_entities;
+        std::vector<entity2D> *m_entities;
         std::vector<interval> m_intervals;
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
@@ -91,7 +91,7 @@ namespace ppx
         bool m_enabled = true;
 
         void sort_intervals();
-        static bool collide(const entity2D *e1, const entity2D *e2, collision *c);
+        bool collide(const entity2D &e1, const entity2D &e2, collision *c) const;
         void brute_force_coldet(std::vector<float> &stchanges) const;
         void sort_and_sweep_coldet(std::vector<float> &stchanges);
         void quad_tree_coldet(std::vector<float> &stchanges);
@@ -100,7 +100,7 @@ namespace ppx
                    std::vector<float> &stchanges) const;
         std::array<float, 6> forces_upon_collision(const collision &c) const;
 
-        static bool gjk_epa(const entity2D *e1, const entity2D *e2, collision *c);
+        bool gjk_epa(const entity2D &e1, const entity2D &e2, collision *c) const;
 
         static bool gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex);
         static void line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir);
