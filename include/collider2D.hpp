@@ -11,6 +11,12 @@
 
 namespace ppx
 {
+    struct collision2D
+    {
+        entity2D_ptr e1, e2;
+        alg::vec2 touch1, touch2, normal;
+    };
+
     class collider2D final : public ini::saveable
     {
     public:
@@ -54,12 +60,6 @@ namespace ppx
         std::uint32_t quad_tree_build_period() const;
         void quad_tree_build_period(std::uint32_t period);
 
-        struct collision
-        {
-            entity2D_ptr e1, e2;
-            alg::vec2 touch1, touch2, normal;
-        };
-
     private:
         struct interval
         {
@@ -91,16 +91,16 @@ namespace ppx
         bool m_enabled = true;
 
         void sort_intervals();
-        bool collide(const entity2D &e1, const entity2D &e2, collision *c) const;
+        bool collide(const entity2D &e1, const entity2D &e2, collision2D *c) const;
         void brute_force_coldet(std::vector<float> &stchanges) const;
         void sort_and_sweep_coldet(std::vector<float> &stchanges);
         void quad_tree_coldet(std::vector<float> &stchanges);
 
-        void solve(const collision &c,
+        void solve(const collision2D &c,
                    std::vector<float> &stchanges) const;
-        std::array<float, 6> forces_upon_collision(const collision &c) const;
+        std::array<float, 6> forces_upon_collision(const collision2D &c) const;
 
-        bool gjk_epa(const entity2D &e1, const entity2D &e2, collision *c) const;
+        bool gjk_epa(const entity2D &e1, const entity2D &e2, collision2D *c) const;
 
         static bool gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex);
         static void line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir);

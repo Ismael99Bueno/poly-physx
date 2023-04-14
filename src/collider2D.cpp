@@ -120,12 +120,21 @@ namespace ppx
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    bool collider2D::collide(const entity2D &e1, const entity2D &e2, collision *c) const
+    bool collider2D::collide(const entity2D &e1, const entity2D &e2, collision2D *c) const
     {
-        return e1 != e2 &&
-               (e1.kinematic() || e2.kinematic()) &&
-               e1.aabb().overlaps(e2.aabb()) &&
-               gjk_epa(e1, e2, c);
+        const bool collide = e1 != e2 &&
+                             (e1.kinematic() || e2.kinematic()) &&
+                             e1.aabb().overlaps(e2.aabb()) &&
+                             gjk_epa(e1, e2, c);
+        if (collide)
+        {
+            e1.callbacks().try_enter_or_stay(*c); // Incoming is indistinguishable...
+            e2.callbacks().try_enter_or_stay(*c);
+            return true;
+        }
+        e1.callbacks().try_exit(c->e2);
+        e2.callbacks().try_exit(c->e1);
+        return false;
     }
 
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
@@ -134,7 +143,7 @@ namespace ppx
         for (std::size_t i = 0; i < m_entities->size(); i++)
             for (std::size_t j = i + 1; j < m_entities->size(); j++)
             {
-                collision c;
+                collision2D c;
                 if (collide((*m_entities)[i], (*m_entities)[j], &c))
                     solve(c, stchanges);
             }
@@ -152,7 +161,7 @@ namespace ppx
             {
                 for (const entity2D *e : eligible)
                 {
-                    collision c;
+                    collision2D c;
                     if (collide(*e, *itrv.entity(), &c))
                         solve(c, stchanges);
                 }
@@ -181,13 +190,14 @@ namespace ppx
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
                 {
-                    collision c;
-                    if (collide(*(*partition)[i], *(*partition)[j], &c))
+                    collision2D c;
+                    const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
+                    if (collide(*e1, *e2, &c))
                         solve(c, stchanges);
                 }
     }
 
-    void collider2D::solve(const collision &c,
+    void collider2D::solve(const collision2D &c,
                            std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
@@ -201,7 +211,7 @@ namespace ppx
         }
     }
 
-    std::array<float, 6> collider2D::forces_upon_collision(const collision &c) const
+    std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) const
     {
         PERF_FUNCTION()
         const alg::vec2 rel1 = c.touch1 - c.e1->pos(),
@@ -215,7 +225,7 @@ namespace ppx
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
 
-    bool collider2D::gjk_epa(const entity2D &e1, const entity2D &e2, collision *c) const
+    bool collider2D::gjk_epa(const entity2D &e1, const entity2D &e2, collision2D *c) const
     {
         PERF_FUNCTION()
         std::vector<alg::vec2> simplex;
