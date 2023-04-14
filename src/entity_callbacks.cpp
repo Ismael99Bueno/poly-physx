@@ -11,7 +11,7 @@ namespace ppx
 
     void entity_callbacks::try_enter_or_stay(const collision2D &c) const
     {
-        if (m_processed)
+        if (m_processed || (m_on_enter.empty() && m_on_stay.empty()))
             return;
         if (m_collided_ids.find(c.incoming.id()) != m_collided_ids.end())
             on_stay(c);
@@ -21,7 +21,7 @@ namespace ppx
     }
     void entity_callbacks::try_exit(const entity2D_ptr &incoming) const
     {
-        if (m_processed || m_collided_ids.find(incoming.id()) == m_collided_ids.end())
+        if (m_processed || m_on_stay.empty() || m_collided_ids.find(incoming.id()) == m_collided_ids.end())
             return;
         on_exit(incoming);
     }
