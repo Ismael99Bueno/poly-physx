@@ -5,6 +5,7 @@
 #include "polygon.hpp"
 #include "saveable.hpp"
 #include "state.hpp"
+#include "entity_callbacks.hpp"
 
 namespace ppx
 {
@@ -49,6 +50,9 @@ namespace ppx
         void write(ini::output &out) const override;
         void read(ini::input &in) override;
 
+        const entity_callbacks &callbacks() const;
+        entity_callbacks &callbacks();
+
         const alg::vec2 &pos() const;
         const alg::vec2 &vel() const;
         const alg::vec2 vel_at(const alg::vec2 &at) const;
@@ -70,6 +74,7 @@ namespace ppx
         rk::state *m_state = nullptr;
         alg::vec2 m_vel, m_force, m_added_force;
         std::size_t m_index = 0, m_id;
+        entity_callbacks m_callbacks;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
         bool m_kinematic;
 

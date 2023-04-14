@@ -15,6 +15,7 @@ namespace ppx
                                                m_shape(pos, vertices),
                                                m_vel(vel),
                                                m_id(s_id++),
+                                               m_callbacks(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_charge(charge),
@@ -113,6 +114,9 @@ namespace ppx
         dispatch();
         DBG_ASSERT((size_t)in.readui64("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readui64("index"), m_index)
     }
+
+    const entity_callbacks &entity2D::callbacks() const { return m_callbacks; }
+    entity_callbacks &entity2D::callbacks() { return m_callbacks; }
 
     const alg::vec2 &entity2D::pos() const { return m_shape.centroid(); }
     const alg::vec2 &entity2D::vel() const { return m_vel; }
