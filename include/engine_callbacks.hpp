@@ -13,6 +13,7 @@ namespace ppx
     public:
         engine_callbacks(engine_key);
 
+    private:
         using add_entity = std::function<void(const entity2D_ptr &)>;
         using early_remove_entity = std::function<void(entity2D &)>;
         using late_remove_entity = std::function<void(std::size_t)>;
@@ -21,6 +22,7 @@ namespace ppx
         using remove_spring = std::function<void(spring2D &)>;
         using constraint_cb = std::function<void(const std::shared_ptr<constraint_interface2D> &)>;
 
+    public:
         void on_entity_addition(const add_entity &on_add);
         void on_early_entity_removal(const early_remove_entity &on_remove);
         void on_late_entity_removal(const late_remove_entity &on_remove);
