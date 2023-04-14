@@ -41,6 +41,9 @@ namespace ppx
             for (const T &cb : cbs)
                 cb(c);
         }
+
+        entity_callbacks(const entity_callbacks &) = delete;
+        entity_callbacks &operator=(const entity_callbacks &) = delete;
     };
 }
 
