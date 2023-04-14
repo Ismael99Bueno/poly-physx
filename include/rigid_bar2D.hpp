@@ -54,7 +54,6 @@ namespace ppx
         float with_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const;
         float with_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const;
 
-        rigid_bar2D() = delete;
         rigid_bar2D(const rigid_bar2D &) = delete;
         rigid_bar2D &operator=(const rigid_bar2D &) = delete;
     };

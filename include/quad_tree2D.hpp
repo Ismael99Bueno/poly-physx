@@ -55,7 +55,6 @@ namespace ppx
         void partition();
         void add_to_children(const const_entity2D_ptr &e);
 
-        quad_tree2D() = delete;
         quad_tree2D(const quad_tree2D &) = delete;
         quad_tree2D &operator=(const quad_tree2D &) = delete;
     };

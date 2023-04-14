@@ -111,7 +111,6 @@ namespace ppx
                                                             const geo::polygon &poly2,
                                                             const alg::vec2 &mtv);
 
-        collider2D() = delete;
         collider2D(const collider2D &) = delete;
         collider2D &operator=(const collider2D &) = delete;
     };

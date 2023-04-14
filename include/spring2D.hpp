@@ -62,7 +62,6 @@ namespace ppx
         std::tuple<alg::vec2, float, float> without_joints_force() const;
         std::tuple<alg::vec2, float, float> with_joints_force() const;
 
-        spring2D() = delete;
         // Cant delete copy ctr-assignment bc engine owns a std vector of this literal type
     };
 }

@@ -52,7 +52,6 @@ namespace ppx
                                     const std::vector<float> &lambda,
                                     std::vector<float> &stchanges) const;
 
-        compeller2D() = delete;
         compeller2D(const compeller2D &) = delete;
         compeller2D &operator=(const compeller2D &) = delete;
     };
