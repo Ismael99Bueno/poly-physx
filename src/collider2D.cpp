@@ -128,12 +128,12 @@ namespace ppx
                              gjk_epa(e1, e2, c);
         if (collide)
         {
-            e1.callbacks().try_enter_or_stay(*c); // Incoming is indistinguishable...
-            e2.callbacks().try_enter_or_stay(*c);
+            e1.callbacks().try_enter_or_stay(*c);
+            e2.callbacks().try_enter_or_stay({c->incoming, c->other, c->touch2, c->touch1, -c->normal});
             return true;
         }
-        e1.callbacks().try_exit(c->e2);
-        e2.callbacks().try_exit(c->e1);
+        e1.callbacks().try_exit({m_entities, e2.index()});
+        e2.callbacks().try_exit({m_entities, e1.index()});
         return false;
     }
 
@@ -204,21 +204,21 @@ namespace ppx
         const std::array<float, 6> forces = forces_upon_collision(c);
         for (std::size_t i = 0; i < 3; i++)
         {
-            if (c.e1->kinematic())
-                stchanges[c.e1->index() * 6 + i + 3] += forces[i];
-            if (c.e2->kinematic())
-                stchanges[c.e2->index() * 6 + i + 3] += forces[i + 3];
+            if (c.other->kinematic())
+                stchanges[c.other->index() * 6 + i + 3] += forces[i];
+            if (c.incoming->kinematic())
+                stchanges[c.incoming->index() * 6 + i + 3] += forces[i + 3];
         }
     }
 
     std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) const
     {
         PERF_FUNCTION()
-        const alg::vec2 rel1 = c.touch1 - c.e1->pos(),
-                        rel2 = c.touch2 - c.e2->pos();
+        const alg::vec2 rel1 = c.touch1 - c.other->pos(),
+                        rel2 = c.touch2 - c.incoming->pos();
 
-        const alg::vec2 vel1 = c.e1->vel_at(rel1),
-                        vel2 = c.e2->vel_at(rel2);
+        const alg::vec2 vel1 = c.other->vel_at(rel1),
+                        vel2 = c.incoming->vel_at(rel2);
 
         const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1));
         const float torque1 = rel1.cross(force), torque2 = force.cross(rel2);

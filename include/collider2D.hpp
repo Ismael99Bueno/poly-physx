@@ -13,7 +13,7 @@ namespace ppx
 {
     struct collision2D
     {
-        entity2D_ptr e1, e2;
+        entity2D_ptr other, incoming;
         alg::vec2 touch1, touch2, normal;
     };
 
