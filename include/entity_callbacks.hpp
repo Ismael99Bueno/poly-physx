@@ -25,11 +25,12 @@ namespace ppx
 
         void try_enter_or_stay(const collision2D &c) const;
         void try_exit(const entity2D_ptr &other) const;
+        void reset(engine_key);
 
     private:
         std::vector<enter_stay_cb> m_on_enter, m_on_stay;
         std::vector<exit_cb> m_on_exit;
-        mutable bool m_in_collision = false;
+        mutable bool m_in_collision = false, m_processed = false;
 
         void on_enter(const collision2D &c) const;
         void on_stay(const collision2D &c) const;

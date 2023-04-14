@@ -10,16 +10,22 @@ namespace ppx
 
     void entity_callbacks::try_enter_or_stay(const collision2D &c) const
     {
+        if (m_processed)
+            return;
         if (m_in_collision)
             on_stay(c);
         else
             on_enter(c);
+        m_processed = true;
     }
     void entity_callbacks::try_exit(const entity2D_ptr &other) const
     {
+        if (m_processed)
+            return;
         if (m_in_collision)
             on_exit(other);
     }
+    void entity_callbacks::reset(engine_key) { m_processed = false; }
 
     void entity_callbacks::on_enter(const collision2D &c) const
     {

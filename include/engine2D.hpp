@@ -139,7 +139,7 @@ namespace ppx
         void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
         void load_interactions_and_externals(std::vector<float> &stchanges) const;
         std::vector<float> inverse_masses() const;
-        void reset_forces();
+        void reset_entities();
         void retrieve(const std::vector<float> &vars_buffer);
         void register_forces_into_entities();
         void validate();

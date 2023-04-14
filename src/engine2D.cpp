@@ -27,7 +27,7 @@ namespace ppx
     {
         const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this, ode);
         register_forces_into_entities();
-        reset_forces();
+        reset_entities();
         retrieve();
         return valid;
     }
@@ -35,7 +35,7 @@ namespace ppx
     {
         const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, ode, reiterations);
         register_forces_into_entities();
-        reset_forces();
+        reset_entities();
         retrieve();
         return valid;
     }
@@ -43,7 +43,7 @@ namespace ppx
     {
         const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this, ode);
         register_forces_into_entities();
-        reset_forces();
+        reset_entities();
         retrieve();
         return valid;
     }
@@ -158,12 +158,13 @@ namespace ppx
         return inv_masses;
     }
 
-    void engine2D::reset_forces()
+    void engine2D::reset_entities()
     {
         for (entity2D &e : m_entities)
         {
             e.m_added_force = alg::vec2::zero;
             e.m_added_torque = 0.f;
+            e.callbacks().reset(engine_key());
         }
     }
 
