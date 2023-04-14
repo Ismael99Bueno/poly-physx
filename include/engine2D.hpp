@@ -150,8 +150,8 @@ namespace ppx
                                std::size_t index);
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
-        engine2D &operator=(const engine2D &eng) = delete;
-        engine2D(const engine2D &eng) = delete;
+        engine2D(const engine2D &) = delete;
+        engine2D &operator=(const engine2D &) = delete;
     };
 }
 
