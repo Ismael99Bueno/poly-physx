@@ -34,7 +34,7 @@ namespace ppx
         }
 
         float value() const override { return constraint(m_entities); }
-        bool try_validate() override
+        virtual bool try_validate() override
         {
             for (const_entity2D_ptr &e : m_entities)
                 if (!e.try_validate())
