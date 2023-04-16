@@ -59,7 +59,12 @@ namespace ppx
         return {force, torque1, torque2};
     }
 
-    bool spring2D::try_validate() { return m_e1.try_validate() && m_e2.try_validate(); }
+    bool spring2D::try_validate()
+    {
+        const bool v1 = m_e1.try_validate(),
+                   v2 = m_e2.try_validate();
+        return v1 && v2;
+    }
 
     float spring2D::stiffness() const { return m_stiffness; }
     float spring2D::dampening() const { return m_dampening; }
