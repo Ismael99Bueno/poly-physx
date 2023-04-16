@@ -93,6 +93,12 @@ namespace ppx
     {
         m_collider.validate();
         m_compeller.validate();
+        for (const auto &ctr : m_compeller.constraints())
+        {
+            const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
+            if (rb)
+                rb->try_validate(); // Invalids should be automatically filtered by compeller
+        }
         for (const std::shared_ptr<force2D> &f : m_forces)
             f->validate();
         for (const std::shared_ptr<interaction2D> &i : m_interactions)

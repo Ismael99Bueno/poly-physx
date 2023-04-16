@@ -156,4 +156,5 @@ namespace ppx
     }
 
     bool rigid_bar2D::has_joints() const { return m_has_joints; }
+    bool rigid_bar2D::try_validate() { return m_e1.try_validate() && m_e2.try_validate(); }
 }

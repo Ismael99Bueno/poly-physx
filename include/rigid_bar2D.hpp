@@ -38,6 +38,7 @@ namespace ppx
         void joint2(const alg::vec2 &joint2);
 
         bool has_joints() const;
+        bool try_validate();
 
     private:
         entity2D_ptr m_e1, m_e2;
