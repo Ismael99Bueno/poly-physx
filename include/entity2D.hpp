@@ -12,29 +12,29 @@ namespace ppx
     class entity2D : public ini::saveable
     {
     public:
-        entity2D(const alg::vec2 &pos = alg::vec2::zero,
-                 const alg::vec2 &vel = alg::vec2::zero,
+        entity2D(const glm::vec2 &pos = glm::vec2(0.f),
+                 const glm::vec2 &vel = glm::vec2(0.f),
                  float angpos = 0.f, float angvel = 0.f,
                  float mass = 1.f, float charge = 1.f,
-                 const std::vector<alg::vec2> &vertices = geo::polygon::ngon(1.f, 3),
+                 const std::vector<glm::vec2> &vertices = geo::polygon::ngon(1.f, 3),
                  bool kinematic = true);
 
         void retrieve();
         void dispatch() const;
         float kinetic_energy() const;
 
-        void add_force(const alg::vec2 &force);
+        void add_force(const glm::vec2 &force);
         void add_torque(float torque);
 
-        const alg::vec2 &force() const;
+        const glm::vec2 &force() const;
         float torque() const;
-        const alg::vec2 &added_force() const;
+        const glm::vec2 &added_force() const;
         float added_torque() const;
 
         const geo::aabb2D &aabb() const;
 
         const geo::polygon &shape() const;
-        void shape(const std::vector<alg::vec2> &vertices);
+        void shape(const std::vector<glm::vec2> &vertices);
 
         std::size_t index() const;
         std::size_t id() const;
@@ -44,7 +44,7 @@ namespace ppx
         bool kinematic() const;
         void kinematic(bool kinematic);
 
-        void translate(const alg::vec2 &dpos);
+        void translate(const glm::vec2 &dpos);
         void rotate(float dangle);
 
         void write(ini::output &out) const override;
@@ -53,16 +53,16 @@ namespace ppx
         const entity_callbacks &callbacks() const;
         entity_callbacks &callbacks();
 
-        const alg::vec2 &pos() const;
-        const alg::vec2 &vel() const;
-        const alg::vec2 vel_at(const alg::vec2 &at) const;
+        const glm::vec2 &pos() const;
+        const glm::vec2 &vel() const;
+        const glm::vec2 vel_at(const glm::vec2 &at) const;
         float angpos() const;
         float angvel() const;
         float mass() const;
         float charge() const;
 
-        void pos(const alg::vec2 &pos);
-        void vel(const alg::vec2 &vel);
+        void pos(const glm::vec2 &pos);
+        void vel(const glm::vec2 &vel);
         void angpos(float angpos);
         void angvel(float angvel);
         void mass(float mass);
@@ -72,7 +72,7 @@ namespace ppx
         geo::aabb2D m_aabb;
         geo::polygon m_shape;
         rk::state *m_state = nullptr;
-        alg::vec2 m_vel, m_force, m_added_force;
+        glm::vec2 m_vel, m_force, m_added_force;
         std::size_t m_index = 0, m_id;
         entity_callbacks m_callbacks;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;

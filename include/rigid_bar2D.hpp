@@ -14,8 +14,8 @@ namespace ppx
                     float dampening = 0.f);
         rigid_bar2D(const entity2D_ptr &e1,
                     const entity2D_ptr &e2,
-                    const alg::vec2 &joint1,
-                    const alg::vec2 &joint2,
+                    const glm::vec2 &joint1,
+                    const glm::vec2 &joint2,
                     float stiffness = 1.f,
                     float dampening = 0.f);
 
@@ -31,11 +31,11 @@ namespace ppx
         const entity2D_ptr &e1() const;
         const entity2D_ptr &e2() const;
 
-        alg::vec2 joint1() const;
-        alg::vec2 joint2() const;
+        glm::vec2 joint1() const;
+        glm::vec2 joint2() const;
 
-        void joint1(const alg::vec2 &joint1);
-        void joint2(const alg::vec2 &joint2);
+        void joint1(const glm::vec2 &joint1);
+        void joint2(const glm::vec2 &joint2);
 
         bool has_joints() const;
         bool try_validate() override;
@@ -43,7 +43,7 @@ namespace ppx
     private:
         entity2D_ptr m_e1, m_e2;
         float m_length, m_angle1, m_angle2;
-        alg::vec2 m_joint1, m_joint2;
+        glm::vec2 m_joint1, m_joint2;
         bool m_has_joints;
 
         std::array<float, 3> constraint_grad(entity2D &e) const override;

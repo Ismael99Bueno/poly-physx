@@ -2,15 +2,16 @@
 #include "force2D.hpp"
 #include "interaction2D.hpp"
 #include "debug.hpp"
+#include <glm/gtx/norm.hpp>
 
 namespace ppx
 {
     std::size_t entity2D::s_id = 0;
-    entity2D::entity2D(const alg::vec2 &pos,
-                       const alg::vec2 &vel,
+    entity2D::entity2D(const glm::vec2 &pos,
+                       const glm::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
-                       const std::vector<alg::vec2> &vertices,
+                       const std::vector<glm::vec2> &vertices,
                        const bool kinematic) : m_aabb(),
                                                m_shape(pos, vertices),
                                                m_vel(vel),
@@ -41,7 +42,7 @@ namespace ppx
     }
     void entity2D::dispatch() const
     {
-        const alg::vec2 &pos = m_shape.centroid();
+        const glm::vec2 &pos = m_shape.centroid();
         const float angpos = m_shape.rotation();
         rk::state &st = *m_state;
 
@@ -56,21 +57,21 @@ namespace ppx
 
     float entity2D::kinetic_energy() const
     {
-        return 0.5f * (m_mass * m_vel.sq_norm() + m_angvel * m_angvel * m_shape.inertia());
+        return 0.5f * (m_mass * glm::length2(m_vel) + m_angvel * m_angvel * m_shape.inertia());
     }
 
-    void entity2D::add_force(const alg::vec2 &force) { m_added_force += force; }
+    void entity2D::add_force(const glm::vec2 &force) { m_added_force += force; }
     void entity2D::add_torque(const float torque) { m_added_torque += torque; }
 
-    const alg::vec2 &entity2D::force() const { return m_force; }
+    const glm::vec2 &entity2D::force() const { return m_force; }
     float entity2D::torque() const { return m_torque; }
-    const alg::vec2 &entity2D::added_force() const { return m_added_force; }
+    const glm::vec2 &entity2D::added_force() const { return m_added_force; }
     float entity2D::added_torque() const { return m_added_torque; }
 
     const geo::aabb2D &entity2D::aabb() const { return m_aabb; }
     const geo::polygon &entity2D::shape() const { return m_shape; }
 
-    void entity2D::shape(const std::vector<alg::vec2> &vertices)
+    void entity2D::shape(const std::vector<glm::vec2> &vertices)
     {
         m_shape = geo::polygon(pos(), vertices);
         m_aabb.bound(m_shape.vertices());
@@ -84,7 +85,7 @@ namespace ppx
     bool entity2D::kinematic() const { return m_kinematic; }
     void entity2D::kinematic(const bool kinematic) { m_kinematic = kinematic; }
 
-    void entity2D::translate(const alg::vec2 &dpos) { m_shape.translate(dpos); }
+    void entity2D::translate(const glm::vec2 &dpos) { m_shape.translate(dpos); }
     void entity2D::rotate(const float dangle) { m_shape.rotate(dangle); }
 
     void entity2D::write(ini::output &out) const
@@ -118,9 +119,9 @@ namespace ppx
     const entity_callbacks &entity2D::callbacks() const { return m_callbacks; }
     entity_callbacks &entity2D::callbacks() { return m_callbacks; }
 
-    const alg::vec2 &entity2D::pos() const { return m_shape.centroid(); }
-    const alg::vec2 &entity2D::vel() const { return m_vel; }
-    const alg::vec2 entity2D::vel_at(const alg::vec2 &at) const { return m_vel + m_angvel * alg::vec2(-at.y, at.x); }
+    const glm::vec2 &entity2D::pos() const { return m_shape.centroid(); }
+    const glm::vec2 &entity2D::vel() const { return m_vel; }
+    const glm::vec2 entity2D::vel_at(const glm::vec2 &at) const { return m_vel + m_angvel * glm::vec2(-at.y, at.x); }
 
     float entity2D::angpos() const { return m_shape.rotation(); }
     float entity2D::angvel() const { return m_angvel; }
@@ -128,12 +129,12 @@ namespace ppx
     float entity2D::mass() const { return m_mass; }
     float entity2D::charge() const { return m_charge; }
 
-    void entity2D::pos(const alg::vec2 &pos)
+    void entity2D::pos(const glm::vec2 &pos)
     {
         m_shape.pos(pos);
         m_aabb.bound(m_shape.vertices());
     }
-    void entity2D::vel(const alg::vec2 &vel) { m_vel = vel; }
+    void entity2D::vel(const glm::vec2 &vel) { m_vel = vel; }
 
     void entity2D::angpos(const float angpos)
     {

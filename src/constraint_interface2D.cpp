@@ -19,7 +19,7 @@ namespace ppx
     std::array<float, 3> constraint_interface2D::constraint_grad_derivative(entity2D &e) const { return gradient(e, &constraint_interface2D::derivative); }
     std::array<float, 3> constraint_interface2D::gradient(entity2D &e, const constraint_fun &constraint) const
     {
-        const alg::vec2 pos = e.pos();
+        const glm::vec2 pos = e.pos();
         e.translate({-TOLERANCE, 0.f});
         const float cx1 = constraint(*this);
         e.translate({2.f * TOLERANCE, 0.f});

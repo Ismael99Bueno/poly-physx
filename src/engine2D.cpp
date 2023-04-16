@@ -54,14 +54,14 @@ namespace ppx
         for (std::size_t i = 0; i < m_entities.size(); i++)
         {
             const std::size_t index = 6 * i;
-            const alg::vec2 &vel = m_entities[i].vel();
+            const glm::vec2 &vel = m_entities[i].vel();
             const float angvel = m_entities[i].angvel();
             stchanges[index] = vel.x;
             stchanges[index + 1] = vel.y;
             stchanges[index + 2] = angvel;
             if (m_entities[i].kinematic())
             {
-                const alg::vec2 &force = m_entities[i].added_force();
+                const glm::vec2 &force = m_entities[i].added_force();
                 const float torque = m_entities[i].added_torque();
                 load_force(stchanges, force, torque, index);
             }
@@ -80,7 +80,7 @@ namespace ppx
     }
 
     void engine2D::load_force(std::vector<float> &stchanges,
-                              const alg::vec2 &force,
+                              const glm::vec2 &force,
                               float torque,
                               std::size_t index)
     {
@@ -162,19 +162,19 @@ namespace ppx
     {
         for (entity2D &e : m_entities)
         {
-            e.m_added_force = alg::vec2::zero;
+            e.m_added_force = glm::vec2(0.f);
             e.m_added_torque = 0.f;
             e.callbacks().reset(engine_key());
         }
     }
 
-    entity2D_ptr engine2D::add_entity(const alg::vec2 &pos,
-                                      const alg::vec2 &vel,
+    entity2D_ptr engine2D::add_entity(const glm::vec2 &pos,
+                                      const glm::vec2 &vel,
                                       const float angpos,
                                       const float angvel,
                                       const float mass,
                                       const float charge,
-                                      const std::vector<alg::vec2> &vertices,
+                                      const std::vector<glm::vec2> &vertices,
                                       const bool kinematic)
     {
         entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices, kinematic);
@@ -246,8 +246,8 @@ namespace ppx
 
     spring2D &engine2D::add_spring(const entity2D_ptr &e1,
                                    const entity2D_ptr &e2,
-                                   const alg::vec2 &joint1,
-                                   const alg::vec2 &joint2,
+                                   const glm::vec2 &joint1,
+                                   const glm::vec2 &joint2,
                                    const float stiffness,
                                    const float dampening,
                                    const float length)
@@ -400,7 +400,7 @@ namespace ppx
 
             if (has_joints)
             {
-                const alg::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
+                const glm::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
                                 joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
                 add_spring(e1, e2, joint1, joint2).read(in);
             }
@@ -425,7 +425,7 @@ namespace ppx
 
             if (has_joints)
             {
-                const alg::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
+                const glm::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
                                 joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
                 const auto rb = std::make_shared<rigid_bar2D>(e1, e2, joint1, joint2);
                 rb->read(in);
@@ -578,7 +578,7 @@ namespace ppx
     utils::vector_view<std::shared_ptr<interaction2D>> engine2D::interactions() { return m_interactions; }
     utils::vector_view<spring2D> engine2D::springs() { return m_springs; }
 
-    const_entity2D_ptr engine2D::operator[](const alg::vec2 &point) const
+    const_entity2D_ptr engine2D::operator[](const glm::vec2 &point) const
     {
         const geo::aabb2D aabb = point;
         for (const entity2D &e : m_entities)
@@ -586,7 +586,7 @@ namespace ppx
                 return {&m_entities, e.index()};
         return nullptr;
     }
-    entity2D_ptr engine2D::operator[](const alg::vec2 &point)
+    entity2D_ptr engine2D::operator[](const glm::vec2 &point)
     {
         const geo::aabb2D aabb = point;
         for (const entity2D &e : m_entities)

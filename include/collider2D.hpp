@@ -14,7 +14,7 @@ namespace ppx
     struct collision2D
     {
         entity2D_ptr other, incoming;
-        alg::vec2 touch1, touch2, normal;
+        glm::vec2 touch1, touch2, normal;
     };
 
     class collider2D final : public ini::saveable
@@ -30,8 +30,8 @@ namespace ppx
         collider2D(engine_key,
                    std::vector<entity2D> *entities,
                    std::size_t allocations,
-                   const alg::vec2 &min = -0.5f * alg::vec2(192.f, 128.f),
-                   const alg::vec2 &max = 0.5f * alg::vec2(192.f, 128.f));
+                   const glm::vec2 &min = -0.5f * glm::vec2(192.f, 128.f),
+                   const glm::vec2 &max = 0.5f * glm::vec2(192.f, 128.f));
 
         void add_entity_intervals(const const_entity2D_ptr &e);
         void solve_and_load_collisions(std::vector<float> &stchanges);
@@ -102,14 +102,14 @@ namespace ppx
 
         bool gjk_epa(const entity2D &e1, const entity2D &e2, collision2D *c) const;
 
-        static bool gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex);
-        static void line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir);
-        static bool triangle_case(std::vector<alg::vec2> &simplex, alg::vec2 &dir);
+        static bool gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<glm::vec2> &simplex);
+        static void line_case(const std::vector<glm::vec2> &simplex, glm::vec2 &dir);
+        static bool triangle_case(std::vector<glm::vec2> &simplex, glm::vec2 &dir);
 
-        static alg::vec2 epa(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex);
-        static std::pair<alg::vec2, alg::vec2> touch_points(const geo::polygon &poly1,
+        static glm::vec2 epa(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<glm::vec2> &simplex);
+        static std::pair<glm::vec2, glm::vec2> touch_points(const geo::polygon &poly1,
                                                             const geo::polygon &poly2,
-                                                            const alg::vec2 &mtv);
+                                                            const glm::vec2 &mtv);
 
         collider2D(const collider2D &) = delete;
         collider2D &operator=(const collider2D &) = delete;

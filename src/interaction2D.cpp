@@ -2,12 +2,12 @@
 
 namespace ppx
 {
-    float interaction2D::potential(const entity2D &e, const alg::vec2 &pos) const
+    float interaction2D::potential(const entity2D &e, const glm::vec2 &pos) const
     {
         m_unit.pos(pos);
         return potential_energy_pair(m_unit, e);
     }
-    float interaction2D::potential(const alg::vec2 &pos) const
+    float interaction2D::potential(const glm::vec2 &pos) const
     {
         m_unit.pos(pos);
         float pot = 0.f;

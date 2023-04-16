@@ -25,11 +25,11 @@ namespace ppx
         bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
         bool embedded_forward(float &timestep);
 
-        entity2D_ptr add_entity(const alg::vec2 &pos = alg::vec2::zero,
-                                const alg::vec2 &vel = alg::vec2::zero,
+        entity2D_ptr add_entity(const glm::vec2 &pos = glm::vec2(0.f),
+                                const glm::vec2 &vel = glm::vec2(0.f),
                                 float angpos = 0.f, float angvel = 0.f,
                                 float mass = 1.f, float charge = 1.f,
-                                const std::vector<alg::vec2> &vertices = geo::polygon::box(1.f),
+                                const std::vector<glm::vec2> &vertices = geo::polygon::box(1.f),
                                 bool kinematic = true);
 
         bool remove_entity(std::size_t index);
@@ -46,8 +46,8 @@ namespace ppx
 
         spring2D &add_spring(const entity2D_ptr &e1,
                              const entity2D_ptr &e2,
-                             const alg::vec2 &joint1,
-                             const alg::vec2 &joint2,
+                             const glm::vec2 &joint1,
+                             const glm::vec2 &joint2,
                              float stiffness = 1.f,
                              float dampening = 0.f,
                              float length = 0.f);
@@ -95,8 +95,8 @@ namespace ppx
         std::vector<const_entity2D_ptr> operator[](const geo::aabb2D &aabb) const;
         std::vector<entity2D_ptr> operator[](const geo::aabb2D &aabb);
 
-        const_entity2D_ptr operator[](const alg::vec2 &point) const;
-        entity2D_ptr operator[](const alg::vec2 &point);
+        const_entity2D_ptr operator[](const glm::vec2 &point) const;
+        entity2D_ptr operator[](const glm::vec2 &point);
 
         const std::vector<std::shared_ptr<force2D>> &forces() const;
         const std::vector<std::shared_ptr<interaction2D>> &interactions() const;
@@ -145,7 +145,7 @@ namespace ppx
         void validate();
 
         static void load_force(std::vector<float> &stchanges,
-                               const alg::vec2 &force,
+                               const glm::vec2 &force,
                                float torque,
                                std::size_t index);
 

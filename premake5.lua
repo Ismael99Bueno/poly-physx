@@ -14,4 +14,4 @@ project "poly-physx"
 
    files {"src/**.cpp", "include/**.hpp"}
 
-   includedirs "../**/include"--, "/opt/homebrew/Cellar/libomp/15.0.6/include"}
+   includedirs {"../**/include", "../vendor/glm"}--, "/opt/homebrew/Cellar/libomp/15.0.6/include"}

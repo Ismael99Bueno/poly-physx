@@ -5,16 +5,25 @@
 #include <cmath>
 #include <algorithm>
 #include <unordered_set>
+#include <glm/geometric.hpp>
+#include <glm/gtx/norm.hpp>
 
 #define EPA_EPSILON 1.e-3f
 
 namespace ppx
 {
+    static float cross(const glm::vec2 &v1, const glm::vec2 &v2) { return v1.x * v2.y - v1.y * v2.x; }
+    static glm::vec2 triple_cross(const glm::vec2 &v1, const glm::vec2 &v2, const glm::vec2 &v3)
+    {
+        const float crs = cross(v1, v2);
+        return glm::vec2(-v3.y * crs, v3.x * crs);
+    }
+
     collider2D::collider2D(engine_key,
                            std::vector<entity2D> *entities,
                            const std::size_t allocations,
-                           const alg::vec2 &min,
-                           const alg::vec2 &max) : m_entities(entities),
+                           const glm::vec2 &min,
+                           const glm::vec2 &max) : m_entities(entities),
                                                    m_quad_tree(collider_key(), min, max)
     {
         m_intervals.reserve(allocations);
@@ -214,42 +223,42 @@ namespace ppx
     std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) const
     {
         PERF_FUNCTION()
-        const alg::vec2 rel1 = c.touch1 - c.other->pos(),
+        const glm::vec2 rel1 = c.touch1 - c.other->pos(),
                         rel2 = c.touch2 - c.incoming->pos();
 
-        const alg::vec2 vel1 = c.other->vel_at(rel1),
+        const glm::vec2 vel1 = c.other->vel_at(rel1),
                         vel2 = c.incoming->vel_at(rel2);
 
-        const alg::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1));
-        const float torque1 = rel1.cross(force), torque2 = force.cross(rel2);
+        const glm::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1));
+        const float torque1 = cross(rel1, force), torque2 = cross(force, rel2);
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
 
     bool collider2D::gjk_epa(const entity2D &e1, const entity2D &e2, collision2D *c) const
     {
         PERF_FUNCTION()
-        std::vector<alg::vec2> simplex;
+        std::vector<glm::vec2> simplex;
         if (!gjk(e1.shape(), e2.shape(), simplex))
             return false;
-        const alg::vec2 mtv = epa(e1.shape(), e2.shape(), simplex);
+        const glm::vec2 mtv = epa(e1.shape(), e2.shape(), simplex);
         const auto [t1, t2] = touch_points(e1.shape(), e2.shape(), mtv);
         *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, t1, t2, mtv};
         return true;
     }
 
-    bool collider2D::gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex)
+    bool collider2D::gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<glm::vec2> &simplex)
     {
         PERF_FUNCTION()
-        alg::vec2 dir = poly2.centroid() - poly1.centroid();
+        glm::vec2 dir = poly2.centroid() - poly1.centroid();
         simplex.reserve(3);
-        const alg::vec2 supp = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
+        const glm::vec2 supp = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
         dir = -supp;
         simplex.emplace_back(supp);
 
         for (;;)
         {
-            const alg::vec2 A = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
-            if (A.dot(dir) <= 0.f)
+            const glm::vec2 A = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
+            if (glm::dot(A, dir) <= 0.f)
                 return false;
             simplex.emplace_back(A);
             if (simplex.size() == 2)
@@ -258,23 +267,23 @@ namespace ppx
                 return true;
         }
     }
-    void collider2D::line_case(const std::vector<alg::vec2> &simplex, alg::vec2 &dir)
+    void collider2D::line_case(const std::vector<glm::vec2> &simplex, glm::vec2 &dir)
     {
-        const alg::vec2 AB = simplex[0] - simplex[1], AO = -simplex[1];
-        dir = alg::vec2::triple_cross(AB, AO, AB);
+        const glm::vec2 AB = simplex[0] - simplex[1], AO = -simplex[1];
+        dir = triple_cross(AB, AO, AB);
     }
-    bool collider2D::triangle_case(std::vector<alg::vec2> &simplex, alg::vec2 &dir)
+    bool collider2D::triangle_case(std::vector<glm::vec2> &simplex, glm::vec2 &dir)
     {
-        const alg::vec2 AB = simplex[1] - simplex[2], AC = simplex[0] - simplex[2], AO = -simplex[2];
-        const alg::vec2 ABperp = alg::vec2::triple_cross(AC, AB, AB);
-        if (ABperp.dot(AO) >= 0.f)
+        const glm::vec2 AB = simplex[1] - simplex[2], AC = simplex[0] - simplex[2], AO = -simplex[2];
+        const glm::vec2 ABperp = triple_cross(AC, AB, AB);
+        if (glm::dot(ABperp, AO) >= 0.f)
         {
             simplex.erase(simplex.begin());
             dir = ABperp;
             return false;
         }
-        const alg::vec2 ACperp = alg::vec2::triple_cross(AB, AC, AC);
-        if (ACperp.dot(AO) >= 0.f)
+        const glm::vec2 ACperp = triple_cross(AB, AC, AC);
+        if (glm::dot(ACperp, AO) >= 0.f)
         {
             simplex.erase(simplex.begin() + 1);
             dir = ACperp;
@@ -283,12 +292,12 @@ namespace ppx
         return true;
     }
 
-    alg::vec2 collider2D::epa(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<alg::vec2> &simplex)
+    glm::vec2 collider2D::epa(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<glm::vec2> &simplex)
     {
         PERF_FUNCTION()
         DBG_LOG_IF(!geo::polygon(simplex).contains_origin(), "Simplex passed to EPA algorithm does not contain the origin!\nx1: %f, y1: %f\nx2: %f, y2: %f\nx3: %f, y3: %f\n", simplex[0].x, simplex[0].y, simplex[1].x, simplex[1].y, simplex[2].x, simplex[2].y)
         float min_dist = std::numeric_limits<float>::max();
-        alg::vec2 mtv;
+        glm::vec2 mtv;
         for (;;)
         {
             std::size_t min_index;
@@ -296,11 +305,11 @@ namespace ppx
             {
                 const std::size_t j = (i + 1) % simplex.size();
 
-                const alg::vec2 &p1 = simplex[i], &p2 = simplex[j];
-                const alg::vec2 edge = p2 - p1;
+                const glm::vec2 &p1 = simplex[i], &p2 = simplex[j];
+                const glm::vec2 edge = p2 - p1;
 
-                alg::vec2 normal = alg::vec2(edge.y, -edge.x).normalized();
-                float dist = normal.dot(p1);
+                glm::vec2 normal = glm::normalize(glm::vec2(edge.y, -edge.x));
+                float dist = glm::dot(normal, p1);
                 if (dist < 0.f)
                 {
                     dist *= -1.f;
@@ -313,8 +322,8 @@ namespace ppx
                     mtv = normal;
                 }
             }
-            const alg::vec2 support = poly1.support_vertex(mtv) - poly2.support_vertex(-mtv);
-            const float sup_dist = mtv.dot(support);
+            const glm::vec2 support = poly1.support_vertex(mtv) - poly2.support_vertex(-mtv);
+            const float sup_dist = glm::dot(mtv, support);
             const float diff = std::abs(sup_dist - min_dist);
             if (diff <= EPA_EPSILON)
                 break;
@@ -324,15 +333,15 @@ namespace ppx
         return mtv * min_dist;
     }
 
-    std::pair<alg::vec2, alg::vec2> collider2D::touch_points(const geo::polygon &poly1,
+    std::pair<glm::vec2, glm::vec2> collider2D::touch_points(const geo::polygon &poly1,
                                                              const geo::polygon &poly2,
-                                                             const alg::vec2 &mtv)
+                                                             const glm::vec2 &mtv)
     {
         PERF_FUNCTION()
-        const alg::vec2 sup1 = poly1.support_vertex(mtv),
+        const glm::vec2 sup1 = poly1.support_vertex(mtv),
                         sup2 = poly2.support_vertex(-mtv);
-        const float d1 = poly2.towards_closest_edge_from(sup1 - mtv).sq_norm(),
-                    d2 = poly1.towards_closest_edge_from(sup2 + mtv).sq_norm();
+        const float d1 = glm::length2(poly2.towards_closest_edge_from(sup1 - mtv)),
+                    d2 = glm::length2(poly1.towards_closest_edge_from(sup2 + mtv));
         if (d1 < d2)
             return std::make_pair(sup1, sup1 - mtv);
         return std::make_pair(sup2 + mtv, sup2);

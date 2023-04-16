@@ -12,8 +12,8 @@ namespace ppx
     {
     public:
         quad_tree2D(collider_key,
-                    const alg::vec2 &min,
-                    const alg::vec2 &max,
+                    const glm::vec2 &min,
+                    const glm::vec2 &max,
                     std::size_t max_entities = 5,
                     std::uint32_t depth = 0);
 

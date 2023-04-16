@@ -10,7 +10,7 @@ namespace ppx
     public:
         using entity2D_set::entity2D_set;
         virtual ~force2D() = default;
-        virtual std::pair<alg::vec2, float> force(const entity2D &e) const = 0;
+        virtual std::pair<glm::vec2, float> force(const entity2D &e) const = 0;
 
         virtual float potential_energy(const entity2D &e) const { return 0.f; }
         float potential_energy() const;
