@@ -14,7 +14,7 @@ namespace ppx
     struct collision2D
     {
         entity2D_ptr other, incoming;
-        glm::vec2 touch1, touch2, normal;
+        glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
     };
 
     class collider2D final : public ini::saveable

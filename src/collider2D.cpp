@@ -297,7 +297,7 @@ namespace ppx
         PERF_FUNCTION()
         DBG_LOG_IF(!geo::polygon(simplex).contains_origin(), "Simplex passed to EPA algorithm does not contain the origin!\nx1: %f, y1: %f\nx2: %f, y2: %f\nx3: %f, y3: %f\n", simplex[0].x, simplex[0].y, simplex[1].x, simplex[1].y, simplex[2].x, simplex[2].y)
         float min_dist = std::numeric_limits<float>::max();
-        glm::vec2 mtv;
+        glm::vec2 mtv(0.f);
         for (;;)
         {
             std::size_t min_index;

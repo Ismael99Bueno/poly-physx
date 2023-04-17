@@ -43,7 +43,7 @@ namespace ppx
     private:
         entity2D_ptr m_e1, m_e2;
         float m_length, m_angle1, m_angle2;
-        glm::vec2 m_joint1, m_joint2;
+        glm::vec2 m_joint1{0.f}, m_joint2{0.f};
         bool m_has_joints;
 
         std::array<float, 3> constraint_grad(entity2D &e) const override;

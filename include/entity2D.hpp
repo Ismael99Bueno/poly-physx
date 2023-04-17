@@ -72,7 +72,7 @@ namespace ppx
         geo::aabb2D m_aabb;
         geo::polygon m_shape;
         rk::state *m_state = nullptr;
-        glm::vec2 m_vel, m_force, m_added_force;
+        glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
         std::size_t m_index = 0, m_id;
         entity_callbacks m_callbacks;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;

@@ -54,7 +54,7 @@ namespace ppx
 
     private:
         entity2D_ptr m_e1, m_e2;
-        glm::vec2 m_joint1, m_joint2;
+        glm::vec2 m_joint1{0.f}, m_joint2{0.f};
         float m_stiffness, m_dampening,
             m_angle1, m_angle2, m_length;
         bool m_has_joints;
