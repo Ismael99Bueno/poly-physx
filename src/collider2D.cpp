@@ -198,7 +198,7 @@ namespace ppx
         m_quad_tree.partitions(partitions);
 
 #ifdef WINDOWS
-        const auto exec = [this](const std::vector<const_entity2D_ptr> *partition)
+        const auto exec = [this, &stchanges](const std::vector<const_entity2D_ptr> *partition)
         {
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
@@ -209,7 +209,7 @@ namespace ppx
                         solve(c, stchanges);
                 }
         };
-        std::for_each(std::execution::par, partitions.begin(), partitions.end(), exec)
+        std::for_each(std::execution::par, partitions.begin(), partitions.end(), exec);
 #else
         for (const std::vector<const_entity2D_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
