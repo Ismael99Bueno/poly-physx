@@ -87,7 +87,7 @@ namespace ppx
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
         std::uint32_t m_qt_build_period = 35;
-        coldet_method m_coldet_method = BRUTE_FORCE;
+        coldet_method m_coldet_method = QUAD_TREE;
         bool m_enabled = true;
 
         void sort_intervals();
