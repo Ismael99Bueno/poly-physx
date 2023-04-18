@@ -152,13 +152,28 @@ namespace ppx
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
+#if defined(WINDOWS) && !defined(PERF)
+        const auto exec = [this, &stchanges](const ppx::entity2D &e1)
+        {
+            for (std::size_t j = 0; j < m_entities->size(); j++)
+            {
+                collision2D c;
+                const ppx::entity2D &e2 = (*m_entities)[j];
+                if (collide(*e1, *e2, &c))
+                    solve(c, stchanges);
+            }
+        };
+        std::for_each(std::execution::par, m_entities->begin(), m_entities->end()), exec);
+#else
         for (std::size_t i = 0; i < m_entities->size(); i++)
             for (std::size_t j = i + 1; j < m_entities->size(); j++)
             {
                 collision2D c;
-                if (collide((*m_entities)[i], (*m_entities)[j], &c))
+                const ppx::entity2D &e1 = (*m_entities)[i], &e2 = (*m_entities)[j];
+                if (collide(e1, e2, &c))
                     solve(c, stchanges);
             }
+#endif
     }
 
     void collider2D::sort_and_sweep_coldet(std::vector<float> &stchanges)
@@ -197,7 +212,7 @@ namespace ppx
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
 
-#ifdef WINDOWS
+#if defined(WINDOWS) && !defined(PERF)
         const auto exec = [this, &stchanges](const std::vector<const_entity2D_ptr> *partition)
         {
             for (std::size_t i = 0; i < partition->size(); i++)
