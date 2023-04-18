@@ -7,6 +7,9 @@
 #include <unordered_set>
 #include <glm/geometric.hpp>
 #include <glm/gtx/norm.hpp>
+#ifdef WINDOWS
+#include <execution>
+#endif
 
 #define EPA_EPSILON 1.e-3f
 
@@ -194,7 +197,20 @@ namespace ppx
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
 
-        // TODO: Paralelizar esto
+#ifdef WINDOWS
+        const auto exec = [this](const std::vector<const_entity2D_ptr> *partition)
+        {
+            for (std::size_t i = 0; i < partition->size(); i++)
+                for (std::size_t j = i + 1; j < partition->size(); j++)
+                {
+                    collision2D c;
+                    const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
+                    if (collide(*e1, *e2, &c))
+                        solve(c, stchanges);
+                }
+        };
+        std::for_each(std::execution::par, partitions.begin(), partitions.end(), exec)
+#else
         for (const std::vector<const_entity2D_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
@@ -204,6 +220,7 @@ namespace ppx
                     if (collide(*e1, *e2, &c))
                         solve(c, stchanges);
                 }
+#endif
     }
 
     void collider2D::solve(const collision2D &c,
