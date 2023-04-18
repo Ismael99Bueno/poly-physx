@@ -159,11 +159,11 @@ namespace ppx
             {
                 collision2D c;
                 const ppx::entity2D &e2 = (*m_entities)[j];
-                if (collide(*e1, *e2, &c))
+                if (collide(e1, e2, &c))
                     solve(c, stchanges);
             }
         };
-        std::for_each(std::execution::par, m_entities->begin(), m_entities->end()), exec);
+        std::for_each(std::execution::par, m_entities->begin(), m_entities->end(), exec);
 #else
         for (std::size_t i = 0; i < m_entities->size(); i++)
             for (std::size_t j = i + 1; j < m_entities->size(); j++)
