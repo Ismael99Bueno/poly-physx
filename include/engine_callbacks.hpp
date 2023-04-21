@@ -5,6 +5,7 @@
 #include "constraint_interface2D.hpp"
 #include "spring2D.hpp"
 #include "pass_key.hpp"
+#include <memory>
 
 namespace ppx
 {
