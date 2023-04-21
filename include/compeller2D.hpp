@@ -6,6 +6,7 @@
 #include "engine_callbacks.hpp"
 #include <vector>
 #include <functional>
+#include <memory>
 
 namespace ppx
 {
