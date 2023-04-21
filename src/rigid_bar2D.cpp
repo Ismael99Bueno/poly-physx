@@ -84,12 +84,12 @@ namespace ppx
         const glm::vec2 cg = 2.f * (m_e1->pos() + rot_joint1 - m_e2->pos() - rot_joint2);
         if (e == *m_e1)
         {
-            const float cga = -cg.x * (m_joint1.x * std::sinf(a1) + m_joint1.y * std::cosf(a1)) +
-                              cg.y * (m_joint1.x * std::cosf(a1) - m_joint1.y * std::sinf(a1));
+            const float cga = -cg.x * (m_joint1.x * sinf(a1) + m_joint1.y * cosf(a1)) +
+                              cg.y * (m_joint1.x * cosf(a1) - m_joint1.y * sinf(a1));
             return {cg.x, cg.y, cga};
         }
-        const float cga = cg.x * (m_joint2.x * std::sinf(a2) + m_joint2.y * std::cosf(a2)) +
-                          cg.y * (-m_joint2.x * std::cosf(a2) + m_joint2.y * std::sinf(a2));
+        const float cga = cg.x * (m_joint2.x * sinf(a2) + m_joint2.y * cosf(a2)) +
+                          cg.y * (-m_joint2.x * cosf(a2) + m_joint2.y * sinf(a2));
         return {-cg.x, -cg.y, cga};
     }
     std::array<float, 3> rigid_bar2D::constraint_grad_derivative(entity2D &e) const
