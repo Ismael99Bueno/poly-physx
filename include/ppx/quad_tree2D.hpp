@@ -1,8 +1,8 @@
 #ifndef QUAD_TREE2D_HPP
 #define QUAD_TREE2D_HPP
 
-#include "entity2D_ptr.hpp"
-#include "pass_key.hpp"
+#include "ppx/entity2D_ptr.hpp"
+#include "ppx/pass_key.hpp"
 #include <memory>
 #include <array>
 

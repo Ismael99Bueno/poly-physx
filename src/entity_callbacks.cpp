@@ -1,5 +1,5 @@
-#include "entity_callbacks.hpp"
-#include "collider2D.hpp"
+#include "ppx/entity_callbacks.hpp"
+#include "ppx/collider2D.hpp"
 
 namespace ppx
 {

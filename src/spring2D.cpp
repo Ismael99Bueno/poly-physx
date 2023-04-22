@@ -1,4 +1,4 @@
-#include "spring2D.hpp"
+#include "ppx/spring2D.hpp"
 #include <glm/geometric.hpp>
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/rotate_vector.hpp>

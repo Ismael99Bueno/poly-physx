@@ -1,7 +1,7 @@
 #ifndef ENTITY2D_PTR_HPP
 #define ENTITY2D_PTR_HPP
 
-#include "entity2D.hpp"
+#include "ppx/entity2D.hpp"
 #include <vector>
 
 namespace ppx

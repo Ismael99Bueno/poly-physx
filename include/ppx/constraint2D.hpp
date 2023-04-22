@@ -1,8 +1,8 @@
 #ifndef CONSTRAINT2D_HPP
 #define CONSTRAINT2D_HPP
 
-#include "constraint_interface2D.hpp"
-#include "entity2D_ptr.hpp"
+#include "ppx/constraint_interface2D.hpp"
+#include "ppx/entity2D_ptr.hpp"
 
 namespace ppx
 {

@@ -1,9 +1,9 @@
 #ifndef COMPELLER2D_HPP
 #define COMPELLER2D_HPP
 
-#include "entity2D.hpp"
-#include "pass_key.hpp"
-#include "engine_callbacks.hpp"
+#include "ppx/entity2D.hpp"
+#include "ppx/pass_key.hpp"
+#include "ppx/engine_callbacks.hpp"
 #include <vector>
 #include <functional>
 #include <memory>

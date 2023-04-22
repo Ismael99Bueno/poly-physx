@@ -1,5 +1,5 @@
-#include "ode2D.hpp"
-#include "perf.hpp"
+#include "ppx/ode2D.hpp"
+#include "perf/perf.hpp"
 
 namespace ppx
 {

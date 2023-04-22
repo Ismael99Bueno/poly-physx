@@ -1,7 +1,7 @@
 #ifndef ENTITY_CALLBACKS_HPP
 #define ENTITY_CALLBACKS_HPP
 
-#include "pass_key.hpp"
+#include "ppx/pass_key.hpp"
 #include <vector>
 #include <functional>
 #include <unordered_set>

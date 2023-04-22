@@ -1,6 +1,6 @@
-#include "collider2D.hpp"
-#include "debug.hpp"
-#include "perf.hpp"
+#include "ppx/collider2D.hpp"
+#include "debug/debug.hpp"
+#include "perf/perf.hpp"
 #include <limits>
 #include <cmath>
 #include <algorithm>

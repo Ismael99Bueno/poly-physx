@@ -1,11 +1,11 @@
 #ifndef COLLIDER_HPP
 #define COLLIDER_HPP
 
-#include "entity2D.hpp"
-#include "entity2D_ptr.hpp"
-#include "constraint2D.hpp"
-#include "quad_tree2D.hpp"
-#include "pass_key.hpp"
+#include "ppx/entity2D.hpp"
+#include "ppx/entity2D_ptr.hpp"
+#include "ppx/constraint2D.hpp"
+#include "ppx/quad_tree2D.hpp"
+#include "ppx/pass_key.hpp"
 #include <vector>
 #include <utility>
 

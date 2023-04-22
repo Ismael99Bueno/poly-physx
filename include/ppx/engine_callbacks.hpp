@@ -1,10 +1,10 @@
 #ifndef ENGINE_CALLBACKS_HPP
 #define ENGINE_CALLBACKS_HPP
 
-#include "entity2D_ptr.hpp"
-#include "constraint_interface2D.hpp"
-#include "spring2D.hpp"
-#include "pass_key.hpp"
+#include "ppx/entity2D_ptr.hpp"
+#include "ppx/constraint_interface2D.hpp"
+#include "ppx/spring2D.hpp"
+#include "ppx/pass_key.hpp"
 #include <memory>
 
 namespace ppx

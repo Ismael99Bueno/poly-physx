@@ -1,5 +1,5 @@
-#include "entity2D_set.hpp"
-#include "debug.hpp"
+#include "ppx/entity2D_set.hpp"
+#include "debug/debug.hpp"
 
 namespace ppx
 {

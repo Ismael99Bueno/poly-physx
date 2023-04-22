@@ -1,7 +1,7 @@
 #ifndef RIGID_BAR2D_HPP
 #define RIGID_BAR2D_HPP
 
-#include "constraint2D.hpp"
+#include "ppx/constraint2D.hpp"
 
 namespace ppx
 {

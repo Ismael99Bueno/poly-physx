@@ -1,11 +1,11 @@
 #ifndef ENTITY2D_HPP
 #define ENTITY2D_HPP
 
-#include "aabb2D.hpp"
-#include "polygon.hpp"
-#include "saveable.hpp"
-#include "state.hpp"
-#include "entity_callbacks.hpp"
+#include "geo/aabb2D.hpp"
+#include "geo/polygon.hpp"
+#include "ini/saveable.hpp"
+#include "rk/state.hpp"
+#include "ppx/entity_callbacks.hpp"
 
 namespace ppx
 {

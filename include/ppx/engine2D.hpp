@@ -1,16 +1,16 @@
 #ifndef ENGINE2D_HPP
 #define ENGINE2D_HPP
 
-#include "integrator.hpp"
-#include "entity2D_ptr.hpp"
-#include "compeller2D.hpp"
-#include "collider2D.hpp"
-#include "force2D.hpp"
-#include "interaction2D.hpp"
-#include "spring2D.hpp"
-#include "vector_view.hpp"
-#include "rigid_bar2D.hpp"
-#include "engine_callbacks.hpp"
+#include "rk/integrator.hpp"
+#include "ppx/entity2D_ptr.hpp"
+#include "ppx/compeller2D.hpp"
+#include "ppx/collider2D.hpp"
+#include "ppx/force2D.hpp"
+#include "ppx/interaction2D.hpp"
+#include "ppx/spring2D.hpp"
+#include "utils/vector_view.hpp"
+#include "ppx/rigid_bar2D.hpp"
+#include "ppx/engine_callbacks.hpp"
 
 namespace ppx
 {

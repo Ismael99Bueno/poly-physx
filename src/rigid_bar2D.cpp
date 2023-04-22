@@ -1,5 +1,5 @@
-#include "rigid_bar2D.hpp"
-#include "debug.hpp"
+#include "ppx/rigid_bar2D.hpp"
+#include "debug/debug.hpp"
 #include <cmath>
 #include <glm/geometric.hpp>
 #include <glm/gtx/norm.hpp>

@@ -1,7 +1,7 @@
 #ifndef FORCE2D_HPP
 #define FORCE2D_HPP
 
-#include "entity2D_set.hpp"
+#include "ppx/entity2D_set.hpp"
 
 namespace ppx
 {

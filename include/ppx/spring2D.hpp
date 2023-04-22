@@ -1,7 +1,7 @@
 #ifndef SPRING2D_HPP
 #define SPRING2D_HPP
 
-#include "entity2D_ptr.hpp"
+#include "ppx/entity2D_ptr.hpp"
 #include <utility>
 
 namespace ppx

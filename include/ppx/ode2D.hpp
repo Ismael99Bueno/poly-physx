@@ -1,7 +1,7 @@
 #ifndef ODE2D_HPP
 #define ODE2D_HPP
 
-#include "engine2D.hpp"
+#include "ppx/engine2D.hpp"
 
 namespace ppx
 {
