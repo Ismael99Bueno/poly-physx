@@ -5,7 +5,11 @@ from typing import Union
 
 
 def add_dependencies(
-    dependencies: Union[str, list[str]], exec: str, branch: str, folder: str = "."
+    dependencies: Union[str, list[str]],
+    exec: str,
+    branch: str,
+    folder: str = ".",
+    user: str = "ismawno",
 ) -> None:
     if isinstance(dependencies, str):
         dependencies = [dependencies]
@@ -19,7 +23,7 @@ def add_dependencies(
                 "git",
                 "submodule",
                 "add",
-                f"https://github.com/ismawno/{dependency}.git",
+                f"https://github.com/{user}/{dependency}.git",
                 f"{folder}/{dependency}",
             ]
         )
@@ -71,7 +75,6 @@ def main() -> None:
 
     add_dependencies(
         [
-            "vec-2D",
             "shapes-2D",
             "rk-integrator",
             "debug-tools",
@@ -82,6 +85,7 @@ def main() -> None:
         args.exec,
         args.branch,
     )
+    add_dependencies("glm", args.exec, args.branch, folder="vendor", user="g-truc")
 
 
 if __name__ == "__main__":
