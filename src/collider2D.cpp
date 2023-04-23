@@ -372,8 +372,8 @@ namespace ppx
         PERF_FUNCTION()
         const glm::vec2 sup1 = poly1.support_vertex(mtv),
                         sup2 = poly2.support_vertex(-mtv);
-        const float d1 = glm::length2(poly2.towards_closest_edge_from(sup1 - mtv)),
-                    d2 = glm::length2(poly1.towards_closest_edge_from(sup2 + mtv));
+        const float d1 = glm::length2(poly2.closest_direction_from(sup1 - mtv)),
+                    d2 = glm::length2(poly1.closest_direction_from(sup2 + mtv));
         if (d1 < d2)
             return std::make_pair(sup1, sup1 - mtv);
         return std::make_pair(sup2 + mtv, sup2);
