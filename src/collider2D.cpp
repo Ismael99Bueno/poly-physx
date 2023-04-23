@@ -283,13 +283,13 @@ namespace ppx
         PERF_FUNCTION()
         glm::vec2 dir = poly2.centroid() - poly1.centroid();
         simplex.reserve(3);
-        const glm::vec2 supp = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
+        const glm::vec2 supp = poly1.support_point(dir) - poly2.support_point(-dir);
         dir = -supp;
         simplex.emplace_back(supp);
 
         for (;;)
         {
-            const glm::vec2 A = poly1.support_vertex(dir) - poly2.support_vertex(-dir);
+            const glm::vec2 A = poly1.support_point(dir) - poly2.support_point(-dir);
             if (glm::dot(A, dir) <= 0.f)
                 return false;
             simplex.emplace_back(A);
@@ -354,7 +354,7 @@ namespace ppx
                     mtv = normal;
                 }
             }
-            const glm::vec2 support = poly1.support_vertex(mtv) - poly2.support_vertex(-mtv);
+            const glm::vec2 support = poly1.support_point(mtv) - poly2.support_point(-mtv);
             const float sup_dist = glm::dot(mtv, support);
             const float diff = std::abs(sup_dist - min_dist);
             if (diff <= EPA_EPSILON)
@@ -370,8 +370,8 @@ namespace ppx
                                                              const glm::vec2 &mtv)
     {
         PERF_FUNCTION()
-        const glm::vec2 sup1 = poly1.support_vertex(mtv),
-                        sup2 = poly2.support_vertex(-mtv);
+        const glm::vec2 sup1 = poly1.support_point(mtv),
+                        sup2 = poly2.support_point(-mtv);
         const float d1 = glm::length2(poly2.closest_direction_from(sup1 - mtv)),
                     d2 = glm::length2(poly1.closest_direction_from(sup2 + mtv));
         if (d1 < d2)
