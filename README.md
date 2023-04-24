@@ -15,7 +15,7 @@ poly-physx is a 2D physics engine that simulates collisions between convex polyg
 
 poly-physx depends on several other projects, all created by the same author:
 
-- [glm](https://github.com/imsawno/glm)
+- [glm](https://github.com/g-truc/glm)
 - [shapes-2D](https://github.com/ismawno/shapes-2D)
 - [rk-integrator](https://github.com/ismawno/rk-integrator)
 - [debug-tools](https://github.com/ismawno/debug-tools)
