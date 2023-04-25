@@ -28,14 +28,14 @@ namespace ppx
         if (m_partitioned)
             add_to_children(e);
         else
-            m_entities.emplace_back(e);
+            m_entities.push_back(e);
     }
 
     void quad_tree2D::partitions(std::vector<const std::vector<const_entity2D_ptr> *> &partitions) const
     {
         PERF_FUNCTION()
         if (!m_partitioned)
-            partitions.emplace_back(&m_entities);
+            partitions.push_back(&m_entities);
         else
             for (const auto &q : m_children)
                 q->partitions(partitions);

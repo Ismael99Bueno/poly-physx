@@ -230,8 +230,8 @@ namespace ppx
 
     bool engine2D::remove_entity(const entity2D &e) { return remove_entity(e.index()); }
 
-    void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.emplace_back(force); }
-    void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.emplace_back(inter); }
+    void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.push_back(force); }
+    void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.push_back(inter); }
 
     spring2D &engine2D::add_spring(const entity2D_ptr &e1,
                                    const entity2D_ptr &e2,

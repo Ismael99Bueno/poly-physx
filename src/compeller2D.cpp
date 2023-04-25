@@ -15,7 +15,7 @@ namespace ppx
 
     void compeller2D::add_constraint(const std::shared_ptr<constraint_interface2D> &ctr)
     {
-        m_constraints.emplace_back(ctr);
+        m_constraints.push_back(ctr);
         m_callbacks->constraint_addition(ctr);
     }
     bool compeller2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr)
