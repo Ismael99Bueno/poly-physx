@@ -14,6 +14,12 @@ namespace ppx
     class entity2D : public ini::saveable
     {
     public:
+        enum shape_type
+        {
+            POLYGON = 0,
+            CIRCLE = 1
+        };
+
         entity2D(const std::vector<glm::vec2> &vertices,
                  const glm::vec2 &pos = glm::vec2(0.f),
                  const glm::vec2 &vel = glm::vec2(0.f),
@@ -54,8 +60,7 @@ namespace ppx
         void shape(const geo::polygon &poly);
         void shape(const geo::circle &c);
 
-        bool is_polygon() const;
-        bool is_circle() const;
+        shape_type type() const;
 
         std::size_t index() const;
         std::size_t id() const;

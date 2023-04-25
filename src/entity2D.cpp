@@ -123,8 +123,7 @@ namespace ppx
     void entity2D::shape(const geo::polygon &poly) { m_shape = poly; }
     void entity2D::shape(const geo::circle &c) { m_shape = c; }
 
-    bool entity2D::is_polygon() const { return m_shape.index() == 0; }
-    bool entity2D::is_circle() const { return m_shape.index() == 1; }
+    entity2D::shape_type entity2D::type() const { return m_shape.index() == 0 ? POLYGON : CIRCLE; }
 
     std::size_t entity2D::index() const { return m_index; }
     std::size_t entity2D::id() const { return m_id; }
