@@ -25,12 +25,12 @@ namespace ppx
         bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
         bool embedded_forward(float &timestep);
 
-        entity2D_ptr add_entity(const glm::vec2 &pos = glm::vec2(0.f),
-                                const glm::vec2 &vel = glm::vec2(0.f),
-                                float angpos = 0.f, float angvel = 0.f,
-                                float mass = 1.f, float charge = 1.f,
-                                const std::vector<glm::vec2> &vertices = geo::polygon::box(1.f),
-                                bool kinematic = true);
+        template <class... Args>
+        entity2D_ptr add_entity(Args &&...args)
+        {
+            entity2D &e = m_entities.emplace_back(std::forward<Args>(args)...);
+            return process_entity_addition(e);
+        }
 
         bool remove_entity(std::size_t index);
         bool remove_entity(const entity2D &e);
@@ -135,6 +135,8 @@ namespace ppx
         engine_callbacks m_callbacks;
 
         float m_elapsed = 0.f;
+
+        entity2D_ptr process_entity_addition(entity2D &e);
 
         void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
         void load_interactions_and_externals(std::vector<float> &stchanges) const;

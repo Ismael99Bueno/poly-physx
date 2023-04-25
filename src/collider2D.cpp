@@ -163,14 +163,19 @@ namespace ppx
     {
         PERF_FUNCTION()
 #if defined(WINDOWS) && !defined(PERF)
-        const auto exec = [this, &stchanges](const ppx::entity2D &e1)
+        const auto exec = [this, &stchanges](const entity2D &e1)
         {
             for (std::size_t j = 0; j < m_entities->size(); j++)
             {
                 collision2D c;
-                const ppx::entity2D &e2 = (*m_entities)[j];
+                const entity2D &e2 = (*m_entities)[j];
                 if (collide(e1, e2, &c))
+                {
+                    try_enter_or_stay_callback(e1, e2, c);
                     solve(c, stchanges);
+                }
+                else
+                    try_exit_callback(e1, e2);
             }
         };
         std::for_each(std::execution::par, m_entities->begin(), m_entities->end(), exec);
@@ -179,9 +184,14 @@ namespace ppx
             for (std::size_t j = i + 1; j < m_entities->size(); j++)
             {
                 collision2D c;
-                const ppx::entity2D &e1 = (*m_entities)[i], &e2 = (*m_entities)[j];
+                const entity2D &e1 = (*m_entities)[i], &e2 = (*m_entities)[j];
                 if (collide(e1, e2, &c))
+                {
+                    try_enter_or_stay_callback(e1, e2, c);
                     solve(c, stchanges);
+                }
+                else
+                    try_exit_callback(e1, e2);
             }
 #endif
     }
@@ -199,8 +209,14 @@ namespace ppx
                 for (const entity2D *e : eligible)
                 {
                     collision2D c;
-                    if (collide(*e, *itrv.entity(), &c))
+                    const entity2D &e1 = *e, &e2 = *itrv.entity();
+                    if (collide(e1, e2, &c))
+                    {
+                        try_enter_or_stay_callback(e1, e2, c);
                         solve(c, stchanges);
+                    }
+                    else
+                        try_exit_callback(e1, e2);
                 }
                 eligible.insert(itrv.entity());
             }

@@ -1,6 +1,7 @@
 #include "ppx/engine2D.hpp"
 #include "ppx/ode2D.hpp"
 #include "perf/perf.hpp"
+#include "geo/intersection.hpp"
 #include <random>
 
 namespace ppx
@@ -168,24 +169,17 @@ namespace ppx
         }
     }
 
-    entity2D_ptr engine2D::add_entity(const glm::vec2 &pos,
-                                      const glm::vec2 &vel,
-                                      const float angpos,
-                                      const float angvel,
-                                      const float mass,
-                                      const float charge,
-                                      const std::vector<glm::vec2> &vertices,
-                                      const bool kinematic)
+    entity2D_ptr engine2D::process_entity_addition(entity2D &e)
     {
-        entity2D &e = m_entities.emplace_back(pos, vel, angpos, angvel, mass, charge, vertices, kinematic);
         const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
 
         rk::state &state = m_integ.state();
         e.m_index = m_entities.size() - 1;
         e.m_state = &state;
 
-        state.append({pos.x, pos.y, angpos,
-                      vel.x, vel.y, angvel});
+        const glm::vec2 &pos = e.pos(), &vel = e.vel();
+        state.append({pos.x, pos.y, e.angpos(),
+                      vel.x, vel.y, e.angvel()});
         m_collider.add_entity_intervals(e_ptr);
         e.retrieve();
 
@@ -555,8 +549,9 @@ namespace ppx
     {
         std::vector<const_entity2D_ptr> in_area;
         in_area.reserve(m_entities.size() / 2);
+
         for (const entity2D &e : m_entities)
-            if (e.aabb().overlaps(aabb))
+            if (geo::intersect(e.shape().bounding_box(), aabb))
                 in_area.emplace_back(&m_entities, e.index());
         return in_area;
     }
@@ -565,7 +560,7 @@ namespace ppx
         std::vector<entity2D_ptr> in_area;
         in_area.reserve(m_entities.size() / 2);
         for (const entity2D &e : m_entities)
-            if (e.aabb().overlaps(aabb))
+            if (geo::intersect(e.shape().bounding_box(), aabb))
                 in_area.emplace_back(&m_entities, e.index());
         return in_area;
     }
@@ -582,7 +577,7 @@ namespace ppx
     {
         const geo::aabb2D aabb = point;
         for (const entity2D &e : m_entities)
-            if (e.aabb().overlaps(aabb))
+            if (geo::intersect(e.shape().bounding_box(), aabb))
                 return {&m_entities, e.index()};
         return nullptr;
     }
@@ -590,7 +585,7 @@ namespace ppx
     {
         const geo::aabb2D aabb = point;
         for (const entity2D &e : m_entities)
-            if (e.aabb().overlaps(aabb))
+            if (geo::intersect(e.shape().bounding_box(), aabb))
                 return {&m_entities, e.index()};
         return nullptr;
     }

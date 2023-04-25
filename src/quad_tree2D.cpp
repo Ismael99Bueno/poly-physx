@@ -1,6 +1,7 @@
 #include "ppx/quad_tree2D.hpp"
 #include "debug/debug.hpp"
 #include "perf/perf.hpp"
+#include "geo/intersection.hpp"
 
 namespace ppx
 {
@@ -21,7 +22,7 @@ namespace ppx
     void quad_tree2D::add_if_inside(const const_entity2D_ptr &e)
     {
         DBG_ASSERT(m_entities.size() <= m_max_entities || rock_bottom(), "Quad tree contains more entities than allowed! - Contained entities: %zu, maximum entities: %zu\n", m_entities.size(), m_max_entities)
-        if (!m_aabb.overlaps(e->aabb()))
+        if (!geo::intersect(m_aabb, e->shape().bounding_box()))
             return;
         if (full() && !rock_bottom())
             partition();

@@ -46,11 +46,13 @@ namespace ppx
         float added_torque() const;
 
         const geo::shape2D &shape() const;
+        template <typename T>
+        const T &shape() const;
+
         void shape(const std::vector<glm::vec2> &vertices);
         void shape(float radius);
         void shape(const geo::polygon &poly);
         void shape(const geo::circle &c);
-        // const T &shape<T> with specializations for both shapes
 
         bool is_polygon() const;
         bool is_circle() const;
@@ -98,7 +100,7 @@ namespace ppx
 
         static std::size_t s_id;
 
-        geo::shape2D &shape();
+        geo::shape2D &get_shape();
         void retrieve(const std::vector<float> &vars_buffer);
         friend class engine2D;
     };
