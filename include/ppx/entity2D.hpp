@@ -3,20 +3,34 @@
 
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"
+#include "geo/circle.hpp"
 #include "ini/saveable.hpp"
 #include "rk/state.hpp"
 #include "ppx/entity_callbacks.hpp"
+#include <variant>
 
 namespace ppx
 {
     class entity2D : public ini::saveable
     {
     public:
+        entity2D(const std::vector<glm::vec2> &vertices,
+                 const glm::vec2 &pos = glm::vec2(0.f),
+                 const glm::vec2 &vel = glm::vec2(0.f),
+                 float angpos = 0.f, float angvel = 0.f,
+                 float mass = 1.f, float charge = 1.f,
+                 bool kinematic = true);
+        entity2D(float radius,
+                 const glm::vec2 &pos = glm::vec2(0.f),
+                 const glm::vec2 &vel = glm::vec2(0.f),
+                 float angpos = 0.f, float angvel = 0.f,
+                 float mass = 1.f, float charge = 1.f,
+                 bool kinematic = true);
+
         entity2D(const glm::vec2 &pos = glm::vec2(0.f),
                  const glm::vec2 &vel = glm::vec2(0.f),
                  float angpos = 0.f, float angvel = 0.f,
                  float mass = 1.f, float charge = 1.f,
-                 const std::vector<glm::vec2> &vertices = geo::polygon::ngon(1.f, 3),
                  bool kinematic = true);
 
         void retrieve();
@@ -31,10 +45,15 @@ namespace ppx
         const glm::vec2 &added_force() const;
         float added_torque() const;
 
-        const geo::aabb2D &aabb() const;
-
-        const geo::polygon &shape() const;
+        const geo::shape2D &shape() const;
         void shape(const std::vector<glm::vec2> &vertices);
+        void shape(float radius);
+        void shape(const geo::polygon &poly);
+        void shape(const geo::circle &c);
+        // const T &shape<T> with specializations for both shapes
+
+        bool is_polygon() const;
+        bool is_circle() const;
 
         std::size_t index() const;
         std::size_t id() const;
@@ -69,8 +88,7 @@ namespace ppx
         void charge(float charge);
 
     private:
-        geo::aabb2D m_aabb;
-        geo::polygon m_shape;
+        std::variant<geo::polygon, geo::circle> m_shape;
         rk::state *m_state = nullptr;
         glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
         std::size_t m_index = 0, m_id;
@@ -80,6 +98,7 @@ namespace ppx
 
         static std::size_t s_id;
 
+        geo::shape2D &shape();
         void retrieve(const std::vector<float> &vars_buffer);
         friend class engine2D;
     };

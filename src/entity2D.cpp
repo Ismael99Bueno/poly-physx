@@ -11,20 +11,39 @@ namespace ppx
                        const glm::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
-                       const std::vector<glm::vec2> &vertices,
-                       const bool kinematic) : m_aabb(),
-                                               m_shape(pos, vertices),
+                       const bool kinematic) : m_vel(vel),
+                                               m_id(s_id++),
+                                               m_callbacks(entity_key()),
+                                               m_angvel(angvel),
+                                               m_mass(mass),
+                                               m_charge(charge),
+                                               m_kinematic(kinematic) {}
+    entity2D::entity2D(const std::vector<glm::vec2> &vertices,
+                       const glm::vec2 &pos,
+                       const glm::vec2 &vel,
+                       const float angpos, const float angvel,
+                       const float mass, const float charge,
+                       const bool kinematic) : m_shape(geo::polygon(pos, vertices)),
                                                m_vel(vel),
                                                m_id(s_id++),
                                                m_callbacks(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_charge(charge),
-                                               m_kinematic(kinematic)
-    {
-        m_shape.rotate(angpos);
-        m_aabb.bound(vertices);
-    }
+                                               m_kinematic(kinematic) {}
+    entity2D::entity2D(const float radius,
+                       const glm::vec2 &pos,
+                       const glm::vec2 &vel,
+                       const float angpos, const float angvel,
+                       const float mass, const float charge,
+                       const bool kinematic) : m_shape(geo::circle(pos, radius)),
+                                               m_vel(vel),
+                                               m_id(s_id++),
+                                               m_callbacks(entity_key()),
+                                               m_angvel(angvel),
+                                               m_mass(mass),
+                                               m_charge(charge),
+                                               m_kinematic(kinematic) {}
 
     void entity2D::retrieve(const std::vector<float> &vars_buffer)
     {
@@ -42,8 +61,9 @@ namespace ppx
     }
     void entity2D::dispatch() const
     {
-        const glm::vec2 &pos = m_shape.centroid();
-        const float angpos = m_shape.rotation();
+        const geo::shape2D &sh = shape();
+        const glm::vec2 &pos = sh.centroid();
+        const float angpos = sh.rotation();
         rk::state &st = *m_state;
 
         const std::size_t idx = 6 * m_index;
@@ -57,7 +77,7 @@ namespace ppx
 
     float entity2D::kinetic_energy() const
     {
-        return 0.5f * (m_mass * glm::length2(m_vel) + m_angvel * m_angvel * m_shape.inertia());
+        return 0.5f * (m_mass * glm::length2(m_vel) + m_angvel * m_angvel * shape().inertia());
     }
 
     void entity2D::add_force(const glm::vec2 &force) { m_added_force += force; }
@@ -68,25 +88,40 @@ namespace ppx
     const glm::vec2 &entity2D::added_force() const { return m_added_force; }
     float entity2D::added_torque() const { return m_added_torque; }
 
-    const geo::aabb2D &entity2D::aabb() const { return m_aabb; }
-    const geo::polygon &entity2D::shape() const { return m_shape; }
+    const geo::shape2D &entity2D::shape() const
+    {
+        if (m_shape.index() == 0)
+            return std::get<geo::polygon>(m_shape);
+        return std::get<geo::circle>(m_shape);
+    }
+    geo::shape2D &entity2D::shape()
+    {
+        if (m_shape.index() == 0)
+            return std::get<geo::polygon>(m_shape);
+        return std::get<geo::circle>(m_shape);
+    }
 
     void entity2D::shape(const std::vector<glm::vec2> &vertices)
     {
         m_shape = geo::polygon(pos(), vertices);
-        m_aabb.bound(m_shape.vertices());
     }
+    void entity2D::shape(const float radius) { m_shape = geo::circle(pos(), radius); }
+    void entity2D::shape(const geo::polygon &poly) { m_shape = poly; }
+    void entity2D::shape(const geo::circle &c) { m_shape = c; }
+
+    bool entity2D::is_polygon() const { return m_shape.index() == 0; }
+    bool entity2D::is_circle() const { return m_shape.index() == 1; }
 
     std::size_t entity2D::index() const { return m_index; }
     std::size_t entity2D::id() const { return m_id; }
 
-    float entity2D::inertia() const { return m_shape.inertia() * m_mass; }
+    float entity2D::inertia() const { return shape().inertia() * m_mass; }
 
     bool entity2D::kinematic() const { return m_kinematic; }
     void entity2D::kinematic(const bool kinematic) { m_kinematic = kinematic; }
 
-    void entity2D::translate(const glm::vec2 &dpos) { m_shape.translate(dpos); }
-    void entity2D::rotate(const float dangle) { m_shape.rotate(dangle); }
+    void entity2D::translate(const glm::vec2 &dpos) { shape().translate(dpos); }
+    void entity2D::rotate(const float dangle) { shape().rotate(dangle); }
 
     void entity2D::write(ini::output &out) const
     {
@@ -96,7 +131,7 @@ namespace ppx
         out.write("angvel", m_angvel);
         out.write("added_torque", m_added_torque);
         out.write("index", m_index);
-        m_shape.write(out);
+        shape().write(out);
         out.write("vx", m_vel.x);
         out.write("vy", m_vel.y);
     }
@@ -108,8 +143,7 @@ namespace ppx
         m_angvel = in.readf32("angvel");
         m_added_torque = in.readf32("added_torque");
 
-        m_shape.read(in);
-        m_aabb.bound(m_shape.vertices());
+        shape().read(in);
         m_vel = {in.readf32("vx"), in.readf32("vy")};
 
         dispatch();
@@ -119,28 +153,20 @@ namespace ppx
     const entity_callbacks &entity2D::callbacks() const { return m_callbacks; }
     entity_callbacks &entity2D::callbacks() { return m_callbacks; }
 
-    const glm::vec2 &entity2D::pos() const { return m_shape.centroid(); }
+    const glm::vec2 &entity2D::pos() const { return shape().centroid(); }
     const glm::vec2 &entity2D::vel() const { return m_vel; }
     const glm::vec2 entity2D::vel_at(const glm::vec2 &at) const { return m_vel + m_angvel * glm::vec2(-at.y, at.x); }
 
-    float entity2D::angpos() const { return m_shape.rotation(); }
+    float entity2D::angpos() const { return shape().rotation(); }
     float entity2D::angvel() const { return m_angvel; }
 
     float entity2D::mass() const { return m_mass; }
     float entity2D::charge() const { return m_charge; }
 
-    void entity2D::pos(const glm::vec2 &pos)
-    {
-        m_shape.pos(pos);
-        m_aabb.bound(m_shape.vertices());
-    }
+    void entity2D::pos(const glm::vec2 &pos) { shape().pos(pos); }
     void entity2D::vel(const glm::vec2 &vel) { m_vel = vel; }
 
-    void entity2D::angpos(const float angpos)
-    {
-        m_shape.rotation(angpos);
-        m_aabb.bound(m_shape.vertices());
-    }
+    void entity2D::angpos(const float angpos) { shape().rotation(angpos); }
     void entity2D::angvel(const float angvel) { m_angvel = angvel; }
 
     void entity2D::mass(const float mass) { m_mass = mass; }
