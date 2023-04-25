@@ -80,6 +80,7 @@ namespace ppx
         private:
             const_entity2D_ptr m_entity;
             end m_end;
+            float m_val;
         };
 
         std::vector<entity2D> *m_entities;
@@ -92,6 +93,9 @@ namespace ppx
 
         void sort_intervals();
         bool collide(const entity2D &e1, const entity2D &e2, collision2D *c) const;
+        void try_enter_or_stay_callback(const entity2D &e1, const entity2D &e2, const collision2D &c) const;
+        void try_exit_callback(const entity2D &e1, const entity2D &e2) const;
+
         void brute_force_coldet(std::vector<float> &stchanges) const;
         void sort_and_sweep_coldet(std::vector<float> &stchanges);
         void quad_tree_coldet(std::vector<float> &stchanges);
@@ -99,17 +103,6 @@ namespace ppx
         void solve(const collision2D &c,
                    std::vector<float> &stchanges) const;
         std::array<float, 6> forces_upon_collision(const collision2D &c) const;
-
-        bool gjk_epa(const entity2D &e1, const entity2D &e2, collision2D *c) const;
-
-        static bool gjk(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<glm::vec2> &simplex);
-        static void line_case(const std::vector<glm::vec2> &simplex, glm::vec2 &dir);
-        static bool triangle_case(std::vector<glm::vec2> &simplex, glm::vec2 &dir);
-
-        static glm::vec2 epa(const geo::polygon &poly1, const geo::polygon &poly2, std::vector<glm::vec2> &simplex);
-        static std::pair<glm::vec2, glm::vec2> touch_points(const geo::polygon &poly1,
-                                                            const geo::polygon &poly2,
-                                                            const glm::vec2 &mtv);
 
         collider2D(const collider2D &) = delete;
         collider2D &operator=(const collider2D &) = delete;
