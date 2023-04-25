@@ -38,19 +38,13 @@ namespace ppx
         void add_force(const std::shared_ptr<force2D> &force);
         void add_interaction(const std::shared_ptr<interaction2D> &inter);
 
-        spring2D &add_spring(const entity2D_ptr &e1,
-                             const entity2D_ptr &e2,
-                             float stiffness = 1.f,
-                             float dampening = 0.f,
-                             float length = 0.f);
-
-        spring2D &add_spring(const entity2D_ptr &e1,
-                             const entity2D_ptr &e2,
-                             const glm::vec2 &joint1,
-                             const glm::vec2 &joint2,
-                             float stiffness = 1.f,
-                             float dampening = 0.f,
-                             float length = 0.f);
+        template <class... Args>
+        spring2D &add_spring(Args &&...args)
+        {
+            spring2D &sp = m_springs.emplace_back(std::forward<Args>(args)...);
+            m_callbacks.spring_addition(&sp);
+            return sp;
+        }
 
         void add_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
         bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
