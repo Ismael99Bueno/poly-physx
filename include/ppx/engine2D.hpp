@@ -96,12 +96,12 @@ namespace ppx
         const std::vector<std::shared_ptr<interaction2D>> &interactions() const;
         const std::vector<spring2D> &springs() const;
 
-        utils::container_view<std::vector<std::shared_ptr<force2D>>> forces();
-        utils::container_view<std::vector<std::shared_ptr<interaction2D>>> interactions();
-        utils::container_view<std::vector<spring2D>> springs();
+        utils::vector_view<std::shared_ptr<force2D>> forces();
+        utils::vector_view<std::shared_ptr<interaction2D>> interactions();
+        utils::vector_view<spring2D> springs();
 
         const std::vector<entity2D> &entities() const;
-        utils::container_view<std::vector<entity2D>> entities();
+        utils::vector_view<entity2D> entities();
         std::size_t size() const;
 
         const rk::integrator &integrator() const;
