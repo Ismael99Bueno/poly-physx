@@ -52,8 +52,12 @@ namespace ppx
         float added_torque() const;
 
         const geo::shape2D &shape() const;
+
         template <typename T>
         const T &shape() const;
+
+        template <typename T>
+        const T *shape_if() const;
 
         void shape(const std::vector<glm::vec2> &vertices);
         void shape(float radius);

@@ -110,6 +110,12 @@ namespace ppx
     template const geo::polygon &entity2D::shape<geo::polygon>() const;
     template const geo::circle &entity2D::shape<geo::circle>() const;
 
+    template <typename T>
+    const T *entity2D::shape_if() const { return std::get_if<T>(&m_shape); }
+
+    template const geo::polygon *entity2D::shape_if<geo::polygon>() const;
+    template const geo::circle *entity2D::shape_if<geo::circle>() const;
+
     void entity2D::shape(const std::vector<glm::vec2> &vertices)
     {
         const geo::shape2D &sh = shape();
