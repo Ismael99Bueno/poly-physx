@@ -171,12 +171,13 @@ namespace ppx
 
     entity2D_ptr engine2D::process_entity_addition(entity2D &e)
     {
-        const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
-
+        static std::size_t id = 0;
         rk::state &state = m_integ.state();
         e.m_index = m_entities.size() - 1;
         e.m_state = &state;
+        e.m_id = id++;
 
+        const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
         const glm::vec2 &pos = e.pos(), &vel = e.vel();
         state.append({pos.x, pos.y, e.angpos(),
                       vel.x, vel.y, e.angvel()});

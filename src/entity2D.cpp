@@ -6,27 +6,39 @@
 
 namespace ppx
 {
-    std::size_t entity2D::s_id = 0;
-    entity2D::entity2D(const glm::vec2 &pos,
-                       const glm::vec2 &vel,
+    entity2D::entity2D(const std::variant<geo::polygon, geo::circle> &shape,
+                       const glm::vec2 &pos, const glm::vec2 &vel,
+                       const float angpos, const float angvel,
+                       const float mass, const float charge,
+                       const bool kinematic) : m_shape(shape),
+                                               m_vel(vel),
+                                               m_callbacks(entity_key()),
+                                               m_angvel(angvel),
+                                               m_mass(mass),
+                                               m_charge(charge),
+                                               m_kinematic(kinematic)
+    {
+        geo::shape2D &sh = get_shape();
+        sh.pos(pos);
+        sh.rotation(angpos);
+    }
+
+    entity2D::entity2D(const glm::vec2 &pos, const glm::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
                        const bool kinematic) : m_shape(geo::polygon(pos, angpos, geo::polygon::box(5.f))),
                                                m_vel(vel),
-                                               m_id(s_id++),
                                                m_callbacks(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
     entity2D::entity2D(const std::vector<glm::vec2> &vertices,
-                       const glm::vec2 &pos,
-                       const glm::vec2 &vel,
+                       const glm::vec2 &pos, const glm::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
                        const bool kinematic) : m_shape(geo::polygon(pos, angpos, vertices)),
                                                m_vel(vel),
-                                               m_id(s_id++),
                                                m_callbacks(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
@@ -39,7 +51,6 @@ namespace ppx
                        const float mass, const float charge,
                        const bool kinematic) : m_shape(geo::circle(pos, radius, angpos)),
                                                m_vel(vel),
-                                               m_id(s_id++),
                                                m_callbacks(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),

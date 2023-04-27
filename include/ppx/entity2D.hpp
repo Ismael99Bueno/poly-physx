@@ -20,6 +20,12 @@ namespace ppx
             CIRCLE = 1
         };
 
+        entity2D(const std::variant<geo::polygon, geo::circle> &shape,
+                 const glm::vec2 &pos = glm::vec2(0.f),
+                 const glm::vec2 &vel = glm::vec2(0.f),
+                 float angpos = 0.f, float angvel = 0.f,
+                 float mass = 1.f, float charge = 1.f,
+                 bool kinematic = true);
         entity2D(const std::vector<glm::vec2> &vertices,
                  const glm::vec2 &pos = glm::vec2(0.f),
                  const glm::vec2 &vel = glm::vec2(0.f),
@@ -102,12 +108,10 @@ namespace ppx
         std::variant<geo::polygon, geo::circle> m_shape;
         rk::state *m_state = nullptr;
         glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
-        std::size_t m_index = 0, m_id;
+        std::size_t m_index = 0, m_id = 0;
         entity_callbacks m_callbacks;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
         bool m_kinematic;
-
-        static std::size_t s_id;
 
         geo::shape2D &get_shape();
         void retrieve(const std::vector<float> &vars_buffer);
