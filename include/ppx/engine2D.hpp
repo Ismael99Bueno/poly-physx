@@ -58,7 +58,7 @@ namespace ppx
         spring2D &add_spring(Args &&...args)
         {
             spring2D &sp = m_springs.emplace_back(std::forward<Args>(args)...);
-            m_callbacks.spring_addition(&sp);
+            m_events.on_spring_addition(&sp);
             return sp;
         }
 
@@ -128,8 +128,6 @@ namespace ppx
         collider2D &collider();
 
         const compeller2D &compeller() const;
-
-        const engine_events &events() const;
         engine_events &events();
 
         float elapsed() const;
@@ -143,7 +141,7 @@ namespace ppx
         std::vector<spring2D> m_springs;
         std::tuple<float, std::vector<float>, std::vector<entity2D>> m_checkpoint;
         rk::integrator m_integ;
-        engine_events m_callbacks;
+        engine_events m_events;
 
         float m_elapsed = 0.f;
 

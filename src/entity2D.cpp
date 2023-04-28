@@ -12,7 +12,7 @@ namespace ppx
                        const float mass, const float charge,
                        const bool kinematic) : m_shape(shape),
                                                m_vel(vel),
-                                               m_callbacks(entity_key()),
+                                               m_events(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_charge(charge),
@@ -28,7 +28,7 @@ namespace ppx
                        const float mass, const float charge,
                        const bool kinematic) : m_shape(geo::polygon(pos, angpos, geo::polygon::box(5.f))),
                                                m_vel(vel),
-                                               m_callbacks(entity_key()),
+                                               m_events(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_charge(charge),
@@ -39,7 +39,7 @@ namespace ppx
                        const float mass, const float charge,
                        const bool kinematic) : m_shape(geo::polygon(pos, angpos, vertices)),
                                                m_vel(vel),
-                                               m_callbacks(entity_key()),
+                                               m_events(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_charge(charge),
@@ -51,7 +51,7 @@ namespace ppx
                        const float mass, const float charge,
                        const bool kinematic) : m_shape(geo::circle(pos, radius, angpos)),
                                                m_vel(vel),
-                                               m_callbacks(entity_key()),
+                                               m_events(entity_key()),
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_charge(charge),
@@ -193,8 +193,8 @@ namespace ppx
         DBG_ASSERT((size_t)in.readui64("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readui64("index"), m_index)
     }
 
-    const entity_events &entity2D::events() const { return m_callbacks; }
-    entity_events &entity2D::events() { return m_callbacks; }
+    const entity_events &entity2D::events() const { return m_events; }
+    entity_events &entity2D::events() { return m_events; }
 
     const glm::vec2 &entity2D::pos() const { return shape().centroid(); }
     const glm::vec2 &entity2D::vel() const { return m_vel; }

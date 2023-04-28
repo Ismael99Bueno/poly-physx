@@ -26,7 +26,7 @@ namespace ppx
             static_assert(std::is_convertible<T *, constraint_interface2D *>::value, "Constraint must inherit from constraint2D!");
             const auto ctr = std::make_shared<T>(std::forward<Args>(args)...);
             m_constraints.push_back(ctr);
-            m_callbacks->constraint_addition(ctr);
+            m_callbacks->on_constraint_addition(ctr);
             return ctr;
         }
         bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);

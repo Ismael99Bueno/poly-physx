@@ -18,7 +18,7 @@ namespace ppx
         for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
             if (*it == ctr)
             {
-                m_callbacks->constraint_removal(*it);
+                m_callbacks->on_constraint_removal(*it);
                 m_constraints.erase(it);
                 return true;
             }
@@ -27,7 +27,7 @@ namespace ppx
     void compeller2D::clear_constraints()
     {
         for (const auto &ctr : m_constraints)
-            m_callbacks->constraint_removal(ctr);
+            m_callbacks->on_constraint_removal(ctr);
         m_constraints.clear();
     }
 
@@ -36,7 +36,7 @@ namespace ppx
         for (auto it = m_constraints.begin(); it != m_constraints.end();)
             if (!((*it)->try_validate()))
             {
-                m_callbacks->constraint_removal(*it);
+                m_callbacks->on_constraint_removal(*it);
                 it = m_constraints.erase(it);
             }
             else

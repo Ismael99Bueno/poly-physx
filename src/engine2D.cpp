@@ -8,8 +8,8 @@ namespace ppx
 {
     engine2D::engine2D(const rk::butcher_tableau &table,
                        const std::size_t allocations) : m_collider(engine_key(), &m_entities, 2 * allocations),
-                                                        m_compeller(engine_key(), &m_entities, allocations, &m_callbacks),
-                                                        m_integ(table), m_callbacks(engine_key())
+                                                        m_compeller(engine_key(), &m_entities, allocations, &m_events),
+                                                        m_integ(table), m_events(engine_key())
     {
         m_entities.reserve(allocations);
         m_integ.state().reserve(6 * allocations);
@@ -101,7 +101,7 @@ namespace ppx
         for (auto it = m_springs.begin(); it != m_springs.end();)
             if (!it->try_validate())
             {
-                m_callbacks.spring_removal(*it);
+                m_events.on_spring_removal(*it);
                 it = m_springs.erase(it);
             }
             else
@@ -189,11 +189,11 @@ namespace ppx
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
             DBG_ASSERT(m_entities[i].m_id != e.m_id, "Added entity has the same id as entity with index %zu.\n", i)
 #endif
-        m_callbacks.entity_addition(e_ptr);
+        m_events.on_entity_addition(e_ptr);
         return e_ptr;
     }
 
-    bool engine2D::remove_entity(const std::size_t index)
+    bool engine2D::remove_entity(std::size_t index)
     {
         if (index >= m_entities.size())
         {
@@ -201,7 +201,7 @@ namespace ppx
             return false;
         }
 
-        m_callbacks.early_entity_removal(m_entities[index]);
+        m_events.on_early_entity_removal(m_entities[index]);
         rk::state &state = m_integ.state();
         if (index == m_entities.size() - 1)
             m_entities.pop_back();
@@ -219,7 +219,7 @@ namespace ppx
 
         validate();
         m_collider.update_quad_tree();
-        m_callbacks.late_entity_removal(index);
+        m_events.on_late_entity_removal(std::move(index)); // It just made me do this...
         return true;
     }
 
@@ -252,7 +252,7 @@ namespace ppx
             DBG_LOG("Array index out of bounds. Aborting... - index: %zu, size: %zu\n", index, m_springs.size())
             return false;
         }
-        m_callbacks.spring_removal(m_springs[index]);
+        m_events.on_spring_removal(m_springs[index]);
         m_springs.erase(m_springs.begin() + (long)index);
         return true;
     }
@@ -567,8 +567,7 @@ namespace ppx
 
     const compeller2D &engine2D::compeller() const { return m_compeller; }
 
-    const engine_events &engine2D::events() const { return m_callbacks; }
-    engine_events &engine2D::events() { return m_callbacks; }
+    engine_events &engine2D::events() { return m_events; }
 
     float engine2D::elapsed() const { return m_elapsed; }
 }

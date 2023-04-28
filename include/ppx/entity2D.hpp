@@ -109,7 +109,7 @@ namespace ppx
         rk::state *m_state = nullptr;
         glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
         std::size_t m_index = 0, m_id = 0;
-        entity_events m_callbacks;
+        entity_events m_events;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
         bool m_kinematic;
 
