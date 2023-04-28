@@ -18,13 +18,6 @@ namespace ppx
         friend class collider2D;
         friend class quad_tree2D;
     };
-    class entity_key final
-    {
-        entity_key() = default;
-        entity_key(const entity_key &) = delete;
-        entity_key &operator=(const entity_key &) = delete;
-        friend class entity2D;
-    };
 }
 
 #endif

@@ -61,8 +61,6 @@ namespace ppx
 
         std::tuple<glm::vec2, float, float> without_joints_force() const;
         std::tuple<glm::vec2, float, float> with_joints_force() const;
-
-        // Cant delete copy ctr-assignment bc engine owns a std vector of this literal type
     };
 }
 

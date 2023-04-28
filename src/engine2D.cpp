@@ -165,7 +165,7 @@ namespace ppx
         {
             e.m_added_force = glm::vec2(0.f);
             e.m_added_torque = 0.f;
-            e.events().reset(engine_key());
+            e.events().reset();
         }
     }
 

@@ -37,11 +37,16 @@ namespace ppx
                 sub(std::forward<Ts>(args)...);
         }
 
+        const std::vector<subscription> &subscriptions() const { return m_subscriptions; }
+
     private:
         std::vector<subscription> m_subscriptions;
 
-        event(const event &) = delete;
-        event &operator=(const event &) = delete;
+        event(const event &) = default;
+        event &operator=(const event &) = default;
+
+        friend class engine_events;
+        friend class entity_events;
     };
 }
 

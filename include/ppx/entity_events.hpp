@@ -1,7 +1,7 @@
 #ifndef ENTITY_EVENTS_HPP
 #define ENTITY_EVENTS_HPP
 
-#include "ppx/pass_key.hpp"
+#include "ppx/event.hpp"
 #include <vector>
 #include <functional>
 #include <unordered_set>
@@ -13,37 +13,24 @@ namespace ppx
     class entity_events final
     {
     public:
-        entity_events(entity_key, std::size_t allocations = 15);
-
-    private:
-        using enter_stay_cb = std::function<void(const collision2D &)>;
-        using exit_cb = std::function<void(const entity2D_ptr &)>;
-
-    public:
-        void on_collision_enter(const enter_stay_cb &on_enter);
-        void on_collision_stay(const enter_stay_cb &on_stay);
-        void on_collision_exit(const exit_cb &on_exit);
-
         void try_enter_or_stay(const collision2D &c) const;
         void try_exit(const entity2D_ptr &incoming) const;
-        void reset(engine_key);
+
+        event<const collision2D &> on_collision_enter, on_collision_stay;
+        event<const entity2D_ptr &> on_collision_exit;
 
     private:
-        std::vector<enter_stay_cb> m_on_enter, m_on_stay;
-        std::vector<exit_cb> m_on_exit;
         mutable bool m_processed = false;
         mutable std::unordered_set<std::size_t> m_collided_ids;
 
-        void on_enter(const collision2D &c) const;
-        void on_stay(const collision2D &c) const;
-        void on_exit(const entity2D_ptr &incoming) const;
+        void reset();
 
-        template <typename T, typename U>
-        static void call(const std::vector<T> &cbs, const U &c)
-        {
-            for (const T &cb : cbs)
-                cb(c);
-        }
+        entity_events(std::size_t allocations = 15);
+        entity_events(const entity_events &) = default;
+        entity_events &operator=(const entity_events &) = default;
+
+        friend class entity2D;
+        friend class engine2D;
     };
 }
 
