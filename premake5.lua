@@ -3,7 +3,10 @@ project "poly-physx"
    cppdialect "C++17"
    filter "system:macosx"
       buildoptions {"-Wall", "-Wextra", "-Wpedantic", "-Wconversion", "-Wno-unused-parameter"}
-   filter{}
+      defines "PPX_MACOS"
+   filter "system:windows"
+      defines "PPX_WINDOWS"
+   filter {}
    
    staticruntime "off"
    kind "StaticLib"
