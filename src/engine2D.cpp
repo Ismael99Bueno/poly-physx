@@ -224,13 +224,8 @@ namespace ppx
     }
 
     bool engine2D::remove_entity(const entity2D &e) { return remove_entity(e.index()); }
-
-    void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.push_back(force); }
-    void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.push_back(inter); }
-
     bool engine2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr) { return m_compeller.remove_constraint(ctr); }
-
-    bool engine2D::remove_force(const std::shared_ptr<force2D> &force)
+    bool engine2D::remove_force(const std::shared_ptr<const force2D> &force)
     {
         for (auto it = m_forces.begin(); it != m_forces.end(); ++it)
             if (*it == force)
@@ -240,7 +235,7 @@ namespace ppx
             }
         return false;
     }
-    bool engine2D::remove_interaction(const std::shared_ptr<interaction2D> &inter)
+    bool engine2D::remove_interaction(const std::shared_ptr<const interaction2D> &inter)
     {
         for (auto it = m_interactions.begin(); it != m_interactions.end(); ++it)
             if (*it == inter)

@@ -35,8 +35,24 @@ namespace ppx
         bool remove_entity(std::size_t index);
         bool remove_entity(const entity2D &e);
 
-        void add_force(const std::shared_ptr<force2D> &force);
-        void add_interaction(const std::shared_ptr<interaction2D> &inter);
+        template <typename T, class... Args>
+        std::shared_ptr<T> add_force(Args &&...args)
+        {
+            static_assert(std::is_convertible<T *, force2D *>::value, "Force must inherit from force2D!");
+            const auto force = std::make_shared<T>(std::forward<Args>(args)...);
+            m_forces.push_back(force);
+            // CALL EVENT
+            return force;
+        }
+        template <typename T, class... Args>
+        std::shared_ptr<T> add_interaction(Args &&...args)
+        {
+            static_assert(std::is_convertible<T *, interaction2D *>::value, "Force must inherit from interaction2D!");
+            const auto inter = std::make_shared<T>(std::forward<Args>(args)...);
+            m_interactions.push_back(inter);
+            // CALL EVENT
+            return inter;
+        }
 
         template <class... Args>
         spring2D &add_spring(Args &&...args)
@@ -50,8 +66,8 @@ namespace ppx
         void add_constraint(Args &&...args) { m_compeller.add_constraint<T>(std::forward<Args>(args)...); }
         bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
 
-        bool remove_force(const std::shared_ptr<force2D> &force);
-        bool remove_interaction(const std::shared_ptr<interaction2D> &inter);
+        bool remove_force(const std::shared_ptr<const force2D> &force);
+        bool remove_interaction(const std::shared_ptr<const interaction2D> &inter);
         bool remove_spring(std::size_t index);
         bool remove_spring(const spring2D &sp);
 

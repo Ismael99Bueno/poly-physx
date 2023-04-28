@@ -8,7 +8,6 @@
 #include <unordered_set>
 #include <glm/geometric.hpp>
 #include <glm/gtx/norm.hpp>
-#include <signal.h>
 #ifdef WINDOWS
 #include <execution>
 #endif
