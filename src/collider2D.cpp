@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <glm/geometric.hpp>
 #include <glm/gtx/norm.hpp>
+#include <signal.h>
 #ifdef WINDOWS
 #include <execution>
 #endif
@@ -130,6 +131,18 @@ namespace ppx
     {
         if (e1 == e2 || (!e1.kinematic() && !e2.kinematic()))
             return false;
+
+        const auto *c1 = e1.shape_if<geo::circle>(),
+                   *c2 = e2.shape_if<geo::circle>();
+        if (c1 && c2)
+        {
+            if (!geo::intersect(*c1, *c2))
+                return false;
+            const glm::vec2 mtv = geo::mtv(*c1, *c2);
+            const auto &[contact1, contact2] = geo::contact_points(*c1, *c2);
+            *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv};
+            return true;
+        }
 
         const geo::shape2D &sh1 = e1.shape(),
                            &sh2 = e2.shape();

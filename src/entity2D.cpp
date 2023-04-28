@@ -164,6 +164,7 @@ namespace ppx
         shape().write(out);
         out.write("vx", m_vel.x);
         out.write("vy", m_vel.y);
+        out.write("shape_type", type());
     }
     void entity2D::read(ini::input &in)
     {
@@ -172,8 +173,20 @@ namespace ppx
         m_kinematic = (bool)in.readi16("kinematic");
         m_angvel = in.readf32("angvel");
         m_added_torque = in.readf32("added_torque");
+        shape_type sh_type = (shape_type)in.readi32("shape_type");
+        if (sh_type == POLYGON)
+        {
+            geo::polygon poly;
+            poly.read(in);
+            m_shape = poly;
+        }
+        else
+        {
+            geo::circle c;
+            c.read(in);
+            m_shape = c;
+        }
 
-        get_shape().read(in);
         m_vel = {in.readf32("vx"), in.readf32("vy")};
 
         dispatch();
