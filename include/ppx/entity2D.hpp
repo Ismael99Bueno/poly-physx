@@ -105,17 +105,10 @@ namespace ppx
         void charge(float charge);
 
     private:
-        struct non_copyable // So that the user can assign to references to entities in the vector without messing up sensitive data
-        {
-            non_copyable() = default;
-            std::size_t index = 0, id = 0;
-            non_copyable(const non_copyable &) {}
-            non_copyable &operator=(const non_copyable &) { return *this; }
-        };
         std::variant<geo::polygon, geo::circle> m_shape;
         rk::state *m_state = nullptr;
         glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
-        non_copyable m_non_copyable;
+        std::size_t m_index = 0, m_id = 0;
         entity_events m_events;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
         bool m_kinematic;

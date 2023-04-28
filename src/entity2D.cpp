@@ -55,7 +55,7 @@ namespace ppx
 
     void entity2D::retrieve(const std::vector<float> &vars_buffer)
     {
-        const std::size_t idx = 6 * m_non_copyable.index;
+        const std::size_t idx = 6 * m_index;
         geo::shape2D &sh = get_shape();
 
         sh.pos({vars_buffer[idx + 0], vars_buffer[idx + 1]});
@@ -77,7 +77,7 @@ namespace ppx
         const float angpos = sh.rotation();
         rk::state &st = *m_state;
 
-        const std::size_t idx = 6 * m_non_copyable.index;
+        const std::size_t idx = 6 * m_index;
         st[idx + 0] = pos.x;
         st[idx + 1] = pos.y;
         st[idx + 2] = angpos;
@@ -138,8 +138,8 @@ namespace ppx
 
     entity2D::shape_type entity2D::type() const { return m_shape.index() == 0 ? POLYGON : CIRCLE; }
 
-    std::size_t entity2D::index() const { return m_non_copyable.index; }
-    std::size_t entity2D::id() const { return m_non_copyable.id; }
+    std::size_t entity2D::index() const { return m_index; }
+    std::size_t entity2D::id() const { return m_id; }
 
     float entity2D::inertia() const { return shape().inertia() * m_mass; }
 
@@ -156,7 +156,7 @@ namespace ppx
         out.write("kinematic", m_kinematic);
         out.write("angvel", m_angvel);
         out.write("added_torque", m_added_torque);
-        out.write("index", m_non_copyable.index);
+        out.write("index", m_index);
         shape().write(out);
         out.write("vx", m_vel.x);
         out.write("vy", m_vel.y);
@@ -186,7 +186,7 @@ namespace ppx
         m_vel = {in.readf32("vx"), in.readf32("vy")};
 
         dispatch();
-        DBG_ASSERT((size_t)in.readui64("index") == m_non_copyable.index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readui64("index"), m_non_copyable.index)
+        DBG_ASSERT((size_t)in.readui64("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readui64("index"), m_index)
     }
 
     const entity_events &entity2D::events() const { return m_events; }
