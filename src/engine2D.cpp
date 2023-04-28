@@ -173,9 +173,9 @@ namespace ppx
     {
         static std::size_t id = 0;
         rk::state &state = m_integ.state();
-        e.m_index = m_entities.size() - 1;
+        e.m_non_copyable.index = m_entities.size() - 1;
         e.m_state = &state;
-        e.m_id = id++;
+        e.m_non_copyable.id = id++;
 
         const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
         const glm::vec2 &pos = e.pos(), &vel = e.vel();
@@ -184,10 +184,10 @@ namespace ppx
         m_collider.add_entity_intervals(e_ptr);
         e.retrieve();
 
-        DBG_LOG("Added entity with index %zu and id %zu.\n", e.m_index, e.m_id)
+        DBG_LOG("Added entity with index %zu and id %zu.\n", e.m_non_copyable.index, e.m_non_copyable.id)
 #ifdef DEBUG
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
-            DBG_ASSERT(m_entities[i].m_id != e.m_id, "Added entity has the same id as entity with index %zu.\n", i)
+            DBG_ASSERT(m_entities[i].m_non_copyable.id != e.m_non_copyable.id, "Added entity has the same id as entity with index %zu.\n", i)
 #endif
         m_events.on_entity_addition(e_ptr);
         return e_ptr;
@@ -209,7 +209,7 @@ namespace ppx
         {
             m_entities[index] = m_entities.back();
             m_entities.pop_back();
-            m_entities[index].m_index = index;
+            m_entities[index].m_non_copyable.index = index;
             m_entities[index].m_state = &state;
         }
 
