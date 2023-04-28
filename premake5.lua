@@ -8,7 +8,7 @@ project "poly-physx"
       defines "PPX_WINDOWS"
    filter {}
 
-   pchheader "include/ppx/pch.hpp"
+   pchheader "ppx/pch.hpp"
    pchsource "src/pch.cpp"
    
    staticruntime "off"
