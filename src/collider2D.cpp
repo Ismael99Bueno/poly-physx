@@ -154,7 +154,9 @@ namespace ppx
         if (!geo::gjk(sh1, sh2, simplex))
             return false;
 
-        const glm::vec2 mtv = geo::epa(sh1, sh2, simplex);
+        glm::vec2 mtv;
+        if (!geo::epa(sh1, sh2, simplex, mtv))
+            return false;
         const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv);
         *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv};
 
