@@ -1,8 +1,8 @@
+#include "ppx/pch.hpp"
 #include "ppx/entity2D.hpp"
 #include "ppx/force2D.hpp"
 #include "ppx/interaction2D.hpp"
 #include "debug/debug.hpp"
-#include <glm/gtx/norm.hpp>
 
 namespace ppx
 {

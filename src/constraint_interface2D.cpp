@@ -1,5 +1,5 @@
+#include "ppx/pch.hpp"
 #include "ppx/constraint_interface2D.hpp"
-#include <algorithm>
 
 #define TOLERANCE 1.e-3f
 

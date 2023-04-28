@@ -1,13 +1,9 @@
+#include "ppx/pch.hpp"
 #include "ppx/collider2D.hpp"
 #include "debug/debug.hpp"
 #include "perf/perf.hpp"
 #include "geo/intersection.hpp"
-#include <limits>
-#include <cmath>
-#include <algorithm>
-#include <unordered_set>
-#include <glm/geometric.hpp>
-#include <glm/gtx/norm.hpp>
+
 #ifdef PPX_WINDOWS
 #include <execution>
 #endif

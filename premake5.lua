@@ -7,6 +7,9 @@ project "poly-physx"
    filter "system:windows"
       defines "PPX_WINDOWS"
    filter {}
+
+   pchheader "include/ppx/pch.hpp"
+   pchsource "src/pch.cpp"
    
    staticruntime "off"
    kind "StaticLib"

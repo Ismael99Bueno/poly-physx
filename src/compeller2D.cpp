@@ -1,3 +1,4 @@
+#include "ppx/pch.hpp"
 #include "ppx/compeller2D.hpp"
 #include "perf/perf.hpp"
 #include "debug/debug.hpp"

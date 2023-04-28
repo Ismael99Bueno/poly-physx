@@ -1,3 +1,4 @@
+#include "ppx/pch.hpp"
 #include "ppx/quad_tree2D.hpp"
 #include "debug/debug.hpp"
 #include "perf/perf.hpp"

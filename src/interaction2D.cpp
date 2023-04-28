@@ -1,3 +1,4 @@
+#include "ppx/pch.hpp"
 #include "ppx/interaction2D.hpp"
 
 namespace ppx
