@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <type_traits>
 
 namespace ppx
 {
@@ -19,8 +20,16 @@ namespace ppx
                     std::size_t allocations,
                     engine_callbacks *cbs);
 
-        void add_constraint(const std::shared_ptr<constraint_interface2D> &c);
-        bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &c);
+        template <typename T, class... Args>
+        std::shared_ptr<T> add_constraint(Args &&...args)
+        {
+            static_assert(std::is_convertible<T *, constraint_interface2D *>::value, "Constraint must inherit from constraint2D!");
+            const auto ctr = std::make_shared<T>(std::forward<Args>(args)...);
+            m_constraints.emplace_back(ctr);
+            m_callbacks->constraint_addition(ctr);
+            return ctr;
+        }
+        bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
         void clear_constraints();
 
         void validate();

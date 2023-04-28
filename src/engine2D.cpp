@@ -228,7 +228,6 @@ namespace ppx
     void engine2D::add_force(const std::shared_ptr<force2D> &force) { m_forces.push_back(force); }
     void engine2D::add_interaction(const std::shared_ptr<interaction2D> &inter) { m_interactions.push_back(inter); }
 
-    void engine2D::add_constraint(const std::shared_ptr<constraint_interface2D> &ctr) { m_compeller.add_constraint(ctr); }
     bool engine2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr) { return m_compeller.remove_constraint(ctr); }
 
     bool engine2D::remove_force(const std::shared_ptr<force2D> &force)
@@ -398,16 +397,10 @@ namespace ppx
             {
                 const glm::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
                                 joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
-                const auto rb = std::make_shared<rigid_bar2D>(e1, e2, joint1, joint2);
-                rb->read(in);
-                m_compeller.add_constraint(rb);
+                m_compeller.add_constraint<rigid_bar2D>(e1, e2, joint1, joint2)->read(in);
             }
             else
-            {
-                const auto rb = std::make_shared<rigid_bar2D>(e1, e2);
-                rb->read(in);
-                m_compeller.add_constraint(rb);
-            }
+                m_compeller.add_constraint<rigid_bar2D>(e1, e2)->read(in);
             in.end_section();
         }
     }

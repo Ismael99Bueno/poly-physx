@@ -46,7 +46,8 @@ namespace ppx
             return sp;
         }
 
-        void add_constraint(const std::shared_ptr<constraint_interface2D> &ctr);
+        template <typename T, class... Args>
+        void add_constraint(Args &&...args) { m_compeller.add_constraint<T>(std::forward<Args>(args)...); }
         bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
 
         bool remove_force(const std::shared_ptr<force2D> &force);
