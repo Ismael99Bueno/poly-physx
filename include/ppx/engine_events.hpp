@@ -1,5 +1,5 @@
-#ifndef ENGINE_CALLBACKS_HPP
-#define ENGINE_CALLBACKS_HPP
+#ifndef ENGINE_EVENTS_HPP
+#define ENGINE_EVENTS_HPP
 
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraint_interface2D.hpp"
@@ -9,10 +9,10 @@
 
 namespace ppx
 {
-    class engine_callbacks final
+    class engine_events final
     {
     public:
-        engine_callbacks(engine_key);
+        engine_events(engine_key);
 
     private:
         using add_entity = std::function<void(const entity2D_ptr &)>;
@@ -52,8 +52,8 @@ namespace ppx
         std::vector<remove_spring> m_on_spring_removal;
         std::vector<constraint_cb> m_on_constraint_addition, m_on_constraint_removal;
 
-        engine_callbacks(const engine_callbacks &) = delete;
-        engine_callbacks &operator=(const engine_callbacks &) = delete;
+        engine_events(const engine_events &) = delete;
+        engine_events &operator=(const engine_events &) = delete;
     };
 
 }

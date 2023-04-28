@@ -164,13 +164,13 @@ namespace ppx
 
     void collider2D::try_enter_or_stay_callback(const entity2D &e1, const entity2D &e2, const collision2D &c) const
     {
-        e1.callbacks().try_enter_or_stay(c);
-        e2.callbacks().try_enter_or_stay({c.incoming, c.other, c.touch2, c.touch1, -c.normal});
+        e1.events().try_enter_or_stay(c);
+        e2.events().try_enter_or_stay({c.incoming, c.other, c.touch2, c.touch1, -c.normal});
     }
     void collider2D::try_exit_callback(const entity2D &e1, const entity2D &e2) const
     {
-        e1.callbacks().try_exit({m_entities, e2.index()});
-        e2.callbacks().try_exit({m_entities, e1.index()});
+        e1.events().try_exit({m_entities, e2.index()});
+        e2.events().try_exit({m_entities, e1.index()});
     }
 
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const

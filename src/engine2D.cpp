@@ -165,7 +165,7 @@ namespace ppx
         {
             e.m_added_force = glm::vec2(0.f);
             e.m_added_torque = 0.f;
-            e.callbacks().reset(engine_key());
+            e.events().reset(engine_key());
         }
     }
 
@@ -567,8 +567,8 @@ namespace ppx
 
     const compeller2D &engine2D::compeller() const { return m_compeller; }
 
-    const engine_callbacks &engine2D::callbacks() const { return m_callbacks; }
-    engine_callbacks &engine2D::callbacks() { return m_callbacks; }
+    const engine_events &engine2D::events() const { return m_callbacks; }
+    engine_events &engine2D::events() { return m_callbacks; }
 
     float engine2D::elapsed() const { return m_elapsed; }
 }

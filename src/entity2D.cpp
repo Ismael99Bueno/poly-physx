@@ -193,8 +193,8 @@ namespace ppx
         DBG_ASSERT((size_t)in.readui64("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readui64("index"), m_index)
     }
 
-    const entity_callbacks &entity2D::callbacks() const { return m_callbacks; }
-    entity_callbacks &entity2D::callbacks() { return m_callbacks; }
+    const entity_events &entity2D::events() const { return m_callbacks; }
+    entity_events &entity2D::events() { return m_callbacks; }
 
     const glm::vec2 &entity2D::pos() const { return shape().centroid(); }
     const glm::vec2 &entity2D::vel() const { return m_vel; }

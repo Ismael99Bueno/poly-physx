@@ -1,5 +1,5 @@
-#ifndef ENTITY_CALLBACKS_HPP
-#define ENTITY_CALLBACKS_HPP
+#ifndef ENTITY_EVENTS_HPP
+#define ENTITY_EVENTS_HPP
 
 #include "ppx/pass_key.hpp"
 #include <vector>
@@ -10,10 +10,10 @@ namespace ppx
 {
     struct collision2D;
     class entity2D_ptr;
-    class entity_callbacks final
+    class entity_events final
     {
     public:
-        entity_callbacks(entity_key, std::size_t allocations = 15);
+        entity_events(entity_key, std::size_t allocations = 15);
 
     private:
         using enter_stay_cb = std::function<void(const collision2D &)>;

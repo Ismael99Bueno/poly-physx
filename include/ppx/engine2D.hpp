@@ -10,7 +10,7 @@
 #include "ppx/spring2D.hpp"
 #include "utils/container_view.hpp"
 #include "ppx/rigid_bar2D.hpp"
-#include "ppx/engine_callbacks.hpp"
+#include "ppx/engine_events.hpp"
 
 namespace ppx
 {
@@ -129,8 +129,8 @@ namespace ppx
 
         const compeller2D &compeller() const;
 
-        const engine_callbacks &callbacks() const;
-        engine_callbacks &callbacks();
+        const engine_events &events() const;
+        engine_events &events();
 
         float elapsed() const;
 
@@ -143,7 +143,7 @@ namespace ppx
         std::vector<spring2D> m_springs;
         std::tuple<float, std::vector<float>, std::vector<entity2D>> m_checkpoint;
         rk::integrator m_integ;
-        engine_callbacks m_callbacks;
+        engine_events m_callbacks;
 
         float m_elapsed = 0.f;
 

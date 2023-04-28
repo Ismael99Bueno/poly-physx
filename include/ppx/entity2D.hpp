@@ -6,7 +6,7 @@
 #include "geo/circle.hpp"
 #include "ini/saveable.hpp"
 #include "rk/state.hpp"
-#include "ppx/entity_callbacks.hpp"
+#include "ppx/entity_events.hpp"
 #include <variant>
 
 namespace ppx
@@ -86,8 +86,8 @@ namespace ppx
         void write(ini::output &out) const override;
         void read(ini::input &in) override;
 
-        const entity_callbacks &callbacks() const;
-        entity_callbacks &callbacks();
+        const entity_events &events() const;
+        entity_events &events();
 
         const glm::vec2 &pos() const;
         const glm::vec2 &vel() const;
@@ -109,7 +109,7 @@ namespace ppx
         rk::state *m_state = nullptr;
         glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
         std::size_t m_index = 0, m_id = 0;
-        entity_callbacks m_callbacks;
+        entity_events m_callbacks;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
         bool m_kinematic;
 
