@@ -63,6 +63,7 @@ namespace ppx
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
         std::vector<float> cmatrix(rows * cols, 0.f);
+
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t ct_idx = 0; ct_idx < m_constraints[i]->size(); ct_idx++)
             {
@@ -93,6 +94,8 @@ namespace ppx
                 const std::size_t id = i * rows + j;
                 for (std::size_t k = 0; k < cols; k++)
                 {
+                    if (inv_masses[k] == 0.f)
+                        continue;
                     const std::size_t id1 = i * cols + k, id2 = j * cols + k;
                     A[id] += jcb[id1] * jcb[id2] * inv_masses[k];
                 }
@@ -178,13 +181,12 @@ namespace ppx
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
         for (std::size_t i = 0; i < m_entities->size(); i++)
-            if ((*m_entities)[i].kinematic())
-                for (std::size_t j = 0; j < 3; j++)
-                    for (std::size_t k = 0; k < rows; k++)
-                    {
-                        const std::size_t id1 = 6 * i + j + 3,
-                                          id2 = k * cols + 3 * i + j;
-                        stchanges[id1] += jcb[id2] * lambda[k];
-                    }
+            for (std::size_t j = 0; j < 3; j++)
+                for (std::size_t k = 0; k < rows; k++)
+                {
+                    const std::size_t id1 = 6 * i + j + 3,
+                                      id2 = k * cols + 3 * i + j;
+                    stchanges[id1] += jcb[id2] * lambda[k];
+                }
     }
 }

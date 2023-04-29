@@ -152,8 +152,8 @@ namespace ppx
         inv_masses.reserve(3 * m_entities.size());
         for (std::size_t i = 0; i < m_entities.size(); i++)
         {
-            const float inv_mass = 1.f / m_entities[i].mass(),
-                        inv_inertia = 1.f / m_entities[i].inertia();
+            const float inv_mass = m_entities[i].kinematic() ? (1.f / m_entities[i].mass()) : 0.f,
+                        inv_inertia = m_entities[i].kinematic() ? (1.f / m_entities[i].inertia()) : 0.f;
             inv_masses.insert(inv_masses.end(), {inv_mass, inv_mass, inv_inertia});
         }
         return inv_masses;
