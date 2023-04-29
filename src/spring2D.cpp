@@ -99,7 +99,8 @@ namespace ppx
     {
         const glm::vec2 p1 = m_e1->pos() + joint1(),
                         p2 = m_e2->pos() + joint2();
-        return 0.5f * m_stiffness * glm::distance2(p1, p2);
+        const float dist = glm::distance(p1, p2) - m_length;
+        return 0.5f * m_stiffness * dist * dist;
     }
     float spring2D::energy() const { return kinetic_energy() + potential_energy(); }
 
