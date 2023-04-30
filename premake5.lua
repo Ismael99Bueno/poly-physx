@@ -1,19 +1,19 @@
 project "poly-physx"
 language "C++"
 cppdialect "C++17"
+
 filter "system:macosx"
+   buildoptions {
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Wconversion",
+      "-Wno-unused-parameter"
+   }
+   defines "PPX_MACOS"
 
-buildoptions {
-   "-Wall",
-   "-Wextra",
-   "-Wpedantic",
-   "-Wconversion",
-   "-Wno-unused-parameter"
-}
-
-defines "PPX_MACOS"
 filter "system:windows"
-defines "PPX_WINDOWS"
+   defines "PPX_WINDOWS"
 filter {}
 
 pchheader "ppx/pch.hpp"
@@ -32,7 +32,13 @@ files {
 }
 
 includedirs {
-   "../**/include",
-   "../vendor/glm"
+   "include",
+   "%{wks.location}/shapes-2D/include",
+   "%{wks.location}/rk-integrator/include",
+   "%{wks.location}/debug-tools/include",
+   "%{wks.location}/profile-tools/include",
+   "%{wks.location}/ini-parser/include",
+   "%{wks.location}/container-view/include",
+   "%{wks.location}/vendor/glm"
 }
 --, "/opt/homebrew/Cellar/libomp/15.0.6/include"}
