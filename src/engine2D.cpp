@@ -111,7 +111,7 @@ namespace ppx
     void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        for (const std::shared_ptr<const force2D> f : m_forces)
+        for (const std::shared_ptr<force2D> &f : m_forces)
             for (const const_entity2D_ptr &e : f->entities())
             {
                 if (!e->kinematic())
@@ -130,7 +130,7 @@ namespace ppx
             if (s.e2()->kinematic())
                 load_force(stchanges, -force, t2, index2);
         }
-        for (const std::shared_ptr<const interaction2D> i : m_interactions)
+        for (const std::shared_ptr<interaction2D> &i : m_interactions)
             for (const const_entity2D_ptr &e1 : i->entities())
             {
                 if (!e1->kinematic())
