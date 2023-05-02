@@ -37,7 +37,7 @@ includedirs {
    "%{wks.location}/rk-integrator/include",
    "%{wks.location}/debug-tools/include",
    "%{wks.location}/profile-tools/include",
-   "%{wks.location}/ini-parser/include",
+   "%{wks.location}/vendor/yaml-cpp/include",
    "%{wks.location}/container-view/include",
    "%{wks.location}/vendor/glm"
 }
