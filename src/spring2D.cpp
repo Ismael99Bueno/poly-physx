@@ -72,7 +72,7 @@ namespace ppx
     void spring2D::dampening(const float dampening) { m_dampening = dampening; }
     void spring2D::length(const float length) { m_length = length; }
 
-    void spring2D::write(ini::output &out) const
+    void spring2D::serialize(ini::serializer &out) const
     {
         out.write("e1", m_e1->index());
         out.write("e2", m_e2->index());
@@ -87,7 +87,7 @@ namespace ppx
         out.write("has_joints", m_has_joints);
     }
 
-    void spring2D::read(ini::input &in)
+    void spring2D::deserialize(ini::deserializer &in)
     {
         m_stiffness = in.readf32("stiffness");
         m_dampening = in.readf32("dampening");

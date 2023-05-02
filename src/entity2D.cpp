@@ -149,7 +149,7 @@ namespace ppx
     void entity2D::translate(const glm::vec2 &dpos) { get_shape().translate(dpos); }
     void entity2D::rotate(const float dangle) { get_shape().rotate(dangle); }
 
-    void entity2D::write(ini::output &out) const
+    void entity2D::serialize(ini::serializer &out) const
     {
         out.write("mass", m_mass);
         out.write("charge", m_charge);
@@ -157,12 +157,12 @@ namespace ppx
         out.write("angvel", m_angvel);
         out.write("added_torque", m_added_torque);
         out.write("index", m_index);
-        shape().write(out);
+        shape().serialize(out);
         out.write("vx", m_vel.x);
         out.write("vy", m_vel.y);
         out.write("shape_type", type());
     }
-    void entity2D::read(ini::input &in)
+    void entity2D::deserialize(ini::deserializer &in)
     {
         m_mass = in.readf32("mass");
         m_charge = in.readf32("charge");
@@ -173,13 +173,13 @@ namespace ppx
         if (sh_type == POLYGON)
         {
             geo::polygon poly;
-            poly.read(in);
+            poly.deserialize(in);
             m_shape = poly;
         }
         else
         {
             geo::circle c;
-            c.read(in);
+            c.deserialize(in);
             m_shape = c;
         }
 

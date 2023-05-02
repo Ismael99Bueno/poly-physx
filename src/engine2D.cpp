@@ -282,21 +282,21 @@ namespace ppx
         clear_entities();
     }
 
-    void engine2D::write(ini::output &out) const
+    void engine2D::serialize(ini::serializer &out) const
     {
         out.write("elapsed", m_elapsed);
         out.begin_section("tableau");
-        m_integ.tableau().write(out);
+        m_integ.tableau().serialize(out);
         out.end_section();
         out.begin_section("collider");
-        m_collider.write(out);
+        m_collider.serialize(out);
         out.end_section();
 
         std::string section = "entity";
         for (const entity2D &e : m_entities)
         {
             out.begin_section(section + std::to_string(e.index()));
-            e.write(out);
+            e.serialize(out);
             out.end_section();
         }
 
@@ -305,7 +305,7 @@ namespace ppx
         for (const spring2D &sp : m_springs)
         {
             out.begin_section(section + std::to_string(index++));
-            sp.write(out);
+            sp.serialize(out);
             out.end_section();
         }
 
@@ -317,22 +317,22 @@ namespace ppx
             if (!rb)
                 continue;
             out.begin_section(section + std::to_string(index++));
-            rb->write(out);
+            rb->serialize(out);
             out.end_section();
         }
     }
 
-    void engine2D::read(ini::input &in)
+    void engine2D::deserialize(ini::deserializer &in)
     {
         clear_entities();
         m_elapsed = in.readf32("elapsed");
         in.begin_section("tableau");
         rk::butcher_tableau tb;
-        tb.read(in);
+        tb.deserialize(in);
         m_integ.tableau(tb);
         in.end_section();
         in.begin_section("collider");
-        m_collider.read(in);
+        m_collider.deserialize(in);
         in.end_section();
 
         std::string section = "entity";
@@ -345,7 +345,7 @@ namespace ppx
                 in.end_section();
                 break;
             }
-            add_entity()->read(in);
+            add_entity()->deserialize(in);
             in.end_section();
         }
 
@@ -367,10 +367,10 @@ namespace ppx
             {
                 const glm::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
                                 joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
-                add_spring(e1, e2, joint1, joint2).read(in);
+                add_spring(e1, e2, joint1, joint2).deserialize(in);
             }
             else
-                add_spring(e1, e2).read(in);
+                add_spring(e1, e2).deserialize(in);
             in.end_section();
         }
 
@@ -392,10 +392,10 @@ namespace ppx
             {
                 const glm::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
                                 joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
-                m_compeller.add_constraint<rigid_bar2D>(e1, e2, joint1, joint2)->read(in);
+                m_compeller.add_constraint<rigid_bar2D>(e1, e2, joint1, joint2)->deserialize(in);
             }
             else
-                m_compeller.add_constraint<rigid_bar2D>(e1, e2)->read(in);
+                m_compeller.add_constraint<rigid_bar2D>(e1, e2)->deserialize(in);
             in.end_section();
         }
     }

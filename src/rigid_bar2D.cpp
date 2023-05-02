@@ -113,7 +113,7 @@ namespace ppx
         return {-cgd.x, -cgd.y, cgda};
     }
 
-    void rigid_bar2D::write(ini::output &out) const
+    void rigid_bar2D::serialize(ini::serializer &out) const
     {
         out.write("e1", m_e1.index());
         out.write("e2", m_e2.index());
@@ -128,7 +128,7 @@ namespace ppx
         out.write("has_joints", m_has_joints);
     }
 
-    void rigid_bar2D::read(ini::input &in)
+    void rigid_bar2D::deserialize(ini::deserializer &in)
     {
         stiffness(in.readf32("stiffness"));
         dampening(in.readf32("dampening"));

@@ -4,14 +4,14 @@
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"
 #include "geo/circle.hpp"
-#include "ini/saveable.hpp"
+#include "ini/serializable.hpp"
 #include "rk/state.hpp"
 #include "ppx/entity_events.hpp"
 #include <variant>
 
 namespace ppx
 {
-    class entity2D : public ini::saveable
+    class entity2D : public ini::serializable
     {
     public:
         enum shape_type
@@ -83,8 +83,8 @@ namespace ppx
         void translate(const glm::vec2 &dpos);
         void rotate(float dangle);
 
-        void write(ini::output &out) const override;
-        void read(ini::input &in) override;
+        void serialize(ini::serializer &out) const override;
+        void deserialize(ini::deserializer &in) override;
 
         const entity_events &events() const;
         entity_events &events();

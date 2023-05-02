@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-    class rigid_bar2D : public constraint2D<2>, ini::saveable
+    class rigid_bar2D : public constraint2D<2>, ini::serializable
     {
     public:
         rigid_bar2D(const entity2D_ptr &e1,
@@ -25,8 +25,8 @@ namespace ppx
         float length() const;
         void length(float length);
 
-        void write(ini::output &out) const override;
-        void read(ini::input &in) override;
+        void serialize(ini::serializer &out) const override;
+        void deserialize(ini::deserializer &in) override;
 
         const entity2D_ptr &e1() const;
         const entity2D_ptr &e2() const;

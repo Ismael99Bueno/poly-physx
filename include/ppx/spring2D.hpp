@@ -6,7 +6,7 @@
 
 namespace ppx
 {
-    class spring2D : public ini::saveable
+    class spring2D : public ini::serializable
     {
     public:
         spring2D(const entity2D_ptr &e1,
@@ -34,8 +34,8 @@ namespace ppx
         void dampening(float dampening);
         void length(float length);
 
-        void write(ini::output &out) const override;
-        void read(ini::input &in) override;
+        void serialize(ini::serializer &out) const override;
+        void deserialize(ini::deserializer &in) override;
 
         float kinetic_energy() const;
         float potential_energy() const;

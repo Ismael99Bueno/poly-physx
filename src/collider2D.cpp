@@ -78,7 +78,7 @@ namespace ppx
                 ++it;
     }
 
-    void collider2D::write(ini::output &out) const
+    void collider2D::serialize(ini::serializer &out) const
     {
         out.write("stiffness", m_stiffness);
         out.write("dampening", m_dampening);
@@ -87,7 +87,7 @@ namespace ppx
         out.write("enabled", m_enabled);
     }
 
-    void collider2D::read(ini::input &in)
+    void collider2D::deserialize(ini::deserializer &in)
     {
         m_stiffness = in.readf32("stiffness");
         m_dampening = in.readf32("dampening");
