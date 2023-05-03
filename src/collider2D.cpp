@@ -78,25 +78,6 @@ namespace ppx
                 ++it;
     }
 
-    // void collider2D::serialize(ini::serializer &out) const
-    // {
-    //     out.write("stiffness", m_stiffness);
-    //     out.write("dampening", m_dampening);
-    //     out.write("qt_build_period", m_qt_build_period);
-    //     out.write("coldet_method", m_coldet_method);
-    //     out.write("enabled", m_enabled);
-    // }
-
-    // void collider2D::deserialize(ini::deserializer &in)
-    // {
-    //     m_stiffness = in.readf32("stiffness");
-    //     m_dampening = in.readf32("dampening");
-    //     m_qt_build_period = in.readui32("qt_build_period");
-    //     m_coldet_method = (coldet_method)in.readi32("coldet_method");
-    //     m_enabled = (bool)in.readi16("enabled");
-    //     rebuild_quad_tree();
-    // }
-
     float collider2D::stiffness() const { return m_stiffness; }
     float collider2D::dampening() const { return m_dampening; }
 
@@ -315,3 +296,32 @@ namespace ppx
     }
 #endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)
+    {
+        Node node;
+        node["stiffness"] = cld.stiffness();
+        node["dampening"] = cld.dampening();
+        node["qt_period"] = cld.quad_tree_build_period();
+        node["coldet"] = cld.coldet();
+        node["enabled"] = cld.enabled();
+        return node;
+    }
+    bool convert<ppx::collider2D>::decode(const Node &node, ppx::collider2D &cld)
+    {
+        if (!node.IsMap() || node.size() != 5)
+            return false;
+
+        cld.stiffness(node["stiffness"].as<float>());
+        cld.dampening(node["dampening"].as<float>());
+        cld.quad_tree_build_period(node["qt_period"].as<std::uint32_t>());
+        cld.coldet((ppx::collider2D::coldet_method)node["coldet"].as<int>());
+        cld.enabled(node["enabled"].as<bool>());
+
+        return true;
+    };
+}
+#endif

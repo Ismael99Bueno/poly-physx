@@ -65,4 +65,16 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const spring2D &sp);
 #endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    template <>
+    struct convert<ppx::spring2D>
+    {
+        static Node encode(const ppx::spring2D &sp);
+        static bool decode(const Node &node, ppx::spring2D &sp);
+    };
+}
+#endif
 #endif

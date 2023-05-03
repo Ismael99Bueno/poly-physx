@@ -133,3 +133,37 @@ namespace ppx
     }
 #endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    Node convert<ppx::spring2D>::encode(const ppx::spring2D &sp)
+    {
+        Node node;
+        node["id1"] = sp.e1().id();
+        node["id2"] = sp.e2().id();
+        node["index1"] = sp.e1().index();
+        node["index2"] = sp.e2().index();
+        if (sp.has_joints())
+        {
+            node["joint1"] = sp.joint1();
+            node["joint2"] = sp.joint2();
+        }
+        node["stiffness"] = sp.stiffness();
+        node["dampening"] = sp.dampening();
+        node["length"] = sp.length();
+        return node;
+    }
+    bool convert<ppx::spring2D>::decode(const Node &node, ppx::spring2D &sp)
+    {
+        if (!node.IsMap() || (node.size() != 7 && node.size() != 9))
+            return false;
+
+        sp.stiffness(node["stiffness"].as<float>());
+        sp.dampening(node["dampening"].as<float>());
+        sp.length(node["length"].as<float>());
+
+        return true;
+    };
+}
+#endif

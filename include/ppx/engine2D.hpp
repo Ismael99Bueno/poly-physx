@@ -63,7 +63,7 @@ namespace ppx
         }
 
         template <typename T, class... Args>
-        void add_constraint(Args &&...args) { m_compeller.add_constraint<T>(std::forward<Args>(args)...); }
+        std::shared_ptr<T> add_constraint(Args &&...args) { return m_compeller.add_constraint<T>(std::forward<Args>(args)...); }
         bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
 
         bool remove_force(const std::shared_ptr<const force2D> &force);
@@ -160,7 +160,27 @@ namespace ppx
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
         engine2D(const engine2D &) = delete;
         engine2D &operator=(const engine2D &) = delete;
+
+#ifdef HAS_YAML_CPP
+        friend YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &e);
+        friend struct YAML::convert<engine2D>;
+#endif
+    };
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng);
+#endif
+}
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    template <>
+    struct convert<ppx::engine2D>
+    {
+        static Node encode(const ppx::engine2D &eng);
+        static bool decode(const Node &node, ppx::engine2D &eng);
     };
 }
+#endif
 
 #endif

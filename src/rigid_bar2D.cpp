@@ -162,3 +162,37 @@ namespace ppx
     }
 #endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    Node convert<ppx::rigid_bar2D>::encode(const ppx::rigid_bar2D &rb)
+    {
+        Node node;
+        node["id1"] = rb.e1().id();
+        node["id2"] = rb.e2().id();
+        node["index1"] = rb.e1().index();
+        node["index2"] = rb.e2().index();
+        if (rb.has_joints())
+        {
+            node["joint1"] = rb.joint1();
+            node["joint2"] = rb.joint2();
+        }
+        node["stiffness"] = rb.stiffness();
+        node["dampening"] = rb.dampening();
+        node["length"] = rb.length();
+        return node;
+    }
+    bool convert<ppx::rigid_bar2D>::decode(const Node &node, ppx::rigid_bar2D &rb)
+    {
+        if (!node.IsMap() || (node.size() != 7 && node.size() != 9))
+            return false;
+
+        rb.stiffness(node["stiffness"].as<float>());
+        rb.dampening(node["dampening"].as<float>());
+        rb.length(node["length"].as<float>());
+
+        return true;
+    };
+}
+#endif

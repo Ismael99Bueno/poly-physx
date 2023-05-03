@@ -56,5 +56,15 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const rigid_bar2D &rb);
 #endif
 }
-
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    template <>
+    struct convert<ppx::rigid_bar2D>
+    {
+        static Node encode(const ppx::rigid_bar2D &rb);
+        static bool decode(const Node &node, ppx::rigid_bar2D &rb);
+    };
+}
+#endif
 #endif

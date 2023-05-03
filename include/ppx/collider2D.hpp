@@ -109,4 +109,16 @@ namespace ppx
 #endif
 }
 
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    template <>
+    struct convert<ppx::collider2D>
+    {
+        static Node encode(const ppx::collider2D &cld);
+        static bool decode(const Node &node, ppx::collider2D &cld);
+    };
+}
+#endif
+
 #endif

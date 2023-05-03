@@ -282,124 +282,6 @@ namespace ppx
         clear_entities();
     }
 
-    void engine2D::serialize(ini::serializer &out) const
-    {
-        out.write("elapsed", m_elapsed);
-        out.begin_section("tableau");
-        m_integ.tableau().serialize(out);
-        out.end_section();
-        out.begin_section("collider");
-        m_collider.serialize(out);
-        out.end_section();
-
-        std::string section = "entity";
-        for (const entity2D &e : m_entities)
-        {
-            out.begin_section(section + std::to_string(e.index()));
-            e.serialize(out);
-            out.end_section();
-        }
-
-        section = "spring";
-        std::size_t index = 0;
-        for (const spring2D &sp : m_springs)
-        {
-            out.begin_section(section + std::to_string(index++));
-            sp.serialize(out);
-            out.end_section();
-        }
-
-        section = "rigid_bar";
-        index = 0;
-        for (const auto &ctr : m_compeller.constraints())
-        {
-            const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
-            if (!rb)
-                continue;
-            out.begin_section(section + std::to_string(index++));
-            rb->serialize(out);
-            out.end_section();
-        }
-    }
-
-    void engine2D::deserialize(ini::deserializer &in)
-    {
-        clear_entities();
-        m_elapsed = in.readf32("elapsed");
-        in.begin_section("tableau");
-        rk::butcher_tableau tb;
-        tb.deserialize(in);
-        m_integ.tableau(tb);
-        in.end_section();
-        in.begin_section("collider");
-        m_collider.deserialize(in);
-        in.end_section();
-
-        std::string section = "entity";
-        std::size_t index = 0;
-        while (true)
-        {
-            in.begin_section(section + std::to_string(index++));
-            if (!in.contains_section())
-            {
-                in.end_section();
-                break;
-            }
-            add_entity()->deserialize(in);
-            in.end_section();
-        }
-
-        section = "spring";
-        index = 0;
-        while (true)
-        {
-            in.begin_section(section + std::to_string(index++));
-            if (!in.contains_section())
-            {
-                in.end_section();
-                break;
-            }
-            const bool has_joints = (bool)in.readi16("has_joints");
-            const std::size_t idx1 = in.readui64("e1"), idx2 = in.readui64("e2");
-            const entity2D_ptr e1 = (*this)[idx1], e2 = (*this)[idx2];
-
-            if (has_joints)
-            {
-                const glm::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
-                                joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
-                add_spring(e1, e2, joint1, joint2).deserialize(in);
-            }
-            else
-                add_spring(e1, e2).deserialize(in);
-            in.end_section();
-        }
-
-        section = "rigid_bar";
-        index = 0;
-        while (true)
-        {
-            in.begin_section(section + std::to_string(index++));
-            if (!in.contains_section())
-            {
-                in.end_section();
-                break;
-            }
-            const bool has_joints = (bool)in.readi16("has_joints");
-            const std::size_t idx1 = in.readui64("e1"), idx2 = in.readui64("e2");
-            const entity2D_ptr e1 = (*this)[idx1], e2 = (*this)[idx2];
-
-            if (has_joints)
-            {
-                const glm::vec2 joint1 = {in.readf32("joint1x"), in.readf32("joint1y")},
-                                joint2 = {in.readf32("joint2x"), in.readf32("joint2y")};
-                m_compeller.add_constraint<rigid_bar2D>(e1, e2, joint1, joint2)->deserialize(in);
-            }
-            else
-                m_compeller.add_constraint<rigid_bar2D>(e1, e2)->deserialize(in);
-            in.end_section();
-        }
-    }
-
     void engine2D::checkpoint() { m_checkpoint = std::make_tuple(m_elapsed, m_integ.state().vars(), m_entities); }
     void engine2D::revert()
     {
@@ -570,4 +452,90 @@ namespace ppx
     engine_events &engine2D::events() { return m_events; }
 
     float engine2D::elapsed() const { return m_elapsed; }
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
+    {
+        out << YAML::BeginMap;
+        out << YAML::Key << "entities" << YAML::Value << eng.entities();
+        out << YAML::Key << "collider" << YAML::Value << eng.collider();
+        out << YAML::Key << "springs" << YAML::Value << eng.springs();
+        out << YAML::Key << "rigid_bars" << YAML::Value << YAML::BeginSeq;
+        for (const auto &ctr : eng.compeller().constraints())
+        {
+            const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
+            if (rb)
+                out << *rb;
+        }
+        // Save checkpoint?
+        out << YAML::Key << "integrator" << YAML::Value << eng.integrator();
+        out << YAML::Key << "elapsed" << YAML::Value << eng.elapsed();
+        out << YAML::EndMap;
+    }
+#endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)
+    {
+        Node node;
+        node["entities"] = eng.entities();
+        node["collider"] = eng.collider();
+        node["springs"] = eng.springs();
+        for (const auto &ctr : eng.compeller().constraints())
+        {
+            const auto rb = std::dynamic_pointer_cast<ppx::rigid_bar2D>(ctr);
+            if (rb)
+                node["rigid_bars"].push_back(*rb);
+        }
+        // Save checkpoint?
+        node["integrator"] = eng.integrator();
+        node["elapsed"] = eng.elapsed();
+        return node;
+    }
+    bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
+    {
+        if (!node.IsMap() || node.size() != 6)
+            return false;
+        for (const YAML::Node &n : node["entities"])
+            eng.add_entity(n.as<ppx::entity2D>());
+
+        node["collider"].as<ppx::collider2D>(eng.collider());
+        for (const YAML::Node &n : node["springs"])
+        {
+            const std::size_t idx1 = n["index1"].as<std::size_t>(),
+                              idx2 = n["index2"].as<std::size_t>();
+            if (n["joint1"])
+            {
+                ppx::spring2D &sp = eng.add_spring(eng[idx1], eng[idx2],
+                                                   n["joint1"].as<glm::vec2>(),
+                                                   n["joint2"].as<glm::vec2>());
+                n.as<ppx::spring2D>(sp);
+                continue;
+            }
+            ppx::spring2D &sp = eng.add_spring(eng[idx1], eng[idx2]);
+            n.as<ppx::spring2D>(sp);
+        }
+
+        for (const YAML::Node &n : node["rigid_bars"])
+        {
+            const std::size_t idx1 = n["index1"].as<std::size_t>(),
+                              idx2 = n["index2"].as<std::size_t>();
+            if (n["joint1"])
+            {
+                const auto rb = eng.add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2],
+                                                                     n["joint1"].as<glm::vec2>(),
+                                                                     n["joint2"].as<glm::vec2>());
+                n.as<ppx::rigid_bar2D>(*rb);
+                continue;
+            }
+            const auto rb = eng.add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2]);
+            n.as<ppx::rigid_bar2D>(*rb);
+        }
+        eng.m_integ = node["integrator"].as<rk::integrator>();
+        eng.m_elapsed = node["elapsed"].as<float>();
+        return true;
+    };
+}
+#endif
