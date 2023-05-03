@@ -14,7 +14,7 @@
 
 namespace ppx
 {
-    class engine2D : public ini::serializable
+    class engine2D
     {
     public:
         engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);
@@ -77,9 +77,6 @@ namespace ppx
         void clear_springs();
         void clear_constraints();
         void clear();
-
-        void serialize(ini::serializer &out) const override;
-        void deserialize(ini::deserializer &in) override;
 
         void checkpoint();
         void revert();

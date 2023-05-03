@@ -6,7 +6,7 @@
 
 namespace ppx
 {
-    class spring2D : public ini::serializable
+    class spring2D
     {
     public:
         spring2D(const entity2D_ptr &e1,
@@ -24,6 +24,7 @@ namespace ppx
 
         std::tuple<glm::vec2, float, float> force() const;
 
+        void bind(const entity2D_ptr &e1, const entity2D_ptr &e2);
         bool try_validate();
 
         float stiffness() const;
@@ -33,9 +34,6 @@ namespace ppx
         void stiffness(float stiffness);
         void dampening(float dampening);
         void length(float length);
-
-        void serialize(ini::serializer &out) const override;
-        void deserialize(ini::deserializer &in) override;
 
         float kinetic_energy() const;
         float potential_energy() const;
@@ -53,7 +51,7 @@ namespace ppx
         bool has_joints() const;
 
     private:
-        entity2D_ptr m_e1, m_e2;
+        entity2D_ptr m_e1 = nullptr, m_e2 = nullptr;
         glm::vec2 m_joint1{0.f}, m_joint2{0.f};
         float m_stiffness, m_dampening,
             m_angle1, m_angle2, m_length;
@@ -62,6 +60,9 @@ namespace ppx
         std::tuple<glm::vec2, float, float> without_joints_force() const;
         std::tuple<glm::vec2, float, float> with_joints_force() const;
     };
-}
 
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const spring2D &sp);
+#endif
+}
 #endif

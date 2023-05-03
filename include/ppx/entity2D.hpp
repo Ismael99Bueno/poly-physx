@@ -4,14 +4,13 @@
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"
 #include "geo/circle.hpp"
-#include "ini/serializable.hpp"
 #include "rk/state.hpp"
 #include "ppx/entity_events.hpp"
 #include <variant>
 
 namespace ppx
 {
-    class entity2D : public ini::serializable
+    class entity2D
     {
     public:
         enum shape_type
@@ -83,9 +82,6 @@ namespace ppx
         void translate(const glm::vec2 &dpos);
         void rotate(float dangle);
 
-        void serialize(ini::serializer &out) const override;
-        void deserialize(ini::deserializer &in) override;
-
         const entity_events &events() const;
         entity_events &events();
 
@@ -116,10 +112,29 @@ namespace ppx
         geo::shape2D &get_shape();
         void retrieve(const std::vector<float> &vars_buffer);
         friend class engine2D;
+#ifdef HAS_YAML_CPP
+        friend YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e);
+        friend struct YAML::convert<entity2D>;
+#endif
     };
 
     bool operator==(const entity2D &lhs, const entity2D &rhs);
     bool operator!=(const entity2D &lhs, const entity2D &rhs);
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e);
+#endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    template <>
+    struct convert<ppx::entity2D>
+    {
+        static Node encode(const ppx::entity2D &e);
+        static bool decode(const Node &node, ppx::entity2D &e);
+    };
+}
+#endif
 
 #endif

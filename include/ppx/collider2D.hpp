@@ -17,7 +17,7 @@ namespace ppx
         glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
     };
 
-    class collider2D final : public ini::serializable
+    class collider2D final
     {
     public:
         enum coldet_method
@@ -38,9 +38,6 @@ namespace ppx
         void update_quad_tree();
         void rebuild_quad_tree();
         void validate();
-
-        void serialize(ini::serializer &out) const override;
-        void deserialize(ini::deserializer &in) override;
 
         float stiffness() const;
         float dampening() const;
@@ -107,6 +104,9 @@ namespace ppx
         collider2D(const collider2D &) = delete;
         collider2D &operator=(const collider2D &) = delete;
     };
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld);
+#endif
 }
 
 #endif

@@ -78,24 +78,24 @@ namespace ppx
                 ++it;
     }
 
-    void collider2D::serialize(ini::serializer &out) const
-    {
-        out.write("stiffness", m_stiffness);
-        out.write("dampening", m_dampening);
-        out.write("qt_build_period", m_qt_build_period);
-        out.write("coldet_method", m_coldet_method);
-        out.write("enabled", m_enabled);
-    }
+    // void collider2D::serialize(ini::serializer &out) const
+    // {
+    //     out.write("stiffness", m_stiffness);
+    //     out.write("dampening", m_dampening);
+    //     out.write("qt_build_period", m_qt_build_period);
+    //     out.write("coldet_method", m_coldet_method);
+    //     out.write("enabled", m_enabled);
+    // }
 
-    void collider2D::deserialize(ini::deserializer &in)
-    {
-        m_stiffness = in.readf32("stiffness");
-        m_dampening = in.readf32("dampening");
-        m_qt_build_period = in.readui32("qt_build_period");
-        m_coldet_method = (coldet_method)in.readi32("coldet_method");
-        m_enabled = (bool)in.readi16("enabled");
-        rebuild_quad_tree();
-    }
+    // void collider2D::deserialize(ini::deserializer &in)
+    // {
+    //     m_stiffness = in.readf32("stiffness");
+    //     m_dampening = in.readf32("dampening");
+    //     m_qt_build_period = in.readui32("qt_build_period");
+    //     m_coldet_method = (coldet_method)in.readi32("coldet_method");
+    //     m_enabled = (bool)in.readi16("enabled");
+    //     rebuild_quad_tree();
+    // }
 
     float collider2D::stiffness() const { return m_stiffness; }
     float collider2D::dampening() const { return m_dampening; }
@@ -301,4 +301,17 @@ namespace ppx
         const float torque1 = cross(rel1, force), torque2 = cross(force, rel2);
         return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
+
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
+    {
+        out << YAML::BeginMap;
+        out << YAML::Key << "stiffness" << YAML::Value << cld.stiffness();
+        out << YAML::Key << "dampening" << YAML::Value << cld.dampening();
+        out << YAML::Key << "qt_period" << YAML::Value << cld.quad_tree_build_period();
+        out << YAML::Key << "coldet" << YAML::Value << cld.coldet();
+        out << YAML::Key << "enabled" << YAML::Value << cld.enabled();
+        out << YAML::EndMap;
+    }
+#endif
 }

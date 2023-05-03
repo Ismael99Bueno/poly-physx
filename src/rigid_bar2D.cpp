@@ -113,28 +113,6 @@ namespace ppx
         return {-cgd.x, -cgd.y, cgda};
     }
 
-    void rigid_bar2D::serialize(ini::serializer &out) const
-    {
-        out.write("e1", m_e1.index());
-        out.write("e2", m_e2.index());
-        const glm::vec2 j1 = joint1(), j2 = joint2();
-        out.write("joint1x", j1.x);
-        out.write("joint1y", j1.y);
-        out.write("joint2x", j2.x);
-        out.write("joint2y", j2.y);
-        out.write("stiffness", stiffness());
-        out.write("dampening", dampening());
-        out.write("length", length());
-        out.write("has_joints", m_has_joints);
-    }
-
-    void rigid_bar2D::deserialize(ini::deserializer &in)
-    {
-        stiffness(in.readf32("stiffness"));
-        dampening(in.readf32("dampening"));
-        length(in.readf32("length"));
-    }
-
     float rigid_bar2D::length() const { return m_length; }
     void rigid_bar2D::length(const float length) { m_length = length; }
 
@@ -162,4 +140,25 @@ namespace ppx
     {
         return constraint2D::try_validate() && m_e1.try_validate() && m_e2.try_validate();
     }
+
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const rigid_bar2D &rb)
+    {
+        out << YAML::BeginMap;
+        out << YAML::Key << "id1" << YAML::Value << rb.e1().id();
+        out << YAML::Key << "id2" << YAML::Value << rb.e2().id();
+        out << YAML::Key << "index1" << YAML::Value << rb.e1().index();
+        out << YAML::Key << "index2" << YAML::Value << rb.e2().index();
+        if (rb.has_joints())
+        {
+            out << YAML::Key << "joint1" << YAML::Value << rb.joint1();
+            out << YAML::Key << "joint2" << YAML::Value << rb.joint2();
+        }
+        out << YAML::Key << "stiffness" << YAML::Value << rb.stiffness();
+        out << YAML::Key << "dampening" << YAML::Value << rb.dampening();
+        out << YAML::Key << "length" << YAML::Value << rb.length();
+        out << YAML::EndMap;
+        return out;
+    }
+#endif
 }

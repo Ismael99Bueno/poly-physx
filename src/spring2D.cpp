@@ -62,6 +62,16 @@ namespace ppx
         return {force, torque1, torque2};
     }
 
+    void spring2D::bind(const entity2D_ptr &e1, const entity2D_ptr &e2)
+    {
+        m_e1 = e1;
+        m_e2 = e2;
+        if (m_has_joints)
+        {
+            joint1(joint1());
+            joint2(joint2());
+        }
+    }
     bool spring2D::try_validate() { return m_e1.try_validate() && m_e2.try_validate(); }
 
     float spring2D::stiffness() const { return m_stiffness; }
@@ -71,28 +81,6 @@ namespace ppx
     void spring2D::stiffness(const float stiffness) { m_stiffness = stiffness; }
     void spring2D::dampening(const float dampening) { m_dampening = dampening; }
     void spring2D::length(const float length) { m_length = length; }
-
-    void spring2D::serialize(ini::serializer &out) const
-    {
-        out.write("e1", m_e1->index());
-        out.write("e2", m_e2->index());
-        const glm::vec2 j1 = joint1(), j2 = joint2();
-        out.write("joint1x", j1.x);
-        out.write("joint1y", j1.y);
-        out.write("joint2x", j2.x);
-        out.write("joint2y", j2.y);
-        out.write("stiffness", m_stiffness);
-        out.write("dampening", m_dampening);
-        out.write("length", m_length);
-        out.write("has_joints", m_has_joints);
-    }
-
-    void spring2D::deserialize(ini::deserializer &in)
-    {
-        m_stiffness = in.readf32("stiffness");
-        m_dampening = in.readf32("dampening");
-        m_length = in.readf32("length");
-    }
 
     float spring2D::kinetic_energy() const { return m_e1->kinetic_energy() + m_e2->kinetic_energy(); }
     float spring2D::potential_energy() const
@@ -124,4 +112,24 @@ namespace ppx
     }
 
     bool spring2D::has_joints() const { return m_has_joints; }
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const spring2D &sp)
+    {
+        out << YAML::BeginMap;
+        out << YAML::Key << "id1" << YAML::Value << sp.e1().id();
+        out << YAML::Key << "id2" << YAML::Value << sp.e2().id();
+        out << YAML::Key << "index1" << YAML::Value << sp.e1().index();
+        out << YAML::Key << "index2" << YAML::Value << sp.e2().index();
+        if (sp.has_joints())
+        {
+            out << YAML::Key << "joint1" << YAML::Value << sp.joint1();
+            out << YAML::Key << "joint2" << YAML::Value << sp.joint2();
+        }
+        out << YAML::Key << "stiffness" << YAML::Value << sp.stiffness();
+        out << YAML::Key << "dampening" << YAML::Value << sp.dampening();
+        out << YAML::Key << "length" << YAML::Value << sp.length();
+        out << YAML::EndMap;
+        return out;
+    }
+#endif
 }

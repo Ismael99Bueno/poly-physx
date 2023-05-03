@@ -15,5 +15,6 @@
 #include <array>
 #include <cstdint>
 #include <variant>
+#include <yaml-cpp/yaml.h>
 
 #endif

@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-    class rigid_bar2D : public constraint2D<2>, ini::serializable
+    class rigid_bar2D : public constraint2D<2>
     {
     public:
         rigid_bar2D(const entity2D_ptr &e1,
@@ -24,9 +24,6 @@ namespace ppx
 
         float length() const;
         void length(float length);
-
-        void serialize(ini::serializer &out) const override;
-        void deserialize(ini::deserializer &in) override;
 
         const entity2D_ptr &e1() const;
         const entity2D_ptr &e2() const;
@@ -55,6 +52,9 @@ namespace ppx
         float with_joints_constraint(const std::array<const_entity2D_ptr, 2> &entities) const;
         float with_joints_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const;
     };
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const rigid_bar2D &rb);
+#endif
 }
 
 #endif

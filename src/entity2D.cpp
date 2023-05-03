@@ -149,46 +149,6 @@ namespace ppx
     void entity2D::translate(const glm::vec2 &dpos) { get_shape().translate(dpos); }
     void entity2D::rotate(const float dangle) { get_shape().rotate(dangle); }
 
-    void entity2D::serialize(ini::serializer &out) const
-    {
-        out.write("mass", m_mass);
-        out.write("charge", m_charge);
-        out.write("kinematic", m_kinematic);
-        out.write("angvel", m_angvel);
-        out.write("added_torque", m_added_torque);
-        out.write("index", m_index);
-        shape().serialize(out);
-        out.write("vx", m_vel.x);
-        out.write("vy", m_vel.y);
-        out.write("shape_type", type());
-    }
-    void entity2D::deserialize(ini::deserializer &in)
-    {
-        m_mass = in.readf32("mass");
-        m_charge = in.readf32("charge");
-        m_kinematic = (bool)in.readi16("kinematic");
-        m_angvel = in.readf32("angvel");
-        m_added_torque = in.readf32("added_torque");
-        shape_type sh_type = (shape_type)in.readi32("shape_type");
-        if (sh_type == POLYGON)
-        {
-            geo::polygon poly;
-            poly.deserialize(in);
-            m_shape = poly;
-        }
-        else
-        {
-            geo::circle c;
-            c.deserialize(in);
-            m_shape = c;
-        }
-
-        m_vel = {in.readf32("vx"), in.readf32("vy")};
-
-        dispatch();
-        DBG_ASSERT((size_t)in.readui64("index") == m_index, "Index found at .ini file does not match with the current entity index. Did you save the entities in the wrong order? - Index found: %zu, entity index: %zu\n", (size_t)in.readui64("index"), m_index)
-    }
-
     const entity_events &entity2D::events() const { return m_events; }
     entity_events &entity2D::events() { return m_events; }
 
@@ -213,4 +173,58 @@ namespace ppx
 
     bool operator==(const entity2D &lhs, const entity2D &rhs) { return lhs.id() == rhs.id(); }
     bool operator!=(const entity2D &lhs, const entity2D &rhs) { return lhs.id() != rhs.id(); }
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
+    {
+        out << YAML::BeginMap;
+        out << YAML::Key << "id" << e.id();
+        out << YAML::Key << "index" << e.index();
+        out << YAML::Key << "shape" << e.shape();
+        out << YAML::Key << "vel" << e.vel();
+        out << YAML::Key << "angvel" << e.angvel();
+        out << YAML::Key << "mass" << e.mass();
+        out << YAML::Key << "charge" << e.charge();
+        out << YAML::Key << "kinematic" << e.kinematic();
+        out << YAML::EndMap;
+        return out;
+    }
+#endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    Node convert<ppx::entity2D>::encode(const ppx::entity2D &e)
+    {
+        Node node;
+        node["id"] = e.id();
+        node["index"] = e.index();
+        node["shape"] = e.shape();
+        node["vel"] = e.vel();
+        node["angvel"] = e.angvel();
+        node["mass"] = e.mass();
+        node["charge"] = e.charge();
+        node["kinematic"] = e.kinematic();
+        return node;
+    }
+    bool convert<ppx::entity2D>::decode(const Node &node, ppx::entity2D &e)
+    {
+        if (!node.IsMap() || node.size() != 8)
+            return false;
+
+        e.m_id = node["id"].as<std::size_t>();
+        e.m_index = node["index"].as<std::size_t>();
+        if (node["shape"]["radius"])
+            e.shape(node["shape"].as<geo::circle>());
+        else
+            e.shape(node["shape"].as<geo::polygon>());
+        e.vel(node["vel"].as<glm::vec2>());
+        e.angvel(node["angvel"].as<float>());
+        e.mass(node["mass"].as<float>());
+        e.charge(node["charge"].as<float>());
+        e.kinematic(node["kinematic"].as<bool>());
+
+        return true;
+    };
+}
+#endif
