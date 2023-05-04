@@ -466,10 +466,12 @@ namespace ppx
             if (rb)
                 out << *rb;
         }
+        out << YAML::EndSeq;
         // Save checkpoint?
         out << YAML::Key << "integrator" << YAML::Value << eng.integrator();
         out << YAML::Key << "elapsed" << YAML::Value << eng.elapsed();
         out << YAML::EndMap;
+        return out;
     }
 #endif
 }

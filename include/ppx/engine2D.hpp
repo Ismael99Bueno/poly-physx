@@ -11,13 +11,15 @@
 #include "utils/container_view.hpp"
 #include "ppx/rigid_bar2D.hpp"
 #include "ppx/engine_events.hpp"
+#include "rk/tableaus.hpp"
 
 namespace ppx
 {
     class engine2D
     {
     public:
-        engine2D(const rk::butcher_tableau &table, std::size_t allocations = 100);
+        engine2D(const rk::butcher_tableau &table = rk::rk4,
+                 std::size_t allocations = 100);
 
         void retrieve();
 
@@ -162,7 +164,7 @@ namespace ppx
         engine2D &operator=(const engine2D &) = delete;
 
 #ifdef HAS_YAML_CPP
-        friend YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &e);
+        friend YAML::Emitter &operator<<(YAML::Emitter &, const engine2D &);
         friend struct YAML::convert<engine2D>;
 #endif
     };

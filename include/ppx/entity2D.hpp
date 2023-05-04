@@ -113,7 +113,7 @@ namespace ppx
         void retrieve(const std::vector<float> &vars_buffer);
         friend class engine2D;
 #ifdef HAS_YAML_CPP
-        friend YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e);
+        friend YAML::Emitter &operator<<(YAML::Emitter &, const entity2D &);
         friend struct YAML::convert<entity2D>;
 #endif
     };

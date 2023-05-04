@@ -22,9 +22,9 @@ namespace ppx
     public:
         enum coldet_method
         {
-            BRUTE_FORCE,
-            SORT_AND_SWEEP,
-            QUAD_TREE
+            BRUTE_FORCE = 0,
+            SORT_AND_SWEEP = 1,
+            QUAD_TREE = 2
         };
 
         collider2D(engine_key,

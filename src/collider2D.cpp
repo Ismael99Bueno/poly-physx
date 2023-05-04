@@ -293,6 +293,7 @@ namespace ppx
         out << YAML::Key << "coldet" << YAML::Value << cld.coldet();
         out << YAML::Key << "enabled" << YAML::Value << cld.enabled();
         out << YAML::EndMap;
+        return out;
     }
 #endif
 }
@@ -306,7 +307,7 @@ namespace YAML
         node["stiffness"] = cld.stiffness();
         node["dampening"] = cld.dampening();
         node["qt_period"] = cld.quad_tree_build_period();
-        node["coldet"] = cld.coldet();
+        node["coldet"] = (int)cld.coldet();
         node["enabled"] = cld.enabled();
         return node;
     }

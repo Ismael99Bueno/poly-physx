@@ -177,14 +177,14 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "id" << e.id();
-        out << YAML::Key << "index" << e.index();
-        out << YAML::Key << "shape" << e.shape();
-        out << YAML::Key << "vel" << e.vel();
-        out << YAML::Key << "angvel" << e.angvel();
-        out << YAML::Key << "mass" << e.mass();
-        out << YAML::Key << "charge" << e.charge();
-        out << YAML::Key << "kinematic" << e.kinematic();
+        out << YAML::Key << "id" << YAML::Value << e.id();
+        out << YAML::Key << "index" << YAML::Value << e.index();
+        out << YAML::Key << "shape" << YAML::Value << YAML::BeginMap << e.shape() << YAML::EndMap;
+        out << YAML::Key << "vel" << YAML::Value << e.vel();
+        out << YAML::Key << "angvel" << YAML::Value << e.angvel();
+        out << YAML::Key << "mass" << YAML::Value << e.mass();
+        out << YAML::Key << "charge" << YAML::Value << e.charge();
+        out << YAML::Key << "kinematic" << YAML::Value << e.kinematic();
         out << YAML::EndMap;
         return out;
     }
