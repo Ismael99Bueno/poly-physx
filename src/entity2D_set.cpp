@@ -46,4 +46,28 @@ namespace ppx
 
     const std::vector<const_entity2D_ptr> &entity2D_set::entities() const { return m_entities; }
     const char *entity2D_set::name() const { return m_name; }
+
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D_set &set)
+    {
+        out << YAML::BeginMap;
+        set.write(out);
+        out << YAML::EndMap;
+        return out;
+    }
+#endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    Node convert<ppx::entity2D_set>::encode(const ppx::entity2D_set &set)
+    {
+        return set.encode();
+    }
+    bool convert<ppx::entity2D_set>::decode(const Node &node, ppx::entity2D_set &set)
+    {
+        return set.decode(node);
+    };
+}
+#endif

@@ -22,6 +22,14 @@ namespace ppx
         const std::vector<const_entity2D_ptr> &entities() const;
         const char *name() const;
 
+#ifdef HAS_YAML_CPP
+        virtual void write(YAML::Emitter &out) const
+        {
+        }
+        virtual YAML::Node encode() const { return YAML::Node(); }
+        virtual bool decode(const YAML::Node &node) { return true; }
+#endif
+
     protected:
         std::vector<const_entity2D_ptr> m_entities;
 
@@ -31,6 +39,22 @@ namespace ppx
     private:
         const char *m_name;
     };
+
+#ifdef HAS_YAML_CPP
+    YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D_set &set);
+#endif
 }
+
+#ifdef HAS_YAML_CPP
+namespace YAML
+{
+    template <>
+    struct convert<ppx::entity2D_set>
+    {
+        static Node encode(const ppx::entity2D_set &set);
+        static bool decode(const Node &node, ppx::entity2D_set &set);
+    };
+}
+#endif
 
 #endif

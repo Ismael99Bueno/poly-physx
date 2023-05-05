@@ -177,14 +177,14 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "id" << YAML::Value << e.id();
-        out << YAML::Key << "index" << YAML::Value << e.index();
-        out << YAML::Key << "shape" << YAML::Value << YAML::BeginMap << e.shape() << YAML::EndMap;
-        out << YAML::Key << "vel" << YAML::Value << e.vel();
-        out << YAML::Key << "angvel" << YAML::Value << e.angvel();
-        out << YAML::Key << "mass" << YAML::Value << e.mass();
-        out << YAML::Key << "charge" << YAML::Value << e.charge();
-        out << YAML::Key << "kinematic" << YAML::Value << e.kinematic();
+        out << YAML::Key << "ID" << YAML::Value << e.id();
+        out << YAML::Key << "Index" << YAML::Value << e.index();
+        out << YAML::Key << "Shape" << YAML::Value << e.shape();
+        out << YAML::Key << "Velocity" << YAML::Value << e.vel();
+        out << YAML::Key << "Angular velocity" << YAML::Value << e.angvel();
+        out << YAML::Key << "Mass" << YAML::Value << e.mass();
+        out << YAML::Key << "Charge" << YAML::Value << e.charge();
+        out << YAML::Key << "Kinematic" << YAML::Value << e.kinematic();
         out << YAML::EndMap;
         return out;
     }
@@ -197,14 +197,14 @@ namespace YAML
     Node convert<ppx::entity2D>::encode(const ppx::entity2D &e)
     {
         Node node;
-        node["id"] = e.id();
-        node["index"] = e.index();
-        node["shape"] = e.shape();
-        node["vel"] = e.vel();
-        node["angvel"] = e.angvel();
-        node["mass"] = e.mass();
-        node["charge"] = e.charge();
-        node["kinematic"] = e.kinematic();
+        node["ID"] = e.id();
+        node["Index"] = e.index();
+        node["Shape"] = e.shape();
+        node["Velocity"] = e.vel();
+        node["Angular velocity"] = e.angvel();
+        node["Mass"] = e.mass();
+        node["Charge"] = e.charge();
+        node["Kinematic"] = e.kinematic();
         return node;
     }
     bool convert<ppx::entity2D>::decode(const Node &node, ppx::entity2D &e)
@@ -212,17 +212,17 @@ namespace YAML
         if (!node.IsMap() || node.size() != 8)
             return false;
 
-        e.m_id = node["id"].as<std::size_t>();
-        e.m_index = node["index"].as<std::size_t>();
-        if (node["shape"]["radius"])
-            e.shape(node["shape"].as<geo::circle>());
+        e.m_id = node["ID"].as<std::size_t>();
+        e.m_index = node["Index"].as<std::size_t>();
+        if (node["Shape"]["Radius"])
+            e.shape(node["Shape"].as<geo::circle>());
         else
-            e.shape(node["shape"].as<geo::polygon>());
-        e.vel(node["vel"].as<glm::vec2>());
-        e.angvel(node["angvel"].as<float>());
-        e.mass(node["mass"].as<float>());
-        e.charge(node["charge"].as<float>());
-        e.kinematic(node["kinematic"].as<bool>());
+            e.shape(node["Shape"].as<geo::polygon>());
+        e.vel(node["Velocity"].as<glm::vec2>());
+        e.angvel(node["Angular velocity"].as<float>());
+        e.mass(node["Mass"].as<float>());
+        e.charge(node["Charge"].as<float>());
+        e.kinematic(node["Kinematic"].as<bool>());
 
         return true;
     };

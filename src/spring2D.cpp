@@ -125,8 +125,8 @@ namespace ppx
             out << YAML::Key << "joint1" << YAML::Value << sp.joint1();
             out << YAML::Key << "joint2" << YAML::Value << sp.joint2();
         }
-        out << YAML::Key << "stiffness" << YAML::Value << sp.stiffness();
-        out << YAML::Key << "dampening" << YAML::Value << sp.dampening();
+        out << YAML::Key << "Stiffness" << YAML::Value << sp.stiffness();
+        out << YAML::Key << "Dampening" << YAML::Value << sp.dampening();
         out << YAML::Key << "length" << YAML::Value << sp.length();
         out << YAML::EndMap;
         return out;
@@ -149,8 +149,8 @@ namespace YAML
             node["joint1"] = sp.joint1();
             node["joint2"] = sp.joint2();
         }
-        node["stiffness"] = sp.stiffness();
-        node["dampening"] = sp.dampening();
+        node["Stiffness"] = sp.stiffness();
+        node["Dampening"] = sp.dampening();
         node["length"] = sp.length();
         return node;
     }
@@ -159,8 +159,8 @@ namespace YAML
         if (!node.IsMap() || (node.size() != 7 && node.size() != 9))
             return false;
 
-        sp.stiffness(node["stiffness"].as<float>());
-        sp.dampening(node["dampening"].as<float>());
+        sp.stiffness(node["Stiffness"].as<float>());
+        sp.dampening(node["Dampening"].as<float>());
         sp.length(node["length"].as<float>());
 
         return true;

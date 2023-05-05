@@ -287,11 +287,11 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "stiffness" << YAML::Value << cld.stiffness();
-        out << YAML::Key << "dampening" << YAML::Value << cld.dampening();
-        out << YAML::Key << "qt_period" << YAML::Value << cld.quad_tree_build_period();
-        out << YAML::Key << "coldet" << YAML::Value << cld.coldet();
-        out << YAML::Key << "enabled" << YAML::Value << cld.enabled();
+        out << YAML::Key << "Stiffness" << YAML::Value << cld.stiffness();
+        out << YAML::Key << "Dampening" << YAML::Value << cld.dampening();
+        out << YAML::Key << "Quad tree period" << YAML::Value << cld.quad_tree_build_period();
+        out << YAML::Key << "Collision detection" << YAML::Value << cld.coldet();
+        out << YAML::Key << "Enabled" << YAML::Value << cld.enabled();
         out << YAML::EndMap;
         return out;
     }
@@ -304,11 +304,11 @@ namespace YAML
     Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)
     {
         Node node;
-        node["stiffness"] = cld.stiffness();
-        node["dampening"] = cld.dampening();
-        node["qt_period"] = cld.quad_tree_build_period();
-        node["coldet"] = (int)cld.coldet();
-        node["enabled"] = cld.enabled();
+        node["Stiffness"] = cld.stiffness();
+        node["Dampening"] = cld.dampening();
+        node["Quad tree period"] = cld.quad_tree_build_period();
+        node["Collision detection"] = (int)cld.coldet();
+        node["Enabled"] = cld.enabled();
         return node;
     }
     bool convert<ppx::collider2D>::decode(const Node &node, ppx::collider2D &cld)
@@ -316,11 +316,11 @@ namespace YAML
         if (!node.IsMap() || node.size() != 5)
             return false;
 
-        cld.stiffness(node["stiffness"].as<float>());
-        cld.dampening(node["dampening"].as<float>());
-        cld.quad_tree_build_period(node["qt_period"].as<std::uint32_t>());
-        cld.coldet((ppx::collider2D::coldet_method)node["coldet"].as<int>());
-        cld.enabled(node["enabled"].as<bool>());
+        cld.stiffness(node["Stiffness"].as<float>());
+        cld.dampening(node["Dampening"].as<float>());
+        cld.quad_tree_build_period(node["Quad tree period"].as<std::uint32_t>());
+        cld.coldet((ppx::collider2D::coldet_method)node["Collision detection"].as<int>());
+        cld.enabled(node["Enabled"].as<bool>());
 
         return true;
     };
