@@ -116,10 +116,10 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const spring2D &sp)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "id1" << YAML::Value << sp.e1().id();
-        out << YAML::Key << "id2" << YAML::Value << sp.e2().id();
-        out << YAML::Key << "index1" << YAML::Value << sp.e1().index();
-        out << YAML::Key << "index2" << YAML::Value << sp.e2().index();
+        out << YAML::Key << "ID1" << YAML::Value << sp.e1().id();
+        out << YAML::Key << "ID2" << YAML::Value << sp.e2().id();
+        out << YAML::Key << "Index1" << YAML::Value << sp.e1().index();
+        out << YAML::Key << "Index2" << YAML::Value << sp.e2().index();
         if (sp.has_joints())
         {
             out << YAML::Key << "joint1" << YAML::Value << sp.joint1();
@@ -140,10 +140,10 @@ namespace YAML
     Node convert<ppx::spring2D>::encode(const ppx::spring2D &sp)
     {
         Node node;
-        node["id1"] = sp.e1().id();
-        node["id2"] = sp.e2().id();
-        node["index1"] = sp.e1().index();
-        node["index2"] = sp.e2().index();
+        node["ID1"] = sp.e1().id();
+        node["ID2"] = sp.e2().id();
+        node["Index1"] = sp.e1().index();
+        node["Index2"] = sp.e2().index();
         if (sp.has_joints())
         {
             node["joint1"] = sp.joint1();

@@ -145,10 +145,10 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const rigid_bar2D &rb)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "id1" << YAML::Value << rb.e1().id();
-        out << YAML::Key << "id2" << YAML::Value << rb.e2().id();
-        out << YAML::Key << "index1" << YAML::Value << rb.e1().index();
-        out << YAML::Key << "index2" << YAML::Value << rb.e2().index();
+        out << YAML::Key << "ID1" << YAML::Value << rb.e1().id();
+        out << YAML::Key << "ID2" << YAML::Value << rb.e2().id();
+        out << YAML::Key << "Index1" << YAML::Value << rb.e1().index();
+        out << YAML::Key << "Index2" << YAML::Value << rb.e2().index();
         if (rb.has_joints())
         {
             out << YAML::Key << "joint1" << YAML::Value << rb.joint1();
@@ -169,10 +169,10 @@ namespace YAML
     Node convert<ppx::rigid_bar2D>::encode(const ppx::rigid_bar2D &rb)
     {
         Node node;
-        node["id1"] = rb.e1().id();
-        node["id2"] = rb.e2().id();
-        node["index1"] = rb.e1().index();
-        node["index2"] = rb.e2().index();
+        node["ID1"] = rb.e1().id();
+        node["ID2"] = rb.e2().id();
+        node["Index1"] = rb.e1().index();
+        node["Index2"] = rb.e2().index();
         if (rb.has_joints())
         {
             node["joint1"] = rb.joint1();

@@ -528,7 +528,7 @@ namespace YAML
     }
     bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
     {
-        if (!node.IsMap() || node.size() != 6)
+        if (!node.IsMap() || node.size() != 8)
             return false;
         for (const Node &n : node["Entities"])
             eng.add_entity(n.as<ppx::entity2D>());
@@ -536,13 +536,13 @@ namespace YAML
         node["Collider"].as<ppx::collider2D>(eng.collider());
         for (const Node &n : node["Springs"])
         {
-            const std::size_t idx1 = n["index1"].as<std::size_t>(),
-                              idx2 = n["index2"].as<std::size_t>();
-            if (n["joint1"])
+            const std::size_t idx1 = n["Index1"].as<std::size_t>(),
+                              idx2 = n["Index2"].as<std::size_t>();
+            if (n["Joint1"])
             {
                 ppx::spring2D &sp = eng.add_spring(eng[idx1], eng[idx2],
-                                                   n["joint1"].as<glm::vec2>(),
-                                                   n["joint2"].as<glm::vec2>());
+                                                   n["Joint1"].as<glm::vec2>(),
+                                                   n["Joint2"].as<glm::vec2>());
                 n.as<ppx::spring2D>(sp);
                 continue;
             }
@@ -552,13 +552,13 @@ namespace YAML
 
         for (const Node &n : node["Rigid bars"])
         {
-            const std::size_t idx1 = n["index1"].as<std::size_t>(),
-                              idx2 = n["index2"].as<std::size_t>();
-            if (n["joint1"])
+            const std::size_t idx1 = n["Index1"].as<std::size_t>(),
+                              idx2 = n["Index2"].as<std::size_t>();
+            if (n["Joint1"])
             {
                 const auto rb = eng.add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2],
-                                                                     n["joint1"].as<glm::vec2>(),
-                                                                     n["joint2"].as<glm::vec2>());
+                                                                     n["Joint1"].as<glm::vec2>(),
+                                                                     n["Joint2"].as<glm::vec2>());
                 n.as<ppx::rigid_bar2D>(*rb);
                 continue;
             }
