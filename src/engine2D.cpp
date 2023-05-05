@@ -456,10 +456,10 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "entities" << YAML::Value << eng.entities();
-        out << YAML::Key << "collider" << YAML::Value << eng.collider();
-        out << YAML::Key << "springs" << YAML::Value << eng.springs();
-        out << YAML::Key << "rigid_bars" << YAML::Value << YAML::BeginSeq;
+        out << YAML::Key << "Entities" << YAML::Value << eng.entities();
+        out << YAML::Key << "Collider" << YAML::Value << eng.collider();
+        out << YAML::Key << "Springs" << YAML::Value << eng.springs();
+        out << YAML::Key << "Rigid bars" << YAML::Value << YAML::BeginSeq;
         for (const auto &ctr : eng.compeller().constraints())
         {
             const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
@@ -467,9 +467,27 @@ namespace ppx
                 out << *rb;
         }
         out << YAML::EndSeq;
+        out << YAML::Key << "Forces" << YAML::Value << YAML::BeginMap;
+        for (const auto &f : eng.forces())
+        {
+            out << YAML::Key << f->name() << YAML::Value << YAML::Flow << YAML::BeginSeq;
+            for (const auto &e : f->entities())
+                out << e.index();
+            out << YAML::EndSeq;
+        }
+        out << YAML::EndMap;
+        out << YAML::Key << "Interactions" << YAML::Value << YAML::BeginMap;
+        for (const auto &i : eng.interactions())
+        {
+            out << YAML::Key << i->name() << YAML::Value << YAML::Flow << YAML::BeginSeq;
+            for (const auto &e : i->entities())
+                out << e.index();
+            out << YAML::EndSeq;
+        }
+        out << YAML::EndMap;
         // Save checkpoint?
-        out << YAML::Key << "integrator" << YAML::Value << eng.integrator();
-        out << YAML::Key << "elapsed" << YAML::Value << eng.elapsed();
+        out << YAML::Key << "Integrator" << YAML::Value << eng.integrator();
+        out << YAML::Key << "Elapsed" << YAML::Value << eng.elapsed();
         out << YAML::EndMap;
         return out;
     }
@@ -482,29 +500,41 @@ namespace YAML
     Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)
     {
         Node node;
-        node["entities"] = eng.entities();
-        node["collider"] = eng.collider();
-        node["springs"] = eng.springs();
+        node["Entities"] = eng.entities();
+        node["Collider"] = eng.collider();
+        node["Springs"] = eng.springs();
         for (const auto &ctr : eng.compeller().constraints())
         {
             const auto rb = std::dynamic_pointer_cast<ppx::rigid_bar2D>(ctr);
             if (rb)
-                node["rigid_bars"].push_back(*rb);
+                node["Rigid bars"].push_back(*rb);
+        }
+        for (const auto &f : eng.forces())
+        {
+            for (const auto &e : f->entities())
+                node["Forces"][f->name()].push_back(e.index());
+            node["Forces"][f->name()].SetStyle(YAML::EmitterStyle::Flow);
+        }
+        for (const auto &i : eng.interactions())
+        {
+            for (const auto &e : i->entities())
+                node["Interactions"][i->name()].push_back(e.index());
+            node["Interactions"][i->name()].SetStyle(YAML::EmitterStyle::Flow);
         }
         // Save checkpoint?
-        node["integrator"] = eng.integrator();
-        node["elapsed"] = eng.elapsed();
+        node["Integrator"] = eng.integrator();
+        node["Elapsed"] = eng.elapsed();
         return node;
     }
     bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
     {
         if (!node.IsMap() || node.size() != 6)
             return false;
-        for (const YAML::Node &n : node["entities"])
+        for (const Node &n : node["Entities"])
             eng.add_entity(n.as<ppx::entity2D>());
 
-        node["collider"].as<ppx::collider2D>(eng.collider());
-        for (const YAML::Node &n : node["springs"])
+        node["Collider"].as<ppx::collider2D>(eng.collider());
+        for (const Node &n : node["Springs"])
         {
             const std::size_t idx1 = n["index1"].as<std::size_t>(),
                               idx2 = n["index2"].as<std::size_t>();
@@ -520,7 +550,7 @@ namespace YAML
             n.as<ppx::spring2D>(sp);
         }
 
-        for (const YAML::Node &n : node["rigid_bars"])
+        for (const Node &n : node["Rigid bars"])
         {
             const std::size_t idx1 = n["index1"].as<std::size_t>(),
                               idx2 = n["index2"].as<std::size_t>();
@@ -535,8 +565,44 @@ namespace YAML
             const auto rb = eng.add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2]);
             n.as<ppx::rigid_bar2D>(*rb);
         }
-        eng.m_integ = node["integrator"].as<rk::integrator>();
-        eng.m_elapsed = node["elapsed"].as<float>();
+
+        for (auto it = node["Forces"].begin(); it != node["Forces"].end(); ++it)
+        {
+            bool contained = false;
+            std::shared_ptr<ppx::force2D> force;
+            for (const auto &f : eng.forces())
+                if (f->name() == it->first.as<std::string>())
+                {
+                    contained = true;
+                    force = f;
+                    break;
+                }
+            if (!contained)
+                continue;
+            force->clear();
+            for (const Node &n : node["Forces"][force->name()])
+                force->include(eng[n.as<std::size_t>()]);
+        }
+        for (auto it = node["Interactions"].begin(); it != node["Interactions"].end(); ++it)
+        {
+            bool contained = false;
+            std::shared_ptr<ppx::interaction2D> inter;
+            for (const auto &i : eng.interactions())
+                if (i->name() == it->first.as<std::string>())
+                {
+                    contained = true;
+                    inter = i;
+                    break;
+                }
+            if (!contained)
+                continue;
+            inter->clear();
+            for (const Node &n : node["Interactions"][inter->name()])
+                inter->include(eng[n.as<std::size_t>()]);
+        }
+
+        eng.m_integ = node["Integrator"].as<rk::integrator>();
+        eng.m_elapsed = node["Elapsed"].as<float>();
         return true;
     };
 }
