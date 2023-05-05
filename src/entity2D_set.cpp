@@ -4,7 +4,8 @@
 
 namespace ppx
 {
-    entity2D_set::entity2D_set(const std::size_t allocations) { m_entities.reserve(allocations); }
+    entity2D_set::entity2D_set(const char *name,
+                               const std::size_t allocations) : m_name(name) { m_entities.reserve(allocations); }
 
     void entity2D_set::validate()
     {
@@ -44,4 +45,5 @@ namespace ppx
     std::size_t entity2D_set::size() const { return m_entities.size(); }
 
     const std::vector<const_entity2D_ptr> &entity2D_set::entities() const { return m_entities; }
+    const char *entity2D_set::name() const { return m_name; }
 }
