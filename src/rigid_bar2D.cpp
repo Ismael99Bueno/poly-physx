@@ -151,8 +151,8 @@ namespace ppx
         out << YAML::Key << "Index2" << YAML::Value << rb.e2().index();
         if (rb.has_joints())
         {
-            out << YAML::Key << "joint1" << YAML::Value << rb.joint1();
-            out << YAML::Key << "joint2" << YAML::Value << rb.joint2();
+            out << YAML::Key << "Joint1" << YAML::Value << rb.joint1();
+            out << YAML::Key << "Joint2" << YAML::Value << rb.joint2();
         }
         out << YAML::Key << "Stiffness" << YAML::Value << rb.stiffness();
         out << YAML::Key << "Dampening" << YAML::Value << rb.dampening();
@@ -175,8 +175,8 @@ namespace YAML
         node["Index2"] = rb.e2().index();
         if (rb.has_joints())
         {
-            node["joint1"] = rb.joint1();
-            node["joint2"] = rb.joint2();
+            node["Joint1"] = rb.joint1();
+            node["Joint2"] = rb.joint2();
         }
         node["Stiffness"] = rb.stiffness();
         node["Dampening"] = rb.dampening();

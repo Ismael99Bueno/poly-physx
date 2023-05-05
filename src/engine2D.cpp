@@ -530,6 +530,11 @@ namespace YAML
     {
         if (!node.IsMap() || node.size() != 8)
             return false;
+
+        eng.clear_entities();
+        eng.m_integ = node["Integrator"].as<rk::integrator>();
+        eng.m_integ.state().clear();
+
         for (const Node &n : node["Entities"])
             eng.add_entity(n.as<ppx::entity2D>());
 
@@ -601,7 +606,6 @@ namespace YAML
                 inter->include(eng[n.as<std::size_t>()]);
         }
 
-        eng.m_integ = node["Integrator"].as<rk::integrator>();
         eng.m_elapsed = node["Elapsed"].as<float>();
         return true;
     };
