@@ -8,12 +8,9 @@ namespace ppx
                        const entity2D_ptr &e2,
                        const float stiffness,
                        const float dampening,
-                       const float length) : m_e1(e1),
-                                             m_e2(e2),
+                       const float length) : joint2D(e1, e2, length),
                                              m_stiffness(stiffness),
-                                             m_dampening(dampening),
-                                             m_length(length),
-                                             m_has_anchors(false) {}
+                                             m_dampening(dampening) {}
 
     spring2D::spring2D(const entity2D_ptr &e1,
                        const entity2D_ptr &e2,
@@ -21,16 +18,9 @@ namespace ppx
                        const glm::vec2 &anchor2,
                        const float stiffness,
                        const float dampening,
-                       const float length) : m_e1(e1),
-                                             m_e2(e2),
-                                             m_anchor1(anchor1),
-                                             m_anchor2(anchor2),
+                       const float length) : joint2D(e1, e2, anchor1, anchor2, length),
                                              m_stiffness(stiffness),
-                                             m_dampening(dampening),
-                                             m_angle1(e1->angpos()),
-                                             m_angle2(e2->angpos()),
-                                             m_length(length),
-                                             m_has_anchors(true) {}
+                                             m_dampening(dampening) {}
 
     std::tuple<glm::vec2, float, float> spring2D::force() const
     {
@@ -62,25 +52,11 @@ namespace ppx
         return {force, torque1, torque2};
     }
 
-    void spring2D::bind(const entity2D_ptr &e1, const entity2D_ptr &e2)
-    {
-        m_e1 = e1;
-        m_e2 = e2;
-        if (m_has_anchors)
-        {
-            anchor1(anchor1());
-            anchor2(anchor2());
-        }
-    }
-    bool spring2D::try_validate() { return m_e1.try_validate() && m_e2.try_validate(); }
-
     float spring2D::stiffness() const { return m_stiffness; }
     float spring2D::dampening() const { return m_dampening; }
-    float spring2D::length() const { return m_length; }
 
     void spring2D::stiffness(const float stiffness) { m_stiffness = stiffness; }
     void spring2D::dampening(const float dampening) { m_dampening = dampening; }
-    void spring2D::length(const float length) { m_length = length; }
 
     float spring2D::kinetic_energy() const { return m_e1->kinetic_energy() + m_e2->kinetic_energy(); }
     float spring2D::potential_energy() const
@@ -92,44 +68,27 @@ namespace ppx
     }
     float spring2D::energy() const { return kinetic_energy() + potential_energy(); }
 
-    const entity2D_ptr &spring2D::e1() const { return m_e1; }
-    const entity2D_ptr &spring2D::e2() const { return m_e2; }
-
-    glm::vec2 spring2D::anchor1() const { return glm::rotate(m_anchor1, m_e1->angpos() - m_angle1); }
-    glm::vec2 spring2D::anchor2() const { return glm::rotate(m_anchor2, m_e2->angpos() - m_angle2); }
-
-    void spring2D::anchor1(const glm::vec2 &anchor1)
-    {
-        m_anchor1 = anchor1;
-        m_angle1 = m_e1->angpos();
-        m_has_anchors = true;
-    }
-    void spring2D::anchor2(const glm::vec2 &anchor2)
-    {
-        m_anchor2 = anchor2;
-        m_angle2 = m_e2->angpos();
-        m_has_anchors = true;
-    }
-
-    bool spring2D::has_anchors() const { return m_has_anchors; }
 #ifdef HAS_YAML_CPP
-    YAML::Emitter &operator<<(YAML::Emitter &out, const spring2D &sp)
+    void spring2D::write(YAML::Emitter &out) const
     {
-        out << YAML::BeginMap;
-        out << YAML::Key << "ID1" << YAML::Value << sp.e1().id();
-        out << YAML::Key << "ID2" << YAML::Value << sp.e2().id();
-        out << YAML::Key << "Index1" << YAML::Value << sp.e1().index();
-        out << YAML::Key << "Index2" << YAML::Value << sp.e2().index();
-        if (sp.has_anchors())
-        {
-            out << YAML::Key << "Anchor1" << YAML::Value << sp.anchor1();
-            out << YAML::Key << "Anchor2" << YAML::Value << sp.anchor2();
-        }
-        out << YAML::Key << "Stiffness" << YAML::Value << sp.stiffness();
-        out << YAML::Key << "Dampening" << YAML::Value << sp.dampening();
-        out << YAML::Key << "length" << YAML::Value << sp.length();
-        out << YAML::EndMap;
-        return out;
+        joint2D::write(out);
+        out << YAML::Key << "Stiffness" << YAML::Value << m_stiffness;
+        out << YAML::Key << "Dampening" << YAML::Value << m_dampening;
+    }
+    YAML::Node spring2D::encode() const
+    {
+        YAML::Node node = joint2D::encode();
+        node["Stiffness"] = m_stiffness;
+        node["Dampening"] = m_dampening;
+        return node;
+    }
+    bool spring2D::decode(const YAML::Node &node)
+    {
+        if (!joint2D::decode(node))
+            return false;
+        m_stiffness = node["Stiffness"].as<float>();
+        m_dampening = node["Dampening"].as<float>();
+        return true;
     }
 #endif
 }
@@ -139,31 +98,11 @@ namespace YAML
 {
     Node convert<ppx::spring2D>::encode(const ppx::spring2D &sp)
     {
-        Node node;
-        node["ID1"] = sp.e1().id();
-        node["ID2"] = sp.e2().id();
-        node["Index1"] = sp.e1().index();
-        node["Index2"] = sp.e2().index();
-        if (sp.has_anchors())
-        {
-            node["Anchor1"] = sp.anchor1();
-            node["Anchor2"] = sp.anchor2();
-        }
-        node["Stiffness"] = sp.stiffness();
-        node["Dampening"] = sp.dampening();
-        node["length"] = sp.length();
-        return node;
+        return sp.encode();
     }
     bool convert<ppx::spring2D>::decode(const Node &node, ppx::spring2D &sp)
     {
-        if (!node.IsMap() || (node.size() != 7 && node.size() != 9))
-            return false;
-
-        sp.stiffness(node["Stiffness"].as<float>());
-        sp.dampening(node["Dampening"].as<float>());
-        sp.length(node["length"].as<float>());
-
-        return true;
+        return sp.decode(node);
     };
 }
 #endif
