@@ -77,7 +77,6 @@ namespace ppx
         private:
             const_entity2D_ptr m_entity;
             end m_end;
-            float m_val;
         };
 
         std::vector<entity2D> *m_entities;
@@ -104,6 +103,7 @@ namespace ppx
         collider2D(const collider2D &) = delete;
         collider2D &operator=(const collider2D &) = delete;
     };
+
 #ifdef HAS_YAML_CPP
     YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld);
 #endif

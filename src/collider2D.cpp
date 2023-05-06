@@ -22,14 +22,14 @@ namespace ppx
         m_intervals.reserve(allocations);
     }
 
-    collider2D::interval::interval(const const_entity2D_ptr &e, const end end_type) : m_entity(e), m_end(end_type)
-    {
-        const geo::aabb2D bbox = e->shape().bounding_box();
-        m_val = (end_type == LOWER) ? bbox.min().x : bbox.max().x;
-    }
+    collider2D::interval::interval(const const_entity2D_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
 
     const entity2D *collider2D::interval::entity() const { return m_entity.raw(); }
-    float collider2D::interval::value() const { return m_val; }
+    float collider2D::interval::value() const
+    {
+        const geo::aabb2D bbox = m_entity->shape().bounding_box();
+        return (m_end == LOWER) ? bbox.min().x : bbox.max().x;
+    }
 
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
     bool collider2D::interval::try_validate() { return m_entity.try_validate(); }
@@ -193,7 +193,7 @@ namespace ppx
         std::unordered_set<const entity2D *> eligible;
         sort_intervals();
 
-        eligible.reserve(6);
+        eligible.reserve(30);
         for (const interval &itrv : m_intervals)
             if (itrv.type() == interval::LOWER)
             {

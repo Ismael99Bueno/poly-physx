@@ -181,8 +181,8 @@ namespace ppx
         const glm::vec2 &pos = e.pos(), &vel = e.vel();
         state.append({pos.x, pos.y, e.angpos(),
                       vel.x, vel.y, e.angvel()});
-        m_collider.add_entity_intervals(e_ptr);
         e.retrieve();
+        m_collider.add_entity_intervals(e_ptr);
 
         DBG_LOG("Added entity with index %zu and id %zu.\n", e.m_index, e.m_id)
 #ifdef DEBUG
