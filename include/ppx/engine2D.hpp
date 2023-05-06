@@ -8,7 +8,7 @@
 #include "ppx/force2D.hpp"
 #include "ppx/interaction2D.hpp"
 #include "ppx/spring2D.hpp"
-#include "utils/container_view.hpp"
+#include "cvw/container_view.hpp"
 #include "ppx/rigid_bar2D.hpp"
 #include "ppx/engine_events.hpp"
 #include "rk/tableaus.hpp"
@@ -43,7 +43,7 @@ namespace ppx
             static_assert(std::is_convertible<T *, force2D *>::value, "Force must inherit from force2D!");
             const auto force = std::make_shared<T>(std::forward<Args>(args)...);
             m_forces.push_back(force);
-            // CALL EVENT
+            m_events.on_force_addition(force);
             return force;
         }
         template <typename T, class... Args>
@@ -52,7 +52,7 @@ namespace ppx
             static_assert(std::is_convertible<T *, interaction2D *>::value, "Force must inherit from interaction2D!");
             const auto inter = std::make_shared<T>(std::forward<Args>(args)...);
             m_interactions.push_back(inter);
-            // CALL EVENT
+            m_events.on_interaction_addition(inter);
             return inter;
         }
 
@@ -66,6 +66,7 @@ namespace ppx
 
         template <typename T, class... Args>
         std::shared_ptr<T> add_constraint(Args &&...args) { return m_compeller.add_constraint<T>(std::forward<Args>(args)...); }
+
         bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
 
         bool remove_force(const std::shared_ptr<const force2D> &force);
@@ -112,12 +113,12 @@ namespace ppx
         const std::vector<std::shared_ptr<interaction2D>> &interactions() const;
         const std::vector<spring2D> &springs() const;
 
-        utils::vector_view<std::shared_ptr<force2D>> forces();
-        utils::vector_view<std::shared_ptr<interaction2D>> interactions();
-        utils::vector_view<spring2D> springs();
+        cvw::vector<std::shared_ptr<force2D>> forces();
+        cvw::vector<std::shared_ptr<interaction2D>> interactions();
+        cvw::vector<spring2D> springs();
 
         const std::vector<entity2D> &entities() const;
-        utils::vector_view<entity2D> entities();
+        cvw::vector<entity2D> entities();
         std::size_t size() const;
 
         const rk::integrator &integrator() const;

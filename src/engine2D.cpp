@@ -230,6 +230,7 @@ namespace ppx
         for (auto it = m_forces.begin(); it != m_forces.end(); ++it)
             if (*it == force)
             {
+                m_events.on_force_removal(*it);
                 m_forces.erase(it);
                 return true;
             }
@@ -240,6 +241,7 @@ namespace ppx
         for (auto it = m_interactions.begin(); it != m_interactions.end(); ++it)
             if (*it == inter)
             {
+                m_events.on_interaction_removal(*it);
                 m_interactions.erase(it);
                 return true;
             }
@@ -416,9 +418,9 @@ namespace ppx
     const std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() const { return m_interactions; }
     const std::vector<spring2D> &engine2D::springs() const { return m_springs; }
 
-    utils::vector_view<std::shared_ptr<force2D>> engine2D::forces() { return m_forces; }
-    utils::vector_view<std::shared_ptr<interaction2D>> engine2D::interactions() { return m_interactions; }
-    utils::vector_view<spring2D> engine2D::springs() { return m_springs; }
+    cvw::vector<std::shared_ptr<force2D>> engine2D::forces() { return m_forces; }
+    cvw::vector<std::shared_ptr<interaction2D>> engine2D::interactions() { return m_interactions; }
+    cvw::vector<spring2D> engine2D::springs() { return m_springs; }
 
     const_entity2D_ptr engine2D::operator[](const glm::vec2 &point) const
     {
@@ -438,7 +440,7 @@ namespace ppx
     }
 
     const std::vector<entity2D> &engine2D::entities() const { return m_entities; }
-    utils::vector_view<entity2D> engine2D::entities() { return m_entities; }
+    cvw::vector<entity2D> engine2D::entities() { return m_entities; }
     std::size_t engine2D::size() const { return m_entities.size(); }
 
     const rk::integrator &engine2D::integrator() const { return m_integ; }
