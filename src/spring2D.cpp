@@ -13,31 +13,31 @@ namespace ppx
                                              m_stiffness(stiffness),
                                              m_dampening(dampening),
                                              m_length(length),
-                                             m_has_joints(false) {}
+                                             m_has_anchors(false) {}
 
     spring2D::spring2D(const entity2D_ptr &e1,
                        const entity2D_ptr &e2,
-                       const glm::vec2 &joint1,
-                       const glm::vec2 &joint2,
+                       const glm::vec2 &anchor1,
+                       const glm::vec2 &anchor2,
                        const float stiffness,
                        const float dampening,
                        const float length) : m_e1(e1),
                                              m_e2(e2),
-                                             m_joint1(joint1),
-                                             m_joint2(joint2),
+                                             m_anchor1(anchor1),
+                                             m_anchor2(anchor2),
                                              m_stiffness(stiffness),
                                              m_dampening(dampening),
                                              m_angle1(e1->angpos()),
                                              m_angle2(e2->angpos()),
                                              m_length(length),
-                                             m_has_joints(true) {}
+                                             m_has_anchors(true) {}
 
     std::tuple<glm::vec2, float, float> spring2D::force() const
     {
-        return m_has_joints ? with_joints_force() : without_joints_force();
+        return m_has_anchors ? with_anchors_force() : without_anchors_force();
     }
 
-    std::tuple<glm::vec2, float, float> spring2D::without_joints_force() const
+    std::tuple<glm::vec2, float, float> spring2D::without_anchors_force() const
     {
         const glm::vec2 relpos = m_e2->pos() - m_e1->pos(),
                         direction = glm::normalize(relpos),
@@ -46,19 +46,19 @@ namespace ppx
         return {m_stiffness * (relpos - vlen) + m_dampening * relvel, 0.f, 0.f};
     }
 
-    std::tuple<glm::vec2, float, float> spring2D::with_joints_force() const
+    std::tuple<glm::vec2, float, float> spring2D::with_anchors_force() const
     {
-        const glm::vec2 rot_joint1 = joint1(),
-                        rot_joint2 = joint2();
-        const glm::vec2 p1 = m_e1->pos() + rot_joint1,
-                        p2 = m_e2->pos() + rot_joint2;
+        const glm::vec2 rot_anchor1 = anchor1(),
+                        rot_anchor2 = anchor2();
+        const glm::vec2 p1 = m_e1->pos() + rot_anchor1,
+                        p2 = m_e2->pos() + rot_anchor2;
         const glm::vec2 relpos = p2 - p1,
                         direction = glm::normalize(relpos),
-                        relvel = direction * glm::dot(m_e2->vel_at(rot_joint2) - m_e1->vel_at(rot_joint1), direction),
+                        relvel = direction * glm::dot(m_e2->vel_at(rot_anchor2) - m_e1->vel_at(rot_anchor1), direction),
                         vlen = m_length * direction;
 
         const glm::vec2 force = m_stiffness * (relpos - vlen) + m_dampening * relvel;
-        const float torque1 = cross(rot_joint1, force), torque2 = cross(force, rot_joint2);
+        const float torque1 = cross(rot_anchor1, force), torque2 = cross(force, rot_anchor2);
         return {force, torque1, torque2};
     }
 
@@ -66,10 +66,10 @@ namespace ppx
     {
         m_e1 = e1;
         m_e2 = e2;
-        if (m_has_joints)
+        if (m_has_anchors)
         {
-            joint1(joint1());
-            joint2(joint2());
+            anchor1(anchor1());
+            anchor2(anchor2());
         }
     }
     bool spring2D::try_validate() { return m_e1.try_validate() && m_e2.try_validate(); }
@@ -85,8 +85,8 @@ namespace ppx
     float spring2D::kinetic_energy() const { return m_e1->kinetic_energy() + m_e2->kinetic_energy(); }
     float spring2D::potential_energy() const
     {
-        const glm::vec2 p1 = m_e1->pos() + joint1(),
-                        p2 = m_e2->pos() + joint2();
+        const glm::vec2 p1 = m_e1->pos() + anchor1(),
+                        p2 = m_e2->pos() + anchor2();
         const float dist = glm::distance(p1, p2) - m_length;
         return 0.5f * m_stiffness * dist * dist;
     }
@@ -95,23 +95,23 @@ namespace ppx
     const entity2D_ptr &spring2D::e1() const { return m_e1; }
     const entity2D_ptr &spring2D::e2() const { return m_e2; }
 
-    glm::vec2 spring2D::joint1() const { return glm::rotate(m_joint1, m_e1->angpos() - m_angle1); }
-    glm::vec2 spring2D::joint2() const { return glm::rotate(m_joint2, m_e2->angpos() - m_angle2); }
+    glm::vec2 spring2D::anchor1() const { return glm::rotate(m_anchor1, m_e1->angpos() - m_angle1); }
+    glm::vec2 spring2D::anchor2() const { return glm::rotate(m_anchor2, m_e2->angpos() - m_angle2); }
 
-    void spring2D::joint1(const glm::vec2 &joint1)
+    void spring2D::anchor1(const glm::vec2 &anchor1)
     {
-        m_joint1 = joint1;
+        m_anchor1 = anchor1;
         m_angle1 = m_e1->angpos();
-        m_has_joints = true;
+        m_has_anchors = true;
     }
-    void spring2D::joint2(const glm::vec2 &joint2)
+    void spring2D::anchor2(const glm::vec2 &anchor2)
     {
-        m_joint2 = joint2;
+        m_anchor2 = anchor2;
         m_angle2 = m_e2->angpos();
-        m_has_joints = true;
+        m_has_anchors = true;
     }
 
-    bool spring2D::has_joints() const { return m_has_joints; }
+    bool spring2D::has_anchors() const { return m_has_anchors; }
 #ifdef HAS_YAML_CPP
     YAML::Emitter &operator<<(YAML::Emitter &out, const spring2D &sp)
     {
@@ -120,10 +120,10 @@ namespace ppx
         out << YAML::Key << "ID2" << YAML::Value << sp.e2().id();
         out << YAML::Key << "Index1" << YAML::Value << sp.e1().index();
         out << YAML::Key << "Index2" << YAML::Value << sp.e2().index();
-        if (sp.has_joints())
+        if (sp.has_anchors())
         {
-            out << YAML::Key << "Joint1" << YAML::Value << sp.joint1();
-            out << YAML::Key << "Joint2" << YAML::Value << sp.joint2();
+            out << YAML::Key << "Anchor1" << YAML::Value << sp.anchor1();
+            out << YAML::Key << "Anchor2" << YAML::Value << sp.anchor2();
         }
         out << YAML::Key << "Stiffness" << YAML::Value << sp.stiffness();
         out << YAML::Key << "Dampening" << YAML::Value << sp.dampening();
@@ -144,10 +144,10 @@ namespace YAML
         node["ID2"] = sp.e2().id();
         node["Index1"] = sp.e1().index();
         node["Index2"] = sp.e2().index();
-        if (sp.has_joints())
+        if (sp.has_anchors())
         {
-            node["Joint1"] = sp.joint1();
-            node["Joint2"] = sp.joint2();
+            node["Anchor1"] = sp.anchor1();
+            node["Anchor2"] = sp.anchor2();
         }
         node["Stiffness"] = sp.stiffness();
         node["Dampening"] = sp.dampening();
