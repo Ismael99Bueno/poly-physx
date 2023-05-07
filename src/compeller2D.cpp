@@ -91,13 +91,13 @@ namespace ppx
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t j = 0; j < rows; j++)
             {
-                const std::size_t id = i * rows + j;
+                const std::size_t idx = i * rows + j;
                 for (std::size_t k = 0; k < cols; k++)
                 {
                     if (inv_masses[k] == 0.f)
                         continue;
-                    const std::size_t id1 = i * cols + k, id2 = j * cols + k;
-                    A[id] += jcb[id1] * jcb[id2] * inv_masses[k];
+                    const std::size_t idx1 = i * cols + k, idx2 = j * cols + k;
+                    A[idx] += jcb[idx1] * jcb[idx2] * inv_masses[k];
                 }
             }
         return A;
@@ -118,10 +118,10 @@ namespace ppx
                 for (std::size_t k = 0; k < 3; k++)
                 {
                     const std::size_t index1 = j * 3 + k, index2 = j * 6 + k;
-                    const std::size_t id = i * cols + index1;
+                    const std::size_t idx = i * cols + index1;
 
-                    const float to_substract = djcb[id] * stchanges[index2] +
-                                               jcb[id] * stchanges[index2 + 3] * inv_masses[index1];
+                    const float to_substract = djcb[idx] * stchanges[index2] +
+                                               jcb[idx] * stchanges[index2 + 3] * inv_masses[index1];
                     b[i] -= to_substract;
                 }
             const float anti_drift = (m_constraints[i]->stiffness() * m_constraints[i]->value() +
@@ -184,9 +184,9 @@ namespace ppx
             for (std::size_t j = 0; j < 3; j++)
                 for (std::size_t k = 0; k < rows; k++)
                 {
-                    const std::size_t id1 = 6 * i + j + 3,
-                                      id2 = k * cols + 3 * i + j;
-                    stchanges[id1] += jcb[id2] * lambda[k];
+                    const std::size_t idx1 = 6 * i + j + 3,
+                                      idx2 = k * cols + 3 * i + j;
+                    stchanges[idx1] += jcb[idx2] * lambda[k];
                 }
     }
 }

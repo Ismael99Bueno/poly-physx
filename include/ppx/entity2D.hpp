@@ -6,6 +6,7 @@
 #include "geo/circle.hpp"
 #include "rk/state.hpp"
 #include "ppx/entity_events.hpp"
+#include "ppx/uuid.hpp"
 #include <variant>
 
 namespace ppx
@@ -72,7 +73,7 @@ namespace ppx
         shape_type type() const;
 
         std::size_t index() const;
-        std::size_t id() const;
+        uuid id() const;
 
         float inertia() const;
 
@@ -104,7 +105,8 @@ namespace ppx
         std::variant<geo::polygon, geo::circle> m_shape;
         rk::state *m_state = nullptr;
         glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
-        std::size_t m_index = 0, m_id = 0;
+        std::size_t m_index = 0;
+        ppx::uuid m_uuid;
         entity_events m_events;
         float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
         bool m_kinematic;

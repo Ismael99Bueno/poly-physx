@@ -2,6 +2,7 @@
 #define ENTITY_EVENTS_HPP
 
 #include "ppx/event.hpp"
+#include "ppx/uuid.hpp"
 #include <vector>
 #include <functional>
 #include <unordered_set>
@@ -21,7 +22,7 @@ namespace ppx
 
     private:
         mutable bool m_processed = false;
-        mutable std::unordered_set<std::size_t> m_collided_ids;
+        mutable std::unordered_set<uuid> m_collided_ids;
 
         void reset();
 

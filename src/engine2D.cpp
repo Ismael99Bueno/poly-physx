@@ -171,11 +171,9 @@ namespace ppx
 
     entity2D_ptr engine2D::process_entity_addition(entity2D &e)
     {
-        static std::size_t id = 0;
         rk::state &state = m_integ.state();
         e.m_index = m_entities.size() - 1;
         e.m_state = &state;
-        e.m_id = id++;
 
         const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
         const glm::vec2 &pos = e.pos(), &vel = e.vel();
@@ -316,7 +314,7 @@ namespace ppx
     }
     float engine2D::energy() const { return kinetic_energy() + potential_energy(); }
 
-    std::optional<std::size_t> engine2D::index_from_id(const std::size_t id) const
+    std::optional<std::size_t> engine2D::index_from_id(const uuid id) const
     {
         for (std::size_t i = 0; i < m_entities.size(); i++)
             if (m_entities[i].id() == id)
@@ -324,13 +322,13 @@ namespace ppx
         return {};
     }
 
-    const_entity2D_ptr engine2D::from_id(std::size_t id) const
+    const_entity2D_ptr engine2D::from_id(uuid id) const
     {
         const auto index = index_from_id(id);
         return index ? (*this)[index.value()] : nullptr;
     }
 
-    entity2D_ptr engine2D::from_id(std::size_t id)
+    entity2D_ptr engine2D::from_id(uuid id)
     {
         const auto index = index_from_id(id);
         return index ? (*this)[index.value()] : nullptr;

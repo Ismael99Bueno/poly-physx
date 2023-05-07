@@ -139,7 +139,7 @@ namespace ppx
     entity2D::shape_type entity2D::type() const { return m_shape.index() == 0 ? POLYGON : CIRCLE; }
 
     std::size_t entity2D::index() const { return m_index; }
-    std::size_t entity2D::id() const { return m_id; }
+    uuid entity2D::id() const { return m_uuid; }
 
     float entity2D::inertia() const { return shape().inertia() * m_mass; }
 
@@ -177,7 +177,7 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "ID" << YAML::Value << e.id();
+        out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)e.id();
         out << YAML::Key << "Index" << YAML::Value << e.index();
         out << YAML::Key << "Shape" << YAML::Value << e.shape();
         out << YAML::Key << "Velocity" << YAML::Value << e.vel();
@@ -197,7 +197,7 @@ namespace YAML
     Node convert<ppx::entity2D>::encode(const ppx::entity2D &e)
     {
         Node node;
-        node["ID"] = e.id();
+        node["UUID"] = (std::uint64_t)e.id();
         node["Index"] = e.index();
         node["Shape"] = e.shape();
         node["Velocity"] = e.vel();
@@ -212,7 +212,7 @@ namespace YAML
         if (!node.IsMap() || node.size() != 8)
             return false;
 
-        e.m_id = node["ID"].as<std::size_t>();
+        e.m_uuid = node["UUID"].as<std::uint64_t>();
         e.m_index = node["Index"].as<std::size_t>();
         if (node["Shape"]["Radius"])
             e.shape(node["Shape"].as<geo::circle>());

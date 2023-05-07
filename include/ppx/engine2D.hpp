@@ -83,8 +83,8 @@ namespace ppx
         float potential_energy() const;
         float energy() const;
 
-        const_entity2D_ptr from_id(std::size_t id) const;
-        entity2D_ptr from_id(std::size_t id);
+        const_entity2D_ptr from_id(uuid id) const;
+        entity2D_ptr from_id(uuid id);
 
         template <typename T>
         std::shared_ptr<T> by_name(const char *name) const
@@ -151,7 +151,7 @@ namespace ppx
         void retrieve(const std::vector<float> &vars_buffer);
         void register_forces_into_entities();
         void validate();
-        std::optional<std::size_t> index_from_id(std::size_t id) const;
+        std::optional<std::size_t> index_from_id(uuid id) const;
 
         template <typename T, typename S>
         static std::shared_ptr<T> by_name(const char *name, const std::vector<std::shared_ptr<S>> &vec)

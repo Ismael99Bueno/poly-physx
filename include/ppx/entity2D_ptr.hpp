@@ -13,7 +13,7 @@ namespace ppx
         const_entity2D_ptr(const std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
-        std::size_t id() const;
+        uuid id() const;
 
         const entity2D *raw() const;
         const entity2D *operator->() const;
@@ -26,10 +26,11 @@ namespace ppx
 
     private:
         // Private ctr ensuring conversion between non const to const acts like a copy
-        const_entity2D_ptr(const std::vector<entity2D> *buffer, std::size_t index, std::size_t id);
+        const_entity2D_ptr(const std::vector<entity2D> *buffer, std::size_t index, uuid id);
 
         const std::vector<entity2D> *m_buffer = nullptr;
-        std::size_t m_index = 0, m_id = 0;
+        std::size_t m_index = 0;
+        uuid m_id = 0;
         friend class entity2D_ptr;
     };
 
@@ -43,7 +44,7 @@ namespace ppx
         entity2D_ptr(std::vector<entity2D> *buffer, std::size_t index = 0);
 
         std::size_t index() const;
-        std::size_t id() const;
+        uuid id() const;
 
         entity2D *raw() const;
         entity2D *operator->() const;
@@ -57,7 +58,8 @@ namespace ppx
 
     private:
         std::vector<entity2D> *m_buffer = nullptr;
-        std::size_t m_index = 0, m_id = 0;
+        std::size_t m_index = 0;
+        uuid m_id = 0;
     };
 
     bool operator==(const entity2D_ptr &e1, const entity2D_ptr &e2);

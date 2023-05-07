@@ -62,8 +62,8 @@ namespace ppx
 #ifdef HAS_YAML_CPP
     void joint2D::write(YAML::Emitter &out) const
     {
-        out << YAML::Key << "ID1" << YAML::Value << m_e1.id();
-        out << YAML::Key << "ID2" << YAML::Value << m_e2.id();
+        out << YAML::Key << "ID1" << YAML::Value << (std::uint64_t)m_e1.id();
+        out << YAML::Key << "ID2" << YAML::Value << (std::uint64_t)m_e2.id();
         out << YAML::Key << "Index1" << YAML::Value << m_e1.index();
         out << YAML::Key << "Index2" << YAML::Value << m_e2.index();
         if (m_has_anchors)
@@ -76,8 +76,8 @@ namespace ppx
     YAML::Node joint2D::encode() const
     {
         YAML::Node node;
-        node["ID1"] = m_e1.id();
-        node["ID2"] = m_e2.id();
+        node["ID1"] = (std::uint64_t)m_e1.id();
+        node["ID2"] = (std::uint64_t)m_e2.id();
         node["Index1"] = m_e1.index();
         node["Index2"] = m_e2.index();
         if (m_has_anchors)

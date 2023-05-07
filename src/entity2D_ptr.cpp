@@ -13,15 +13,15 @@ namespace ppx
     }
     const_entity2D_ptr::const_entity2D_ptr(const std::vector<entity2D> *buffer,
                                            std::size_t index,
-                                           std::size_t id) : m_buffer(buffer),
-                                                             m_index(index),
-                                                             m_id(id) {}
+                                           uuid id) : m_buffer(buffer),
+                                                      m_index(index),
+                                                      m_id(id) {}
 
     std::size_t const_entity2D_ptr::index() const
     {
         return m_index;
     }
-    std::size_t const_entity2D_ptr::id() const { return m_id; }
+    uuid const_entity2D_ptr::id() const { return m_id; }
 
     const entity2D *const_entity2D_ptr::raw() const { return &((*m_buffer)[m_index]); }
     const entity2D *const_entity2D_ptr::operator->() const { return &((*m_buffer)[m_index]); }
@@ -58,7 +58,7 @@ namespace ppx
     }
 
     std::size_t entity2D_ptr::index() const { return m_index; }
-    std::size_t entity2D_ptr::id() const { return m_id; }
+    uuid entity2D_ptr::id() const { return m_id; }
 
     entity2D *entity2D_ptr::raw() const { return &((*m_buffer)[m_index]); }
     entity2D *entity2D_ptr::operator->() const { return &((*m_buffer)[m_index]); }
@@ -92,11 +92,11 @@ namespace std
 {
     size_t hash<ppx::const_entity2D_ptr>::operator()(const ppx::const_entity2D_ptr &key) const
     {
-        return hash<size_t>()(key.id());
+        return hash<ppx::uuid>()(key.id());
     }
 
     size_t hash<ppx::entity2D_ptr>::operator()(const ppx::entity2D_ptr &key) const
     {
-        return hash<size_t>()(key.id());
+        return hash<ppx::uuid>()(key.id());
     }
 }

@@ -16,5 +16,6 @@
 #include <cstdint>
 #include <variant>
 #include <yaml-cpp/yaml.h>
+#include <random>
 
 #endif
