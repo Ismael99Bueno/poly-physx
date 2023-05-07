@@ -224,7 +224,6 @@ namespace ppx
     }
 
     bool engine2D::remove_entity(const entity2D &e) { return remove_entity(e.index()); }
-    bool engine2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr) { return m_compeller.remove_constraint(ctr); }
     bool engine2D::remove_force(const std::shared_ptr<const force2D> &force)
     {
         for (auto it = m_forces.begin(); it != m_forces.end(); ++it)
@@ -404,6 +403,7 @@ namespace ppx
     collider2D &engine2D::collider() { return m_collider; }
 
     const compeller2D &engine2D::compeller() const { return m_compeller; }
+    compeller2D &engine2D::compeller() { return m_compeller; }
 
     engine_events &engine2D::events() { return m_events; }
 
@@ -517,13 +517,13 @@ namespace YAML
                               idx2 = n["Index2"].as<std::size_t>();
             if (n["Anchor1"])
             {
-                const auto rb = eng.add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2],
-                                                                     n["Anchor1"].as<glm::vec2>(),
-                                                                     n["Anchor2"].as<glm::vec2>());
+                const auto rb = eng.compeller().add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2],
+                                                                                 n["Anchor1"].as<glm::vec2>(),
+                                                                                 n["Anchor2"].as<glm::vec2>());
                 n.as<ppx::rigid_bar2D>(*rb);
                 continue;
             }
-            const auto rb = eng.add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2]);
+            const auto rb = eng.compeller().add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2]);
             n.as<ppx::rigid_bar2D>(*rb);
         }
 

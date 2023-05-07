@@ -64,11 +64,6 @@ namespace ppx
             return sp;
         }
 
-        template <typename T, class... Args>
-        std::shared_ptr<T> add_constraint(Args &&...args) { return m_compeller.add_constraint<T>(std::forward<Args>(args)...); }
-
-        bool remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr);
-
         bool remove_force(const std::shared_ptr<const force2D> &force);
         bool remove_interaction(const std::shared_ptr<const interaction2D> &inter);
         bool remove_spring(std::size_t index);
@@ -128,6 +123,8 @@ namespace ppx
         collider2D &collider();
 
         const compeller2D &compeller() const;
+        compeller2D &compeller();
+
         engine_events &events();
 
         float elapsed() const;
