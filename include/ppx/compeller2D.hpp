@@ -23,7 +23,7 @@ namespace ppx
         template <typename T, class... Args>
         std::shared_ptr<T> add_constraint(Args &&...args)
         {
-            static_assert(std::is_convertible<T *, constraint_interface2D *>::value, "Constraint must inherit from constraint2D!");
+            static_assert(std::is_base_of<constraint_interface2D, T>::value, "Constraint must inherit from constraint2D!");
             const auto ctr = std::make_shared<T>(std::forward<Args>(args)...);
             m_constraints.push_back(ctr);
             m_callbacks->on_constraint_addition(ctr);

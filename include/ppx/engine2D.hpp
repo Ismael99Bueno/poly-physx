@@ -40,7 +40,7 @@ namespace ppx
         template <typename T, class... Args>
         std::shared_ptr<T> add_force(Args &&...args)
         {
-            static_assert(std::is_convertible<T *, force2D *>::value, "Force must inherit from force2D!");
+            static_assert(std::is_base_of<force2D, T>::value, "Force must inherit from force2D!");
             const auto force = std::make_shared<T>(std::forward<Args>(args)...);
             m_forces.push_back(force);
             m_events.on_force_addition(force);
@@ -49,7 +49,7 @@ namespace ppx
         template <typename T, class... Args>
         std::shared_ptr<T> add_interaction(Args &&...args)
         {
-            static_assert(std::is_convertible<T *, interaction2D *>::value, "Force must inherit from interaction2D!");
+            static_assert(std::is_base_of<interaction2D, T>::value, "Force must inherit from interaction2D!");
             const auto inter = std::make_shared<T>(std::forward<Args>(args)...);
             m_interactions.push_back(inter);
             m_events.on_interaction_addition(inter);
@@ -88,17 +88,17 @@ namespace ppx
         float potential_energy() const;
         float energy() const;
 
-        const_entity2D_ptr entity_from_index(std::size_t index) const;
-        entity2D_ptr entity_from_index(std::size_t index);
+        const_entity2D_ptr from_id(std::size_t id) const;
+        entity2D_ptr from_id(std::size_t id);
 
-        const_entity2D_ptr entity_from_id(std::size_t id) const;
-        entity2D_ptr entity_from_id(std::size_t id);
-
-        const spring2D *spring_from_entities(const entity2D &e1, const entity2D &e2) const;
-        spring2D *spring_from_entities(const entity2D &e1, const entity2D &e2);
-
-        std::shared_ptr<const rigid_bar2D> rbar_from_entities(const entity2D &e1, const entity2D &e2) const;
-        std::shared_ptr<rigid_bar2D> rbar_from_entities(const entity2D &e1, const entity2D &e2);
+        template <typename T>
+        std::shared_ptr<T> by_name(const char *name) const
+        {
+            static_assert(std::is_base_of<entity2D_set, T>::value, "Type must inherit from force2D or interaction2D!");
+            if (std::is_base_of<force2D, T>::value)
+                return by_name<T, force2D>(name, m_forces);
+            return by_name<T, interaction2D>(name, m_interactions);
+        }
 
         const_entity2D_ptr operator[](std::size_t index) const;
         entity2D_ptr operator[](std::size_t index);
@@ -154,11 +154,16 @@ namespace ppx
         void retrieve(const std::vector<float> &vars_buffer);
         void register_forces_into_entities();
         void validate();
+        std::optional<std::size_t> index_from_id(std::size_t id) const;
 
-        static void load_force(std::vector<float> &stchanges,
-                               const glm::vec2 &force,
-                               float torque,
-                               std::size_t index);
+        template <typename T, typename S>
+        static std::shared_ptr<T> by_name(const char *name, const std::vector<std::shared_ptr<S>> &vec)
+        {
+            for (const auto &elm : vec)
+                if (strcmp(name, elm->name()) == 0)
+                    return std::dynamic_pointer_cast<T>(elm);
+            return nullptr;
+        }
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
         engine2D(const engine2D &) = delete;

@@ -49,6 +49,16 @@ namespace ppx
         return valid;
     }
 
+    static void load_force(std::vector<float> &stchanges,
+                           const glm::vec2 &force,
+                           float torque,
+                           std::size_t index)
+    {
+        stchanges[index + 3] += force.x;
+        stchanges[index + 4] += force.y;
+        stchanges[index + 5] += torque;
+    }
+
     void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
@@ -78,16 +88,6 @@ namespace ppx
             m_entities[i].m_force = {step[index + 3], step[index + 4]};
             m_entities[i].m_torque = step[index + 5];
         }
-    }
-
-    void engine2D::load_force(std::vector<float> &stchanges,
-                              const glm::vec2 &force,
-                              float torque,
-                              std::size_t index)
-    {
-        stchanges[index + 3] += force.x;
-        stchanges[index + 4] += force.y;
-        stchanges[index + 5] += torque;
     }
 
     void engine2D::validate()
@@ -317,82 +317,36 @@ namespace ppx
     }
     float engine2D::energy() const { return kinetic_energy() + potential_energy(); }
 
-    const_entity2D_ptr engine2D::entity_from_index(const std::size_t index) const
+    std::optional<std::size_t> engine2D::index_from_id(const std::size_t id) const
+    {
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+            if (m_entities[i].id() == id)
+                return i;
+        return {};
+    }
+
+    const_entity2D_ptr engine2D::from_id(std::size_t id) const
+    {
+        const auto index = index_from_id(id);
+        return index ? (*this)[index.value()] : nullptr;
+    }
+
+    entity2D_ptr engine2D::from_id(std::size_t id)
+    {
+        const auto index = index_from_id(id);
+        return index ? (*this)[index.value()] : nullptr;
+    }
+
+    const_entity2D_ptr engine2D::operator[](const std::size_t index) const
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
         return {&m_entities, index};
     }
-    entity2D_ptr engine2D::entity_from_index(const std::size_t index)
+    entity2D_ptr engine2D::operator[](const std::size_t index)
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
         return {&m_entities, index};
     }
-
-    const_entity2D_ptr engine2D::entity_from_id(const std::size_t id) const
-    {
-        for (std::size_t i = 0; i < m_entities.size(); i++)
-            if (m_entities[i].id() == id)
-                return {&m_entities, i};
-        return nullptr;
-    }
-    entity2D_ptr engine2D::entity_from_id(const std::size_t id)
-    {
-        for (std::size_t i = 0; i < m_entities.size(); i++)
-            if (m_entities[i].id() == id)
-                return {&m_entities, i};
-        return nullptr;
-    }
-
-    const spring2D *engine2D::spring_from_entities(const entity2D &e1,
-                                                   const entity2D &e2) const
-    {
-        for (const spring2D &sp : m_springs)
-            if ((*sp.e1() == e1 && *sp.e2() == e2) ||
-                (*sp.e1() == e2 && *sp.e2() == e1))
-                return &sp;
-        return nullptr;
-    }
-    spring2D *engine2D::spring_from_entities(const entity2D &e1,
-                                             const entity2D &e2)
-    {
-        for (spring2D &sp : m_springs)
-            if ((*sp.e1() == e1 && *sp.e2() == e2) ||
-                (*sp.e1() == e2 && *sp.e2() == e1))
-                return &sp;
-        return nullptr;
-    }
-
-    std::shared_ptr<const rigid_bar2D> engine2D::rbar_from_entities(const entity2D &e1,
-                                                                    const entity2D &e2) const
-    {
-        for (const auto &ctr : m_compeller.constraints())
-        {
-            const auto rb = std::dynamic_pointer_cast<const rigid_bar2D>(ctr);
-            if (!rb)
-                continue;
-            if ((*rb->e1() == e1 && *rb->e2() == e2) ||
-                (*rb->e1() == e2 && *rb->e2() == e1))
-                return rb;
-        }
-        return nullptr;
-    }
-    std::shared_ptr<rigid_bar2D> engine2D::rbar_from_entities(const entity2D &e1,
-                                                              const entity2D &e2)
-    {
-        for (const auto &ctr : m_compeller.constraints())
-        {
-            const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
-            if (!rb)
-                continue;
-            if ((*rb->e1() == e1 && *rb->e2() == e2) ||
-                (*rb->e1() == e2 && *rb->e2() == e1))
-                return rb;
-        }
-        return nullptr;
-    }
-
-    const_entity2D_ptr engine2D::operator[](const std::size_t index) const { return entity_from_index(index); }
-    entity2D_ptr engine2D::operator[](const std::size_t index) { return entity_from_index(index); }
 
     std::vector<const_entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
     {
@@ -575,34 +529,14 @@ namespace YAML
 
         for (auto it = node["Forces"].begin(); it != node["Forces"].end(); ++it)
         {
-            bool contained = false;
-            std::shared_ptr<ppx::force2D> force;
-            for (const auto &f : eng.forces())
-                if (f->name() == it->first.as<std::string>())
-                {
-                    contained = true;
-                    force = f;
-                    break;
-                }
-            if (!contained)
-                continue;
+            const auto force = eng.by_name<ppx::force2D>(it->first.as<std::string>().c_str());
             force->clear();
             for (const Node &n : node["Forces"][force->name()])
                 force->include(eng[n.as<std::size_t>()]);
         }
         for (auto it = node["Interactions"].begin(); it != node["Interactions"].end(); ++it)
         {
-            bool contained = false;
-            std::shared_ptr<ppx::interaction2D> inter;
-            for (const auto &i : eng.interactions())
-                if (i->name() == it->first.as<std::string>())
-                {
-                    contained = true;
-                    inter = i;
-                    break;
-                }
-            if (!contained)
-                continue;
+            const auto inter = eng.by_name<ppx::interaction2D>(it->first.as<std::string>().c_str());
             inter->clear();
             for (const Node &n : node["Interactions"][inter->name()])
                 inter->include(eng[n.as<std::size_t>()]);
