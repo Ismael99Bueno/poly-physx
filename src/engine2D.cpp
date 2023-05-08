@@ -334,6 +334,11 @@ namespace ppx
         return index ? (*this)[index.value()] : nullptr;
     }
 
+    template <>
+    std::shared_ptr<force2D> engine2D::behaviour_by_name(const char *name) const { return behaviour_by_name(name, m_forces); }
+    template <>
+    std::shared_ptr<interaction2D> engine2D::behaviour_by_name(const char *name) const { return behaviour_by_name(name, m_interactions); }
+
     const_entity2D_ptr engine2D::operator[](const std::size_t index) const
     {
         DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
@@ -527,14 +532,14 @@ namespace YAML
 
         for (auto it = node["Forces"].begin(); it != node["Forces"].end(); ++it)
         {
-            const auto force = eng.by_name<ppx::force2D>(it->first.as<std::string>().c_str());
+            const auto force = eng.behaviour_by_name<ppx::force2D>(it->first.as<std::string>().c_str());
             force->clear();
             for (const Node &n : node["Forces"][force->name()])
                 force->include(eng[n.as<std::size_t>()]);
         }
         for (auto it = node["Interactions"].begin(); it != node["Interactions"].end(); ++it)
         {
-            const auto inter = eng.by_name<ppx::interaction2D>(it->first.as<std::string>().c_str());
+            const auto inter = eng.behaviour_by_name<ppx::interaction2D>(it->first.as<std::string>().c_str());
             inter->clear();
             for (const Node &n : node["Interactions"][inter->name()])
                 inter->include(eng[n.as<std::size_t>()]);
