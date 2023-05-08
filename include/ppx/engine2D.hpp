@@ -87,12 +87,12 @@ namespace ppx
         entity2D_ptr from_id(uuid id);
 
         template <typename T>
-        std::shared_ptr<T> behaviour_by_name(const char *name) const
+        std::shared_ptr<T> behaviour_from_name(const char *name) const
         {
             static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from force2D or interaction2D!");
             if (std::is_base_of<force2D, T>::value)
-                return std::dynamic_pointer_cast<T>(behaviour_by_name(name, m_forces));
-            return std::dynamic_pointer_cast<T>(behaviour_by_name(name, m_interactions));
+                return std::dynamic_pointer_cast<T>(behaviour_from_name(name, m_forces));
+            return std::dynamic_pointer_cast<T>(behaviour_from_name(name, m_interactions));
         }
 
         const_entity2D_ptr operator[](std::size_t index) const;
@@ -154,7 +154,7 @@ namespace ppx
         std::optional<std::size_t> index_from_id(uuid id) const;
 
         template <typename T>
-        static std::shared_ptr<T> behaviour_by_name(const char *name, const std::vector<std::shared_ptr<T>> &vec)
+        static std::shared_ptr<T> behaviour_from_name(const char *name, const std::vector<std::shared_ptr<T>> &vec)
         {
             for (const auto &elm : vec)
                 if (strcmp(name, elm->name()) == 0)
