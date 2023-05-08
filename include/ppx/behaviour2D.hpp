@@ -31,14 +31,15 @@ namespace ppx
         const std::vector<const_entity2D_ptr> &entities() const;
         const char *name() const;
 
+    protected:
+        std::vector<const_entity2D_ptr> m_included;
+
 #ifdef HAS_YAML_CPP
         virtual void write(YAML::Emitter &out) const;
         virtual YAML::Node encode() const;
         virtual bool decode(const YAML::Node &node);
 #endif
 
-    protected:
-        std::vector<const_entity2D_ptr> m_included;
         behaviour2D(const behaviour2D &) = delete;
         behaviour2D &operator=(const behaviour2D &) = delete;
 
@@ -46,6 +47,10 @@ namespace ppx
         const char *m_name;
         const std::vector<entity2D> *m_entities = nullptr;
         friend class engine2D;
+#ifdef HAS_YAML_CPP
+        friend YAML::Emitter &operator<<(YAML::Emitter &, const behaviour2D &);
+        friend struct YAML::convert<behaviour2D>;
+#endif
     };
 
 #ifdef HAS_YAML_CPP

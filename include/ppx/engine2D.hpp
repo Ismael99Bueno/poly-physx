@@ -5,8 +5,7 @@
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/compeller2D.hpp"
 #include "ppx/collider2D.hpp"
-#include "ppx/force2D.hpp"
-#include "ppx/interaction2D.hpp"
+#include "ppx/behaviour2D.hpp"
 #include "ppx/spring2D.hpp"
 #include "cvw/container_view.hpp"
 #include "ppx/rigid_bar2D.hpp"
@@ -38,22 +37,13 @@ namespace ppx
         bool remove_entity(const entity2D &e);
 
         template <typename T, class... Args>
-        std::shared_ptr<T> add_force(Args &&...args)
+        std::shared_ptr<T> add_behaviour(Args &&...args)
         {
-            static_assert(std::is_base_of<force2D, T>::value, "Force must inherit from force2D!");
-            const auto force = std::make_shared<T>(std::forward<Args>(args)...);
-            m_forces.push_back(force);
-            m_events.on_force_addition(force);
-            return force;
-        }
-        template <typename T, class... Args>
-        std::shared_ptr<T> add_interaction(Args &&...args)
-        {
-            static_assert(std::is_base_of<interaction2D, T>::value, "Force must inherit from interaction2D!");
-            const auto inter = std::make_shared<T>(std::forward<Args>(args)...);
-            m_interactions.push_back(inter);
-            m_events.on_interaction_addition(inter);
-            return inter;
+            static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is recommended to inherit from force2D or interaction2D)");
+            const auto bhv = std::make_shared<T>(std::forward<Args>()...);
+            m_behaviours.push_back(bhv);
+            m_events.on_behaviour_addition(bhv);
+            return bhv;
         }
 
         template <class... Args>
@@ -64,14 +54,12 @@ namespace ppx
             return sp;
         }
 
-        bool remove_force(const std::shared_ptr<const force2D> &force);
-        bool remove_interaction(const std::shared_ptr<const interaction2D> &inter);
+        bool remove_behaviour(const std::shared_ptr<behaviour2D> &bhv);
         bool remove_spring(std::size_t index);
         bool remove_spring(const spring2D &sp);
 
         void clear_entities();
-        void clear_forces();
-        void clear_interactions();
+        void clear_behaviours();
         void clear_springs();
         void clear_constraints();
         void clear();
@@ -89,10 +77,8 @@ namespace ppx
         template <typename T>
         std::shared_ptr<T> behaviour_from_name(const char *name) const
         {
-            static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from force2D or interaction2D!");
-            if (std::is_base_of<force2D, T>::value)
-                return std::dynamic_pointer_cast<T>(behaviour_from_name(name, m_forces));
-            return std::dynamic_pointer_cast<T>(behaviour_from_name(name, m_interactions));
+            static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is recommended to inherit from force2D or interaction2D)");
+            return std::dynamic_pointer_cast<T>(behaviour_from_name<behaviour2D>(name));
         }
 
         const_entity2D_ptr operator[](std::size_t index) const;
@@ -104,12 +90,10 @@ namespace ppx
         const_entity2D_ptr operator[](const glm::vec2 &point) const;
         entity2D_ptr operator[](const glm::vec2 &point);
 
-        const std::vector<std::shared_ptr<force2D>> &forces() const;
-        const std::vector<std::shared_ptr<interaction2D>> &interactions() const;
+        const std::vector<std::shared_ptr<behaviour2D>> &behaviours() const;
         const std::vector<spring2D> &springs() const;
 
-        cvw::vector<std::shared_ptr<force2D>> forces();
-        cvw::vector<std::shared_ptr<interaction2D>> interactions();
+        cvw::vector<std::shared_ptr<behaviour2D>> behaviours();
         cvw::vector<spring2D> springs();
 
         const std::vector<entity2D> &entities() const;
@@ -133,8 +117,7 @@ namespace ppx
         std::vector<entity2D> m_entities;
         collider2D m_collider;
         compeller2D m_compeller;
-        std::vector<std::shared_ptr<force2D>> m_forces;
-        std::vector<std::shared_ptr<interaction2D>> m_interactions;
+        std::vector<std::shared_ptr<behaviour2D>> m_behaviours;
         std::vector<spring2D> m_springs;
         std::tuple<float, std::vector<float>, std::vector<entity2D>> m_checkpoint;
         rk::integrator m_integ;
@@ -152,15 +135,6 @@ namespace ppx
         void register_forces_into_entities();
         void validate();
         std::optional<std::size_t> index_from_id(uuid id) const;
-
-        template <typename T>
-        static std::shared_ptr<T> behaviour_from_name(const char *name, const std::vector<std::shared_ptr<T>> &vec)
-        {
-            for (const auto &elm : vec)
-                if (strcmp(name, elm->name()) == 0)
-                    return elm;
-            return nullptr;
-        }
 
         friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
         engine2D(const engine2D &) = delete;

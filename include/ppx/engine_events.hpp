@@ -24,8 +24,7 @@ namespace ppx
         event<spring2D *> on_spring_addition;
         event<spring2D &> on_spring_removal;
         event<const std::shared_ptr<constraint_interface2D> &> on_constraint_addition, on_constraint_removal;
-        event<const std::shared_ptr<force2D> &> on_force_addition, on_force_removal;
-        event<const std::shared_ptr<interaction2D> &> on_interaction_addition, on_interaction_removal;
+        event<const std::shared_ptr<behaviour2D> &> on_behaviour_addition, on_behaviour_removal;
 
         engine_events(const engine_events &) = delete;
         engine_events &operator=(const engine_events &) = delete;

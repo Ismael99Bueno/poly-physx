@@ -94,10 +94,8 @@ namespace ppx
     {
         m_collider.validate();
         m_compeller.validate();
-        for (const std::shared_ptr<force2D> &f : m_forces)
-            f->validate();
-        for (const std::shared_ptr<interaction2D> &i : m_interactions)
-            i->validate();
+        for (const auto &bhv : m_behaviours)
+            bhv->validate();
         for (auto it = m_springs.begin(); it != m_springs.end();)
             if (!it->try_validate())
             {
@@ -111,14 +109,13 @@ namespace ppx
     void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-        for (const std::shared_ptr<force2D> &f : m_forces)
-            for (const const_entity2D_ptr &e : f->entities())
+        for (const auto &bhv : m_behaviours)
+            for (const auto &e : bhv->entities())
             {
                 if (!e->kinematic())
                     continue;
-                const std::size_t index = 6 * e.index();
-                const auto [force, torque] = f->force(*e);
-                load_force(stchanges, force, torque, index);
+                const auto [force, torque] = bhv->force(*e);
+                load_force(stchanges, force, torque, 6 * e.index());
             }
         for (const spring2D &s : m_springs)
         {
@@ -130,19 +127,6 @@ namespace ppx
             if (s.e2()->kinematic())
                 load_force(stchanges, -force, t2, index2);
         }
-        for (const std::shared_ptr<interaction2D> &i : m_interactions)
-            for (const const_entity2D_ptr &e1 : i->entities())
-            {
-                if (!e1->kinematic())
-                    continue;
-                const std::size_t index = 6 * e1.index();
-                for (const const_entity2D_ptr &e2 : i->entities())
-                    if (e1 != e2)
-                    {
-                        const auto [force, torque] = i->force(*e1, *e2);
-                        load_force(stchanges, force, torque, index);
-                    }
-            }
     }
 
     std::vector<float> engine2D::inverse_masses() const
@@ -222,24 +206,13 @@ namespace ppx
     }
 
     bool engine2D::remove_entity(const entity2D &e) { return remove_entity(e.index()); }
-    bool engine2D::remove_force(const std::shared_ptr<const force2D> &force)
+    bool engine2D::remove_behaviour(const std::shared_ptr<behaviour2D> &bhv)
     {
-        for (auto it = m_forces.begin(); it != m_forces.end(); ++it)
-            if (*it == force)
+        for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
+            if (*it == bhv)
             {
-                m_events.on_force_removal(*it);
-                m_forces.erase(it);
-                return true;
-            }
-        return false;
-    }
-    bool engine2D::remove_interaction(const std::shared_ptr<const interaction2D> &inter)
-    {
-        for (auto it = m_interactions.begin(); it != m_interactions.end(); ++it)
-            if (*it == inter)
-            {
-                m_events.on_interaction_removal(*it);
-                m_interactions.erase(it);
+                m_events.on_behaviour_removal(*it);
+                m_behaviours.erase(it);
                 return true;
             }
         return false;
@@ -268,14 +241,12 @@ namespace ppx
         for (std::size_t i = m_entities.size() - 1; i < m_entities.size(); i--)
             remove_entity(i);
     }
-    void engine2D::clear_forces() { m_forces.clear(); }
-    void engine2D::clear_interactions() { m_interactions.clear(); }
+    void engine2D::clear_behaviours() { m_behaviours.clear(); }
     void engine2D::clear_springs() { m_springs.clear(); }
     void engine2D::clear_constraints() { m_compeller.clear_constraints(); }
     void engine2D::clear()
     {
-        m_forces.clear();
-        m_interactions.clear();
+        m_behaviours.clear();
         m_springs.clear();
         m_compeller.clear_constraints();
         clear_entities();
@@ -304,10 +275,8 @@ namespace ppx
     float engine2D::potential_energy() const
     {
         float pot = 0.f;
-        for (const auto &force : m_forces)
-            pot += force->potential_energy();
-        for (const auto &inter : m_interactions)
-            pot += inter->potential_energy();
+        for (const auto &bhv : m_behaviours)
+            pot += bhv->potential_energy();
         for (const spring2D &sp : m_springs)
             pot += sp.potential_energy();
         return pot;
@@ -335,9 +304,13 @@ namespace ppx
     }
 
     template <>
-    std::shared_ptr<force2D> engine2D::behaviour_from_name(const char *name) const { return behaviour_from_name(name, m_forces); }
-    template <>
-    std::shared_ptr<interaction2D> engine2D::behaviour_from_name(const char *name) const { return behaviour_from_name(name, m_interactions); }
+    std::shared_ptr<behaviour2D> engine2D::behaviour_from_name(const char *name) const
+    {
+        for (const auto &bhv : m_behaviours)
+            if (strcmp(name, bhv->name()) == 0)
+                return bhv;
+        return nullptr;
+    }
 
     const_entity2D_ptr engine2D::operator[](const std::size_t index) const
     {
@@ -370,12 +343,10 @@ namespace ppx
         return in_area;
     }
 
-    const std::vector<std::shared_ptr<force2D>> &engine2D::forces() const { return m_forces; }
-    const std::vector<std::shared_ptr<interaction2D>> &engine2D::interactions() const { return m_interactions; }
+    const std::vector<std::shared_ptr<behaviour2D>> &engine2D::behaviours() const { return m_behaviours; }
     const std::vector<spring2D> &engine2D::springs() const { return m_springs; }
 
-    cvw::vector<std::shared_ptr<force2D>> engine2D::forces() { return m_forces; }
-    cvw::vector<std::shared_ptr<interaction2D>> engine2D::interactions() { return m_interactions; }
+    cvw::vector<std::shared_ptr<behaviour2D>> engine2D::behaviours() { return m_behaviours; }
     cvw::vector<spring2D> engine2D::springs() { return m_springs; }
 
     const_entity2D_ptr engine2D::operator[](const glm::vec2 &point) const
@@ -426,24 +397,12 @@ namespace ppx
                 out << *rb;
         }
         out << YAML::EndSeq;
-        out << YAML::Key << "Forces" << YAML::Value << YAML::BeginMap;
-        for (const auto &f : eng.forces())
-        {
-            out << YAML::Key << f->name() << YAML::Value << YAML::Flow << YAML::BeginSeq;
-            for (const auto &e : f->entities())
-                out << e.index();
-            out << YAML::EndSeq;
-        }
+
+        out << YAML::Key << "Behaviours" << YAML::Value << YAML::BeginMap;
+        for (const auto &bhv : eng.behaviours())
+            out << YAML::Key << bhv->name() << YAML::Value << *bhv;
         out << YAML::EndMap;
-        out << YAML::Key << "Interactions" << YAML::Value << YAML::BeginMap;
-        for (const auto &i : eng.interactions())
-        {
-            out << YAML::Key << i->name() << YAML::Value << YAML::Flow << YAML::BeginSeq;
-            for (const auto &e : i->entities())
-                out << e.index();
-            out << YAML::EndSeq;
-        }
-        out << YAML::EndMap;
+
         // Save checkpoint?
         out << YAML::Key << "Integrator" << YAML::Value << eng.integrator();
         out << YAML::Key << "Elapsed" << YAML::Value << eng.elapsed();
@@ -468,17 +427,11 @@ namespace YAML
             if (rb)
                 node["Rigid bars"].push_back(*rb);
         }
-        for (const auto &f : eng.forces())
+        for (const auto &bhv : eng.behaviours())
         {
-            for (const auto &e : f->entities())
-                node["Forces"][f->name()].push_back(e.index());
-            node["Forces"][f->name()].SetStyle(YAML::EmitterStyle::Flow);
-        }
-        for (const auto &i : eng.interactions())
-        {
-            for (const auto &e : i->entities())
-                node["Interactions"][i->name()].push_back(e.index());
-            node["Interactions"][i->name()].SetStyle(YAML::EmitterStyle::Flow);
+            for (const auto &e : bhv->entities())
+                node["Behaviours"][bhv->name()].push_back(e.index());
+            node["Behaviours"][bhv->name()].SetStyle(YAML::EmitterStyle::Flow);
         }
         // Save checkpoint?
         node["Integrator"] = eng.integrator();
@@ -530,19 +483,10 @@ namespace YAML
             n.as<ppx::rigid_bar2D>(*rb);
         }
 
-        for (auto it = node["Forces"].begin(); it != node["Forces"].end(); ++it)
+        for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
         {
-            const auto force = eng.behaviour_from_name<ppx::force2D>(it->first.as<std::string>().c_str());
-            force->clear();
-            for (const Node &n : node["Forces"][force->name()])
-                force->include(eng[n.as<std::size_t>()]);
-        }
-        for (auto it = node["Interactions"].begin(); it != node["Interactions"].end(); ++it)
-        {
-            const auto inter = eng.behaviour_from_name<ppx::interaction2D>(it->first.as<std::string>().c_str());
-            inter->clear();
-            for (const Node &n : node["Interactions"][inter->name()])
-                inter->include(eng[n.as<std::size_t>()]);
+            const auto bhv = eng.behaviour_from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
+            node["Behaviours"][bhv->name()].as<ppx::behaviour2D>(*bhv);
         }
 
         eng.m_elapsed = node["Elapsed"].as<float>();

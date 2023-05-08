@@ -19,7 +19,7 @@ namespace ppx
 
         virtual float potential_energy_pair(const entity2D &e1, const entity2D &e2) const { return 0.f; }
         float potential_energy(const entity2D &e) const override;
-        float potential_energy() const;
+        float potential_energy() const override;
 
     private:
         mutable entity2D m_unit;

@@ -64,12 +64,16 @@ namespace ppx
         for (const auto &e : m_included)
             node["Entities"].push_back(e.index());
         node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
+        return node;
     }
     bool behaviour2D::decode(const YAML::Node &node)
     {
+        if (!node.IsMap() || node.size() < 1)
+            return false;
         clear();
         for (const YAML::Node &n : node["Entities"])
             include({m_entities, n.as<std::size_t>()});
+        return true;
     }
     YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv)
     {
