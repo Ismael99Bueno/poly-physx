@@ -1,14 +1,14 @@
 #ifndef INTERACTION2D_HPP
 #define INTERACTION2D_HPP
 
-#include "ppx/entity2D_set.hpp"
+#include "ppx/behaviour2D.hpp"
 
 namespace ppx
 {
-    class interaction2D : public entity2D_set
+    class interaction2D : public behaviour2D
     {
     public:
-        using entity2D_set::entity2D_set;
+        using behaviour2D::behaviour2D;
         virtual ~interaction2D() = default;
         virtual std::pair<glm::vec2, float> force(const entity2D &e1, const entity2D &e2) const = 0;
         virtual float potential_energy_pair(const entity2D &e1, const entity2D &e2) const { return 0.f; }

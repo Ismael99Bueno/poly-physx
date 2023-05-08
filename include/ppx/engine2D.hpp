@@ -89,7 +89,7 @@ namespace ppx
         template <typename T>
         std::shared_ptr<T> by_name(const char *name) const
         {
-            static_assert(std::is_base_of<entity2D_set, T>::value, "Type must inherit from force2D or interaction2D!");
+            static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from force2D or interaction2D!");
             if (std::is_base_of<force2D, T>::value)
                 return by_name<T, force2D>(name, m_forces);
             return by_name<T, interaction2D>(name, m_interactions);

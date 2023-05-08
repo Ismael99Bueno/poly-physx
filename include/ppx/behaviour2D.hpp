@@ -1,14 +1,14 @@
-#ifndef ENTITY2D_SET_HPP
-#define ENTITY2D_SET_HPP
+#ifndef BEHAVIOUR2D_HPP
+#define BEHAVIOUR2D_HPP
 
 #include "ppx/entity2D_ptr.hpp"
 
 namespace ppx
 {
-    class entity2D_set
+    class behaviour2D
     {
     public:
-        entity2D_set(const char *name, std::size_t allocations = 50);
+        behaviour2D(const char *name, std::size_t allocations = 50);
 
         void validate();
 
@@ -33,15 +33,15 @@ namespace ppx
     protected:
         std::vector<const_entity2D_ptr> m_entities;
 
-        entity2D_set(const entity2D_set &) = delete;
-        entity2D_set &operator=(const entity2D_set &) = delete;
+        behaviour2D(const behaviour2D &) = delete;
+        behaviour2D &operator=(const behaviour2D &) = delete;
 
     private:
         const char *m_name;
     };
 
 #ifdef HAS_YAML_CPP
-    YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D_set &set);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &set);
 #endif
 }
 
@@ -49,10 +49,10 @@ namespace ppx
 namespace YAML
 {
     template <>
-    struct convert<ppx::entity2D_set>
+    struct convert<ppx::behaviour2D>
     {
-        static Node encode(const ppx::entity2D_set &set);
-        static bool decode(const Node &node, ppx::entity2D_set &set);
+        static Node encode(const ppx::behaviour2D &set);
+        static bool decode(const Node &node, ppx::behaviour2D &set);
     };
 }
 #endif

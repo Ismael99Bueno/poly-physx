@@ -1,14 +1,14 @@
 #ifndef FORCE2D_HPP
 #define FORCE2D_HPP
 
-#include "ppx/entity2D_set.hpp"
+#include "ppx/behaviour2D.hpp"
 
 namespace ppx
 {
-    class force2D : public entity2D_set
+    class force2D : public behaviour2D
     {
     public:
-        using entity2D_set::entity2D_set;
+        using behaviour2D::behaviour2D;
         virtual ~force2D() = default;
         virtual std::pair<glm::vec2, float> force(const entity2D &e) const = 0;
 
