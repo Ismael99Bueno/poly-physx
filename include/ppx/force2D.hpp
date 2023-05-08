@@ -10,13 +10,9 @@ namespace ppx
     public:
         using behaviour2D::behaviour2D;
         virtual ~force2D() = default;
-        virtual std::pair<glm::vec2, float> force(const entity2D &e) const = 0;
 
-        virtual float potential_energy(const entity2D &e) const { return 0.f; }
-        float potential_energy() const;
-
-        float energy(const entity2D &e) const;
-        float energy() const;
+        virtual float potential_energy(const entity2D &e) const override { return 0.f; }
+        float potential_energy() const override;
 
     private:
         force2D(const force2D &) = delete;

@@ -5,30 +5,30 @@
 namespace ppx
 {
     behaviour2D::behaviour2D(const char *name,
-                               const std::size_t allocations) : m_name(name) { m_entities.reserve(allocations); }
+                             const std::size_t allocations) : m_name(name) { m_included.reserve(allocations); }
 
     void behaviour2D::validate()
     {
-        for (auto it = m_entities.begin(); it != m_entities.end();)
+        for (auto it = m_included.begin(); it != m_included.end();)
             if (!it->try_validate())
-                it = m_entities.erase(it);
+                it = m_included.erase(it);
             else
                 ++it;
     }
 
-    void behaviour2D::include(const const_entity2D_ptr &e) { m_entities.push_back(e); }
+    void behaviour2D::include(const const_entity2D_ptr &e) { m_included.push_back(e); }
     void behaviour2D::exclude(const entity2D &e)
     {
-        for (auto it = m_entities.begin(); it != m_entities.end(); ++it)
+        for (auto it = m_included.begin(); it != m_included.end(); ++it)
             if (*(*it) == e)
             {
-                m_entities.erase(it);
+                m_included.erase(it);
                 break;
             }
     }
     bool behaviour2D::contains(const entity2D &e) const
     {
-        for (const const_entity2D_ptr &entt : m_entities)
+        for (const const_entity2D_ptr &entt : m_included)
             if (*entt == e)
                 return true;
         return false;
@@ -36,22 +36,45 @@ namespace ppx
     float behaviour2D::kinetic_energy() const
     {
         float ke = 0.f;
-        for (const auto &e : m_entities)
+        for (const auto &e : m_included)
             ke += e->kinetic_energy();
         return ke;
     }
 
-    void behaviour2D::clear() { m_entities.clear(); }
-    std::size_t behaviour2D::size() const { return m_entities.size(); }
+    float behaviour2D::energy(const entity2D &e) const { return e.kinetic_energy() + potential_energy(e); }
+    float behaviour2D::energy() const { return kinetic_energy() + potential_energy(); }
 
-    const std::vector<const_entity2D_ptr> &behaviour2D::entities() const { return m_entities; }
+    void behaviour2D::clear() { m_included.clear(); }
+    std::size_t behaviour2D::size() const { return m_included.size(); }
+
+    const std::vector<const_entity2D_ptr> &behaviour2D::entities() const { return m_included; }
     const char *behaviour2D::name() const { return m_name; }
 
 #ifdef HAS_YAML_CPP
-    YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &set)
+    void behaviour2D::write(YAML::Emitter &out) const
+    {
+        out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq << YAML::Flow;
+        for (const auto &e : m_included)
+            out << e.index();
+        out << YAML::EndSeq;
+    }
+    YAML::Node behaviour2D::encode() const
+    {
+        YAML::Node node;
+        for (const auto &e : m_included)
+            node["Entities"].push_back(e.index());
+        node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
+    }
+    bool behaviour2D::decode(const YAML::Node &node)
+    {
+        clear();
+        for (const YAML::Node &n : node["Entities"])
+            include({m_entities, n.as<std::size_t>()});
+    }
+    YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv)
     {
         out << YAML::BeginMap;
-        set.write(out);
+        bhv.write(out);
         out << YAML::EndMap;
         return out;
     }
@@ -61,13 +84,13 @@ namespace ppx
 #ifdef HAS_YAML_CPP
 namespace YAML
 {
-    Node convert<ppx::behaviour2D>::encode(const ppx::behaviour2D &set)
+    Node convert<ppx::behaviour2D>::encode(const ppx::behaviour2D &bhv)
     {
-        return set.encode();
+        return bhv.encode();
     }
-    bool convert<ppx::behaviour2D>::decode(const Node &node, ppx::behaviour2D &set)
+    bool convert<ppx::behaviour2D>::decode(const Node &node, ppx::behaviour2D &bhv)
     {
-        return set.decode(node);
+        return bhv.decode(node);
     };
 }
 #endif

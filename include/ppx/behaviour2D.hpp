@@ -15,7 +15,16 @@ namespace ppx
         void include(const const_entity2D_ptr &e);
         void exclude(const entity2D &e);
         bool contains(const entity2D &e) const;
+
+        virtual std::pair<glm::vec2, float> force(const entity2D &e) const = 0;
+
         float kinetic_energy() const;
+        virtual float potential_energy() const = 0;
+        virtual float potential_energy(const entity2D &e) const = 0;
+
+        float energy(const entity2D &e) const;
+        float energy() const;
+
         void clear();
         std::size_t size() const;
 
@@ -23,25 +32,24 @@ namespace ppx
         const char *name() const;
 
 #ifdef HAS_YAML_CPP
-        virtual void write(YAML::Emitter &out) const
-        {
-        }
-        virtual YAML::Node encode() const { return YAML::Node(); }
-        virtual bool decode(const YAML::Node &node) { return true; }
+        virtual void write(YAML::Emitter &out) const;
+        virtual YAML::Node encode() const;
+        virtual bool decode(const YAML::Node &node);
 #endif
 
     protected:
-        std::vector<const_entity2D_ptr> m_entities;
-
+        std::vector<const_entity2D_ptr> m_included;
         behaviour2D(const behaviour2D &) = delete;
         behaviour2D &operator=(const behaviour2D &) = delete;
 
     private:
         const char *m_name;
+        const std::vector<entity2D> *m_entities = nullptr;
+        friend class engine2D;
     };
 
 #ifdef HAS_YAML_CPP
-    YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &set);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv);
 #endif
 }
 
@@ -51,8 +59,8 @@ namespace YAML
     template <>
     struct convert<ppx::behaviour2D>
     {
-        static Node encode(const ppx::behaviour2D &set);
-        static bool decode(const Node &node, ppx::behaviour2D &set);
+        static Node encode(const ppx::behaviour2D &bhv);
+        static bool decode(const Node &node, ppx::behaviour2D &bhv);
     };
 }
 #endif
