@@ -18,7 +18,7 @@ namespace ppx
                                                m_kinematic(kinematic)
     {
         geo::shape2D &sh = get_shape();
-        sh.pos(pos);
+        sh.centroid(pos);
         sh.rotation(angpos);
     }
 
@@ -58,7 +58,7 @@ namespace ppx
         const std::size_t idx = 6 * m_index;
         geo::shape2D &sh = get_shape();
 
-        sh.pos({vars_buffer[idx + 0], vars_buffer[idx + 1]});
+        sh.centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});
         sh.rotation(vars_buffer[idx + 2]);
 
         m_vel = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
@@ -162,7 +162,7 @@ namespace ppx
     float entity2D::mass() const { return m_mass; }
     float entity2D::charge() const { return m_charge; }
 
-    void entity2D::pos(const glm::vec2 &pos) { get_shape().pos(pos); }
+    void entity2D::pos(const glm::vec2 &pos) { get_shape().centroid(pos); }
     void entity2D::vel(const glm::vec2 &vel) { m_vel = vel; }
 
     void entity2D::angpos(const float angpos) { get_shape().rotation(angpos); }
