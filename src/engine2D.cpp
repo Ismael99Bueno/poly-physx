@@ -166,10 +166,10 @@ namespace ppx
         e.retrieve();
         m_collider.add_entity_intervals(e_ptr);
 
-        DBG_LOG("Added entity with index %zu and id %zu.\n", e.m_index, e.m_id)
+        DBG_LOG("Added entity with index %zu and id %llu.\n", e.m_index, (std::uint64_t)e.m_uuid)
 #ifdef DEBUG
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
-            DBG_ASSERT(m_entities[i].m_id != e.m_id, "Added entity has the same id as entity with index %zu.\n", i)
+            DBG_ASSERT(m_entities[i].m_uuid != e.m_uuid, "Added entity has the same id as entity with index %zu.\n", i)
 #endif
         m_events.on_entity_addition(e_ptr);
         return e_ptr;
@@ -428,11 +428,8 @@ namespace YAML
                 node["Rigid bars"].push_back(*rb);
         }
         for (const auto &bhv : eng.behaviours())
-        {
-            for (const auto &e : bhv->entities())
-                node["Behaviours"][bhv->name()].push_back(e.index());
-            node["Behaviours"][bhv->name()].SetStyle(YAML::EmitterStyle::Flow);
-        }
+            node["Behaviours"][bhv->name()] = *bhv;
+
         // Save checkpoint?
         node["Integrator"] = eng.integrator();
         node["Elapsed"] = eng.elapsed();
@@ -440,7 +437,7 @@ namespace YAML
     }
     bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
     {
-        if (!node.IsMap() || node.size() != 8)
+        if (!node.IsMap() || node.size() != 7)
             return false;
 
         eng.clear_entities();

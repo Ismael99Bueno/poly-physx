@@ -40,8 +40,9 @@ namespace ppx
         std::shared_ptr<T> add_behaviour(Args &&...args)
         {
             static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is recommended to inherit from force2D or interaction2D)");
-            const auto bhv = std::make_shared<T>(std::forward<Args>()...);
+            const auto bhv = std::make_shared<T>(std::forward<Args>(args)...);
             m_behaviours.push_back(bhv);
+            m_behaviours.back()->m_entities = &m_entities;
             m_events.on_behaviour_addition(bhv);
             return bhv;
         }

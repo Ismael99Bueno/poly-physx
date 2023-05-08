@@ -53,7 +53,7 @@ namespace ppx
 #ifdef HAS_YAML_CPP
     void behaviour2D::write(YAML::Emitter &out) const
     {
-        out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq << YAML::Flow;
+        out << YAML::Key << "Entities" << YAML::Value << YAML::Flow << YAML::BeginSeq;
         for (const auto &e : m_included)
             out << e.index();
         out << YAML::EndSeq;
