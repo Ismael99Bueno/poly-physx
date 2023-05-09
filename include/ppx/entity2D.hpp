@@ -20,12 +20,6 @@ namespace ppx
             CIRCLE = 1
         };
 
-        entity2D(const std::variant<geo::polygon, geo::circle> &shape,
-                 const glm::vec2 &pos = glm::vec2(0.f),
-                 const glm::vec2 &vel = glm::vec2(0.f),
-                 float angpos = 0.f, float angvel = 0.f,
-                 float mass = 1.f, float charge = 1.f,
-                 bool kinematic = true);
         entity2D(const std::vector<glm::vec2> &vertices,
                  const glm::vec2 &pos = glm::vec2(0.f),
                  const glm::vec2 &vel = glm::vec2(0.f),

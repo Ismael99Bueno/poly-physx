@@ -6,22 +6,6 @@
 
 namespace ppx
 {
-    entity2D::entity2D(const std::variant<geo::polygon, geo::circle> &shape,
-                       const glm::vec2 &pos, const glm::vec2 &vel,
-                       const float angpos, const float angvel,
-                       const float mass, const float charge,
-                       const bool kinematic) : m_shape(shape),
-                                               m_vel(vel),
-                                               m_angvel(angvel),
-                                               m_mass(mass),
-                                               m_charge(charge),
-                                               m_kinematic(kinematic)
-    {
-        geo::shape2D &sh = get_shape();
-        sh.centroid(pos);
-        sh.rotation(angpos);
-    }
-
     entity2D::entity2D(const glm::vec2 &pos, const glm::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
