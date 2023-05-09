@@ -17,5 +17,6 @@
 #include <variant>
 #include <yaml-cpp/yaml.h>
 #include <random>
+#include <optional>
 
 #endif
