@@ -9,6 +9,11 @@ namespace ppx
     class spring2D : public joint2D
     {
     public:
+        struct specs : joint2D::specs
+        {
+            float stiffness = 1.f, dampening = 0.f;
+            static specs from_spring(const spring2D &sp);
+        };
         spring2D(const entity2D_ptr &e1,
                  const entity2D_ptr &e2,
                  float stiffness = 1.f,

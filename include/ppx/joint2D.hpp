@@ -8,6 +8,13 @@ namespace ppx
     class joint2D
     {
     public:
+        struct specs
+        {
+            entity2D_ptr e1 = nullptr, e2 = nullptr;
+            glm::vec2 anchor1{0.f}, anchor2{0.f};
+            bool has_anchors = true;
+            static specs from_joint(const joint2D &joint);
+        };
         joint2D(const entity2D_ptr &e1,
                 const entity2D_ptr &e2,
                 float length);

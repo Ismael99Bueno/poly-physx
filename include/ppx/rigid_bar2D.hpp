@@ -9,6 +9,11 @@ namespace ppx
     class rigid_bar2D : public constraint2D<2>, public joint2D
     {
     public:
+        struct specs : joint2D::specs
+        {
+            float stiffness = 500.f, dampening = 30.f;
+            static specs from_rigid_bar(const rigid_bar2D &rb);
+        };
         rigid_bar2D(const entity2D_ptr &e1,
                     const entity2D_ptr &e2,
                     float stiffness = 500.f,

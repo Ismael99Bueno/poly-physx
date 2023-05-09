@@ -14,6 +14,14 @@ namespace ppx
     class entity2D
     {
     public:
+        struct specs
+        {
+            glm::vec2 pos{0.f}, vel{0.f};
+            float angpos = 0.f, angvel = 0.f, mass = 1.f, charge = 1.f;
+            std::variant<std::vector<glm::vec2>, float> shape = geo::polygon::box(5.f);
+            bool kinematic = true;
+            static specs from_entity(const entity2D &e);
+        };
         enum shape_type
         {
             POLYGON = 0,
