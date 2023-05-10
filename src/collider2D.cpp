@@ -335,7 +335,6 @@ namespace YAML
 
         cld.stiffness(node["Stiffness"].as<float>());
         cld.dampening(node["Dampening"].as<float>());
-        cld.quad_tree_build_period(node["Quad tree period"].as<std::uint32_t>());
         cld.coldet((ppx::collider2D::coldet_method)node["Collision detection"].as<int>());
         cld.enabled(node["Enabled"].as<bool>());
         cld.rebuild_quad_tree();
