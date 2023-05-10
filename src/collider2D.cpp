@@ -287,9 +287,14 @@ namespace ppx
     YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
     {
         out << YAML::BeginMap;
+        out << YAML::Key << "Quad tree" << YAML::Value << YAML::BeginMap;
+        out << YAML::Key << "Dimensions" << YAML::Value << cld.quad_tree().aabb();
+        out << YAML::Key << "Max entities" << YAML::Value << cld.quad_tree().max_entities();
+        out << YAML::Key << "Max depth" << YAML::Value << ppx::quad_tree2D::max_depth();
+        out << YAML::Key << "Refresh period" << YAML::Value << cld.quad_tree_build_period();
+        out << YAML::EndMap;
         out << YAML::Key << "Stiffness" << YAML::Value << cld.stiffness();
         out << YAML::Key << "Dampening" << YAML::Value << cld.dampening();
-        out << YAML::Key << "Quad tree period" << YAML::Value << cld.quad_tree_build_period();
         out << YAML::Key << "Collision detection" << YAML::Value << cld.coldet();
         out << YAML::Key << "Enabled" << YAML::Value << cld.enabled();
         out << YAML::EndMap;
@@ -304,9 +309,15 @@ namespace YAML
     Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)
     {
         Node node;
+
+        Node qt = node["Quad tree"];
+        qt["Dimensions"] = cld.quad_tree().aabb();
+        qt["Max entities"] = cld.quad_tree().max_entities();
+        qt["Max depth"] = ppx::quad_tree2D::max_depth();
+        qt["Refresh period"] = cld.quad_tree_build_period();
+
         node["Stiffness"] = cld.stiffness();
         node["Dampening"] = cld.dampening();
-        node["Quad tree period"] = cld.quad_tree_build_period();
         node["Collision detection"] = (int)cld.coldet();
         node["Enabled"] = cld.enabled();
         return node;
@@ -315,6 +326,12 @@ namespace YAML
     {
         if (!node.IsMap() || node.size() != 5)
             return false;
+
+        const Node &qt = node["Quad tree"];
+        cld.quad_tree().aabb(qt["Dimensions"].as<geo::aabb2D>());
+        cld.quad_tree().max_entities(qt["Max entities"].as<std::size_t>());
+        ppx::quad_tree2D::max_depth(qt["Max depth"].as<std::uint32_t>());
+        cld.quad_tree_build_period(qt["Refresh period"].as<std::uint32_t>());
 
         cld.stiffness(node["Stiffness"].as<float>());
         cld.dampening(node["Dampening"].as<float>());
