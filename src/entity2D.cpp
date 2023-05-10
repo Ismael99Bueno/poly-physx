@@ -157,6 +157,22 @@ namespace ppx
     void entity2D::mass(const float mass) { m_mass = mass; }
     void entity2D::charge(const float charge) { m_charge = charge; }
 
+    entity2D::specs entity2D::specs::from_entity(const entity2D &e)
+    {
+        specs spc;
+        spc.pos = e.pos();
+        spc.vel = e.vel();
+        spc.angpos = e.angpos();
+        spc.angvel = e.angvel();
+        spc.mass = e.mass();
+        spc.charge = e.charge();
+        spc.kinematic = e.kinematic();
+        if (const auto *poly = e.shape_if<geo::polygon>())
+            spc.shape = poly->locals();
+        else
+            spc.shape = e.shape<geo::circle>().radius();
+    }
+
     bool operator==(const entity2D &lhs, const entity2D &rhs) { return lhs.id() == rhs.id(); }
     bool operator!=(const entity2D &lhs, const entity2D &rhs) { return lhs.id() != rhs.id(); }
 #ifdef HAS_YAML_CPP

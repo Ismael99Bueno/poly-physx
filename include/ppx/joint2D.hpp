@@ -12,6 +12,7 @@ namespace ppx
         {
             entity2D_ptr e1 = nullptr, e2 = nullptr;
             glm::vec2 anchor1{0.f}, anchor2{0.f};
+            float length = 0.f;
             bool has_anchors = true;
             static specs from_joint(const joint2D &joint);
         };

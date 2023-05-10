@@ -58,6 +58,10 @@ namespace ppx
     }
 
     bool joint2D::has_anchors() const { return m_has_anchors; }
+    joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
+    {
+        return {joint.e1(), joint.e2(), joint.anchor1(), joint.anchor2(), joint.length(), joint.has_anchors()};
+    }
 
 #ifdef HAS_YAML_CPP
     void joint2D::write(YAML::Emitter &out) const

@@ -67,6 +67,10 @@ namespace ppx
         return 0.5f * m_stiffness * dist * dist;
     }
     float spring2D::energy() const { return kinetic_energy() + potential_energy(); }
+    spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
+    {
+        return {sp.e1(), sp.e2(), sp.anchor1(), sp.anchor2(), sp.length(), sp.has_anchors(), sp.stiffness(), sp.dampening()};
+    }
 
 #ifdef HAS_YAML_CPP
     void spring2D::write(YAML::Emitter &out) const
