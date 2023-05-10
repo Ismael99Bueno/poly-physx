@@ -7,9 +7,9 @@
 namespace ppx
 {
     engine2D::engine2D(const rk::butcher_tableau &table,
-                       const std::size_t allocations) : m_collider(engine_key(), &m_entities, 2 * allocations),
-                                                        m_compeller(engine_key(), &m_entities, allocations, &m_events),
-                                                        m_integ(table), m_events(engine_key())
+                       const std::size_t allocations) : m_collider(&m_entities, 2 * allocations),
+                                                        m_compeller(&m_entities, allocations, &m_events),
+                                                        m_integ(table)
     {
         m_entities.reserve(allocations);
         m_integ.state().reserve(6 * allocations);

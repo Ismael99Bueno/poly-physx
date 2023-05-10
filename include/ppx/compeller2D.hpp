@@ -2,7 +2,6 @@
 #define COMPELLER2D_HPP
 
 #include "ppx/entity2D.hpp"
-#include "ppx/pass_key.hpp"
 #include "ppx/engine_events.hpp"
 #include <vector>
 #include <functional>
@@ -15,8 +14,7 @@ namespace ppx
     class compeller2D final
     {
     public:
-        compeller2D(engine_key,
-                    std::vector<entity2D> *entities,
+        compeller2D(std::vector<entity2D> *entities,
                     std::size_t allocations,
                     engine_events *cbs);
 

@@ -6,8 +6,7 @@
 
 namespace ppx
 {
-    compeller2D::compeller2D(engine_key,
-                             std::vector<entity2D> *entities,
+    compeller2D::compeller2D(std::vector<entity2D> *entities,
                              const std::size_t allocations,
                              engine_events *cbs) : m_entities(entities), m_callbacks(cbs)
     {

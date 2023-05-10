@@ -12,12 +12,11 @@ namespace ppx
 {
     static float cross(const glm::vec2 &v1, const glm::vec2 &v2) { return v1.x * v2.y - v1.y * v2.x; }
 
-    collider2D::collider2D(engine_key,
-                           std::vector<entity2D> *entities,
+    collider2D::collider2D(std::vector<entity2D> *entities,
                            const std::size_t allocations,
                            const glm::vec2 &min,
                            const glm::vec2 &max) : m_entities(entities),
-                                                   m_quad_tree(collider_key(), min, max)
+                                                   m_quad_tree(min, max)
     {
         m_intervals.reserve(allocations);
     }

@@ -5,7 +5,6 @@
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraint2D.hpp"
 #include "ppx/quad_tree2D.hpp"
-#include "ppx/pass_key.hpp"
 #include <vector>
 #include <utility>
 
@@ -27,8 +26,7 @@ namespace ppx
             QUAD_TREE = 2
         };
 
-        collider2D(engine_key,
-                   std::vector<entity2D> *entities,
+        collider2D(std::vector<entity2D> *entities,
                    std::size_t allocations,
                    const glm::vec2 &min = -0.5f * glm::vec2(192.f, 128.f),
                    const glm::vec2 &max = 0.5f * glm::vec2(192.f, 128.f));

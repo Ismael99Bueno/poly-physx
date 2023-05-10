@@ -2,7 +2,6 @@
 #define QUAD_TREE2D_HPP
 
 #include "ppx/entity2D_ptr.hpp"
-#include "ppx/pass_key.hpp"
 #include <memory>
 #include <array>
 
@@ -11,8 +10,7 @@ namespace ppx
     class quad_tree2D final
     {
     public:
-        quad_tree2D(collider_key,
-                    const glm::vec2 &min,
+        quad_tree2D(const glm::vec2 &min,
                     const glm::vec2 &max,
                     std::size_t max_entities = 5,
                     std::uint32_t depth = 0);

@@ -4,7 +4,6 @@
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraint_interface2D.hpp"
 #include "ppx/spring2D.hpp"
-#include "ppx/pass_key.hpp"
 #include "ppx/event.hpp"
 #include "ppx/force2D.hpp"
 #include "ppx/interaction2D.hpp"
@@ -16,8 +15,7 @@ namespace ppx
     class engine_events final
     {
     public:
-        engine_events(engine_key) {}
-
+        engine_events() = default;
         event<const entity2D_ptr &> on_entity_addition;
         event<entity2D &> on_early_entity_removal;
         event<std::size_t> on_late_entity_removal;
