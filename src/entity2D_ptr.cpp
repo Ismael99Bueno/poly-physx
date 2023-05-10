@@ -28,7 +28,7 @@ namespace ppx
     const entity2D &const_entity2D_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
     bool const_entity2D_ptr::is_valid() const { return m_index < m_buffer->size() && m_id == (*m_buffer)[m_index].id(); }
-    bool const_entity2D_ptr::try_validate()
+    bool const_entity2D_ptr::validate()
     {
         if (is_valid())
             return true;
@@ -63,7 +63,7 @@ namespace ppx
     entity2D &entity2D_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
     bool entity2D_ptr::is_valid() const { return m_index < m_buffer->size() && m_id == (*m_buffer)[m_index].id(); }
-    bool entity2D_ptr::try_validate()
+    bool entity2D_ptr::validate()
     {
         if (is_valid())
             return true;

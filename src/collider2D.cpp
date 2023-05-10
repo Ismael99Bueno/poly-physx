@@ -31,7 +31,7 @@ namespace ppx
     }
 
     collider2D::interval::end collider2D::interval::type() const { return m_end; }
-    bool collider2D::interval::try_validate() { return m_entity.try_validate(); }
+    bool collider2D::interval::validate() { return m_entity.validate(); }
 
     void collider2D::add_entity_intervals(const const_entity2D_ptr &e)
     {
@@ -71,7 +71,7 @@ namespace ppx
     void collider2D::validate()
     {
         for (auto it = m_intervals.begin(); it != m_intervals.end();)
-            if (!it->try_validate())
+            if (!it->validate())
                 it = m_intervals.erase(it);
             else
                 ++it;

@@ -70,7 +70,7 @@ namespace ppx
             const entity2D *entity() const;
             float value() const;
             end type() const;
-            bool try_validate();
+            bool validate();
 
         private:
             const_entity2D_ptr m_entity;

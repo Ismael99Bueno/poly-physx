@@ -33,7 +33,7 @@ namespace ppx
             anchor2(anchor2());
         }
     }
-    bool joint2D::try_validate() { return m_e1.try_validate() && m_e2.try_validate(); }
+    bool joint2D::validate() { return m_e1.validate() && m_e2.validate(); }
 
     float joint2D::length() const { return m_length; }
     void joint2D::length(const float length) { m_length = length; }

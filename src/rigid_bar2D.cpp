@@ -104,7 +104,7 @@ namespace ppx
         return {-cgd.x, -cgd.y, cgda};
     }
 
-    bool rigid_bar2D::try_validate() { return constraint2D::try_validate() && joint2D::try_validate(); }
+    bool rigid_bar2D::validate() { return constraint2D::validate() && joint2D::validate(); }
 
     void rigid_bar2D::write(YAML::Emitter &out) const
     {

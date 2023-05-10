@@ -34,13 +34,13 @@ namespace ppx
         }
 
         float value() const override { return constraint(m_entities); }
-        virtual bool try_validate() override
+        virtual bool validate() override
         {
             for (const_entity2D_ptr &e : m_entities)
-                if (!e.try_validate())
+                if (!e.validate())
                     return false;
             for (entity2D_ptr &e : m_grad_entities)
-                if (!e.try_validate())
+                if (!e.validate())
                     return false;
             return true;
         }

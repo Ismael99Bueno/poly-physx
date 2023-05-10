@@ -28,7 +28,7 @@ namespace ppx
         float constraint(const std::array<const_entity2D_ptr, 2> &entities) const override;
         float constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const override;
 
-        bool try_validate() override;
+        bool validate() override;
 
     private:
         std::array<float, 3> constraint_grad(entity2D &e) const override;

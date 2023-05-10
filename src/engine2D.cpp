@@ -97,7 +97,7 @@ namespace ppx
         for (const auto &bhv : m_behaviours)
             bhv->validate();
         for (auto it = m_springs.begin(); it != m_springs.end();)
-            if (!it->try_validate())
+            if (!it->validate())
             {
                 m_events.on_spring_removal(*it);
                 it = m_springs.erase(it);

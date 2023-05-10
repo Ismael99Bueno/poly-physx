@@ -10,7 +10,7 @@ namespace ppx
     void behaviour2D::validate()
     {
         for (auto it = m_included.begin(); it != m_included.end();)
-            if (!it->try_validate())
+            if (!it->validate())
                 it = m_included.erase(it);
             else
                 ++it;

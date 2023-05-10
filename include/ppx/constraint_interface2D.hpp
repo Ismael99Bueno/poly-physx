@@ -21,7 +21,7 @@ namespace ppx
         void stiffness(float stiffness);
         void dampening(float dampening);
 
-        virtual bool try_validate() = 0;
+        virtual bool validate() = 0;
 
     protected:
         float m_stiffness, m_dampening;

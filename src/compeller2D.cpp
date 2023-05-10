@@ -34,7 +34,7 @@ namespace ppx
     void compeller2D::validate()
     {
         for (auto it = m_constraints.begin(); it != m_constraints.end();)
-            if (!((*it)->try_validate()))
+            if (!((*it)->validate()))
             {
                 m_callbacks->on_constraint_removal(*it);
                 it = m_constraints.erase(it);

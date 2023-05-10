@@ -26,7 +26,7 @@ namespace ppx
         virtual ~joint2D() = default;
 
         void bind(const entity2D_ptr &e1, const entity2D_ptr &e2);
-        virtual bool try_validate();
+        virtual bool validate();
 
         float length() const;
         void length(float length);
