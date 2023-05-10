@@ -27,10 +27,12 @@ namespace ppx
     const entity2D *const_entity2D_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     const entity2D &const_entity2D_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
-    bool const_entity2D_ptr::is_valid() const { return m_index < m_buffer->size() && m_id == (*m_buffer)[m_index].id(); }
+    bool const_entity2D_ptr::valid() const { return m_buffer != nullptr &&
+                                                    m_index < m_buffer->size() &&
+                                                    m_id == (*m_buffer)[m_index].id(); }
     bool const_entity2D_ptr::validate()
     {
-        if (is_valid())
+        if (valid())
             return true;
         for (const entity2D &e : *m_buffer)
             if (e.id() == m_id)
@@ -42,7 +44,7 @@ namespace ppx
         return false;
     }
 
-    const_entity2D_ptr::operator bool() const { return m_buffer; }
+    const_entity2D_ptr::operator bool() const { return valid(); }
 
     bool operator==(const const_entity2D_ptr &e1, const const_entity2D_ptr &e2) { return e1.id() == e2.id(); }
     bool operator!=(const const_entity2D_ptr &e1, const const_entity2D_ptr &e2) { return e1.id() != e2.id(); }
@@ -62,10 +64,12 @@ namespace ppx
     entity2D *entity2D_ptr::operator->() const { return &((*m_buffer)[m_index]); }
     entity2D &entity2D_ptr::operator*() const { return (*m_buffer)[m_index]; }
 
-    bool entity2D_ptr::is_valid() const { return m_index < m_buffer->size() && m_id == (*m_buffer)[m_index].id(); }
+    bool entity2D_ptr::valid() const { return m_buffer != nullptr &&
+                                              m_index < m_buffer->size() &&
+                                              m_id == (*m_buffer)[m_index].id(); }
     bool entity2D_ptr::validate()
     {
-        if (is_valid())
+        if (valid())
             return true;
         for (const entity2D &e : *m_buffer)
             if (e.id() == m_id)
@@ -77,7 +81,7 @@ namespace ppx
         return false;
     }
 
-    entity2D_ptr::operator bool() const { return m_buffer; }
+    entity2D_ptr::operator bool() const { return valid(); }
     entity2D_ptr::operator const_entity2D_ptr() const { return const_entity2D_ptr(m_buffer, m_index, m_id); }
 
     bool operator==(const entity2D_ptr &e1, const entity2D_ptr &e2) { return e1.id() == e2.id(); }

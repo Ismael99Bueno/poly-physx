@@ -19,7 +19,7 @@ namespace ppx
         const entity2D *operator->() const;
         const entity2D &operator*() const;
 
-        bool is_valid() const;
+        bool valid() const;
         bool validate();
 
         explicit operator bool() const;
@@ -50,7 +50,7 @@ namespace ppx
         entity2D *operator->() const;
         entity2D &operator*() const;
 
-        bool is_valid() const;
+        bool valid() const;
         bool validate();
 
         explicit operator bool() const;
