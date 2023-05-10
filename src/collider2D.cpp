@@ -27,7 +27,7 @@ namespace ppx
     const entity2D *collider2D::interval::entity() const { return m_entity.raw(); }
     float collider2D::interval::value() const
     {
-        const geo::aabb2D bbox = m_entity->shape().bounding_box();
+        const geo::aabb2D &bbox = m_entity->shape().bounding_box();
         return (m_end == LOWER) ? bbox.min().x : bbox.max().x;
     }
 

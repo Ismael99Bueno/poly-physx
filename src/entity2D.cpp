@@ -42,8 +42,10 @@ namespace ppx
         const std::size_t idx = 6 * m_index;
         geo::shape2D &sh = get_shape();
 
+        sh.begin_update();
         sh.centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});
         sh.rotation(vars_buffer[idx + 2]);
+        sh.end_update();
 
         m_vel = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
         m_angvel = vars_buffer[idx + 5];
