@@ -22,6 +22,17 @@ namespace ppx
                                            m_angle2(e2->angpos()),
                                            m_length(length),
                                            m_has_anchors(true) {}
+    joint2D::joint2D(const specs &spc) : m_e1(spc.e1), m_e2(spc.e2),
+                                         m_length(spc.length), m_has_anchors(spc.has_anchors)
+    {
+        if (m_has_anchors)
+        {
+            m_anchor1 = spc.anchor1;
+            m_anchor2 = spc.anchor2;
+            m_angle1 = m_e1->angpos();
+            m_angle2 = m_e2->angpos();
+        }
+    }
 
     void joint2D::bind(const entity2D_ptr &e1, const entity2D_ptr &e2)
     {

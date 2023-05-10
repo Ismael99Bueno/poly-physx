@@ -36,6 +36,14 @@ namespace ppx
                                                m_mass(mass),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
+    entity2D::entity2D(const specs &spc) : m_vel(spc.vel), m_angvel(spc.angvel), m_mass(spc.mass),
+                                           m_charge(spc.charge), m_kinematic(spc.kinematic)
+    {
+        if (const auto *vertices = std::get_if<std::vector<glm::vec2>>(&spc.shape))
+            m_shape = geo::polygon(spc.pos, spc.angpos, *vertices);
+        else
+            m_shape = geo::circle(spc.pos, spc.angpos, std::get<float>(spc.shape));
+    }
 
     void entity2D::retrieve(const std::vector<float> &vars_buffer)
     {
@@ -159,18 +167,9 @@ namespace ppx
 
     entity2D::specs entity2D::specs::from_entity(const entity2D &e)
     {
-        specs spc;
-        spc.pos = e.pos();
-        spc.vel = e.vel();
-        spc.angpos = e.angpos();
-        spc.angvel = e.angvel();
-        spc.mass = e.mass();
-        spc.charge = e.charge();
-        spc.kinematic = e.kinematic();
         if (const auto *poly = e.shape_if<geo::polygon>())
-            spc.shape = poly->locals();
-        else
-            spc.shape = e.shape<geo::circle>().radius();
+            return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), poly->locals(), e.kinematic()};
+        return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), e.shape<geo::circle>().radius(), e.kinematic()};
     }
 
     bool operator==(const entity2D &lhs, const entity2D &rhs) { return lhs.id() == rhs.id(); }

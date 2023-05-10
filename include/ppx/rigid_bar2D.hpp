@@ -24,6 +24,7 @@ namespace ppx
                     const glm::vec2 &anchor2,
                     float stiffness = 500.f,
                     float dampening = 30.f);
+        rigid_bar2D(const specs &spc);
 
         float constraint(const std::array<const_entity2D_ptr, 2> &entities) const override;
         float constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const override;

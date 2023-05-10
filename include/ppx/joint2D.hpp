@@ -24,6 +24,7 @@ namespace ppx
                 const glm::vec2 &anchor1,
                 const glm::vec2 &anchor2,
                 float length);
+        joint2D(const specs &spc);
         virtual ~joint2D() = default;
 
         void bind(const entity2D_ptr &e1, const entity2D_ptr &e2);

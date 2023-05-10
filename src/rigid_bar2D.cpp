@@ -19,6 +19,10 @@ namespace ppx
                                                       joint2D(e1, e2, anchor1, anchor2,
                                                               glm::distance(e1->pos() + anchor1,
                                                                             e2->pos() + anchor2)) {}
+    rigid_bar2D::rigid_bar2D(const specs &spc) : constraint2D<2>({spc.e1, spc.e2},
+                                                                 spc.stiffness,
+                                                                 spc.dampening),
+                                                 joint2D(spc) {}
 
     float rigid_bar2D::constraint(const std::array<const_entity2D_ptr, 2> &entities) const
     {
@@ -107,7 +111,7 @@ namespace ppx
     bool rigid_bar2D::validate() { return constraint2D::validate() && joint2D::validate(); }
     rigid_bar2D::specs rigid_bar2D::specs::from_rigid_bar(const rigid_bar2D &rb)
     {
-        return {rb.e1(), rb.e2(), rb.anchor1(), rb.anchor2(), rb.length(), rb.has_anchors(), rb.stiffness(), rb.dampening()};
+        return {{rb.e1(), rb.e2(), rb.anchor1(), rb.anchor2(), rb.length(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
     }
 
     void rigid_bar2D::write(YAML::Emitter &out) const
