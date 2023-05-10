@@ -133,7 +133,7 @@ namespace ppx
         std::vector<float> inverse_masses() const;
         void reset_entities();
         void retrieve(const std::vector<float> &vars_buffer);
-        void register_forces_into_entities();
+        void load_forces_into_entities();
         void validate();
         std::optional<std::size_t> index_from_id(uuid id) const;
 
