@@ -42,7 +42,7 @@ namespace ppx
         if (const auto *vertices = std::get_if<std::vector<glm::vec2>>(&spc.shape))
             m_shape = geo::polygon(spc.pos, spc.angpos, *vertices);
         else
-            m_shape = geo::circle(spc.pos, spc.angpos, std::get<float>(spc.shape));
+            m_shape = geo::circle(spc.pos, std::get<float>(spc.shape), spc.angpos);
     }
 
     void entity2D::retrieve(const std::vector<float> &vars_buffer)
