@@ -21,6 +21,8 @@ namespace ppx
                        const float length) : joint2D(e1, e2, anchor1, anchor2, length),
                                              m_stiffness(stiffness),
                                              m_dampening(dampening) {}
+    spring2D::spring2D(const specs &spc) : joint2D(spc), m_stiffness(spc.stiffness),
+                                           m_dampening(spc.dampening) {}
 
     std::tuple<glm::vec2, float, float> spring2D::force() const
     {

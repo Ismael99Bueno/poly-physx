@@ -26,6 +26,7 @@ namespace ppx
                  float stiffness = 1.f,
                  float dampening = 0.f,
                  float length = 0.f);
+        spring2D(const specs &spc);
 
         std::tuple<glm::vec2, float, float> force() const;
 
