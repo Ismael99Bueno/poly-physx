@@ -1,6 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/quad_tree2D.hpp"
-#include "debug/debug.hpp"
+#include "dbg/log.hpp"
 #include "perf/perf.hpp"
 #include "geo/intersection.hpp"
 

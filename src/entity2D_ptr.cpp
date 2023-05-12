@@ -1,6 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/entity2D_ptr.hpp"
-#include "debug/debug.hpp"
+#include "dbg/log.hpp"
 
 namespace ppx
 {

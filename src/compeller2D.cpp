@@ -1,7 +1,7 @@
 #include "ppx/pch.hpp"
 #include "ppx/compeller2D.hpp"
 #include "perf/perf.hpp"
-#include "debug/debug.hpp"
+#include "dbg/log.hpp"
 #include "ppx/constraint_interface2D.hpp"
 
 namespace ppx

@@ -1,6 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/behaviour2D.hpp"
-#include "debug/debug.hpp"
+#include "dbg/log.hpp"
 
 namespace ppx
 {
