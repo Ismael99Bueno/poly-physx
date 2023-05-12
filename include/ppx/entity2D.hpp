@@ -54,8 +54,6 @@ namespace ppx
         void add_force(const glm::vec2 &force);
         void add_torque(float torque);
 
-        const glm::vec2 &force() const;
-        float torque() const;
         const glm::vec2 &added_force() const;
         float added_torque() const;
 
@@ -106,11 +104,11 @@ namespace ppx
     private:
         std::variant<geo::polygon, geo::circle> m_shape;
         rk::state *m_state = nullptr;
-        glm::vec2 m_vel{0.f}, m_force{0.f}, m_added_force{0.f};
+        glm::vec2 m_vel{0.f}, m_added_force{0.f};
         std::size_t m_index = 0;
         ppx::uuid m_uuid;
         entity_events m_events;
-        float m_angvel, m_torque, m_added_torque = 0.f, m_mass, m_charge;
+        float m_angvel, m_added_torque = 0.f, m_mass, m_charge;
         bool m_kinematic;
 
         geo::shape2D &get_shape();

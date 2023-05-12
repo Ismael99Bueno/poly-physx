@@ -27,7 +27,6 @@ namespace ppx
     bool engine2D::raw_forward(float &timestep)
     {
         const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this, ode);
-        load_forces_into_entities();
         reset_entities();
         retrieve();
         return valid;
@@ -35,7 +34,6 @@ namespace ppx
     bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
     {
         const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, ode, reiterations);
-        load_forces_into_entities();
         reset_entities();
         retrieve();
         return valid;
@@ -43,7 +41,6 @@ namespace ppx
     bool engine2D::embedded_forward(float &timestep)
     {
         const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this, ode);
-        load_forces_into_entities();
         reset_entities();
         retrieve();
         return valid;
@@ -76,17 +73,6 @@ namespace ppx
                 const float torque = m_entities[i].added_torque();
                 load_force(stchanges, force, torque, index);
             }
-        }
-    }
-
-    void engine2D::load_forces_into_entities() // TODO: Change name register to load wtf
-    {
-        const std::vector<float> &step = m_integ.state().step();
-        for (std::size_t i = 0; i < m_entities.size(); i++)
-        {
-            const std::size_t index = 6 * i;
-            m_entities[i].m_force = {step[index + 3], step[index + 4]};
-            m_entities[i].m_torque = step[index + 5];
         }
     }
 
