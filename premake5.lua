@@ -39,6 +39,7 @@ includedirs {
    "%{wks.location}/profile-tools/include",
    "%{wks.location}/vendor/yaml-cpp/include",
    "%{wks.location}/container-view/include",
-   "%{wks.location}/vendor/glm"
+   "%{wks.location}/vendor/glm",
+   "%{wks.location}/vendor/spdlog/include"
 }
 --, "/opt/homebrew/Cellar/libomp/15.0.6/include"}
