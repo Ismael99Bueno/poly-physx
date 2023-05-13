@@ -1,7 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/entity2D_ptr.hpp"
 
-
 namespace ppx
 {
     const_entity2D_ptr::const_entity2D_ptr(const std::vector<entity2D> *buffer,
@@ -37,7 +36,7 @@ namespace ppx
         for (const entity2D &e : *m_buffer)
             if (e.id() == m_id)
             {
-                m_id = e.id();
+                DBG_INFO("Entity pointer (index: {0}, id: {1}) had to be validated to index {2}", m_index, m_id, e.index())
                 m_index = e.index();
                 return true;
             }
@@ -74,7 +73,7 @@ namespace ppx
         for (const entity2D &e : *m_buffer)
             if (e.id() == m_id)
             {
-                m_id = e.id();
+                DBG_INFO("Entity pointer (index: {0}, id: {1}) had to be validated to index {2}", m_index, m_id, e.index())
                 m_index = e.index();
                 return true;
             }

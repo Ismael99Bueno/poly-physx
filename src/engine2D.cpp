@@ -168,6 +168,7 @@ namespace ppx
             DBG_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_entities.size())
             return false;
         }
+        DBG_INFO("Removing entity with index {0} and id {1}", index, m_entities[index].id())
 
         m_events.on_early_entity_removal(m_entities[index]);
         rk::state &state = m_integ.state();

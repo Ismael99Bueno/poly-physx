@@ -170,25 +170,38 @@ namespace ppx
         };
         std::for_each(std::execution::par, m_entities->begin(), m_entities->end(), exec);
 #else
+#ifdef DEBUG
+        std::size_t checks = 0, collisions = 0;
+#endif
         for (std::size_t i = 0; i < m_entities->size(); i++)
             for (std::size_t j = i + 1; j < m_entities->size(); j++)
             {
+#ifdef DEBUG
+                checks++;
+#endif
                 collision2D c;
                 const entity2D &e1 = (*m_entities)[i], &e2 = (*m_entities)[j];
                 if (collide(e1, e2, &c))
                 {
+#ifdef DEBUG
+                    collisions++;
+#endif
                     try_enter_or_stay_callback(e1, e2, c);
                     solve(c, stchanges);
                 }
                 else
                     try_exit_callback(e1, e2);
             }
+        DBG_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for BRUTE FORCE collision detection (QUALITY: {3:.2f}%%)", checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
 #endif
     }
 
     void collider2D::sort_and_sweep_coldet(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
+#ifdef DEBUG
+        std::size_t checks = 0, collisions = 0;
+#endif
         std::unordered_set<const entity2D *> eligible;
         sort_intervals();
 
@@ -198,10 +211,16 @@ namespace ppx
             {
                 for (const entity2D *e : eligible)
                 {
+#ifdef DEBUG
+                    checks++;
+#endif
                     collision2D c;
                     const entity2D &e1 = *e, &e2 = *itrv.entity();
                     if (collide(e1, e2, &c))
                     {
+#ifdef DEBUG
+                        collisions++;
+#endif
                         try_enter_or_stay_callback(e1, e2, c);
                         solve(c, stchanges);
                     }
@@ -212,6 +231,7 @@ namespace ppx
             }
             else
                 eligible.erase(itrv.entity());
+        DBG_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for SORT AND SWEEP collision detection (QUALITY: {3:.2f}%%)", checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
     }
 
     void collider2D::quad_tree_coldet(std::vector<float> &stchanges)
@@ -242,15 +262,30 @@ namespace ppx
         };
         std::for_each(std::execution::par, partitions.begin(), partitions.end(), exec);
 #else
+#ifdef DEBUG
+        std::size_t checks = 0, collisions = 0;
+#endif
         for (const std::vector<const_entity2D_ptr> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
                 {
+#ifdef DEBUG
+                    checks++;
+#endif
                     collision2D c;
                     const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
                     if (collide(*e1, *e2, &c))
+                    {
+#ifdef DEBUG
+                        collisions++;
+#endif
+                        try_enter_or_stay_callback(*e1, *e2, c);
                         solve(c, stchanges);
+                    }
+                    else
+                        try_exit_callback(*e1, *e2);
                 }
+        DBG_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for QUAD TREE collision detection (QUALITY: {3:.2f}%%)", checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
 #endif
     }
 
