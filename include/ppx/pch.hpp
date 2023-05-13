@@ -15,8 +15,13 @@
 #include <array>
 #include <cstdint>
 #include <variant>
+#ifdef HAS_YAML_CPP
 #include <yaml-cpp/yaml.h>
+#endif
 #include <random>
 #include <optional>
+#ifdef HAS_DEBUG_LOG_TOOLS
+#include "dbg/log.hpp"
+#endif
 
 #endif

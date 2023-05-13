@@ -1,6 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/collider2D.hpp"
-#include "dbg/log.hpp"
+
 #include "perf/perf.hpp"
 #include "geo/intersection.hpp"
 
