@@ -92,6 +92,7 @@ namespace ppx
         float angpos() const;
         float angvel() const;
         float mass() const;
+        float inverse_mass() const;
         float charge() const;
 
         void pos(const glm::vec2 &pos);
@@ -108,7 +109,7 @@ namespace ppx
         std::size_t m_index = 0;
         ppx::uuid m_uuid;
         entity_events m_events;
-        float m_angvel, m_added_torque = 0.f, m_mass, m_charge;
+        float m_angvel, m_added_torque = 0.f, m_mass, m_inv_mass, m_charge;
         bool m_kinematic;
 
         geo::shape2D &get_shape();

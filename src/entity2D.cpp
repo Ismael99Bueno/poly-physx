@@ -3,7 +3,6 @@
 #include "ppx/force2D.hpp"
 #include "ppx/interaction2D.hpp"
 
-
 namespace ppx
 {
     entity2D::entity2D(const glm::vec2 &pos, const glm::vec2 &vel,
@@ -13,6 +12,7 @@ namespace ppx
                                                m_vel(vel),
                                                m_angvel(angvel),
                                                m_mass(mass),
+                                               m_inv_mass(1.f / m_mass),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
     entity2D::entity2D(const std::vector<glm::vec2> &vertices,
@@ -23,6 +23,7 @@ namespace ppx
                                                m_vel(vel),
                                                m_angvel(angvel),
                                                m_mass(mass),
+                                               m_inv_mass(1.f / m_mass),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
     entity2D::entity2D(const float radius,
@@ -34,10 +35,11 @@ namespace ppx
                                                m_vel(vel),
                                                m_angvel(angvel),
                                                m_mass(mass),
+                                               m_inv_mass(1.f / m_mass),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
     entity2D::entity2D(const specs &spc) : m_vel(spc.vel), m_angvel(spc.angvel), m_mass(spc.mass),
-                                           m_charge(spc.charge), m_kinematic(spc.kinematic)
+                                           m_inv_mass(1.f / m_mass), m_charge(spc.charge), m_kinematic(spc.kinematic)
     {
         if (const auto *vertices = std::get_if<std::vector<glm::vec2>>(&spc.shape))
             m_shape = geo::polygon(spc.pos, spc.angpos, *vertices);
@@ -152,6 +154,7 @@ namespace ppx
     float entity2D::angvel() const { return m_angvel; }
 
     float entity2D::mass() const { return m_mass; }
+    float entity2D::inverse_mass() const { return m_inv_mass; }
     float entity2D::charge() const { return m_charge; }
 
     void entity2D::pos(const glm::vec2 &pos) { get_shape().centroid(pos); }
@@ -160,7 +163,11 @@ namespace ppx
     void entity2D::angpos(const float angpos) { get_shape().rotation(angpos); }
     void entity2D::angvel(const float angvel) { m_angvel = angvel; }
 
-    void entity2D::mass(const float mass) { m_mass = mass; }
+    void entity2D::mass(const float mass)
+    {
+        m_mass = mass;
+        m_inv_mass = 1.f / mass;
+    }
     void entity2D::charge(const float charge) { m_charge = charge; }
 
     entity2D::specs entity2D::specs::from_entity(const entity2D &e)
