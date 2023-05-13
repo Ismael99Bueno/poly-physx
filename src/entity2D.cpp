@@ -13,6 +13,8 @@ namespace ppx
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_inv_mass(1.f / m_mass),
+                                               m_inertia(m_mass * shape().inertia()),
+                                               m_inv_inertia(1.f / m_inertia),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
     entity2D::entity2D(const std::vector<glm::vec2> &vertices,
@@ -24,6 +26,8 @@ namespace ppx
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_inv_mass(1.f / m_mass),
+                                               m_inertia(m_mass * shape().inertia()),
+                                               m_inv_inertia(1.f / m_inertia),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
     entity2D::entity2D(const float radius,
@@ -36,15 +40,22 @@ namespace ppx
                                                m_angvel(angvel),
                                                m_mass(mass),
                                                m_inv_mass(1.f / m_mass),
+                                               m_inertia(m_mass * shape().inertia()),
+                                               m_inv_inertia(1.f / m_inertia),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
-    entity2D::entity2D(const specs &spc) : m_vel(spc.vel), m_angvel(spc.angvel), m_mass(spc.mass),
-                                           m_inv_mass(1.f / m_mass), m_charge(spc.charge), m_kinematic(spc.kinematic)
+    entity2D::entity2D(const specs &spc) : m_vel(spc.vel),
+                                           m_angvel(spc.angvel),
+                                           m_mass(spc.mass),
+                                           m_inv_mass(1.f / m_mass),
+                                           m_charge(spc.charge),
+                                           m_kinematic(spc.kinematic)
     {
         if (const auto *vertices = std::get_if<std::vector<glm::vec2>>(&spc.shape))
             m_shape = geo::polygon(spc.pos, spc.angpos, *vertices);
         else
             m_shape = geo::circle(spc.pos, std::get<float>(spc.shape), spc.angpos);
+        compute_inertia(shape());
     }
 
     void entity2D::retrieve(const std::vector<float> &vars_buffer)
@@ -120,22 +131,41 @@ namespace ppx
     void entity2D::shape(const std::vector<glm::vec2> &vertices)
     {
         const geo::shape2D &sh = shape();
-        m_shape = geo::polygon(sh.centroid(), sh.rotation(), vertices);
+        const geo::polygon poly(sh.centroid(), sh.rotation(), vertices);
+        compute_inertia(poly);
+        m_shape = poly;
     }
     void entity2D::shape(const float radius)
     {
         const geo::shape2D &sh = shape();
-        m_shape = geo::circle(sh.centroid(), radius, sh.rotation());
+        const geo::circle c(sh.centroid(), radius, sh.rotation());
+        compute_inertia(c);
+        m_shape = c;
     }
-    void entity2D::shape(const geo::polygon &poly) { m_shape = poly; }
-    void entity2D::shape(const geo::circle &c) { m_shape = c; }
+    void entity2D::shape(const geo::polygon &poly)
+    {
+        compute_inertia(poly);
+        m_shape = poly;
+    }
+    void entity2D::shape(const geo::circle &c)
+    {
+        compute_inertia(c);
+        m_shape = c;
+    }
+
+    void entity2D::compute_inertia(const geo::shape2D &sh)
+    {
+        m_inertia = m_mass * sh.inertia();
+        m_inv_inertia = 1.f / m_inertia;
+    }
 
     entity2D::shape_type entity2D::type() const { return m_shape.index() == 0 ? POLYGON : CIRCLE; }
 
     std::size_t entity2D::index() const { return m_index; }
     uuid entity2D::id() const { return m_uuid; }
 
-    float entity2D::inertia() const { return shape().inertia() * m_mass; }
+    float entity2D::inertia() const { return m_inertia; }
+    float entity2D::inverse_inertia() const { return m_inv_inertia; }
 
     bool entity2D::kinematic() const { return m_kinematic; }
     void entity2D::kinematic(const bool kinematic) { m_kinematic = kinematic; }

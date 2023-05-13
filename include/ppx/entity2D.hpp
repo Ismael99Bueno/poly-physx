@@ -76,6 +76,7 @@ namespace ppx
         uuid id() const;
 
         float inertia() const;
+        float inverse_inertia() const;
 
         bool kinematic() const;
         void kinematic(bool kinematic);
@@ -109,11 +110,16 @@ namespace ppx
         std::size_t m_index = 0;
         ppx::uuid m_uuid;
         entity_events m_events;
-        float m_angvel, m_added_torque = 0.f, m_mass, m_inv_mass, m_charge;
+        float m_angvel, m_added_torque = 0.f,
+                        m_mass, m_inv_mass,
+                        m_inertia, m_inv_inertia,
+                        m_charge;
         bool m_kinematic;
 
         geo::shape2D &get_shape();
         void retrieve(const std::vector<float> &vars_buffer);
+        void compute_inertia(const geo::shape2D &sh);
+
         friend class engine2D;
 #ifdef HAS_YAML_CPP
         friend YAML::Emitter &operator<<(YAML::Emitter &, const entity2D &);
