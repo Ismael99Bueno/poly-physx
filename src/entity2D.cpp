@@ -61,7 +61,7 @@ namespace ppx
 
     void entity2D::retrieve()
     {
-        DBG_ASSERT(m_state, "Cannot retrieve from a null state.\n")
+        DBG_ASSERT_CRITICAL(m_state, "Trying to retrieve entity data from a stateless entity (the entity is not tied to an engine -> its internal state is null)")
         retrieve(m_state->vars());
     }
     void entity2D::dispatch() const

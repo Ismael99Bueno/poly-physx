@@ -21,7 +21,7 @@ namespace ppx
 
     void quad_tree2D::add_if_inside(const const_entity2D_ptr &e)
     {
-        DBG_ASSERT(m_entities.size() <= m_max_entities || rock_bottom(), "Quad tree contains more entities than allowed! - Contained entities: %zu, maximum entities: %zu\n", m_entities.size(), m_max_entities)
+        DBG_ASSERT_CRITICAL(m_entities.size() <= m_max_entities || rock_bottom(), "Quad tree contains more entities than allowed! - Contained entities: {0}, maximum entities: {1}", m_entities.size(), m_max_entities)
         if (!geo::intersect(m_aabb, e->shape().bounding_box()))
             return;
         if (full() && !rock_bottom())
@@ -110,7 +110,7 @@ namespace ppx
     const std::array<std::unique_ptr<quad_tree2D>, 4> &quad_tree2D::children() const { return m_children; }
     const quad_tree2D &quad_tree2D::child(std::size_t index) const
     {
-        DBG_ASSERT(index < 4, "Index outside of array bounds. A quad tree can only have 4 children - index: %zu\n", index)
+        DBG_ASSERT_ERROR(index < 4, "Index outside of array bounds. A quad tree can only have 4 children - index: {0}", index)
         return *m_children[index];
     }
     const quad_tree2D &quad_tree2D::operator[](std::size_t index) const { return child(index); }

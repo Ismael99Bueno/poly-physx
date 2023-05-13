@@ -61,7 +61,7 @@ namespace ppx
 
     std::array<float, 3> rigid_bar2D::constraint_grad(entity2D &e) const
     {
-        DBG_ASSERT(e == *m_e1 || e == *m_e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!\n")
+        DBG_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
         if (!m_has_anchors)
         {
             const glm::vec2 cg = 2.f * (m_e1->pos() - m_e2->pos());
@@ -88,7 +88,7 @@ namespace ppx
     }
     std::array<float, 3> rigid_bar2D::constraint_grad_derivative(entity2D &e) const
     {
-        DBG_ASSERT(e == *m_e1 || e == *m_e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!\n")
+        DBG_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2, "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
         if (!m_has_anchors)
         {
             const glm::vec2 cgd = 2.f * (m_e1->vel() - m_e2->vel());

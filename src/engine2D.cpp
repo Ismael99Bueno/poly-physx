@@ -152,10 +152,10 @@ namespace ppx
         e.retrieve();
         m_collider.add_entity_intervals(e_ptr);
 
-        DBG_LOG("Added entity with index %zu and id %llu.\n", e.m_index, (std::uint64_t)e.m_uuid)
+        DBG_INFO("Added entity with index {0} and id {1}.", e.m_index, (std::uint64_t)e.m_uuid)
 #ifdef DEBUG
         for (std::size_t i = 0; i < m_entities.size() - 1; i++)
-            DBG_ASSERT(m_entities[i].m_uuid != e.m_uuid, "Added entity has the same id as entity with index %zu.\n", i)
+            DBG_ASSERT_CRITICAL(m_entities[i].m_uuid != e.m_uuid, "Entity with index {0} has the same id as entity with index {1}", i, e.index())
 #endif
         m_events.on_entity_addition(e_ptr);
         return e_ptr;
@@ -165,7 +165,7 @@ namespace ppx
     {
         if (index >= m_entities.size())
         {
-            DBG_LOG("Index exceeds entity array bounds. Aborting... - index: %zu, size: %zu\n", index, m_entities.size())
+            DBG_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_entities.size())
             return false;
         }
 
@@ -207,7 +207,7 @@ namespace ppx
     {
         if (index >= m_springs.size())
         {
-            DBG_LOG("Array index out of bounds. Aborting... - index: %zu, size: %zu\n", index, m_springs.size())
+            DBG_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_springs.size())
             return false;
         }
         m_events.on_spring_removal(m_springs[index]);
@@ -242,9 +242,9 @@ namespace ppx
     void engine2D::revert()
     {
         const auto &[elapsed, vars, entities] = m_checkpoint;
-        DBG_ASSERT(m_integ.state().vars().size() == vars.size() &&
-                       m_entities.size() == entities.size(),
-                   "Cannot revert to a checkpoint where the number of entities differ. Entities now: %zu, entities before: %zu.\n", m_entities.size(), entities.size())
+        DBG_ASSERT_ERROR(m_integ.state().vars().size() == vars.size() &&
+                             m_entities.size() == entities.size(),
+                         "Cannot revert to a checkpoint where the number of entities differ. Entities now: {0}, entities before: {1}", m_entities.size(), entities.size())
 
         m_elapsed = elapsed;
         m_integ.state().vars(vars);
@@ -300,12 +300,12 @@ namespace ppx
 
     const_entity2D_ptr engine2D::operator[](const std::size_t index) const
     {
-        DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
+        DBG_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index, m_entities.size())
         return {&m_entities, index};
     }
     entity2D_ptr engine2D::operator[](const std::size_t index)
     {
-        DBG_ASSERT(index < m_entities.size(), "Index exceeds array bounds - index: %zu, size: %zu.\n", index, m_entities.size())
+        DBG_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index, m_entities.size())
         return {&m_entities, index};
     }
 

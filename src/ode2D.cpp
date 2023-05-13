@@ -7,7 +7,7 @@ namespace ppx
     std::vector<float> ode(float t, const std::vector<float> &vars, engine2D &engine)
     {
         PERF_FUNCTION()
-        DBG_ASSERT(vars.size() == 6 * engine.size(), "State vector size must be exactly 6 times greater than the entity array size - vars: %zu, entity array: %zu\n", vars.size(), engine.size())
+        DBG_ASSERT_CRITICAL(vars.size() == 6 * engine.size(), "State vector size must be exactly 6 times greater than the entity array size - vars: {0}, entity array: {1}", vars.size(), engine.size())
         std::vector<float> stchanges(vars.size(), 0.f);
 
         engine.retrieve(vars);
