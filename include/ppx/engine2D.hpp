@@ -72,6 +72,8 @@ namespace ppx
         float potential_energy() const;
         float energy() const;
 
+        std::vector<float> operator()(float t, float dt, const std::vector<float> &vars);
+
         const_entity2D_ptr from_id(uuid id) const;
         entity2D_ptr from_id(uuid id);
 
@@ -139,7 +141,6 @@ namespace ppx
         void validate();
         std::optional<std::size_t> index_from_id(uuid id) const;
 
-        friend std::vector<float> ode(float t, const std::vector<float> &state, engine2D &engine);
         engine2D(const engine2D &) = delete;
         engine2D &operator=(const engine2D &) = delete;
 

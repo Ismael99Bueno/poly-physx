@@ -1,6 +1,5 @@
 #include "ppx/pch.hpp"
 #include "ppx/engine2D.hpp"
-#include "ppx/ode2D.hpp"
 #include "perf/perf.hpp"
 #include "geo/intersection.hpp"
 
@@ -26,21 +25,21 @@ namespace ppx
 
     bool engine2D::raw_forward(float &timestep)
     {
-        const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this, ode);
+        const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this);
         reset_entities();
         retrieve();
         return valid;
     }
     bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
     {
-        const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, ode, reiterations);
+        const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, reiterations);
         reset_entities();
         retrieve();
         return valid;
     }
     bool engine2D::embedded_forward(float &timestep)
     {
-        const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this, ode);
+        const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this);
         reset_entities();
         retrieve();
         return valid;
@@ -272,6 +271,28 @@ namespace ppx
         return pot;
     }
     float engine2D::energy() const { return kinetic_energy() + potential_energy(); }
+
+    std::vector<float> engine2D::operator()(const float t, const float dt, const std::vector<float> &vars)
+    {
+        PERF_FUNCTION()
+        DBG_ASSERT_CRITICAL(vars.size() == 6 * m_entities.size(), "State vector size must be exactly 6 times greater than the entity array size - vars: {0}, entity array: {1}", vars.size(), m_entities.size())
+        std::vector<float> stchanges(vars.size(), 0.f);
+
+        retrieve(vars);
+        load_velocities_and_added_forces(stchanges);
+        load_interactions_and_externals(stchanges);
+        const std::vector<float, mem::stack_allocator<float>> inv_masses = effective_inverse_masses<mem::stack_allocator<float>>();
+
+        m_collider.solve_and_load_collisions(stchanges);
+        m_compeller.solve_and_load_constraints(stchanges, inv_masses);
+        for (std::size_t i = 0; i < m_entities.size(); i++)
+        {
+            stchanges[6 * i + 3] *= inv_masses[3 * i];
+            stchanges[6 * i + 4] *= inv_masses[3 * i + 1];
+            stchanges[6 * i + 5] *= inv_masses[3 * i + 2];
+        }
+        return stchanges;
+    }
 
     std::optional<std::size_t> engine2D::index_from_id(const uuid id) const
     {
