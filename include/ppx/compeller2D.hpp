@@ -3,6 +3,7 @@
 
 #include "ppx/entity2D.hpp"
 #include "ppx/engine_events.hpp"
+#include "mem/stack_allocator.hpp"
 #include <vector>
 #include <functional>
 #include <memory>

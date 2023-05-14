@@ -115,19 +115,22 @@ namespace ppx
         }
     }
 
-    std::vector<float> engine2D::inverse_masses() const
+    template <typename T>
+    std::vector<float, T> engine2D::effective_inverse_masses() const
     {
         PERF_FUNCTION()
-        std::vector<float> inv_masses;
+        std::vector<float, T> inv_masses;
         inv_masses.reserve(3 * m_entities.size());
         for (std::size_t i = 0; i < m_entities.size(); i++)
         {
-            const float inv_mass = m_entities[i].kinematic() ? (1.f / m_entities[i].mass()) : 0.f,
-                        inv_inertia = m_entities[i].kinematic() ? (1.f / m_entities[i].inertia()) : 0.f;
+            const float inv_mass = m_entities[i].kinematic() ? m_entities[i].inverse_mass() : 0.f,
+                        inv_inertia = m_entities[i].kinematic() ? m_entities[i].inverse_inertia() : 0.f;
             inv_masses.insert(inv_masses.end(), {inv_mass, inv_mass, inv_inertia});
         }
         return inv_masses;
     }
+    template std::vector<float, mem::stack_allocator<float>> engine2D::effective_inverse_masses() const; // ADD BLOCK ALLOCATOR
+    template std::vector<float, std::allocator<float>> engine2D::effective_inverse_masses() const;
 
     void engine2D::reset_entities()
     {

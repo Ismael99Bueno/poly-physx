@@ -1,7 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/compeller2D.hpp"
 #include "perf/perf.hpp"
-
 #include "ppx/constraint_interface2D.hpp"
 
 namespace ppx
@@ -135,7 +134,8 @@ namespace ppx
     {
         PERF_FUNCTION()
         const std::size_t size = m_constraints.size();
-        std::vector<float> L(size * size, 0.f), U(size * size, 0.f), sol(size, 0.f);
+        std::vector<float, mem::stack_allocator<float>> L(size * size, 0.f), U(size * size, 0.f);
+        std::vector<float> sol(size, 0.f);
         for (std::size_t i = 0; i < size; i++)
         {
             for (std::size_t j = i; j < size; j++)
