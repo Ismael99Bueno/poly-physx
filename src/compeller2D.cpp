@@ -42,25 +42,25 @@ namespace ppx
                 ++it;
     }
 
-    void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges, const std::vector<float> &inv_masses) const
+    void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges, const std::vector<float, alloc> &inv_masses) const
     {
         PERF_FUNCTION()
         if (m_constraints.empty())
             return;
-        const std::vector<float> jcb = jacobian(), djcb = jacobian_derivative();
-        const std::vector<float> A = lhs(jcb, inv_masses);
-        const std::vector<float> b = rhs(jcb, djcb, stchanges, inv_masses);
-        const std::vector<float> lambda = lu_decomposition(A, b);
-        return load_constraint_accels(jcb, lambda, stchanges);
+        const std::vector<float, alloc> jcb = jacobian(), djcb = jacobian_derivative();
+        const std::vector<float, alloc> A = lhs(jcb, inv_masses);
+        const std::vector<float, alloc> b = rhs(jcb, djcb, stchanges, inv_masses);
+        const std::vector<float, alloc> lambda = lu_decomposition(A, b);
+        load_constraint_accels(jcb, lambda, stchanges);
     }
 
     const std::vector<std::shared_ptr<constraint_interface2D>> &compeller2D::constraints() const { return m_constraints; }
 
-    std::vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
+    std::vector<float, compeller2D::alloc> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
     {
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
-        std::vector<float> cmatrix(rows * cols, 0.f);
+        std::vector<float, alloc> cmatrix(rows * cols, 0.f);
 
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t ct_idx = 0; ct_idx < m_constraints[i]->size(); ct_idx++)
@@ -77,15 +77,15 @@ namespace ppx
         return cmatrix;
     }
 
-    std::vector<float> compeller2D::jacobian() const { return constraint_matrix(&constraint_interface2D::constraint_grad); }
-    std::vector<float> compeller2D::jacobian_derivative() const { return constraint_matrix(&constraint_interface2D::constraint_grad_derivative); }
+    std::vector<float, compeller2D::alloc> compeller2D::jacobian() const { return constraint_matrix(&constraint_interface2D::constraint_grad); }
+    std::vector<float, compeller2D::alloc> compeller2D::jacobian_derivative() const { return constraint_matrix(&constraint_interface2D::constraint_grad_derivative); }
 
-    std::vector<float> compeller2D::lhs(const std::vector<float> &jcb,
-                                        const std::vector<float> &inv_masses) const
+    std::vector<float, compeller2D::alloc> compeller2D::lhs(const std::vector<float, alloc> &jcb,
+                                                            const std::vector<float, alloc> &inv_masses) const
     {
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
-        std::vector<float> A(rows * rows, 0.f);
+        std::vector<float, alloc> A(rows * rows, 0.f);
         for (std::size_t i = 0; i < rows; i++)
             for (std::size_t j = 0; j < rows; j++)
             {
@@ -101,14 +101,14 @@ namespace ppx
         return A;
     }
 
-    std::vector<float> compeller2D::rhs(const std::vector<float> &jcb,
-                                        const std::vector<float> &djcb,
-                                        const std::vector<float> &stchanges,
-                                        const std::vector<float> &inv_masses) const
+    std::vector<float, compeller2D::alloc> compeller2D::rhs(const std::vector<float, alloc> &jcb,
+                                                            const std::vector<float, alloc> &djcb,
+                                                            const std::vector<float> &stchanges,
+                                                            const std::vector<float, alloc> &inv_masses) const
     {
         PERF_FUNCTION()
         const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
-        std::vector<float> b(rows, 0.f);
+        std::vector<float, alloc> b(rows, 0.f);
 
         for (std::size_t i = 0; i < rows; i++)
         {
@@ -129,13 +129,12 @@ namespace ppx
         return b;
     }
 
-    std::vector<float> compeller2D::lu_decomposition(const std::vector<float> &A,
-                                                     const std::vector<float> &b) const
+    std::vector<float, compeller2D::alloc> compeller2D::lu_decomposition(const std::vector<float, alloc> &A,
+                                                                         const std::vector<float, alloc> &b) const
     {
         PERF_FUNCTION()
         const std::size_t size = m_constraints.size();
-        std::vector<float, mem::stack_allocator<float>> L(size * size, 0.f), U(size * size, 0.f);
-        std::vector<float> sol(size, 0.f);
+        std::vector<float, alloc> sol(size, 0.f), L(size * size, 0.f), U(size * size, 0.f);
         for (std::size_t i = 0; i < size; i++)
         {
             for (std::size_t j = i; j < size; j++)
@@ -173,8 +172,8 @@ namespace ppx
         return sol;
     }
 
-    void compeller2D::load_constraint_accels(const std::vector<float> &jcb,
-                                             const std::vector<float> &lambda,
+    void compeller2D::load_constraint_accels(const std::vector<float, alloc> &jcb,
+                                             const std::vector<float, alloc> &lambda,
                                              std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()

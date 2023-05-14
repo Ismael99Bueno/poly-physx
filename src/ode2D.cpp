@@ -13,7 +13,7 @@ namespace ppx
         engine.retrieve(vars);
         engine.load_velocities_and_added_forces(stchanges);
         engine.load_interactions_and_externals(stchanges);
-        const std::vector<float> inv_masses = engine.effective_inverse_masses();
+        const std::vector<float, mem::stack_allocator<float>> inv_masses = engine.effective_inverse_masses<mem::stack_allocator<float>>();
 
         engine.m_collider.solve_and_load_collisions(stchanges);
         engine.m_compeller.solve_and_load_constraints(stchanges, inv_masses);
