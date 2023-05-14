@@ -115,11 +115,11 @@ namespace ppx
         }
     }
 
-    template <typename T>
-    std::vector<float, T> engine2D::effective_inverse_masses() const
+    template <typename Alloc>
+    std::vector<float, Alloc> engine2D::effective_inverse_masses() const
     {
         PERF_FUNCTION()
-        std::vector<float, T> inv_masses;
+        std::vector<float, Alloc> inv_masses;
         inv_masses.reserve(3 * m_entities.size());
         for (std::size_t i = 0; i < m_entities.size(); i++)
         {
