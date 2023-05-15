@@ -141,7 +141,7 @@ namespace ppx
     void collider2D::try_enter_or_stay_callback(const entity2D &e1, const entity2D &e2, const collision2D &c) const
     {
         e1.events().try_enter_or_stay(c);
-        e2.events().try_enter_or_stay({c.incoming, c.other, c.touch2, c.touch1, -c.normal});
+        e2.events().try_enter_or_stay({c.incoming, c.current, c.touch2, c.touch1, -c.normal});
     }
     void collider2D::try_exit_callback(const entity2D &e1, const entity2D &e2) const
     {
@@ -296,8 +296,8 @@ namespace ppx
         const std::array<float, 6> forces = forces_upon_collision(c);
         for (std::size_t i = 0; i < 3; i++)
         {
-            if (c.other->kinematic())
-                stchanges[c.other->index() * 6 + i + 3] += forces[i];
+            if (c.current->kinematic())
+                stchanges[c.current->index() * 6 + i + 3] += forces[i];
             if (c.incoming->kinematic())
                 stchanges[c.incoming->index() * 6 + i + 3] += forces[i + 3];
         }
@@ -306,19 +306,22 @@ namespace ppx
     std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) const
     {
         PERF_FUNCTION()
-        const glm::vec2 rel1 = c.touch1 - c.other->pos(),
+        const glm::vec2 rel1 = c.touch1 - c.current->pos(),
                         rel2 = c.touch2 - c.incoming->pos();
 
-        const glm::vec2 vel1 = c.other->vel_at(rel1),
+        const glm::vec2 vel1 = c.current->vel_at(rel1),
                         vel2 = c.incoming->vel_at(rel2);
 
-        const glm::vec2 force = (m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1));
-        const float torque1 = cross(rel1, force), torque2 = cross(force, rel2);
-        return {force.x, force.y, torque1, -force.x, -force.y, torque2};
+        const glm::vec2 force = m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1);
+        const glm::vec2 force1 = c.current->mass() * force, force2 = c.incoming->mass() * force;
+
+        const float torque1 = cross(rel1, force1), torque2 = cross(force2, rel2);
+        return {force1.x, force1.y, torque1, -force2.x, -force2.y, torque2};
     }
 
 #ifdef HAS_YAML_CPP
-    YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
+    YAML::Emitter &
+    operator<<(YAML::Emitter &out, const collider2D &cld)
     {
         out << YAML::BeginMap;
         out << YAML::Key << "Quad tree" << YAML::Value << YAML::BeginMap;
