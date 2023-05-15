@@ -1,7 +1,7 @@
 #include "ppx/pch.hpp"
 #include "ppx/quad_tree2D.hpp"
 
-#include "perf/perf.hpp"
+
 #include "geo/intersection.hpp"
 
 namespace ppx

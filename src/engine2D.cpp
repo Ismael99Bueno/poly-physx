@@ -1,6 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/engine2D.hpp"
-#include "perf/perf.hpp"
+
 #include "geo/intersection.hpp"
 
 namespace ppx

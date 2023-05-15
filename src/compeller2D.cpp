@@ -1,6 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/compeller2D.hpp"
-#include "perf/perf.hpp"
+
 #include "ppx/constraint_interface2D.hpp"
 
 namespace ppx

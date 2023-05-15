@@ -1,7 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/collider2D.hpp"
 
-#include "perf/perf.hpp"
 #include "geo/intersection.hpp"
 
 #ifdef PPX_WINDOWS
