@@ -1,5 +1,6 @@
 #ifndef UUID_HPP
 #define UUID_HPP
+#include "ppx/core.hpp"
 
 #include <cstdint>
 

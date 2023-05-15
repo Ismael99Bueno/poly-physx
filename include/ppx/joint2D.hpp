@@ -1,5 +1,6 @@
 #ifndef JOINT2D_HPP
 #define JOINT2D_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
 

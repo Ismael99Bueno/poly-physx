@@ -1,5 +1,6 @@
 #ifndef CONSTRAINT_INTERFACE2D_HPP
 #define CONSTRAINT_INTERFACE2D_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/entity2D.hpp"
 #include <vector>

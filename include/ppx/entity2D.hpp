@@ -1,5 +1,6 @@
 #ifndef ENTITY2D_HPP
 #define ENTITY2D_HPP
+#include "ppx/core.hpp"
 
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"

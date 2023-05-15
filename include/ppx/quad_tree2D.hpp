@@ -1,5 +1,6 @@
 #ifndef QUAD_TREE2D_HPP
 #define QUAD_TREE2D_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
 #include <memory>

@@ -1,5 +1,6 @@
 #ifndef ENGINE_EVENTS_HPP
 #define ENGINE_EVENTS_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraint_interface2D.hpp"

@@ -1,5 +1,6 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
+#include "ppx/core.hpp"
 
 #include <functional>
 #include <vector>

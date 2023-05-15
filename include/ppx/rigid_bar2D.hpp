@@ -1,5 +1,6 @@
 #ifndef RIGID_BAR2D_HPP
 #define RIGID_BAR2D_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/constraint2D.hpp"
 #include "ppx/joint2D.hpp"

@@ -1,5 +1,6 @@
 #ifndef ENGINE2D_HPP
 #define ENGINE2D_HPP
+#include "ppx/core.hpp"
 
 #include "rk/integrator.hpp"
 #include "ppx/entity2D_ptr.hpp"

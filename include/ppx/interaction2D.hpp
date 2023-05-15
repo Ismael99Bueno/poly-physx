@@ -1,5 +1,6 @@
 #ifndef INTERACTION2D_HPP
 #define INTERACTION2D_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/behaviour2D.hpp"
 

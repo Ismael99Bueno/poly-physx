@@ -1,5 +1,6 @@
 #ifndef ENTITY_EVENTS_HPP
 #define ENTITY_EVENTS_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/event.hpp"
 #include "ppx/uuid.hpp"

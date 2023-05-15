@@ -1,5 +1,6 @@
 #ifndef COLLIDER_HPP
 #define COLLIDER_HPP
+#include "ppx/core.hpp"
 
 #include "ppx/entity2D.hpp"
 #include "ppx/entity2D_ptr.hpp"
