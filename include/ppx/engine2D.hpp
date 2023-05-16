@@ -134,8 +134,7 @@ namespace ppx
         void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
         void load_interactions_and_externals(std::vector<float> &stchanges) const;
 
-        template <typename Alloc = std::allocator<float>>
-        std::vector<float, Alloc> effective_inverse_masses() const;
+        stk_vector<float> effective_inverse_masses() const;
 
         void reset_entities();
         void retrieve(const std::vector<float> &vars_buffer);

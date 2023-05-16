@@ -114,11 +114,10 @@ namespace ppx
         }
     }
 
-    template <typename Alloc>
-    std::vector<float, Alloc> engine2D::effective_inverse_masses() const
+    stk_vector<float> engine2D::effective_inverse_masses() const
     {
         PERF_FUNCTION()
-        std::vector<float, Alloc> inv_masses;
+        stk_vector<float> inv_masses;
         inv_masses.reserve(3 * m_entities.size());
         for (std::size_t i = 0; i < m_entities.size(); i++)
         {
@@ -128,8 +127,6 @@ namespace ppx
         }
         return inv_masses;
     }
-    template std::vector<float, stack_alloc<float>> engine2D::effective_inverse_masses() const; // ADD BLOCK ALLOCATOR
-    template std::vector<float, std::allocator<float>> engine2D::effective_inverse_masses() const;
 
     void engine2D::reset_entities()
     {
@@ -281,7 +278,7 @@ namespace ppx
         retrieve(vars);
         load_velocities_and_added_forces(stchanges);
         load_interactions_and_externals(stchanges);
-        const std::vector<float, stack_alloc<float>> inv_masses = effective_inverse_masses<stack_alloc<float>>();
+        const stk_vector<float> inv_masses = effective_inverse_masses();
 
         m_collider.solve_and_load_collisions(stchanges);
         m_compeller.solve_and_load_constraints(stchanges, inv_masses);

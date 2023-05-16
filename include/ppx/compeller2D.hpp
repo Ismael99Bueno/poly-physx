@@ -35,7 +35,7 @@ namespace ppx
         void validate();
 
         void solve_and_load_constraints(std::vector<float> &stchanges,
-                                        const std::vector<float, stack_alloc<float>> &inv_masses) const;
+                                        const stk_vector<float> &inv_masses) const;
 
         const std::vector<std::shared_ptr<constraint_interface2D>> &constraints() const;
 
@@ -45,21 +45,21 @@ namespace ppx
         engine_events *m_callbacks;
 
         using constraint_grad_fun = std::function<std::array<float, 3>(const constraint_interface2D &, entity2D &)>;
-        std::vector<float, stack_alloc<float>> constraint_matrix(const constraint_grad_fun &constraint_grad) const;
-        std::vector<float, stack_alloc<float>> jacobian() const;
-        std::vector<float, stack_alloc<float>> jacobian_derivative() const;
+        stk_vector<float> constraint_matrix(const constraint_grad_fun &constraint_grad) const;
+        stk_vector<float> jacobian() const;
+        stk_vector<float> jacobian_derivative() const;
 
-        std::vector<float, stack_alloc<float>> lhs(const std::vector<float, stack_alloc<float>> &jcb,
-                                      const std::vector<float, stack_alloc<float>> &inv_masses) const;
+        stk_vector<float> lhs(const stk_vector<float> &jcb,
+                           const stk_vector<float> &inv_masses) const;
 
-        std::vector<float, stack_alloc<float>> rhs(const std::vector<float, stack_alloc<float>> &jcb,
-                                      const std::vector<float, stack_alloc<float>> &djcb,
-                                      const std::vector<float> &stchanges,
-                                      const std::vector<float, stack_alloc<float>> &inv_masses) const;
+        stk_vector<float> rhs(const stk_vector<float> &jcb,
+                           const stk_vector<float> &djcb,
+                           const std::vector<float> &stchanges,
+                           const stk_vector<float> &inv_masses) const;
 
-        std::vector<float, stack_alloc<float>> lu_decomposition(const std::vector<float, stack_alloc<float>> &A, const std::vector<float, stack_alloc<float>> &b) const;
-        void load_constraint_accels(const std::vector<float, stack_alloc<float>> &jcb,
-                                    const std::vector<float, stack_alloc<float>> &lambda,
+        stk_vector<float> lu_decomposition(const stk_vector<float> &A, const stk_vector<float> &b) const;
+        void load_constraint_accels(const stk_vector<float> &jcb,
+                                    const stk_vector<float> &lambda,
                                     std::vector<float> &stchanges) const;
 
         compeller2D(const compeller2D &) = delete;
