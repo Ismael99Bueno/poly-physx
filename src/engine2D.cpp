@@ -128,7 +128,7 @@ namespace ppx
         }
         return inv_masses;
     }
-    template std::vector<float, mem::stack_allocator<float>> engine2D::effective_inverse_masses() const; // ADD BLOCK ALLOCATOR
+    template std::vector<float, stack_alloc<float>> engine2D::effective_inverse_masses() const; // ADD BLOCK ALLOCATOR
     template std::vector<float, std::allocator<float>> engine2D::effective_inverse_masses() const;
 
     void engine2D::reset_entities()
@@ -281,7 +281,7 @@ namespace ppx
         retrieve(vars);
         load_velocities_and_added_forces(stchanges);
         load_interactions_and_externals(stchanges);
-        const std::vector<float, mem::stack_allocator<float>> inv_masses = effective_inverse_masses<mem::stack_allocator<float>>();
+        const std::vector<float, stack_alloc<float>> inv_masses = effective_inverse_masses<stack_alloc<float>>();
 
         m_collider.solve_and_load_collisions(stchanges);
         m_compeller.solve_and_load_constraints(stchanges, inv_masses);
