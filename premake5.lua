@@ -10,11 +10,6 @@ filter "system:macosx"
       "-Wconversion",
       "-Wno-unused-parameter"
    }
-   defines "PPX_MACOS"
-
-filter "system:windows"
-   defines "PPX_WINDOWS"
-filter {}
 
 pchheader "ppx/pch.hpp"
 pchsource "src/pch.cpp"

@@ -3,7 +3,11 @@
 
 #include "geo/intersection.hpp"
 
-#ifdef PPX_WINDOWS
+#if defined(_WIN32) && !defined(PERF) && !defined(PPX_NO_MULTITHREADING)
+#define MULTITHREADED
+#endif
+
+#ifdef MULTITHREADED
 #include <execution>
 #endif
 
@@ -151,7 +155,7 @@ namespace ppx
     void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
     {
         PERF_FUNCTION()
-#if defined(PPX_WINDOWS) && !defined(PERF) && !defined(PPX_NO_MULTITHREADING)
+#ifdef MULTITHREADED
         const auto exec = [this, &stchanges](const entity2D &e1)
         {
             for (std::size_t j = 0; j < m_entities->size(); j++)
@@ -247,7 +251,7 @@ namespace ppx
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
 
-#if defined(PPX_WINDOWS) && !defined(PERF) && !defined(PPX_NO_MULTITHREADING)
+#ifdef MULTITHREADED
         const auto exec = [this, &stchanges](const std::vector<const_entity2D_ptr> *partition)
         {
             for (std::size_t i = 0; i < partition->size(); i++)
