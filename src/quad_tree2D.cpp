@@ -1,7 +1,6 @@
 #include "ppx/pch.hpp"
 #include "ppx/quad_tree2D.hpp"
 
-
 #include "geo/intersection.hpp"
 
 namespace ppx
@@ -73,10 +72,10 @@ namespace ppx
                         &mx = m_aabb.max();
         const glm::vec2 mid_point = 0.5f * (mm + mx),
                         hdim = 0.5f * (mx - mm);
-        m_children[0] = std::make_unique<quad_tree2D>(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y), m_max_entities, m_depth + 1);
-        m_children[1] = std::make_unique<quad_tree2D>(mid_point, mx, m_max_entities, m_depth + 1);
-        m_children[2] = std::make_unique<quad_tree2D>(mm, mid_point, m_max_entities, m_depth + 1);
-        m_children[3] = std::make_unique<quad_tree2D>(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y), m_max_entities, m_depth + 1);
+        m_children[0] = make_scope<quad_tree2D>(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y), m_max_entities, m_depth + 1);
+        m_children[1] = make_scope<quad_tree2D>(mid_point, mx, m_max_entities, m_depth + 1);
+        m_children[2] = make_scope<quad_tree2D>(mm, mid_point, m_max_entities, m_depth + 1);
+        m_children[3] = make_scope<quad_tree2D>(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y), m_max_entities, m_depth + 1);
     }
 
     void quad_tree2D::partition()
@@ -107,7 +106,7 @@ namespace ppx
     bool quad_tree2D::partitioned() const { return m_partitioned; }
     const std::vector<const_entity2D_ptr> &quad_tree2D::entities() const { return m_entities; }
 
-    const std::array<std::unique_ptr<quad_tree2D>, 4> &quad_tree2D::children() const { return m_children; }
+    const std::array<scope<quad_tree2D>, 4> &quad_tree2D::children() const { return m_children; }
     const quad_tree2D &quad_tree2D::child(std::size_t index) const
     {
         DBG_ASSERT_ERROR(index < 4, "Index outside of array bounds. A quad tree can only have 4 children - index: {0}", index)

@@ -28,8 +28,8 @@ namespace ppx
     inline scope<T> make_scope(Args &&...args)
     {
         static mem::block_allocator<T> alloc; // I dont think static is even worth it
-        T *p = alloc.allocate(1);
-        *p = T(std::forward<Args>(args)...);
+        T *buff = alloc.allocate(1);
+        T *p = new (buff) T(std::forward<Args>(args)...);
         return scope<T>(p);
     }
 
@@ -38,9 +38,9 @@ namespace ppx
     {
         static mem::block_allocator<T> alloc;
         static mem::block_deleter<T> deleter;
-        T *p = alloc.allocate(1);
-        *p = T(std::forward<Args>(args)...);
-        return ref<T>(p, deleter, alloc);
+        T *buff = alloc.allocate(1);
+        T *p = new (buff) T(std::forward<Args>(args)...);
+        return ref<T>(p, deleter);
     }
 }
 #else

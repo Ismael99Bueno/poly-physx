@@ -32,7 +32,7 @@ namespace ppx
         bool partitioned() const;
         const std::vector<const_entity2D_ptr> &entities() const;
 
-        const std::array<std::unique_ptr<quad_tree2D>, 4> &children() const;
+        const std::array<scope<quad_tree2D>, 4> &children() const;
         const quad_tree2D &child(std::size_t index) const;
         const quad_tree2D &operator[](std::size_t index) const;
 
@@ -40,7 +40,7 @@ namespace ppx
         static void max_depth(std::uint32_t max_depth);
 
     private:
-        std::array<std::unique_ptr<quad_tree2D>, 4> m_children; // TL, TR, BL, BR
+        std::array<scope<quad_tree2D>, 4> m_children = {nullptr, nullptr, nullptr, nullptr}; // TL, TR, BL, BR
         geo::aabb2D m_aabb;
         std::size_t m_max_entities;
         std::uint32_t m_depth;
@@ -54,8 +54,11 @@ namespace ppx
         void partition();
         void add_to_children(const const_entity2D_ptr &e);
 
-        quad_tree2D(const quad_tree2D &) = delete;
-        quad_tree2D &operator=(const quad_tree2D &) = delete;
+        quad_tree2D(quad_tree2D &&) = default;
+        quad_tree2D &operator=(quad_tree2D &&) = default;
+
+        template <typename T, class... Args>
+        friend scope<T> make_scope(Args &&...args);
     };
 }
 
