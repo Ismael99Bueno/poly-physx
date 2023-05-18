@@ -31,7 +31,7 @@ namespace ppx
     template <typename T, class... Args>
     inline scope<T> make_scope(Args &&...args)
     {
-        static mem::block_allocator<T> alloc; // I dont think static is even worth it
+        mem::block_allocator<T> alloc; // I dont think static is even worth it
         T *buff = alloc.allocate_raw(sizeof(T));
         if (!buff)
             return scope<T>(new T(std::forward<Args>(args)...));
