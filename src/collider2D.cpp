@@ -316,10 +316,9 @@ namespace ppx
                         vel2 = c.incoming->vel_at(rel2);
 
         const glm::vec2 force = m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1);
-        const glm::vec2 force1 = c.current->mass() * force, force2 = c.incoming->mass() * force;
 
-        const float torque1 = cross(rel1, force1), torque2 = cross(force2, rel2);
-        return {force1.x, force1.y, torque1, -force2.x, -force2.y, torque2};
+        const float torque1 = cross(rel1, force), torque2 = cross(force, rel2);
+        return {force.x, force.y, torque1, -force.x, -force.y, torque2};
     }
 
 #ifdef HAS_YAML_CPP
