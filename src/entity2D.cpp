@@ -17,7 +17,7 @@ namespace ppx
                                                m_inv_inertia(1.f / m_inertia),
                                                m_charge(charge),
                                                m_kinematic(kinematic) {}
-    entity2D::entity2D(const std::vector<glm::vec2> &vertices,
+    entity2D::entity2D(const blk_vector<glm::vec2> &vertices,
                        const glm::vec2 &pos, const glm::vec2 &vel,
                        const float angpos, const float angvel,
                        const float mass, const float charge,
@@ -51,7 +51,7 @@ namespace ppx
                                            m_charge(spc.charge),
                                            m_kinematic(spc.kinematic)
     {
-        if (const auto *vertices = std::get_if<std::vector<glm::vec2>>(&spc.shape))
+        if (const auto *vertices = std::get_if<blk_vector<glm::vec2>>(&spc.shape))
             m_shape = geo::polygon(spc.pos, spc.angpos, *vertices);
         else
             m_shape = geo::circle(spc.pos, std::get<float>(spc.shape), spc.angpos);
@@ -128,7 +128,7 @@ namespace ppx
     template const geo::polygon *entity2D::shape_if<geo::polygon>() const;
     template const geo::circle *entity2D::shape_if<geo::circle>() const;
 
-    void entity2D::shape(const std::vector<glm::vec2> &vertices)
+    void entity2D::shape(const blk_vector<glm::vec2> &vertices)
     {
         const geo::shape2D &sh = shape();
         const geo::polygon poly(sh.centroid(), sh.rotation(), vertices);

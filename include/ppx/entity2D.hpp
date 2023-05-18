@@ -19,7 +19,7 @@ namespace ppx
         {
             glm::vec2 pos{0.f}, vel{0.f};
             float angpos = 0.f, angvel = 0.f, mass = 1.f, charge = 1.f;
-            std::variant<std::vector<glm::vec2>, float> shape = geo::polygon::box(5.f);
+            std::variant<blk_vector<glm::vec2>, float> shape = geo::polygon::box(5.f);
             bool kinematic = true;
             static specs from_entity(const entity2D &e);
         };
@@ -29,7 +29,7 @@ namespace ppx
             CIRCLE = 1
         };
 
-        entity2D(const std::vector<glm::vec2> &vertices,
+        entity2D(const blk_vector<glm::vec2> &vertices,
                  const glm::vec2 &pos = glm::vec2(0.f),
                  const glm::vec2 &vel = glm::vec2(0.f),
                  float angpos = 0.f, float angvel = 0.f,
@@ -66,7 +66,7 @@ namespace ppx
         template <typename T>
         const T *shape_if() const;
 
-        void shape(const std::vector<glm::vec2> &vertices);
+        void shape(const blk_vector<glm::vec2> &vertices);
         void shape(float radius);
         void shape(const geo::polygon &poly);
         void shape(const geo::circle &c);

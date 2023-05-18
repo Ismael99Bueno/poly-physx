@@ -127,7 +127,7 @@ namespace ppx
         if (!geo::may_intersect(sh1, sh2))
             return false;
 
-        std::vector<glm::vec2> simplex;
+        blk_vector<glm::vec2> simplex;
         simplex.reserve(10);
         if (!geo::gjk(sh1, sh2, simplex))
             return false;
