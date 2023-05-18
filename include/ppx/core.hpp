@@ -50,6 +50,7 @@ namespace ppx
             return std::make_shared<T>(std::forward<Args>(args)...);
 
         T *p = new (buff) T(std::forward<Args>(args)...);
+        DBG_ASSERT_WARN((std::uint64_t)p % alignof(T) == 0, "Block allocated pointer {0} is not aligned! Alignment: {1}", (void *)p, alignof(T))
         return ref<T>(p, mem::block_deleter<T>());
     }
 }
