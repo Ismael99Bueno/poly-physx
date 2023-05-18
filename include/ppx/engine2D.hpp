@@ -38,10 +38,10 @@ namespace ppx
         bool remove_entity(const entity2D &e);
 
         template <typename T, class... Args>
-        std::shared_ptr<T> add_behaviour(Args &&...args)
+        ref<T> add_behaviour(Args &&...args)
         {
             static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is recommended to inherit from force2D or interaction2D)");
-            const auto bhv = std::make_shared<T>(std::forward<Args>(args)...);
+            const auto bhv = make_ref<T>(std::forward<Args>(args)...);
             m_behaviours.push_back(bhv);
             m_behaviours.back()->m_entities = &m_entities;
             m_events.on_behaviour_addition(bhv);
@@ -56,7 +56,7 @@ namespace ppx
             return sp;
         }
 
-        bool remove_behaviour(const std::shared_ptr<behaviour2D> &bhv);
+        bool remove_behaviour(const ref<behaviour2D> &bhv);
         bool remove_spring(std::size_t index);
         bool remove_spring(const spring2D &sp);
 
@@ -79,7 +79,7 @@ namespace ppx
         entity2D_ptr from_id(uuid id);
 
         template <typename T>
-        std::shared_ptr<T> behaviour_from_name(const char *name) const
+        ref<T> behaviour_from_name(const char *name) const
         {
             static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is recommended to inherit from force2D or interaction2D)");
             return std::dynamic_pointer_cast<T>(behaviour_from_name<behaviour2D>(name));
@@ -94,10 +94,10 @@ namespace ppx
         const_entity2D_ptr operator[](const glm::vec2 &point) const;
         entity2D_ptr operator[](const glm::vec2 &point);
 
-        const std::vector<std::shared_ptr<behaviour2D>> &behaviours() const;
+        const std::vector<ref<behaviour2D>> &behaviours() const;
         const std::vector<spring2D> &springs() const;
 
-        cvw::vector<std::shared_ptr<behaviour2D>> behaviours();
+        cvw::vector<ref<behaviour2D>> behaviours();
         cvw::vector<spring2D> springs();
 
         const std::vector<entity2D> &entities() const;
@@ -121,7 +121,7 @@ namespace ppx
         std::vector<entity2D> m_entities;
         collider2D m_collider;
         compeller2D m_compeller;
-        std::vector<std::shared_ptr<behaviour2D>> m_behaviours;
+        std::vector<ref<behaviour2D>> m_behaviours;
         std::vector<spring2D> m_springs;
         std::tuple<float, std::vector<float>, std::vector<entity2D>> m_checkpoint;
         rk::integrator m_integ;

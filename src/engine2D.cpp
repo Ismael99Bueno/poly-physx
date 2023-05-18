@@ -192,7 +192,7 @@ namespace ppx
     }
 
     bool engine2D::remove_entity(const entity2D &e) { return remove_entity(e.index()); }
-    bool engine2D::remove_behaviour(const std::shared_ptr<behaviour2D> &bhv)
+    bool engine2D::remove_behaviour(const ref<behaviour2D> &bhv)
     {
         for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
             if (*it == bhv)
@@ -312,7 +312,7 @@ namespace ppx
     }
 
     template <>
-    std::shared_ptr<behaviour2D> engine2D::behaviour_from_name(const char *name) const
+    ref<behaviour2D> engine2D::behaviour_from_name(const char *name) const
     {
         for (const auto &bhv : m_behaviours)
             if (strcmp(name, bhv->name()) == 0)
@@ -351,10 +351,10 @@ namespace ppx
         return in_area;
     }
 
-    const std::vector<std::shared_ptr<behaviour2D>> &engine2D::behaviours() const { return m_behaviours; }
+    const std::vector<ref<behaviour2D>> &engine2D::behaviours() const { return m_behaviours; }
     const std::vector<spring2D> &engine2D::springs() const { return m_springs; }
 
-    cvw::vector<std::shared_ptr<behaviour2D>> engine2D::behaviours() { return m_behaviours; }
+    cvw::vector<ref<behaviour2D>> engine2D::behaviours() { return m_behaviours; }
     cvw::vector<spring2D> engine2D::springs() { return m_springs; }
 
     const_entity2D_ptr engine2D::operator[](const glm::vec2 &point) const

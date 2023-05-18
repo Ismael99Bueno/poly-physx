@@ -12,7 +12,7 @@ namespace ppx
         m_constraints.reserve(allocations);
     }
 
-    bool compeller2D::remove_constraint(const std::shared_ptr<const constraint_interface2D> &ctr)
+    bool compeller2D::remove_constraint(const ref<const constraint_interface2D> &ctr)
     {
         for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
             if (*it == ctr)
@@ -54,7 +54,7 @@ namespace ppx
         load_constraint_accels(jcb, lambda, stchanges);
     }
 
-    const std::vector<std::shared_ptr<constraint_interface2D>> &compeller2D::constraints() const { return m_constraints; }
+    const std::vector<ref<constraint_interface2D>> &compeller2D::constraints() const { return m_constraints; }
 
     stk_vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
     {
