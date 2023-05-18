@@ -45,7 +45,10 @@ namespace ppx
     inline ref<T> make_ref(Args &&...args)
     {
         static mem::block_allocator<T> alloc;
-        T *buff = alloc.allocate(1);
+        T *buff = alloc.allocate_raw(sizeof(T));
+        if (!buff)
+            return std::make_shared<T>(std::forward<Args>(args)...);
+
         T *p = new (buff) T(std::forward<Args>(args)...);
         return ref<T>(p, mem::block_deleter<T>());
     }
