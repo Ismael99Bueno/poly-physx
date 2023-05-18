@@ -10,6 +10,7 @@ filter "system:macosx"
       "-Wconversion",
       "-Wno-unused-parameter"
    }
+filter {}
 
 pchheader "ppx/pch.hpp"
 pchsource "src/pch.cpp"
