@@ -1,7 +1,7 @@
 #include "ppx/pch.hpp"
 #include "ppx/engine2D.hpp"
-
 #include "geo/intersection.hpp"
+#include <cstring>
 
 namespace ppx
 {
