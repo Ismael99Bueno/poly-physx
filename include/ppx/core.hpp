@@ -8,6 +8,10 @@
 #include "mem/stack_allocator.hpp"
 #include "mem/block_allocator.hpp"
 
+#ifdef HAS_DEBUG_LOG_TOOLS
+#include "dbg/log.hpp"
+#endif
+
 #include <vector>
 
 namespace ppx
@@ -28,8 +32,12 @@ namespace ppx
     inline scope<T> make_scope(Args &&...args)
     {
         static mem::block_allocator<T> alloc; // I dont think static is even worth it
-        T *buff = alloc.allocate(1);
+        T *buff = alloc.allocate_raw(sizeof(T));
+        if (!buff)
+            return scope<T>(new T(std::forward<Args>(args)...));
+
         T *p = new (buff) T(std::forward<Args>(args)...);
+        DBG_ASSERT_WARN((std::uint64_t)p % alignof(T) == 0, "Block allocated pointer {0} is not aligned! Alignment: {1}", (void *)p, alignof(T))
         return scope<T>(p);
     }
 
@@ -37,10 +45,9 @@ namespace ppx
     inline ref<T> make_ref(Args &&...args)
     {
         static mem::block_allocator<T> alloc;
-        static mem::block_deleter<T> deleter;
         T *buff = alloc.allocate(1);
         T *p = new (buff) T(std::forward<Args>(args)...);
-        return ref<T>(p, deleter);
+        return ref<T>(p, mem::block_deleter<T>());
     }
 }
 #else

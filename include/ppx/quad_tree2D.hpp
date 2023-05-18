@@ -56,9 +56,6 @@ namespace ppx
 
         quad_tree2D(quad_tree2D &&) = default;
         quad_tree2D &operator=(quad_tree2D &&) = default;
-
-        template <typename T, class... Args>
-        friend scope<T> make_scope(Args &&...args);
     };
 }
 
