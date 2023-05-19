@@ -171,7 +171,7 @@ namespace ppx
                     try_exit_callback(e1, e2);
             }
         };
-        std::for_each(std::execution::par, m_entities->begin(), m_entities->end(), exec);
+        std::for_each(std::execution::par_unseq, m_entities->begin(), m_entities->end(), exec);
 #else
 #ifdef DEBUG
         std::size_t checks = 0, collisions = 0;
@@ -263,7 +263,7 @@ namespace ppx
                         solve(c, stchanges);
                 }
         };
-        std::for_each(std::execution::par, partitions.begin(), partitions.end(), exec);
+        std::for_each(std::execution::par_unseq, partitions.begin(), partitions.end(), exec);
 #else
 #ifdef DEBUG
         std::size_t checks = 0, collisions = 0;
