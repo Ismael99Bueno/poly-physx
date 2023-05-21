@@ -37,6 +37,7 @@ namespace ppx
         void update_quad_tree();
         void rebuild_quad_tree();
         void validate();
+        void flush_collisions();
 
         float stiffness() const;
         float dampening() const;
@@ -77,7 +78,7 @@ namespace ppx
             const_entity2D_ptr m_entity;
             end m_end;
         };
-        using colpair = std::pair<entity2D *, entity2D *>; // Should only last for 1 frame
+        using colpair = std::pair<const entity2D *, const entity2D *>; // Should only last for 1 frame
 
         std::vector<entity2D> *m_entities;
         std::vector<interval> m_intervals;
@@ -92,14 +93,19 @@ namespace ppx
 
         bool broad_detection(const entity2D &e1, const entity2D &e2) const;
         bool narrow_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const;
+        bool narrow_detection_mix(const entity2D &e1, const entity2D &e2, collision2D *c) const;
+        bool narrow_detection_circle(const entity2D &e1, const entity2D &e2, collision2D *c) const;
         bool full_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const;
 
         void try_enter_or_stay_callback(const entity2D &e1, const entity2D &e2, const collision2D &c) const;
         void try_exit_callback(const entity2D &e1, const entity2D &e2) const;
 
-        void brute_force_coldet(std::vector<float> &stchanges) const;
-        void sort_and_sweep_coldet(std::vector<float> &stchanges);
-        void quad_tree_coldet(std::vector<float> &stchanges);
+        void broad_and_narrow_fase(std::vector<float> &stchanges);
+        void narrow_fase(std::vector<float> &stchanges);
+
+        void brute_force(std::vector<float> &stchanges);
+        void sort_and_sweep(std::vector<float> &stchanges);
+        void quad_tree(std::vector<float> &stchanges);
 
         void solve(const collision2D &c,
                    std::vector<float> &stchanges) const;

@@ -28,6 +28,7 @@ namespace ppx
         const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this);
         reset_entities();
         retrieve();
+        m_collider.flush_collisions();
         return valid;
     }
     bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
@@ -35,6 +36,7 @@ namespace ppx
         const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, reiterations);
         reset_entities();
         retrieve();
+        m_collider.flush_collisions();
         return valid;
     }
     bool engine2D::embedded_forward(float &timestep)
@@ -42,6 +44,7 @@ namespace ppx
         const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this);
         reset_entities();
         retrieve();
+        m_collider.flush_collisions();
         return valid;
     }
 

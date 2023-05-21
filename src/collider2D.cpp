@@ -45,20 +45,38 @@ namespace ppx
 
     void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
     {
+        if (m_collision_pairs.empty())
+            broad_and_narrow_fase(stchanges);
+        else
+            narrow_fase(stchanges);
+    }
+
+    void collider2D::broad_and_narrow_fase(std::vector<float> &stchanges)
+    {
         PERF_FUNCTION()
         if (!m_enabled)
             return;
         switch (m_coldet_method)
         {
         case BRUTE_FORCE:
-            brute_force_coldet(stchanges);
+            brute_force(stchanges);
             break;
         case SORT_AND_SWEEP:
-            sort_and_sweep_coldet(stchanges);
+            sort_and_sweep(stchanges);
             break;
         case QUAD_TREE:
-            quad_tree_coldet(stchanges);
+            quad_tree(stchanges);
             break;
+        }
+    }
+
+    void collider2D::narrow_fase(std::vector<float> &stchanges)
+    {
+        for (const colpair &cp : m_collision_pairs)
+        {
+            collision2D c;
+            if (narrow_detection(*cp.first, *cp.second, &c))
+                solve(c, stchanges);
         }
     }
 
@@ -80,6 +98,7 @@ namespace ppx
             else
                 ++it;
     }
+    void collider2D::flush_collisions() { m_collision_pairs.clear(); }
 
     float collider2D::stiffness() const { return m_stiffness; }
     float collider2D::dampening() const { return m_dampening; }
@@ -106,33 +125,8 @@ namespace ppx
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    // bool collider2D::broad_detection(const entity2D &e1, const entity2D &e2) const
-    // {
-    //     if (e1 == e2 || (!e1.kinematic() && !e2.kinematic()))
-    //         return false;
-    //     const geo::shape2D &sh1 = e1.shape(),
-    //                        &sh2 = e2.shape();
-    //     if (!geo::may_intersect(sh1, sh2))
-    //         return false;
-    // }
-
-    bool collider2D::full_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const
+    bool collider2D::narrow_detection_mix(const entity2D &e1, const entity2D &e2, collision2D *c) const
     {
-        if (e1 == e2 || (!e1.kinematic() && !e2.kinematic()))
-            return false;
-
-        const auto *c1 = e1.shape_if<geo::circle>(),
-                   *c2 = e2.shape_if<geo::circle>();
-        if (c1 && c2)
-        {
-            if (!geo::intersect(*c1, *c2))
-                return false;
-            const glm::vec2 mtv = geo::mtv(*c1, *c2);
-            const auto &[contact1, contact2] = geo::contact_points(*c1, *c2);
-            *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv};
-            return true;
-        }
-
         const geo::shape2D &sh1 = e1.shape(),
                            &sh2 = e2.shape();
         if (!geo::may_intersect(sh1, sh2))
@@ -152,6 +146,35 @@ namespace ppx
         return true;
     }
 
+    bool collider2D::narrow_detection_circle(const entity2D &e1, const entity2D &e2, collision2D *c) const
+    {
+        const auto *c1 = e1.shape_if<geo::circle>(),
+                   *c2 = e2.shape_if<geo::circle>();
+        if (!c1 || !c2)
+            return false;
+
+        if (!geo::intersect(*c1, *c2))
+            return false;
+        const glm::vec2 mtv = geo::mtv(*c1, *c2);
+        const auto &[contact1, contact2] = geo::contact_points(*c1, *c2);
+        *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv};
+        return true;
+    }
+
+    bool collider2D::broad_detection(const entity2D &e1, const entity2D &e2) const { return e1 != e2 && (e1.kinematic() || e2.kinematic()) && geo::may_intersect(e1.shape(), e2.shape()); }
+    bool collider2D::narrow_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const
+    {
+        if (narrow_detection_circle(e1, e2, c))
+            return true;
+        return narrow_detection_mix(e1, e2, c);
+    }
+    bool collider2D::full_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const
+    {
+        if (!broad_detection(e1, e2))
+            return false;
+        return narrow_detection(e1, e2, c);
+    }
+
     void collider2D::try_enter_or_stay_callback(const entity2D &e1, const entity2D &e2, const collision2D &c) const
     {
         e1.events().try_enter_or_stay(c);
@@ -163,7 +186,7 @@ namespace ppx
         e2.events().try_exit({m_entities, e1.index()});
     }
 
-    void collider2D::brute_force_coldet(std::vector<float> &stchanges) const
+    void collider2D::brute_force(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
 #ifdef MULTITHREADED
@@ -202,6 +225,7 @@ namespace ppx
 #endif
                     try_enter_or_stay_callback(e1, e2, c);
                     solve(c, stchanges);
+                    m_collision_pairs.emplace_back(&e1, &e2);
                 }
                 else
                     try_exit_callback(e1, e2);
@@ -210,7 +234,7 @@ namespace ppx
 #endif
     }
 
-    void collider2D::sort_and_sweep_coldet(std::vector<float> &stchanges)
+    void collider2D::sort_and_sweep(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
 #ifdef DEBUG
@@ -237,6 +261,7 @@ namespace ppx
 #endif
                         try_enter_or_stay_callback(e1, e2, c);
                         solve(c, stchanges);
+                        m_collision_pairs.emplace_back(&e1, &e2);
                     }
                     else
                         try_exit_callback(e1, e2);
@@ -248,7 +273,7 @@ namespace ppx
         DBG_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for SORT AND SWEEP collision detection (QUALITY: {3:.2f}%%)", checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
     }
 
-    void collider2D::quad_tree_coldet(std::vector<float> &stchanges)
+    void collider2D::quad_tree(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
         static std::uint32_t qt_build_calls = 0;
@@ -295,6 +320,7 @@ namespace ppx
 #endif
                         try_enter_or_stay_callback(*e1, *e2, c);
                         solve(c, stchanges);
+                        m_collision_pairs.emplace_back(&*e1, &*e2);
                     }
                     else
                         try_exit_callback(*e1, *e2);
