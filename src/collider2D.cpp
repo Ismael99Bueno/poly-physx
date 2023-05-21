@@ -127,16 +127,16 @@ namespace ppx
         if (!geo::may_intersect(sh1, sh2))
             return false;
 
-        std::vector<glm::vec2> simplex;
-        simplex.reserve(10);
-        if (!geo::gjk(sh1, sh2, simplex))
+        auto simplex = geo::gjk(sh1, sh2);
+        if (!simplex)
             return false;
 
-        glm::vec2 mtv;
-        if (!geo::epa(sh1, sh2, simplex, mtv))
+        auto mtv = geo::epa(sh1, sh2, simplex.value());
+        if (!mtv)
             return false;
-        const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv);
-        *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv};
+
+        const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv.value());
+        *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv.value()};
 
         return true;
     }
