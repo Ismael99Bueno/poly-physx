@@ -3,17 +3,30 @@
 
 #include "geo/intersection.hpp"
 
-#if defined(_WIN32) && !defined(PERF) && !defined(PPX_NO_MULTITHREADING)
-#define MULTITHREADED
-#endif
-
-#ifdef MULTITHREADED
+#ifdef PPX_MULTITHREADED
 #include <execution>
+#include <mutex>
 #endif
 
 namespace ppx
 {
     static float cross(const glm::vec2 &v1, const glm::vec2 &v2) { return v1.x * v2.y - v1.y * v2.x; }
+
+#ifdef PPX_MULTITHREADED
+    static std::mutex mtx;
+    static std::unordered_map<std::thread::id, std::size_t> id_to_idx;
+    static void check_thread()
+    {
+        std::scoped_lock lock{mtx};
+        static std::size_t idx = 0;
+        id_to_idx[std::this_thread::get_id()] = idx++;
+    }
+    static void debug_thread()
+    {
+        std::scoped_lock lock{mtx};
+        DBG_ASSERT_ERROR(id_to_idx.find(std::this_thread::get_id()) != id_to_idx.end(), "Thread IDs are not being reused! Multithreading cannot be available. Disable it by defining PPX_NO_MULTITHREADING")
+    }
+#endif
 
     collider2D::collider2D(std::vector<entity2D> *entities,
                            const std::size_t allocations,
@@ -23,6 +36,19 @@ namespace ppx
     {
         m_intervals.reserve(allocations);
         m_collision_pairs.reserve(allocations);
+#ifdef PPX_MULTITHREADED
+        std::thread threads[PPX_MAX_THREADS];
+        for (std::thread &th : threads)
+            th = std::thread(check_thread);
+        for (std::thread &th : threads)
+            th.join();
+#ifdef DEBUG
+        for (std::thread &th : threads)
+            th = std::thread(debug_thread);
+        for (std::thread &th : threads)
+            th.join();
+#endif
+#endif
     }
 
     collider2D::interval::interval(const const_entity2D_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
@@ -72,12 +98,22 @@ namespace ppx
 
     void collider2D::narrow_fase(std::vector<float> &stchanges)
     {
+#ifdef PPX_MULTITHREADED
+        const auto exec = [this, &stchanges](const colpair &cp)
+        {
+            collision2D c;
+            if (narrow_detection(*cp.first, *cp.second, &c))
+                solve(c, stchanges);
+        };
+        std::for_each(std::execution::par_unseq, m_collision_pairs->begin(), m_collision_pairs->end(), exec);
+#else
         for (const colpair &cp : m_collision_pairs)
         {
             collision2D c;
             if (narrow_detection(*cp.first, *cp.second, &c))
                 solve(c, stchanges);
         }
+#endif
     }
 
     void collider2D::update_quad_tree()
@@ -189,7 +225,7 @@ namespace ppx
     void collider2D::brute_force(std::vector<float> &stchanges)
     {
         PERF_FUNCTION()
-#ifdef MULTITHREADED
+#ifdef PPX_MULTITHREADED
         const auto exec = [this, &stchanges](const entity2D &e1)
         {
             for (std::size_t j = 0; j < m_entities->size(); j++)
@@ -200,12 +236,16 @@ namespace ppx
                 {
                     try_enter_or_stay_callback(e1, e2, c);
                     solve(c, stchanges);
+                    const std::size_t t_idx = id_to_idx.at(std::this_thread::get_id());
+                    m_mt_collision_pairs[idx].emplace_back(&e1, &e2);
                 }
                 else
                     try_exit_callback(e1, e2);
             }
         };
         std::for_each(std::execution::par_unseq, m_entities->begin(), m_entities->end(), exec);
+        for (const auto &pairs : m_mt_collision_pairs)
+            m_collision_pairs.insert(m_collision_pairs.begin(), pairs.begin(), pairs.end());
 #else
 #ifdef DEBUG
         std::size_t checks = 0, collisions = 0;
@@ -287,7 +327,7 @@ namespace ppx
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
 
-#ifdef MULTITHREADED
+#ifdef PPX_MULTITHREADED
         const auto exec = [this, &stchanges](const std::vector<const_entity2D_ptr> *partition)
         {
             for (std::size_t i = 0; i < partition->size(); i++)
@@ -296,10 +336,19 @@ namespace ppx
                     collision2D c;
                     const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
                     if (full_detection(*e1, *e2, &c))
+                    {
+                        try_enter_or_stay_callback(*e1, *e2, c);
                         solve(c, stchanges);
+                        const std::size_t t_idx = id_to_idx.at(std::this_thread::get_id());
+                        m_mt_collision_pairs[idx].emplace_back(&e1, &e2);
+                    }
+                    else
+                        try_exit_callback(*e1, *e2);
                 }
         };
         std::for_each(std::execution::par_unseq, partitions.begin(), partitions.end(), exec);
+        for (const auto &pairs : m_mt_collision_pairs)
+            m_collision_pairs.insert(m_collision_pairs.begin(), pairs.begin(), pairs.end());
 #else
 #ifdef DEBUG
         std::size_t checks = 0, collisions = 0;

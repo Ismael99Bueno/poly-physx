@@ -14,6 +14,9 @@
 #include <type_traits>
 #include <array>
 #include <cstdint>
+#ifdef PPX_MULTITHREADED
+#include <thread>
+#endif
 #ifdef HAS_YAML_CPP
 #include <yaml-cpp/yaml.h>
 #endif

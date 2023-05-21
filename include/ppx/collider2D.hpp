@@ -9,6 +9,14 @@
 #include <vector>
 #include <utility>
 
+#if defined(_WIN32) && !defined(PERF) && !defined(PPX_NO_MULTITHREADING)
+#define PPX_MULTITHREADED
+#endif
+
+#ifndef PPX_MAX_THREADS
+#define PPX_MAX_THREADS 16
+#endif
+
 namespace ppx
 {
     struct collision2D
@@ -83,6 +91,10 @@ namespace ppx
         std::vector<entity2D> *m_entities;
         std::vector<interval> m_intervals;
         std::vector<colpair> m_collision_pairs;
+#ifdef PPX_MULTITHREADED
+        std::array<std::vector<colpair>, PPX_MAX_THREADS> m_mt_collision_pairs;
+#endif
+
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
         std::uint32_t m_qt_build_period = 35;
