@@ -105,7 +105,7 @@ namespace ppx
             if (narrow_detection(*cp.first, *cp.second, &c))
                 solve(c, stchanges);
         };
-        std::for_each(std::execution::par_unseq, m_collision_pairs->begin(), m_collision_pairs->end(), exec);
+        std::for_each(std::execution::par_unseq, m_collision_pairs.begin(), m_collision_pairs.end(), exec);
 #else
         for (const colpair &cp : m_collision_pairs)
         {
