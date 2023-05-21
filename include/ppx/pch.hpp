@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <array>
 #include <cstdint>
+#include <variant>
 #ifdef PPX_MULTITHREADED
 #include <thread>
 #endif

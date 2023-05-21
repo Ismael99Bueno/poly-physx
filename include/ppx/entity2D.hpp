@@ -8,6 +8,7 @@
 #include "rk/state.hpp"
 #include "ppx/entity_events.hpp"
 #include "ppx/uuid.hpp"
+#include <variant>
 
 namespace ppx
 {
