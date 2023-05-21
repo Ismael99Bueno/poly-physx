@@ -89,8 +89,8 @@ namespace ppx
     bool collider2D::enabled() const { return m_enabled; }
     void collider2D::enabled(const bool enabled) { m_enabled = enabled; }
 
-    collider2D::coldet_method collider2D::coldet() const { return m_coldet_method; }
-    void collider2D::coldet(coldet_method coldet) { m_coldet_method = coldet; }
+    collider2D::detection_method collider2D::detection() const { return m_coldet_method; }
+    void collider2D::detection(detection_method coldet) { m_coldet_method = coldet; }
 
     const quad_tree2D &collider2D::quad_tree() const { return m_quad_tree; }
     quad_tree2D &collider2D::quad_tree() { return m_quad_tree; }
@@ -334,7 +334,7 @@ namespace ppx
         out << YAML::EndMap;
         out << YAML::Key << "Stiffness" << YAML::Value << cld.stiffness();
         out << YAML::Key << "Dampening" << YAML::Value << cld.dampening();
-        out << YAML::Key << "Collision detection" << YAML::Value << cld.coldet();
+        out << YAML::Key << "Collision detection" << YAML::Value << cld.detection();
         out << YAML::Key << "Enabled" << YAML::Value << cld.enabled();
         out << YAML::EndMap;
         return out;
@@ -357,7 +357,7 @@ namespace YAML
 
         node["Stiffness"] = cld.stiffness();
         node["Dampening"] = cld.dampening();
-        node["Collision detection"] = (int)cld.coldet();
+        node["Collision detection"] = (int)cld.detection();
         node["Enabled"] = cld.enabled();
         return node;
     }
@@ -374,7 +374,7 @@ namespace YAML
 
         cld.stiffness(node["Stiffness"].as<float>());
         cld.dampening(node["Dampening"].as<float>());
-        cld.coldet((ppx::collider2D::coldet_method)node["Collision detection"].as<int>());
+        cld.detection((ppx::collider2D::detection_method)node["Collision detection"].as<int>());
         cld.enabled(node["Enabled"].as<bool>());
         cld.rebuild_quad_tree();
 

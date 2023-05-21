@@ -20,7 +20,7 @@ namespace ppx
     class collider2D final
     {
     public:
-        enum coldet_method
+        enum detection_method
         {
             BRUTE_FORCE = 0,
             SORT_AND_SWEEP = 1,
@@ -47,8 +47,8 @@ namespace ppx
         bool enabled() const;
         void enabled(bool enabled);
 
-        coldet_method coldet() const;
-        void coldet(coldet_method coldet);
+        detection_method detection() const;
+        void detection(detection_method coldet);
 
         const quad_tree2D &quad_tree() const;
         quad_tree2D &quad_tree();
@@ -83,7 +83,7 @@ namespace ppx
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
         std::uint32_t m_qt_build_period = 35;
-        coldet_method m_coldet_method = QUAD_TREE;
+        detection_method m_coldet_method = QUAD_TREE;
         bool m_enabled = true;
 
         void sort_intervals();
