@@ -14,7 +14,6 @@
 #include <type_traits>
 #include <array>
 #include <cstdint>
-#include <variant>
 #ifdef HAS_YAML_CPP
 #include <yaml-cpp/yaml.h>
 #endif

@@ -51,10 +51,10 @@ namespace ppx
                                            m_charge(spc.charge),
                                            m_kinematic(spc.kinematic)
     {
-        if (const auto *vertices = std::get_if<blk_vector<glm::vec2>>(&spc.shape))
-            m_shape = geo::polygon(spc.pos, spc.angpos, *vertices);
+        if (spc.shape == POLYGON)
+            m_shape = geo::polygon(spc.pos, spc.angpos, spc.vertices);
         else
-            m_shape = geo::circle(spc.pos, std::get<float>(spc.shape), spc.angpos);
+            m_shape = geo::circle(spc.pos, spc.radius, spc.angpos);
         compute_inertia(shape());
     }
 
@@ -203,8 +203,8 @@ namespace ppx
     entity2D::specs entity2D::specs::from_entity(const entity2D &e)
     {
         if (const auto *poly = e.shape_if<geo::polygon>())
-            return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), poly->locals(), e.kinematic()};
-        return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), e.shape<geo::circle>().radius(), e.kinematic()};
+            return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), poly->locals(), 0.f, e.kinematic()};
+        return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), {}, e.shape<geo::circle>().radius(), e.kinematic()};
     }
 
     bool operator==(const entity2D &lhs, const entity2D &rhs) { return lhs.id() == rhs.id(); }

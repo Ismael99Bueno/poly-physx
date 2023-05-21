@@ -8,25 +8,26 @@
 #include "rk/state.hpp"
 #include "ppx/entity_events.hpp"
 #include "ppx/uuid.hpp"
-#include <variant>
 
 namespace ppx
 {
     class entity2D
     {
     public:
-        struct specs
-        {
-            glm::vec2 pos{0.f}, vel{0.f};
-            float angpos = 0.f, angvel = 0.f, mass = 1.f, charge = 1.f;
-            std::variant<blk_vector<glm::vec2>, float> shape = geo::polygon::box(5.f);
-            bool kinematic = true;
-            static specs from_entity(const entity2D &e);
-        };
         enum shape_type
         {
             POLYGON = 0,
             CIRCLE = 1
+        };
+        struct specs
+        {
+            glm::vec2 pos{0.f}, vel{0.f};
+            float angpos = 0.f, angvel = 0.f, mass = 1.f, charge = 1.f;
+            blk_vector<glm::vec2> vertices = geo::polygon::box(5.f);
+            float radius = 2.5f;
+            bool kinematic = true;
+            shape_type shape = POLYGON;
+            static specs from_entity(const entity2D &e);
         };
 
         entity2D(const blk_vector<glm::vec2> &vertices,
