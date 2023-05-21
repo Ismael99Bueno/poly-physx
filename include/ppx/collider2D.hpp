@@ -77,9 +77,11 @@ namespace ppx
             const_entity2D_ptr m_entity;
             end m_end;
         };
+        using colpair = std::pair<entity2D *, entity2D *>; // Should only last for 1 frame
 
         std::vector<entity2D> *m_entities;
         std::vector<interval> m_intervals;
+        std::vector<colpair> m_collision_pairs;
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
         std::uint32_t m_qt_build_period = 35;
@@ -87,7 +89,11 @@ namespace ppx
         bool m_enabled = true;
 
         void sort_intervals();
-        bool collide(const entity2D &e1, const entity2D &e2, collision2D *c) const;
+
+        bool broad_detection(const entity2D &e1, const entity2D &e2) const;
+        bool narrow_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const;
+        bool full_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const;
+
         void try_enter_or_stay_callback(const entity2D &e1, const entity2D &e2, const collision2D &c) const;
         void try_exit_callback(const entity2D &e1, const entity2D &e2) const;
 

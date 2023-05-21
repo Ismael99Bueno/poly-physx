@@ -22,6 +22,7 @@ namespace ppx
                                                    m_quad_tree(min, max)
     {
         m_intervals.reserve(allocations);
+        m_collision_pairs.reserve(allocations);
     }
 
     collider2D::interval::interval(const const_entity2D_ptr &e, const end end_type) : m_entity(e), m_end(end_type) {}
@@ -105,7 +106,17 @@ namespace ppx
         std::sort(m_intervals.begin(), m_intervals.end(), cmp);
     }
 
-    bool collider2D::collide(const entity2D &e1, const entity2D &e2, collision2D *c) const
+    // bool collider2D::broad_detection(const entity2D &e1, const entity2D &e2) const
+    // {
+    //     if (e1 == e2 || (!e1.kinematic() && !e2.kinematic()))
+    //         return false;
+    //     const geo::shape2D &sh1 = e1.shape(),
+    //                        &sh2 = e2.shape();
+    //     if (!geo::may_intersect(sh1, sh2))
+    //         return false;
+    // }
+
+    bool collider2D::full_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const
     {
         if (e1 == e2 || (!e1.kinematic() && !e2.kinematic()))
             return false;
@@ -162,7 +173,7 @@ namespace ppx
             {
                 collision2D c;
                 const entity2D &e2 = (*m_entities)[j];
-                if (collide(e1, e2, &c))
+                if (full_detection(e1, e2, &c))
                 {
                     try_enter_or_stay_callback(e1, e2, c);
                     solve(c, stchanges);
@@ -184,7 +195,7 @@ namespace ppx
 #endif
                 collision2D c;
                 const entity2D &e1 = (*m_entities)[i], &e2 = (*m_entities)[j];
-                if (collide(e1, e2, &c))
+                if (full_detection(e1, e2, &c))
                 {
 #ifdef DEBUG
                     collisions++;
@@ -219,7 +230,7 @@ namespace ppx
 #endif
                     collision2D c;
                     const entity2D &e1 = *e, &e2 = *itrv.entity();
-                    if (collide(e1, e2, &c))
+                    if (full_detection(e1, e2, &c))
                     {
 #ifdef DEBUG
                         collisions++;
@@ -259,7 +270,7 @@ namespace ppx
                 {
                     collision2D c;
                     const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
-                    if (collide(*e1, *e2, &c))
+                    if (full_detection(*e1, *e2, &c))
                         solve(c, stchanges);
                 }
         };
@@ -277,7 +288,7 @@ namespace ppx
 #endif
                     collision2D c;
                     const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
-                    if (collide(*e1, *e2, &c))
+                    if (full_detection(*e1, *e2, &c))
                     {
 #ifdef DEBUG
                         collisions++;
