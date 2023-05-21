@@ -71,7 +71,7 @@ namespace ppx
     using ref = std::shared_ptr<T>;
 
     template <typename T, class... Args>
-    inline scope<T> make_scope(Args &&...args) { return std::make_unique<T>(std::forwad<Args>(args)...); }
+    inline scope<T> make_scope(Args &&...args) { return std::make_unique<T>(std::forward<Args>(args)...); }
 
     template <typename T, class... Args>
     inline ref<T> make_ref(Args &&...args) { return std::make_shared<T>(std::forward<Args>(args)...); }
