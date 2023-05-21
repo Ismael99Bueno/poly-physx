@@ -39,12 +39,18 @@ namespace ppx
 #ifdef PPX_MULTITHREADED
         std::thread threads[PPX_MAX_THREADS];
         for (std::thread &th : threads)
+        {
             th = std::thread(check_thread);
+            DBG_INFO("First thread ID: {0}", th.get_id())
+        }
         for (std::thread &th : threads)
             th.join();
 #ifdef DEBUG
         for (std::thread &th : threads)
+        {
             th = std::thread(debug_thread);
+            DBG_INFO("Second thread ID: {0}", th.get_id())
+        }
         for (std::thread &th : threads)
             th.join();
 #endif
