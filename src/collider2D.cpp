@@ -237,7 +237,7 @@ namespace ppx
                     try_enter_or_stay_callback(e1, e2, c);
                     solve(c, stchanges);
                     const std::size_t t_idx = id_to_idx.at(std::this_thread::get_id());
-                    m_mt_collision_pairs[idx].emplace_back(&e1, &e2);
+                    m_mt_collision_pairs[t_idx].emplace_back(&e1, &e2);
                 }
                 else
                     try_exit_callback(e1, e2);
@@ -340,7 +340,7 @@ namespace ppx
                         try_enter_or_stay_callback(*e1, *e2, c);
                         solve(c, stchanges);
                         const std::size_t t_idx = id_to_idx.at(std::this_thread::get_id());
-                        m_mt_collision_pairs[idx].emplace_back(&e1, &e2);
+                        m_mt_collision_pairs[t_idx].emplace_back(&e1, &e2);
                     }
                     else
                         try_exit_callback(*e1, *e2);
