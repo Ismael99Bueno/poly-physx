@@ -41,7 +41,7 @@ namespace ppx
         for (std::thread &th : threads)
         {
             th = std::thread(check_thread);
-            DBG_INFO("First thread ID: {0}", th.get_id())
+            DBG_INFO("First thread ID: {0}", std::hash<std::thread::id>{}(th.get_id()))
         }
         for (std::thread &th : threads)
             th.join();
@@ -49,7 +49,7 @@ namespace ppx
         for (std::thread &th : threads)
         {
             th = std::thread(debug_thread);
-            DBG_INFO("Second thread ID: {0}", th.get_id())
+            DBG_INFO("Second thread ID: {0}", std::hash<std::thread::id>{}(th.get_id()))
         }
         for (std::thread &th : threads)
             th.join();
