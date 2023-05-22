@@ -13,10 +13,8 @@ namespace ppx
     static float cross(const glm::vec2 &v1, const glm::vec2 &v2) { return v1.x * v2.y - v1.y * v2.x; }
 
     collider2D::collider2D(std::vector<entity2D> *entities,
-                           const std::size_t allocations,
-                           const glm::vec2 &min,
-                           const glm::vec2 &max) : m_entities(entities),
-                                                   m_quad_tree(min, max)
+                           const std::size_t allocations) : m_entities(entities),
+                                                            m_quad_tree({-10.f, -10.f}, {10.f, 10.f})
     {
         m_intervals.reserve(allocations);
         m_collision_pairs.reserve(allocations);
@@ -122,6 +120,10 @@ namespace ppx
     void collider2D::update_quad_tree()
     {
         m_quad_tree.clear();
+        geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
+        for (const entity2D &e : *m_entities)
+            aabb += e.shape().bounding_box();
+        m_quad_tree.aabb(aabb);
         for (const entity2D &e : *m_entities)
             m_quad_tree.insert(&e);
     }

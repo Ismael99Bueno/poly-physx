@@ -13,7 +13,7 @@ namespace ppx
     public:
         quad_tree2D(const glm::vec2 &min,
                     const glm::vec2 &max,
-                    std::size_t max_entities = 5,
+                    std::size_t max_entities = 12,
                     std::uint32_t depth = 0);
 
         void partitions(std::vector<const std::vector<const entity2D *> *> &partitions) const;

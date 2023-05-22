@@ -13,7 +13,7 @@ namespace ppx
                                                           m_max_entities(max_entities),
                                                           m_depth(depth)
     {
-        m_entities.reserve(max_entities);
+        m_entities.reserve(4 * max_entities);
     }
 
     void quad_tree2D::insert(const entity2D *e)

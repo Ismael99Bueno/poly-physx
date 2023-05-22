@@ -31,10 +31,7 @@ namespace ppx
             QUAD_TREE = 2
         };
 
-        collider2D(std::vector<entity2D> *entities,
-                   std::size_t allocations,
-                   const glm::vec2 &min = -0.5f * glm::vec2(192.f, 128.f),
-                   const glm::vec2 &max = 0.5f * glm::vec2(192.f, 128.f));
+        collider2D(std::vector<entity2D> *entities, std::size_t allocations);
 
         void add_entity_intervals(const const_entity2D_ptr &e);
         void solve_and_load_collisions(std::vector<float> &stchanges);
