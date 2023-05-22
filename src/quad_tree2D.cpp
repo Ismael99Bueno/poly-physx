@@ -18,7 +18,7 @@ namespace ppx
         m_entities.reserve(max_entities);
     }
 
-    void quad_tree2D::add_if_inside(const const_entity2D_ptr &e)
+    void quad_tree2D::insert(const entity2D *e)
     {
         DBG_ASSERT_CRITICAL(m_entities.size() <= m_max_entities || rock_bottom(), "Quad tree contains more entities than allowed! - Contained entities: {0}, maximum entities: {1}", m_entities.size(), m_max_entities)
         if (!geo::intersect(m_aabb, e->shape().bounding_box()))
@@ -26,12 +26,12 @@ namespace ppx
         if (full() && !rock_bottom())
             partition();
         if (m_partitioned)
-            add_to_children(e);
+            insert_to_children(e);
         else
             m_entities.push_back(e);
     }
 
-    void quad_tree2D::partitions(std::vector<const std::vector<const_entity2D_ptr> *> &partitions) const
+    void quad_tree2D::partitions(std::vector<const std::vector<const entity2D *> *> &partitions) const
     {
         PERF_FUNCTION()
         if (!m_partitioned)
@@ -39,19 +39,6 @@ namespace ppx
         else
             for (const auto &q : m_children)
                 q->partitions(partitions);
-    }
-
-    void quad_tree2D::update(const std::vector<entity2D> &entities)
-    {
-        clear();
-        for (std::size_t i = 0; i < entities.size(); i++)
-            add_if_inside({&entities, i});
-    }
-
-    void quad_tree2D::rebuild(const std::vector<entity2D> &entities)
-    {
-        m_has_children = false;
-        update(entities);
     }
 
     void quad_tree2D::clear()
@@ -63,6 +50,13 @@ namespace ppx
                 q->clear();
             m_partitioned = false;
         }
+    }
+
+    void quad_tree2D::purge()
+    {
+        m_has_children = false;
+        m_partitioned = false;
+        m_entities.clear();
     }
 
     void quad_tree2D::create_children()
@@ -83,15 +77,15 @@ namespace ppx
         if (!m_has_children)
             create_children();
         m_partitioned = true;
-        for (const const_entity2D_ptr &e : m_entities)
-            add_to_children(e);
+        for (const entity2D *e : m_entities)
+            insert_to_children(e);
         m_entities.clear();
     }
 
-    void quad_tree2D::add_to_children(const const_entity2D_ptr &e)
+    void quad_tree2D::insert_to_children(const entity2D *e)
     {
         for (const auto &q : m_children)
-            q->add_if_inside(e);
+            q->insert(e);
     }
 
     bool quad_tree2D::full() const { return m_entities.size() >= m_max_entities; }
@@ -104,7 +98,7 @@ namespace ppx
     void quad_tree2D::max_entities(const std::size_t max_entities) { m_max_entities = max_entities; }
 
     bool quad_tree2D::partitioned() const { return m_partitioned; }
-    const std::vector<const_entity2D_ptr> &quad_tree2D::entities() const { return m_entities; }
+    const std::vector<const entity2D *> &quad_tree2D::entities() const { return m_entities; }
 
     const std::array<scope<quad_tree2D>, 4> &quad_tree2D::children() const { return m_children; }
     const quad_tree2D &quad_tree2D::child(std::size_t index) const

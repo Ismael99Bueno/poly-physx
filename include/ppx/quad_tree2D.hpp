@@ -16,12 +16,10 @@ namespace ppx
                     std::size_t max_entities = 5,
                     std::uint32_t depth = 0);
 
-        void partitions(std::vector<const std::vector<const_entity2D_ptr> *> &partitions) const;
-        void update(const std::vector<entity2D> &entities);
-        void rebuild(const std::vector<entity2D> &entities);
-
-        bool full() const;
-        bool rock_bottom() const;
+        void partitions(std::vector<const std::vector<const entity2D *> *> &partitions) const;
+        void insert(const entity2D *e);
+        void purge();
+        void clear();
 
         const geo::aabb2D &aabb() const;
         void aabb(const geo::aabb2D &aabb);
@@ -30,7 +28,7 @@ namespace ppx
         void max_entities(std::size_t max_entities);
 
         bool partitioned() const;
-        const std::vector<const_entity2D_ptr> &entities() const;
+        const std::vector<const entity2D *> &entities() const;
 
         const std::array<scope<quad_tree2D>, 4> &children() const;
         const quad_tree2D &child(std::size_t index) const;
@@ -46,13 +44,13 @@ namespace ppx
         std::uint32_t m_depth;
         static std::uint32_t s_max_depth;
         bool m_partitioned, m_has_children;
-        std::vector<const_entity2D_ptr> m_entities;
+        std::vector<const entity2D *> m_entities;
 
-        void add_if_inside(const const_entity2D_ptr &e);
-        void clear();
+        bool full() const;
+        bool rock_bottom() const;
         void create_children();
         void partition();
-        void add_to_children(const const_entity2D_ptr &e);
+        void insert_to_children(const entity2D *e);
 
         quad_tree2D(quad_tree2D &&) = default;
         quad_tree2D &operator=(quad_tree2D &&) = default;

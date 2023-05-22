@@ -121,12 +121,16 @@ namespace ppx
 
     void collider2D::update_quad_tree()
     {
-        m_quad_tree.update(*m_entities);
+        m_quad_tree.clear();
+        for (const entity2D &e : *m_entities)
+            m_quad_tree.insert(&e);
     }
 
     void collider2D::rebuild_quad_tree()
     {
-        m_quad_tree.rebuild(*m_entities);
+        m_quad_tree.purge();
+        for (const entity2D &e : *m_entities)
+            m_quad_tree.insert(&e);
     }
 
     void collider2D::validate()
@@ -323,13 +327,13 @@ namespace ppx
         PERF_FUNCTION()
         update_quad_tree();
 
-        std::vector<const std::vector<const_entity2D_ptr> *> partitions;
+        std::vector<const std::vector<const entity2D *> *> partitions;
         partitions.reserve(20);
         m_quad_tree.partitions(partitions);
 
 #ifdef PPX_MULTITHREADED
         const auto exec = [this, &stchanges](const std::size_t thread_idx,
-                                             const std::vector<const_entity2D_ptr> *partition)
+                                             const std::vector<const entity2D *> *partition)
         {
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
@@ -340,7 +344,7 @@ namespace ppx
                     {
                         try_enter_or_stay_callback(*e1, *e2, c);
                         solve(c, stchanges);
-                        m_mt_collision_pairs[thread_idx].emplace_back(e1.raw(), e2.raw());
+                        m_mt_collision_pairs[thread_idx].emplace_back(e1, e2);
                     }
                     else
                         try_exit_callback(*e1, *e2);
@@ -353,7 +357,7 @@ namespace ppx
 #ifdef DEBUG
         std::size_t checks = 0, collisions = 0;
 #endif
-        for (const std::vector<const_entity2D_ptr> *partition : partitions)
+        for (const std::vector<const entity2D *> *partition : partitions)
             for (std::size_t i = 0; i < partition->size(); i++)
                 for (std::size_t j = i + 1; j < partition->size(); j++)
                 {
@@ -369,7 +373,7 @@ namespace ppx
 #endif
                         try_enter_or_stay_callback(*e1, *e2, c);
                         solve(c, stchanges);
-                        m_collision_pairs.emplace_back(e1.raw(), e2.raw());
+                        m_collision_pairs.emplace_back(e1, e2);
                     }
                     else
                         try_exit_callback(*e1, *e2);
