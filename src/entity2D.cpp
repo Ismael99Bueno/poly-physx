@@ -203,8 +203,8 @@ namespace ppx
     entity2D::specs entity2D::specs::from_entity(const entity2D &e)
     {
         if (const auto *poly = e.shape_if<geo::polygon>())
-            return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), poly->locals(), 0.f, e.kinematic()};
-        return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), {}, e.shape<geo::circle>().radius(), e.kinematic()};
+            return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), poly->locals(), 0.f, e.kinematic(), e.type()};
+        return {e.pos(), e.vel(), e.angpos(), e.angvel(), e.mass(), e.charge(), {}, e.shape<geo::circle>().radius(), e.kinematic(), e.type()};
     }
 
     bool operator==(const entity2D &lhs, const entity2D &rhs) { return lhs.id() == rhs.id(); }

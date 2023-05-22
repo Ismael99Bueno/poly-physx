@@ -9,12 +9,8 @@
 #include <vector>
 #include <utility>
 
-#if defined(_WIN32) && !defined(PERF) && !defined(PPX_NO_MULTITHREADING)
-#define PPX_MULTITHREADED
-#endif
-
-#ifndef PPX_MAX_THREADS
-#define PPX_MAX_THREADS 16
+#ifndef PPX_THREAD_COUNT
+#define PPX_THREAD_COUNT 8
 #endif
 
 namespace ppx
@@ -92,7 +88,7 @@ namespace ppx
         std::vector<interval> m_intervals;
         std::vector<colpair> m_collision_pairs;
 #ifdef PPX_MULTITHREADED
-        std::array<std::vector<colpair>, PPX_MAX_THREADS> m_mt_collision_pairs;
+        std::array<std::vector<colpair>, PPX_THREAD_COUNT> m_mt_collision_pairs;
 #endif
 
         quad_tree2D m_quad_tree;
@@ -103,7 +99,6 @@ namespace ppx
 
         void sort_intervals();
 
-        bool broad_detection(const entity2D &e1, const entity2D &e2) const;
         bool narrow_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const;
         bool narrow_detection_mix(const entity2D &e1, const entity2D &e2, collision2D *c) const;
         bool narrow_detection_circle(const entity2D &e1, const entity2D &e2, collision2D *c) const;
