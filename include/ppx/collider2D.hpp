@@ -38,8 +38,6 @@ namespace ppx
 
         void add_entity_intervals(const const_entity2D_ptr &e);
         void solve_and_load_collisions(std::vector<float> &stchanges);
-        void update_quad_tree();
-        void rebuild_quad_tree();
         void validate();
         void flush_collisions();
 
@@ -94,6 +92,7 @@ namespace ppx
         bool m_enabled = true;
 
         void sort_intervals();
+        void update_quad_tree();
 
         bool narrow_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const;
         bool narrow_detection_mix(const entity2D &e1, const entity2D &e2, collision2D *c) const;

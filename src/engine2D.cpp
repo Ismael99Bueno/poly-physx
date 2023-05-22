@@ -189,7 +189,6 @@ namespace ppx
         state.resize(6 * m_entities.size());
 
         validate();
-        m_collider.update_quad_tree();
         m_events.on_late_entity_removal(std::move(index)); // It just made me do this...
         return true;
     }

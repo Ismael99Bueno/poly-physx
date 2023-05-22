@@ -11,9 +11,7 @@ namespace ppx
                              const std::size_t max_entities,
                              const std::uint32_t depth) : m_aabb(min, max),
                                                           m_max_entities(max_entities),
-                                                          m_depth(depth),
-                                                          m_partitioned(false),
-                                                          m_has_children(false)
+                                                          m_depth(depth)
     {
         m_entities.reserve(max_entities);
     }
@@ -43,18 +41,6 @@ namespace ppx
 
     void quad_tree2D::clear()
     {
-        m_entities.clear();
-        if (m_partitioned)
-        {
-            for (const auto &q : m_children)
-                q->clear();
-            m_partitioned = false;
-        }
-    }
-
-    void quad_tree2D::purge()
-    {
-        m_has_children = false;
         m_partitioned = false;
         m_entities.clear();
     }
@@ -62,6 +48,7 @@ namespace ppx
     void quad_tree2D::create_children()
     {
         m_has_children = true;
+        m_partitioned = true;
         const glm::vec2 &mm = m_aabb.min(),
                         &mx = m_aabb.max();
         const glm::vec2 mid_point = 0.5f * (mm + mx),
@@ -72,11 +59,25 @@ namespace ppx
         m_children[3] = make_scope<quad_tree2D>(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y), m_max_entities, m_depth + 1);
     }
 
+    void quad_tree2D::reset_children()
+    {
+        m_partitioned = true;
+        const glm::vec2 &mm = m_aabb.min(),
+                        &mx = m_aabb.max();
+        const glm::vec2 mid_point = 0.5f * (mm + mx),
+                        hdim = 0.5f * (mx - mm);
+        *(m_children[0]) = quad_tree2D(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y), m_max_entities, m_depth + 1);
+        *(m_children[1]) = quad_tree2D(mid_point, mx, m_max_entities, m_depth + 1);
+        *(m_children[2]) = quad_tree2D(mm, mid_point, m_max_entities, m_depth + 1);
+        *(m_children[3]) = quad_tree2D(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y), m_max_entities, m_depth + 1);
+    }
+
     void quad_tree2D::partition()
     {
-        if (!m_has_children)
+        if (m_has_children)
+            reset_children();
+        else
             create_children();
-        m_partitioned = true;
         for (const entity2D *e : m_entities)
             insert_to_children(e);
         m_entities.clear();

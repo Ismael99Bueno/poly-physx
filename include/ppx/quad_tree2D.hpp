@@ -18,7 +18,6 @@ namespace ppx
 
         void partitions(std::vector<const std::vector<const entity2D *> *> &partitions) const;
         void insert(const entity2D *e);
-        void purge();
         void clear();
 
         const geo::aabb2D &aabb() const;
@@ -43,12 +42,13 @@ namespace ppx
         std::size_t m_max_entities;
         std::uint32_t m_depth;
         static std::uint32_t s_max_depth;
-        bool m_partitioned, m_has_children;
+        bool m_partitioned = false, m_has_children = false;
         std::vector<const entity2D *> m_entities;
 
         bool full() const;
         bool rock_bottom() const;
         void create_children();
+        void reset_children();
         void partition();
         void insert_to_children(const entity2D *e);
 

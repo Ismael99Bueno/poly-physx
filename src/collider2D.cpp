@@ -126,13 +126,6 @@ namespace ppx
             m_quad_tree.insert(&e);
     }
 
-    void collider2D::rebuild_quad_tree()
-    {
-        m_quad_tree.purge();
-        for (const entity2D &e : *m_entities)
-            m_quad_tree.insert(&e);
-    }
-
     void collider2D::validate()
     {
         for (auto it = m_intervals.begin(); it != m_intervals.end();)
@@ -463,7 +456,6 @@ namespace YAML
         cld.dampening(node["Dampening"].as<float>());
         cld.detection((ppx::collider2D::detection_method)node["Collision detection"].as<int>());
         cld.enabled(node["Enabled"].as<bool>());
-        cld.rebuild_quad_tree();
 
         return true;
     };
