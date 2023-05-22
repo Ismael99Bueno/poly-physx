@@ -58,9 +58,6 @@ namespace ppx
         const quad_tree2D &quad_tree() const;
         quad_tree2D &quad_tree();
 
-        std::uint32_t quad_tree_build_period() const;
-        void quad_tree_build_period(std::uint32_t period);
-
     private:
         struct interval
         {
@@ -93,7 +90,6 @@ namespace ppx
 
         quad_tree2D m_quad_tree;
         float m_stiffness = 5000.f, m_dampening = 10.f;
-        std::uint32_t m_qt_build_period = 35;
         detection_method m_coldet_method = QUAD_TREE;
         bool m_enabled = true;
 
