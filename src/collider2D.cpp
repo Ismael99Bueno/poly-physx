@@ -415,6 +415,7 @@ namespace ppx
         out << YAML::Key << "Dimensions" << YAML::Value << cld.quad_tree().aabb();
         out << YAML::Key << "Max entities" << YAML::Value << cld.quad_tree().max_entities();
         out << YAML::Key << "Max depth" << YAML::Value << ppx::quad_tree2D::max_depth();
+        out << YAML::Key << "Min size" << YAML::Value << ppx::quad_tree2D::min_size();
         out << YAML::EndMap;
         out << YAML::Key << "Stiffness" << YAML::Value << cld.stiffness();
         out << YAML::Key << "Dampening" << YAML::Value << cld.dampening();
@@ -437,6 +438,7 @@ namespace YAML
         qt["Dimensions"] = cld.quad_tree().aabb();
         qt["Max entities"] = cld.quad_tree().max_entities();
         qt["Max depth"] = ppx::quad_tree2D::max_depth();
+        qt["Min size"] = ppx::quad_tree2D::min_size();
 
         node["Stiffness"] = cld.stiffness();
         node["Dampening"] = cld.dampening();
@@ -453,6 +455,7 @@ namespace YAML
         cld.quad_tree().aabb(qt["Dimensions"].as<geo::aabb2D>());
         cld.quad_tree().max_entities(qt["Max entities"].as<std::size_t>());
         ppx::quad_tree2D::max_depth(qt["Max depth"].as<std::uint32_t>());
+        ppx::quad_tree2D::min_size(qt["Min size"].as<float>());
 
         cld.stiffness(node["Stiffness"].as<float>());
         cld.dampening(node["Dampening"].as<float>());

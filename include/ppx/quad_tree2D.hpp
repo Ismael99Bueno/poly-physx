@@ -36,14 +36,19 @@ namespace ppx
         static std::uint32_t max_depth();
         static void max_depth(std::uint32_t max_depth);
 
+        static float min_size();
+        static void min_size(float min_size);
+
     private:
         std::array<scope<quad_tree2D>, 4> m_children = {nullptr, nullptr, nullptr, nullptr}; // TL, TR, BL, BR
         geo::aabb2D m_aabb;
         std::size_t m_max_entities;
         std::uint32_t m_depth;
-        static std::uint32_t s_max_depth;
         bool m_partitioned = false, m_has_children = false;
         std::vector<const entity2D *> m_entities;
+
+        static std::uint32_t s_max_depth;
+        static float s_min_size;
 
         bool full() const;
         bool rock_bottom() const;

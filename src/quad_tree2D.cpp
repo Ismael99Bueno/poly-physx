@@ -5,7 +5,9 @@
 
 namespace ppx
 {
-    std::uint32_t quad_tree2D::s_max_depth = 4;
+    std::uint32_t quad_tree2D::s_max_depth = 12;
+    float quad_tree2D::s_min_size = 14.f;
+
     quad_tree2D::quad_tree2D(const glm::vec2 &min,
                              const glm::vec2 &max,
                              const std::size_t max_entities,
@@ -90,7 +92,13 @@ namespace ppx
     }
 
     bool quad_tree2D::full() const { return m_entities.size() >= m_max_entities; }
-    bool quad_tree2D::rock_bottom() const { return m_depth >= s_max_depth; }
+    bool quad_tree2D::rock_bottom() const
+    {
+        if (m_depth >= s_max_depth)
+            return true;
+        const glm::vec2 diff = m_aabb.max() - m_aabb.min();
+        return diff.x * diff.y < s_min_size * s_min_size;
+    }
 
     const geo::aabb2D &quad_tree2D::aabb() const { return m_aabb; }
     void quad_tree2D::aabb(const geo::aabb2D &aabb) { m_aabb = aabb; }
@@ -111,4 +119,7 @@ namespace ppx
 
     std::uint32_t quad_tree2D::max_depth() { return s_max_depth; }
     void quad_tree2D::max_depth(std::uint32_t max_depth) { s_max_depth = max_depth; }
+
+    float quad_tree2D::min_size() { return s_min_size; }
+    void quad_tree2D::min_size(float min_size) { s_min_size = min_size; }
 }
