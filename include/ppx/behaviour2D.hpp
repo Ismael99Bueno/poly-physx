@@ -10,6 +10,7 @@ class behaviour2D
 {
   public:
     behaviour2D(const char *name, std::size_t allocations = 50);
+    virtual ~behaviour2D() = default;
 
     void validate();
 

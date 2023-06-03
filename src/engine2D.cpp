@@ -1,6 +1,8 @@
 #include "ppx/pch.hpp"
 #include "ppx/engine2D.hpp"
 #include "geo/intersection.hpp"
+#include "ppx/behaviour2D.hpp"
+#include "ppx/rigid_bar2D.hpp"
 #include <cstring>
 
 namespace ppx
@@ -194,12 +196,12 @@ bool engine2D::remove_entity(const entity2D &e)
 {
     return remove_entity(e.index());
 }
-bool engine2D::remove_behaviour(const ref<behaviour2D> &bhv)
+bool engine2D::remove_behaviour(const behaviour2D *bhv)
 {
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
-        if (*it == bhv)
+        if (it->get() == bhv)
         {
-            m_events.on_behaviour_removal(*it);
+            m_events.on_behaviour_removal(*bhv);
             m_behaviours.erase(it);
             return true;
         }
@@ -332,11 +334,11 @@ entity2D_ptr engine2D::from_id(uuid id)
     return index ? (*this)[index.value()] : nullptr;
 }
 
-template <> ref<behaviour2D> engine2D::behaviour_from_name(const char *name) const
+template <> behaviour2D *engine2D::behaviour_from_name(const char *name) const
 {
     for (const auto &bhv : m_behaviours)
         if (strcmp(name, bhv->name()) == 0)
-            return bhv;
+            return bhv.get();
     return nullptr;
 }
 
@@ -373,7 +375,7 @@ std::vector<entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb)
     return in_area;
 }
 
-const std::vector<ref<behaviour2D>> &engine2D::behaviours() const
+const std::vector<scope<behaviour2D>> &engine2D::behaviours() const
 {
     return m_behaviours;
 }
@@ -382,7 +384,7 @@ const std::vector<spring2D> &engine2D::springs() const
     return m_springs;
 }
 
-cvw::vector<ref<behaviour2D>> engine2D::behaviours()
+cvw::vector<scope<behaviour2D>> engine2D::behaviours()
 {
     return m_behaviours;
 }

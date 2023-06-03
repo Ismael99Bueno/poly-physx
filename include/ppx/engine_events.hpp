@@ -23,7 +23,7 @@ class engine_events final
     event<spring2D *> on_spring_addition;
     event<spring2D &> on_spring_removal;
     event<const ref<constraint_interface2D> &> on_constraint_addition, on_constraint_removal;
-    event<const ref<behaviour2D> &> on_behaviour_addition, on_behaviour_removal;
+    event<const behaviour2D &> on_behaviour_addition, on_behaviour_removal;
 
     engine_events(const engine_events &) = delete;
     engine_events &operator=(const engine_events &) = delete;
