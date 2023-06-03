@@ -11,12 +11,12 @@ compeller2D::compeller2D(std::vector<entity2D> *entities, const std::size_t allo
     m_constraints.reserve(allocations);
 }
 
-bool compeller2D::remove_constraint(const ref<const constraint_interface2D> &ctr)
+bool compeller2D::remove_constraint(const constraint_interface2D *ctr)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
-        if (*it == ctr)
+        if (it->get() == ctr)
         {
-            m_callbacks->on_constraint_removal(*it);
+            m_callbacks->on_constraint_removal(*ctr);
             m_constraints.erase(it);
             return true;
         }
@@ -25,7 +25,7 @@ bool compeller2D::remove_constraint(const ref<const constraint_interface2D> &ctr
 void compeller2D::clear_constraints()
 {
     for (const auto &ctr : m_constraints)
-        m_callbacks->on_constraint_removal(ctr);
+        m_callbacks->on_constraint_removal(*ctr);
     m_constraints.clear();
 }
 
@@ -34,7 +34,7 @@ void compeller2D::validate()
     for (auto it = m_constraints.begin(); it != m_constraints.end();)
         if (!((*it)->validate()))
         {
-            m_callbacks->on_constraint_removal(*it);
+            m_callbacks->on_constraint_removal(**it);
             it = m_constraints.erase(it);
         }
         else
@@ -53,7 +53,7 @@ void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges, cons
     load_constraint_accels(jcb, lambda, stchanges);
 }
 
-const std::vector<ref<constraint_interface2D>> &compeller2D::constraints() const
+const std::vector<scope<constraint_interface2D>> &compeller2D::constraints() const
 {
     return m_constraints;
 }

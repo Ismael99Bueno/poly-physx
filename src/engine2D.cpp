@@ -469,7 +469,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
     out << YAML::Key << "Rigid bars" << YAML::Value << YAML::BeginSeq;
     for (const auto &ctr : eng.compeller().constraints())
     {
-        const auto rb = std::dynamic_pointer_cast<rigid_bar2D>(ctr);
+        const auto rb = dynamic_cast<const rigid_bar2D *>(ctr.get());
         if (rb)
             out << *rb;
     }
@@ -500,7 +500,7 @@ Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)
     node["Springs"] = eng.springs();
     for (const auto &ctr : eng.compeller().constraints())
     {
-        const auto rb = std::dynamic_pointer_cast<ppx::rigid_bar2D>(ctr);
+        const auto rb = dynamic_cast<const ppx::rigid_bar2D *>(ctr.get());
         if (rb)
             node["Rigid bars"].push_back(*rb);
     }
