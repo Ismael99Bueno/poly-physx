@@ -99,7 +99,7 @@ stk_vector<float> compeller2D::lhs(const stk_vector<float> &jcb, const stk_vecto
             const std::size_t idx = i * rows + j;
             for (std::size_t k = 0; k < cols; k++)
             {
-                if (inv_masses[k] == 0.f)
+                if (inv_masses[k] <= std::numeric_limits<float>::epsilon())
                     continue;
                 const std::size_t idx1 = i * cols + k, idx2 = j * cols + k;
                 A[idx] += jcb[idx1] * jcb[idx2] * inv_masses[k];

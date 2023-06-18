@@ -22,11 +22,11 @@ class compeller2D final
     {
         static_assert(std::is_base_of<constraint_interface2D, T>::value, "Constraint must inherit from constraint2D!");
         auto ctr = make_scope<T>(std::forward<Args>(args)...);
-        T *ref = ctr.get();
+        T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));
-        m_callbacks->on_constraint_addition(*ref);
-        return ref;
+        m_callbacks->on_constraint_addition(*ptr);
+        return ptr;
     }
     bool remove_constraint(const constraint_interface2D *ctr);
     void clear_constraints();

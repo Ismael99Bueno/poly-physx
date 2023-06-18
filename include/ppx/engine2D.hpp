@@ -39,12 +39,12 @@ class engine2D
         static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
                                                               "recommended to inherit from force2D or interaction2D)");
         auto bhv = make_scope<T>(std::forward<Args>(args)...);
-        T *ref = bhv.get();
+        T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
         m_behaviours.back()->m_entities = &m_entities;
-        m_events.on_behaviour_addition(*ref);
-        return ref;
+        m_events.on_behaviour_addition(*ptr);
+        return ptr;
     }
 
     template <class... Args> spring2D &add_spring(Args &&...args)
@@ -80,7 +80,7 @@ class engine2D
     {
         static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
                                                               "recommended to inherit from force2D or interaction2D)");
-        return (T *)behaviour_from_name<behaviour2D>(name);
+        return dynamic_cast<T *>(behaviour_from_name<behaviour2D>(name));
     }
 
     const_entity2D_ptr operator[](std::size_t index) const;
