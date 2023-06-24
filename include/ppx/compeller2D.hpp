@@ -18,10 +18,10 @@ class compeller2D final
   public:
     compeller2D(std::vector<entity2D> *entities, std::size_t allocations, engine_events *cbs);
 
-    template <typename T, class... Args> T *add_constraint(Args &&...args)
+    template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
     {
         static_assert(std::is_base_of<constraint_interface2D, T>::value, "Constraint must inherit from constraint2D!");
-        auto ctr = make_scope<T>(std::forward<Args>(args)...);
+        auto ctr = make_scope<T>(std::forward<ConstraintArgs>(args)...);
         T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));

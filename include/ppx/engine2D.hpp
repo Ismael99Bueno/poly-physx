@@ -25,20 +25,20 @@ class engine2D
     bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
     bool embedded_forward(float &timestep);
 
-    template <class... Args> entity2D_ptr add_entity(Args &&...args)
+    template <class... EntityArgs> entity2D_ptr add_entity(EntityArgs &&...args)
     {
-        entity2D &e = m_entities.emplace_back(std::forward<Args>(args)...);
+        entity2D &e = m_entities.emplace_back(std::forward<EntityArgs>(args)...);
         return process_entity_addition(e);
     }
 
     bool remove_entity(std::size_t index);
     bool remove_entity(const entity2D &e);
 
-    template <typename T, class... Args> T *add_behaviour(Args &&...args)
+    template <typename T, class... BehaviourArgs> T *add_behaviour(BehaviourArgs &&...args)
     {
         static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
                                                               "recommended to inherit from force2D or interaction2D)");
-        auto bhv = make_scope<T>(std::forward<Args>(args)...);
+        auto bhv = make_scope<T>(std::forward<BehaviourArgs>(args)...);
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
@@ -47,9 +47,9 @@ class engine2D
         return ptr;
     }
 
-    template <class... Args> spring2D &add_spring(Args &&...args)
+    template <class... SpringArgs> spring2D &add_spring(SpringArgs &&...args)
     {
-        spring2D &sp = m_springs.emplace_back(std::forward<Args>(args)...);
+        spring2D &sp = m_springs.emplace_back(std::forward<SpringArgs>(args)...);
         m_events.on_spring_addition(&sp);
         return sp;
     }
