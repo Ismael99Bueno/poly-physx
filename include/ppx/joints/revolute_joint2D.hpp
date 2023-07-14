@@ -1,5 +1,5 @@
-#ifndef REVOLUTE_JOINT2D_HPP
-#define REVOLUTE_JOINT2D_HPP
+#ifndef PPX_REVOLUTE_JOINT2D_HPP
+#define PPX_REVOLUTE_JOINT2D_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/constraints/constraint2D.hpp"

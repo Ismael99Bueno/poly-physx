@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT2D_HPP
-#define CONSTRAINT2D_HPP
+#ifndef PPX_CONSTRAINT2D_HPP
+#define PPX_CONSTRAINT2D_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/constraints/constraint_interface2D.hpp"

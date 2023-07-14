@@ -1,5 +1,5 @@
-#ifndef PPX_CORE_HPP
-#define PPX_CORE_HPP
+#ifndef PPX_PPX_CORE_HPP
+#define PPX_PPX_CORE_HPP
 
 #include "geo/core.hpp"
 #include <memory>

@@ -1,5 +1,5 @@
-#ifndef PPX_PCH
-#define PPX_PCH
+#ifndef PPX_PPX_PCH_HPP
+#define PPX_PPX_PCH_HPP
 
 #include <vector>
 #include <utility>

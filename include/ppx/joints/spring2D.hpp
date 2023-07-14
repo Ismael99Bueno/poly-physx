@@ -1,5 +1,5 @@
-#ifndef SPRING2D_HPP
-#define SPRING2D_HPP
+#ifndef PPX_SPRING2D_HPP
+#define PPX_SPRING2D_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/joints/joint2D.hpp"

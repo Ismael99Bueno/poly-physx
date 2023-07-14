@@ -1,5 +1,5 @@
-#ifndef QUAD_TREE2D_HPP
-#define QUAD_TREE2D_HPP
+#ifndef PPX_QUAD_TREE2D_HPP
+#define PPX_QUAD_TREE2D_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"

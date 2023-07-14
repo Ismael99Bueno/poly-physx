@@ -1,5 +1,5 @@
-#ifndef ENGINE_EVENTS_HPP
-#define ENGINE_EVENTS_HPP
+#ifndef PPX_ENGINE_EVENTS_HPP
+#define PPX_ENGINE_EVENTS_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"

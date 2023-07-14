@@ -1,5 +1,5 @@
-#ifndef EVENT_HPP
-#define EVENT_HPP
+#ifndef PPX_EVENT_HPP
+#define PPX_EVENT_HPP
 #include "ppx/internal/core.hpp"
 
 #include <functional>

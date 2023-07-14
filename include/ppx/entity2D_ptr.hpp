@@ -1,5 +1,5 @@
-#ifndef ENTITY2D_PTR_HPP
-#define ENTITY2D_PTR_HPP
+#ifndef PPX_ENTITY2D_PTR_HPP
+#define PPX_ENTITY2D_PTR_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D.hpp"

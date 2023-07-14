@@ -1,5 +1,5 @@
-#ifndef COMPELLER2D_HPP
-#define COMPELLER2D_HPP
+#ifndef PPX_COMPELLER2D_HPP
+#define PPX_COMPELLER2D_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D.hpp"

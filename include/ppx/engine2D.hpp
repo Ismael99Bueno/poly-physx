@@ -1,5 +1,5 @@
-#ifndef ENGINE2D_HPP
-#define ENGINE2D_HPP
+#ifndef PPX_ENGINE2D_HPP
+#define PPX_ENGINE2D_HPP
 #include "ppx/internal/core.hpp"
 
 #include "rk/integrator.hpp"

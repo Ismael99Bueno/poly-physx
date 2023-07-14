@@ -1,5 +1,5 @@
-#ifndef COLLIDER_HPP
-#define COLLIDER_HPP
+#ifndef PPX_COLLIDER_HPP
+#define PPX_COLLIDER_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D.hpp"

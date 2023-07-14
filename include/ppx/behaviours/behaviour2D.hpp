@@ -1,5 +1,5 @@
-#ifndef BEHAVIOUR2D_HPP
-#define BEHAVIOUR2D_HPP
+#ifndef PPX_BEHAVIOUR2D_HPP
+#define PPX_BEHAVIOUR2D_HPP
 #include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
