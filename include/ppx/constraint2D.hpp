@@ -13,7 +13,7 @@ template <std::size_t N> class constraint2D : public constraint_interface2D
     constraint2D() = default;
     virtual ~constraint2D() = default;
 
-    constraint2D(const std::array<entity2D_ptr, N> &entities) : constraint_interface2D(), m_grad_entities(entities)
+    constraint2D(const std::array<entity2D_ptr, N> &entities) : m_grad_entities(entities)
     {
         copy_to_const_entities(entities);
     }

@@ -30,6 +30,8 @@ class behaviour2D
     void clear();
     std::size_t size() const;
 
+    uuid id() const;
+
     const std::vector<const_entity2D_ptr> &entities() const;
     const char *name() const;
 
@@ -48,6 +50,8 @@ class behaviour2D
   private:
     const char *m_name;
     const std::vector<entity2D> *m_entities = nullptr;
+    uuid m_uuid;
+
     friend class engine2D;
 #ifdef HAS_YAML_CPP
     friend YAML::Emitter &operator<<(YAML::Emitter &, const behaviour2D &);

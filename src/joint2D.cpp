@@ -84,6 +84,11 @@ bool joint2D::has_anchors() const
 {
     return m_has_anchors;
 }
+uuid joint2D::id() const
+{
+    return m_uuid;
+}
+
 joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 {
     return {joint.e1(), joint.e2(), joint.anchor1(), joint.anchor2(), joint.length(), joint.has_anchors()};
@@ -92,6 +97,7 @@ joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 #ifdef HAS_YAML_CPP
 void joint2D::write(YAML::Emitter &out) const
 {
+    out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)m_uuid;
     out << YAML::Key << "ID1" << YAML::Value << (std::uint64_t)m_e1.id();
     out << YAML::Key << "ID2" << YAML::Value << (std::uint64_t)m_e2.id();
     out << YAML::Key << "Index1" << YAML::Value << m_e1.index();
@@ -106,6 +112,7 @@ void joint2D::write(YAML::Emitter &out) const
 YAML::Node joint2D::encode() const
 {
     YAML::Node node;
+    node["UUID"] = (std::uint64_t)m_uuid;
     node["ID1"] = (std::uint64_t)m_e1.id();
     node["ID2"] = (std::uint64_t)m_e2.id();
     node["Index1"] = m_e1.index();
@@ -120,8 +127,9 @@ YAML::Node joint2D::encode() const
 }
 bool joint2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 5)
+    if (!node.IsMap() || node.size() < 6)
         return false;
+    m_uuid = node["UUID"].as<std::uint64_t>();
     m_length = node["length"].as<float>();
     return true;
 }

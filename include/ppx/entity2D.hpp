@@ -99,7 +99,7 @@ class entity2D
     rk::state *m_state = nullptr;
     glm::vec2 m_vel{0.f}, m_added_force{0.f};
     std::size_t m_index = 0;
-    ppx::uuid m_uuid;
+    uuid m_uuid;
     entity_events m_events;
     float m_angvel, m_added_torque = 0.f, m_mass, m_inv_mass, m_inertia, m_inv_inertia, m_charge;
     bool m_kinematic;
