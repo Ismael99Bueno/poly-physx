@@ -10,11 +10,12 @@
 #include "cvw/container_view.hpp"
 #include "ppx/events/engine_events.hpp"
 #include "rk/tableaus.hpp"
+#include "ppx/utility/non_copyable.hpp"
 
 namespace ppx
 {
 class behaviour2D;
-class engine2D
+class engine2D : non_copyable
 {
   public:
     engine2D(const rk::butcher_tableau &table = rk::rk4, std::size_t allocations = 100);
@@ -138,9 +139,6 @@ class engine2D
     void retrieve(const std::vector<float> &vars_buffer);
     void validate();
     std::optional<std::size_t> index_from_id(uuid id) const;
-
-    engine2D(const engine2D &) = delete;
-    engine2D &operator=(const engine2D &) = delete;
 
 #ifdef HAS_YAML_CPP
     friend YAML::Emitter &operator<<(YAML::Emitter &, const engine2D &);

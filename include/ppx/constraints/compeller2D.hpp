@@ -5,6 +5,7 @@
 #include "ppx/entity2D.hpp"
 #include "ppx/events/engine_events.hpp"
 #include "mem/stack_allocator.hpp"
+#include "ppx/utility/non_copyable.hpp"
 #include <vector>
 #include <functional>
 #include <memory>
@@ -13,7 +14,7 @@
 namespace ppx
 {
 class constraint_interface2D;
-class compeller2D final
+class compeller2D final : non_copyable
 {
   public:
     compeller2D(std::vector<entity2D> *entities, std::size_t allocations, engine_events *cbs);
@@ -55,9 +56,6 @@ class compeller2D final
     stk_vector<float> lu_decomposition(const stk_vector<float> &A, const stk_vector<float> &b) const;
     void load_constraint_accels(const stk_vector<float> &jcb, const stk_vector<float> &lambda,
                                 std::vector<float> &stchanges) const;
-
-    compeller2D(const compeller2D &) = delete;
-    compeller2D &operator=(const compeller2D &) = delete;
 };
 } // namespace ppx
 

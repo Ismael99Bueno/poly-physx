@@ -3,10 +3,11 @@
 #include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
+#include "ppx/utility/non_copyable.hpp"
 
 namespace ppx
 {
-class behaviour2D
+class behaviour2D : non_copyable
 {
   public:
     behaviour2D(const char *name, std::size_t allocations = 50);
@@ -43,9 +44,6 @@ class behaviour2D
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
 #endif
-
-    behaviour2D(const behaviour2D &) = delete;
-    behaviour2D &operator=(const behaviour2D &) = delete;
 
   private:
     const char *m_name;

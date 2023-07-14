@@ -27,9 +27,6 @@ class interaction2D : public behaviour2D
 
   private:
     mutable entity2D m_unit;
-
-    interaction2D(const interaction2D &) = delete;
-    interaction2D &operator=(const interaction2D &) = delete;
 };
 } // namespace ppx
 #endif

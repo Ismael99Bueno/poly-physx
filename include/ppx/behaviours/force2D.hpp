@@ -17,10 +17,6 @@ class force2D : public behaviour2D
         return 0.f;
     }
     float potential_energy() const override;
-
-  private:
-    force2D(const force2D &) = delete;
-    force2D &operator=(const force2D &) = delete;
 };
 } // namespace ppx
 

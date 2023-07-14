@@ -6,6 +6,7 @@
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/collision/quad_tree2D.hpp"
+#include "ppx/utility/non_copyable.hpp"
 #include <vector>
 #include <utility>
 
@@ -21,7 +22,7 @@ struct collision2D
     glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
 };
 
-class collider2D final
+class collider2D final : non_copyable
 {
   public:
     enum detection_method
@@ -108,9 +109,6 @@ class collider2D final
 
     void solve(const collision2D &c, std::vector<float> &stchanges) const;
     std::array<float, 6> forces_upon_collision(const collision2D &c) const;
-
-    collider2D(const collider2D &) = delete;
-    collider2D &operator=(const collider2D &) = delete;
 };
 
 #ifdef HAS_YAML_CPP

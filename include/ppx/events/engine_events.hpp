@@ -13,7 +13,7 @@
 
 namespace ppx
 {
-class engine_events final
+class engine_events final : non_copyable
 {
   public:
     engine_events() = default;
@@ -26,9 +26,6 @@ class engine_events final
     event<const constraint_interface2D &> on_constraint_removal;
     event<behaviour2D *> on_behaviour_addition;
     event<const behaviour2D &> on_behaviour_removal;
-
-    engine_events(const engine_events &) = delete;
-    engine_events &operator=(const engine_events &) = delete;
 };
 
 } // namespace ppx
