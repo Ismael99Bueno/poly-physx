@@ -2,7 +2,7 @@
 #include "ppx/engine2D.hpp"
 #include "geo/intersection.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
-#include "ppx/joints/rigid_bar2D.hpp"
+#include "ppx/joints/revolute_joint2D.hpp"
 #include <cstring>
 
 namespace ppx
@@ -469,9 +469,9 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
     out << YAML::Key << "Rigid bars" << YAML::Value << YAML::BeginSeq;
     for (const auto &ctr : eng.compeller().constraints())
     {
-        const auto rb = dynamic_cast<const rigid_bar2D *>(ctr.get());
-        if (rb)
-            out << *rb;
+        const auto revjoint = dynamic_cast<const revolute_joint2D *>(ctr.get());
+        if (revjoint)
+            out << *revjoint;
     }
     out << YAML::EndSeq;
 
@@ -500,9 +500,9 @@ Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)
     node["Springs"] = eng.springs();
     for (const auto &ctr : eng.compeller().constraints())
     {
-        const auto rb = dynamic_cast<const ppx::rigid_bar2D *>(ctr.get());
-        if (rb)
-            node["Rigid bars"].push_back(*rb);
+        const auto revjoint = dynamic_cast<const ppx::revolute_joint2D *>(ctr.get());
+        if (revjoint)
+            node["Rigid bars"].push_back(*revjoint);
     }
     for (const auto &bhv : eng.behaviours())
         node["Behaviours"][bhv->name()] = *bhv;
@@ -544,13 +544,13 @@ bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
         const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
         if (n["Anchor1"])
         {
-            const auto rb = eng.compeller().add_constraint<ppx::rigid_bar2D>(
+            const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(
                 eng[idx1], eng[idx2], n["Anchor1"].as<glm::vec2>(), n["Anchor2"].as<glm::vec2>());
-            n.as<ppx::rigid_bar2D>(*rb);
+            n.as<ppx::revolute_joint2D>(*revjoint);
             continue;
         }
-        const auto rb = eng.compeller().add_constraint<ppx::rigid_bar2D>(eng[idx1], eng[idx2]);
-        n.as<ppx::rigid_bar2D>(*rb);
+        const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(eng[idx1], eng[idx2]);
+        n.as<ppx::revolute_joint2D>(*revjoint);
     }
 
     for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
