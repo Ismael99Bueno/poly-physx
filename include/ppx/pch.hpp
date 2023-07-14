@@ -7,9 +7,13 @@
 #include <cmath>
 #include <algorithm>
 #include <unordered_set>
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/geometric.hpp>
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+
 #include <memory>
 #include <type_traits>
 #include <array>
