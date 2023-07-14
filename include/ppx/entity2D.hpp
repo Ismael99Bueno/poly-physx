@@ -7,12 +7,13 @@
 #include "geo/circle.hpp"
 #include "rk/state.hpp"
 #include "ppx/events/entity_events.hpp"
-#include "ppx/utility/uuid.hpp"
+#include "ppx/utility/identifiable.hpp"
+#include "ppx/utility/indexable.hpp"
 #include <variant>
 
 namespace ppx
 {
-class entity2D
+class entity2D : public identifiable, public indexable
 {
   public:
     enum shape_type
@@ -63,9 +64,6 @@ class entity2D
 
     shape_type type() const;
 
-    std::size_t index() const;
-    uuid id() const;
-
     float inertia() const;
     float inverse_inertia() const;
 
@@ -98,8 +96,6 @@ class entity2D
     std::variant<geo::polygon, geo::circle> m_shape;
     rk::state *m_state = nullptr;
     glm::vec2 m_vel{0.f}, m_added_force{0.f};
-    std::size_t m_index = 0;
-    uuid m_uuid;
     entity_events m_events;
     float m_angvel, m_added_torque = 0.f, m_mass, m_inv_mass, m_inertia, m_inv_inertia, m_charge;
     bool m_kinematic;
@@ -109,10 +105,6 @@ class entity2D
     void compute_inertia(const geo::shape2D &sh);
 
     friend class engine2D;
-#ifdef HAS_YAML_CPP
-    friend YAML::Emitter &operator<<(YAML::Emitter &, const entity2D &);
-    friend struct YAML::convert<entity2D>;
-#endif
 };
 
 bool operator==(const entity2D &lhs, const entity2D &rhs);

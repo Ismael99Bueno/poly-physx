@@ -88,6 +88,7 @@ spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
 #ifdef HAS_YAML_CPP
 void spring2D::write(YAML::Emitter &out) const
 {
+    out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)id();
     joint2D::write(out);
     out << YAML::Key << "Stiffness" << YAML::Value << m_stiffness;
     out << YAML::Key << "Dampening" << YAML::Value << m_dampening;
@@ -95,6 +96,7 @@ void spring2D::write(YAML::Emitter &out) const
 YAML::Node spring2D::encode() const
 {
     YAML::Node node = joint2D::encode();
+    node["UUID"] = (std::uint64_t)id();
     node["Stiffness"] = m_stiffness;
     node["Dampening"] = m_dampening;
     return node;
@@ -103,6 +105,7 @@ bool spring2D::decode(const YAML::Node &node)
 {
     if (!joint2D::decode(node))
         return false;
+    id(node["UUID"].as<std::uint64_t>());
     m_stiffness = node["Stiffness"].as<float>();
     m_dampening = node["Dampening"].as<float>();
     return true;

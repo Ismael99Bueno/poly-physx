@@ -9,7 +9,7 @@
 
 namespace ppx
 {
-class constraint_interface2D
+class constraint_interface2D : public identifiable
 {
   public:
     constraint_interface2D(float stiffness = 500.f, float dampening = 30.f);

@@ -4,10 +4,11 @@
 
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/utility/non_copyable.hpp"
+#include "ppx/utility/identifiable.hpp"
 
 namespace ppx
 {
-class behaviour2D : non_copyable
+class behaviour2D : non_copyable, public identifiable
 {
   public:
     behaviour2D(const char *name, std::size_t allocations = 50);
@@ -31,8 +32,6 @@ class behaviour2D : non_copyable
     void clear();
     std::size_t size() const;
 
-    uuid id() const;
-
     const std::vector<const_entity2D_ptr> &entities() const;
     const char *name() const;
 
@@ -48,7 +47,6 @@ class behaviour2D : non_copyable
   private:
     const char *m_name;
     const std::vector<entity2D> *m_entities = nullptr;
-    uuid m_uuid;
 
     friend class engine2D;
 #ifdef HAS_YAML_CPP

@@ -63,11 +63,6 @@ std::size_t behaviour2D::size() const
     return m_included.size();
 }
 
-uuid behaviour2D::id() const
-{
-    return m_uuid;
-}
-
 const std::vector<const_entity2D_ptr> &behaviour2D::entities() const
 {
     return m_included;
@@ -80,7 +75,7 @@ const char *behaviour2D::name() const
 #ifdef HAS_YAML_CPP
 void behaviour2D::write(YAML::Emitter &out) const
 {
-    out << YAML::Key << "UUID" << YAML::Value << m_uuid;
+    out << YAML::Key << "UUID" << YAML::Value << id();
     out << YAML::Key << "Entities" << YAML::Value << YAML::Flow << YAML::BeginSeq;
     for (const auto &e : m_included)
         out << e.index();
@@ -89,7 +84,7 @@ void behaviour2D::write(YAML::Emitter &out) const
 YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
-    node["UUID"] = (std::uint64_t)m_uuid;
+    node["UUID"] = (std::uint64_t)id();
     for (const auto &e : m_included)
         node["Entities"].push_back(e.index());
     node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
@@ -99,7 +94,7 @@ bool behaviour2D::decode(const YAML::Node &node)
 {
     if (!node.IsMap() || node.size() < 2)
         return false;
-    m_uuid = node["UUID"].as<std::uint64_t>();
+    id(node["UUID"].as<std::uint64_t>());
     clear();
     for (const YAML::Node &n : node["Entities"])
         include({m_entities, n.as<std::size_t>()});

@@ -143,7 +143,7 @@ void engine2D::reset_entities()
 entity2D_ptr engine2D::process_entity_addition(entity2D &e)
 {
     rk::state &state = m_integ.state();
-    e.m_index = m_entities.size() - 1;
+    e.index(m_entities.size() - 1);
     e.m_state = &state;
 
     const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
@@ -152,10 +152,10 @@ entity2D_ptr engine2D::process_entity_addition(entity2D &e)
     e.retrieve();
     m_collider.add_entity_intervals(e_ptr);
 
-    DBG_INFO("Added entity with index {0} and id {1}.", e.m_index, (std::uint64_t)e.m_uuid)
+    DBG_INFO("Added entity with index {0} and id {1}.", e.index(), (std::uint64_t)e.id())
 #ifdef DEBUG
     for (std::size_t i = 0; i < m_entities.size() - 1; i++)
-        DBG_ASSERT_CRITICAL(m_entities[i].m_uuid != e.m_uuid,
+        DBG_ASSERT_CRITICAL(m_entities[i].id() != e.id(),
                             "Entity with index {0} has the same id as entity with index {1}", i, e.index())
 #endif
     m_events.on_entity_addition(e_ptr);
@@ -179,7 +179,7 @@ bool engine2D::remove_entity(std::size_t index)
     {
         m_entities[index] = m_entities.back();
         m_entities.pop_back();
-        m_entities[index].m_index = index;
+        m_entities[index].index(index);
         m_entities[index].m_state = &state;
     }
 

@@ -38,7 +38,7 @@ entity2D::entity2D(const specs &spc)
 
 void entity2D::retrieve(const std::vector<float> &vars_buffer)
 {
-    const std::size_t idx = 6 * m_index;
+    const std::size_t idx = 6 * index();
     geo::shape2D &sh = get_shape();
 
     sh.begin_update();
@@ -63,7 +63,7 @@ void entity2D::dispatch() const
     const float angpos = sh.rotation();
     rk::state &st = *m_state;
 
-    const std::size_t idx = 6 * m_index;
+    const std::size_t idx = 6 * index();
     st[idx + 0] = pos.x;
     st[idx + 1] = pos.y;
     st[idx + 2] = angpos;
@@ -157,15 +157,6 @@ void entity2D::compute_inertia(const geo::shape2D &sh)
 entity2D::shape_type entity2D::type() const
 {
     return m_shape.index() == 0 ? POLYGON : CIRCLE;
-}
-
-std::size_t entity2D::index() const
-{
-    return m_index;
-}
-uuid entity2D::id() const
-{
-    return m_uuid;
 }
 
 float entity2D::inertia() const
@@ -323,8 +314,8 @@ bool convert<ppx::entity2D>::decode(const Node &node, ppx::entity2D &e)
     if (!node.IsMap() || node.size() != 8)
         return false;
 
-    e.m_uuid = node["UUID"].as<std::uint64_t>();
-    e.m_index = node["Index"].as<std::size_t>();
+    e.id(node["UUID"].as<std::uint64_t>());
+    e.index(node["Index"].as<std::size_t>());
     if (node["Shape"]["Radius"])
         e.shape(node["Shape"].as<geo::circle>());
     else

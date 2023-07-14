@@ -39,14 +39,12 @@ class joint2D
     void anchor2(const glm::vec2 &anchor2);
 
     bool has_anchors() const;
-    uuid id() const;
 
   protected:
     entity2D_ptr m_e1 = nullptr, m_e2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
     float m_angle1, m_angle2, m_length;
     bool m_has_anchors;
-    uuid m_uuid;
 
 #ifdef HAS_YAML_CPP
     virtual void write(YAML::Emitter &out) const;
