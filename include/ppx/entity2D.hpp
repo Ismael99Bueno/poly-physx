@@ -1,13 +1,13 @@
 #ifndef ENTITY2D_HPP
 #define ENTITY2D_HPP
-#include "ppx/core.hpp"
+#include "ppx/internal/core.hpp"
 
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"
 #include "geo/circle.hpp"
 #include "rk/state.hpp"
-#include "ppx/entity_events.hpp"
-#include "ppx/uuid.hpp"
+#include "ppx/events/entity_events.hpp"
+#include "ppx/utility/uuid.hpp"
 #include <variant>
 
 namespace ppx

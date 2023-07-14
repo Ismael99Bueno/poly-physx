@@ -12,8 +12,8 @@ filter "system:macosx"
    }
 filter {}
 
-pchheader "ppx/pch.hpp"
-pchsource "src/pch.cpp"
+pchheader "ppx/internal/pch.hpp"
+pchsource "src/internal/pch.cpp"
 
 staticruntime "off"
 kind "StaticLib"

@@ -1,7 +1,7 @@
-#include "ppx/pch.hpp"
+#include "ppx/internal/pch.hpp"
 #include "ppx/entity2D.hpp"
-#include "ppx/force2D.hpp"
-#include "ppx/interaction2D.hpp"
+#include "ppx/behaviours/force2D.hpp"
+#include "ppx/behaviours/interaction2D.hpp"
 
 namespace ppx
 {

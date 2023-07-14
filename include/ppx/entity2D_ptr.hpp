@@ -1,6 +1,6 @@
 #ifndef ENTITY2D_PTR_HPP
 #define ENTITY2D_PTR_HPP
-#include "ppx/core.hpp"
+#include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D.hpp"
 #include <vector>

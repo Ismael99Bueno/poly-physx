@@ -1,14 +1,14 @@
 #ifndef ENGINE2D_HPP
 #define ENGINE2D_HPP
-#include "ppx/core.hpp"
+#include "ppx/internal/core.hpp"
 
 #include "rk/integrator.hpp"
 #include "ppx/entity2D_ptr.hpp"
-#include "ppx/compeller2D.hpp"
-#include "ppx/collider2D.hpp"
-#include "ppx/spring2D.hpp"
+#include "ppx/constraints/compeller2D.hpp"
+#include "ppx/collision/collider2D.hpp"
+#include "ppx/joints/spring2D.hpp"
 #include "cvw/container_view.hpp"
-#include "ppx/engine_events.hpp"
+#include "ppx/events/engine_events.hpp"
 #include "rk/tableaus.hpp"
 
 namespace ppx

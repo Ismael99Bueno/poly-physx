@@ -1,8 +1,8 @@
-#include "ppx/pch.hpp"
+#include "ppx/internal/pch.hpp"
 #include "ppx/engine2D.hpp"
 #include "geo/intersection.hpp"
-#include "ppx/behaviour2D.hpp"
-#include "ppx/rigid_bar2D.hpp"
+#include "ppx/behaviours/behaviour2D.hpp"
+#include "ppx/joints/rigid_bar2D.hpp"
 #include <cstring>
 
 namespace ppx
