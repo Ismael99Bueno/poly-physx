@@ -25,7 +25,7 @@ class compeller2D final
         T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));
-        m_callbacks->on_constraint_addition(*ptr);
+        m_callbacks->on_constraint_addition(ptr);
         return ptr;
     }
     bool remove_constraint(const constraint_interface2D *ctr);
