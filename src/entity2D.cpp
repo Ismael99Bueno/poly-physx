@@ -267,14 +267,6 @@ entity2D::specs entity2D::specs::from_entity(const entity2D &e)
             e.kinematic(), e.type()};
 }
 
-bool operator==(const entity2D &lhs, const entity2D &rhs)
-{
-    return lhs.id() == rhs.id();
-}
-bool operator!=(const entity2D &lhs, const entity2D &rhs)
-{
-    return lhs.id() != rhs.id();
-}
 #ifdef HAS_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
 {

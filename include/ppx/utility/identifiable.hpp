@@ -17,6 +17,9 @@ class identifiable
   private:
     uuid m_uuid;
 };
+
+bool operator==(const identifiable &lhs, const identifiable &rhs);
+bool operator!=(const identifiable &lhs, const identifiable &rhs);
 } // namespace ppx
 
 #endif

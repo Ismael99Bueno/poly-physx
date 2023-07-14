@@ -106,9 +106,6 @@ class entity2D : public identifiable, public indexable
 
     friend class engine2D;
 };
-
-bool operator==(const entity2D &lhs, const entity2D &rhs);
-bool operator!=(const entity2D &lhs, const entity2D &rhs);
 #ifdef HAS_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e);
 #endif
