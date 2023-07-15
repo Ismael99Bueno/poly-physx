@@ -152,10 +152,10 @@ entity2D_ptr engine2D::process_entity_addition(entity2D &e)
     e.retrieve();
     m_collider.add_entity_intervals(e_ptr);
 
-    DBG_INFO("Added entity with index {0} and id {1}.", e.index(), (std::uint64_t)e.id())
+    KIT_INFO("Added entity with index {0} and id {1}.", e.index(), (std::uint64_t)e.id())
 #ifdef DEBUG
     for (std::size_t i = 0; i < m_entities.size() - 1; i++)
-        DBG_ASSERT_CRITICAL(m_entities[i].id() != e.id(),
+        KIT_ASSERT_CRITICAL(m_entities[i].id() != e.id(),
                             "Entity with index {0} has the same id as entity with index {1}", i, e.index())
 #endif
     m_events.on_entity_addition(e_ptr);
@@ -166,10 +166,10 @@ bool engine2D::remove_entity(std::size_t index)
 {
     if (index >= m_entities.size())
     {
-        DBG_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_entities.size())
+        KIT_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_entities.size())
         return false;
     }
-    DBG_INFO("Removing entity with index {0} and id {1}", index, m_entities[index].id())
+    KIT_INFO("Removing entity with index {0} and id {1}", index, m_entities[index].id())
 
     m_events.on_early_entity_removal(m_entities[index]);
     rk::state &state = m_integ.state();
@@ -211,7 +211,7 @@ bool engine2D::remove_spring(std::size_t index)
 {
     if (index >= m_springs.size())
     {
-        DBG_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_springs.size())
+        KIT_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_springs.size())
         return false;
     }
     m_events.on_spring_removal(m_springs[index]);
@@ -258,7 +258,7 @@ void engine2D::checkpoint()
 void engine2D::revert()
 {
     const auto &[elapsed, vars, entities] = m_checkpoint;
-    DBG_ASSERT_ERROR(
+    KIT_ASSERT_ERROR(
         m_integ.state().vars().size() == vars.size() && m_entities.size() == entities.size(),
         "Cannot revert to a checkpoint where the number of entities differ. Entities now: {0}, entities before: {1}",
         m_entities.size(), entities.size())
@@ -292,7 +292,7 @@ float engine2D::energy() const
 std::vector<float> engine2D::operator()(const float t, const float dt, const std::vector<float> &vars)
 {
     PERF_FUNCTION()
-    DBG_ASSERT_CRITICAL(
+    KIT_ASSERT_CRITICAL(
         vars.size() == 6 * m_entities.size(),
         "State vector size must be exactly 6 times greater than the entity array size - vars: {0}, entity array: {1}",
         vars.size(), m_entities.size())
@@ -344,13 +344,13 @@ template <> behaviour2D *engine2D::behaviour_from_name(const char *name) const
 
 const_entity2D_ptr engine2D::operator[](const std::size_t index) const
 {
-    DBG_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
+    KIT_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_entities.size())
     return {&m_entities, index};
 }
 entity2D_ptr engine2D::operator[](const std::size_t index)
 {
-    DBG_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
+    KIT_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_entities.size())
     return {&m_entities, index};
 }

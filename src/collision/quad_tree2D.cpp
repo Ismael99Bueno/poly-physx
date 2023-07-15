@@ -17,7 +17,7 @@ quad_tree2D::quad_tree2D(const glm::vec2 &min, const glm::vec2 &max, const std::
 
 void quad_tree2D::insert(const entity2D *e)
 {
-    DBG_ASSERT_CRITICAL(
+    KIT_ASSERT_CRITICAL(
         m_entities.size() <= m_max_entities || rock_bottom(),
         "Quad tree contains more entities than allowed! - Contained entities: {0}, maximum entities: {1}",
         m_entities.size(), m_max_entities)
@@ -136,7 +136,7 @@ const std::array<kit::scope<quad_tree2D>, 4> &quad_tree2D::children() const
 }
 const quad_tree2D &quad_tree2D::child(std::size_t index) const
 {
-    DBG_ASSERT_ERROR(index < 4, "Index outside of array bounds. A quad tree can only have 4 children - index: {0}",
+    KIT_ASSERT_ERROR(index < 4, "Index outside of array bounds. A quad tree can only have 4 children - index: {0}",
                      index)
     return *m_children[index];
 }

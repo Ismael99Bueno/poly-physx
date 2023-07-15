@@ -56,7 +56,7 @@ float revolute_joint2D::with_anchors_constraint_derivative(const std::array<cons
 
 std::array<float, 3> revolute_joint2D::constraint_grad(entity2D &e) const
 {
-    DBG_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2,
+    KIT_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2,
                         "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
     if (!m_has_anchors)
     {
@@ -81,7 +81,7 @@ std::array<float, 3> revolute_joint2D::constraint_grad(entity2D &e) const
 }
 std::array<float, 3> revolute_joint2D::constraint_grad_derivative(entity2D &e) const
 {
-    DBG_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2,
+    KIT_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2,
                         "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
     if (!m_has_anchors)
     {

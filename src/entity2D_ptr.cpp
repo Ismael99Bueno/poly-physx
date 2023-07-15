@@ -47,7 +47,7 @@ bool const_entity2D_ptr::validate()
     for (const entity2D &e : *m_buffer)
         if (e.id() == m_id)
         {
-            DBG_INFO("Entity pointer (index: {0}, id: {1}) had to be validated to index {2}", m_index, m_id, e.index())
+            KIT_INFO("Entity pointer (index: {0}, id: {1}) had to be validated to index {2}", m_index, m_id, e.index())
             m_index = e.index();
             return true;
         }
@@ -107,7 +107,7 @@ bool entity2D_ptr::validate()
     for (const entity2D &e : *m_buffer)
         if (e.id() == m_id)
         {
-            DBG_INFO("Entity pointer (index: {0}, id: {1}) had to be validated to index {2}", m_index, m_id, e.index())
+            KIT_INFO("Entity pointer (index: {0}, id: {1}) had to be validated to index {2}", m_index, m_id, e.index())
             m_index = e.index();
             return true;
         }

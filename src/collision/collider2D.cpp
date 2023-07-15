@@ -96,14 +96,14 @@ template <typename T, typename Func> static void for_each(const std::vector<T> &
     {
         const std::size_t start = i * vec.size() / PPX_THREAD_COUNT, end = (i + 1) * vec.size() / PPX_THREAD_COUNT;
 
-        DBG_ASSERT_ERROR(end <= vec.size(), "Partition exceeds vector size! start: {0}, end: {1}, size: {2}", start,
+        KIT_ASSERT_ERROR(end <= vec.size(), "Partition exceeds vector size! start: {0}, end: {1}, size: {2}", start,
                          end, vec.size())
         threads[i] = std::thread(compute<decltype(vec.begin()), Func>, vec.begin() + (long)start,
                                  vec.begin() + (long)end, func, i);
     }
     for (std::thread &th : threads)
     {
-        DBG_ASSERT_ERROR(th.joinable(), "Thread is not joinable!")
+        KIT_ASSERT_ERROR(th.joinable(), "Thread is not joinable!")
         th.join();
     }
 }
@@ -317,7 +317,7 @@ void collider2D::brute_force(std::vector<float> &stchanges)
             else
                 try_exit_callback(e1, e2);
         }
-    DBG_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for BRUTE FORCE "
+    KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for BRUTE FORCE "
               "collision detection (QUALITY: {3:.2f}%%)",
               checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
 #endif
@@ -359,7 +359,7 @@ void collider2D::sort_and_sweep(std::vector<float> &stchanges)
         }
         else
             eligible.erase(itrv.entity());
-    DBG_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for SORT AND "
+    KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for SORT AND "
               "SWEEP collision detection (QUALITY: {3:.2f}%%)",
               checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
 }
@@ -418,7 +418,7 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
                 else
                     try_exit_callback(*e1, *e2);
             }
-    DBG_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for QUAD TREE "
+    KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for QUAD TREE "
               "collision detection (QUALITY: {3:.2f}%%)",
               checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
 #endif
