@@ -314,7 +314,7 @@ std::vector<float> engine2D::operator()(const float t, const float dt, const std
     return stchanges;
 }
 
-std::optional<std::size_t> engine2D::index_from_id(const uuid id) const
+std::optional<std::size_t> engine2D::index_from_id(const kit::uuid id) const
 {
     for (std::size_t i = 0; i < m_entities.size(); i++)
         if (m_entities[i].id() == id)
@@ -322,13 +322,13 @@ std::optional<std::size_t> engine2D::index_from_id(const uuid id) const
     return {};
 }
 
-const_entity2D_ptr engine2D::from_id(uuid id) const
+const_entity2D_ptr engine2D::from_id(kit::uuid id) const
 {
     const auto index = index_from_id(id);
     return index ? (*this)[index.value()] : nullptr;
 }
 
-entity2D_ptr engine2D::from_id(uuid id)
+entity2D_ptr engine2D::from_id(kit::uuid id)
 {
     const auto index = index_from_id(id);
     return index ? (*this)[index.value()] : nullptr;

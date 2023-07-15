@@ -9,12 +9,12 @@
 #include "ppx/events/engine_events.hpp"
 #include "kit/container/container_view.hpp"
 #include "rk/tableaus.hpp"
-#include "ppx/utility/non_copyable.hpp"
+#include "kit/interface/non_copyable.hpp"
 
 namespace ppx
 {
 class behaviour2D;
-class engine2D : non_copyable
+class engine2D : kit::non_copyable
 {
   public:
     engine2D(const rk::butcher_tableau &table = rk::rk4, std::size_t allocations = 100);
@@ -73,8 +73,8 @@ class engine2D : non_copyable
 
     std::vector<float> operator()(float t, float dt, const std::vector<float> &vars);
 
-    const_entity2D_ptr from_id(uuid id) const;
-    entity2D_ptr from_id(uuid id);
+    const_entity2D_ptr from_id(kit::uuid id) const;
+    entity2D_ptr from_id(kit::uuid id);
 
     template <typename T> T *behaviour_from_name(const char *name) const
     {
@@ -137,7 +137,7 @@ class engine2D : non_copyable
     void reset_entities();
     void retrieve(const std::vector<float> &vars_buffer);
     void validate();
-    std::optional<std::size_t> index_from_id(uuid id) const;
+    std::optional<std::size_t> index_from_id(kit::uuid id) const;
 
 #ifdef YAML_CPP_COMPAT
     friend YAML::Emitter &operator<<(YAML::Emitter &, const engine2D &);

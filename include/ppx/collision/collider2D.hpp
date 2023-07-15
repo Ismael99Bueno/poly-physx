@@ -5,7 +5,7 @@
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/collision/quad_tree2D.hpp"
-#include "ppx/utility/non_copyable.hpp"
+#include "kit/interface/non_copyable.hpp"
 #include <vector>
 #include <utility>
 
@@ -21,7 +21,7 @@ struct collision2D
     glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
 };
 
-class collider2D final : non_copyable
+class collider2D final : kit::non_copyable
 {
   public:
     enum detection_method

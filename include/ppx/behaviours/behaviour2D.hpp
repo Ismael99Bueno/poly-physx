@@ -2,12 +2,12 @@
 #define PPX_BEHAVIOUR2D_HPP
 
 #include "ppx/entity2D_ptr.hpp"
-#include "ppx/utility/non_copyable.hpp"
-#include "ppx/utility/identifiable.hpp"
+#include "kit/interface/non_copyable.hpp"
+#include "kit/interface/identifiable.hpp"
 
 namespace ppx
 {
-class behaviour2D : non_copyable, public identifiable
+class behaviour2D : kit::non_copyable, public kit::identifiable
 {
   public:
     behaviour2D(const char *name, std::size_t allocations = 50);

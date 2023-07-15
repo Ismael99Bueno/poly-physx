@@ -12,7 +12,7 @@
 
 namespace ppx
 {
-class engine_events final : non_copyable
+class engine_events final : kit::non_copyable
 {
   public:
     engine_events() = default;

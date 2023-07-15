@@ -6,13 +6,13 @@
 #include "geo/circle.hpp"
 #include "rk/state.hpp"
 #include "ppx/events/entity_events.hpp"
-#include "ppx/utility/identifiable.hpp"
-#include "ppx/utility/indexable.hpp"
+#include "kit/interface/identifiable.hpp"
+#include "kit/interface/indexable.hpp"
 #include <variant>
 
 namespace ppx
 {
-class entity2D : public identifiable, public indexable
+class entity2D : public kit::identifiable, public kit::indexable
 {
   public:
     enum shape_type

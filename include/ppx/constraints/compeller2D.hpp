@@ -3,7 +3,7 @@
 
 #include "ppx/entity2D.hpp"
 #include "ppx/events/engine_events.hpp"
-#include "ppx/utility/non_copyable.hpp"
+#include "kit/interface/non_copyable.hpp"
 #include "kit/memory/stack_vector.hpp"
 #include "kit/memory/scope.hpp"
 #include <vector>
@@ -14,7 +14,7 @@
 namespace ppx
 {
 class constraint_interface2D;
-class compeller2D final : non_copyable
+class compeller2D final : kit::non_copyable
 {
   public:
     compeller2D(std::vector<entity2D> *entities, std::size_t allocations, engine_events *cbs);

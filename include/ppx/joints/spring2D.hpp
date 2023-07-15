@@ -6,7 +6,7 @@
 
 namespace ppx
 {
-class spring2D : public joint2D, public identifiable, public indexable
+class spring2D : public joint2D, public kit::identifiable, public kit::indexable
 {
   public:
     struct specs : joint2D::specs
