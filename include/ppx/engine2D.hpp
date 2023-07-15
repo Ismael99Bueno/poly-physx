@@ -1,14 +1,13 @@
 #ifndef PPX_ENGINE2D_HPP
 #define PPX_ENGINE2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "rk/integrator.hpp"
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraints/compeller2D.hpp"
 #include "ppx/collision/collider2D.hpp"
 #include "ppx/joints/spring2D.hpp"
-#include "cvw/container_view.hpp"
 #include "ppx/events/engine_events.hpp"
+#include "kit/container/container_view.hpp"
 #include "rk/tableaus.hpp"
 #include "ppx/utility/non_copyable.hpp"
 
@@ -39,7 +38,7 @@ class engine2D : non_copyable
     {
         static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
                                                               "recommended to inherit from force2D or interaction2D)");
-        auto bhv = make_scope<T>(std::forward<BehaviourArgs>(args)...);
+        auto bhv = kit::make_scope<T>(std::forward<BehaviourArgs>(args)...);
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
@@ -93,14 +92,14 @@ class engine2D : non_copyable
     const_entity2D_ptr operator[](const glm::vec2 &point) const;
     entity2D_ptr operator[](const glm::vec2 &point);
 
-    const std::vector<scope<behaviour2D>> &behaviours() const;
+    const std::vector<kit::scope<behaviour2D>> &behaviours() const;
     const std::vector<spring2D> &springs() const;
 
-    cvw::vector<scope<behaviour2D>> behaviours();
-    cvw::vector<spring2D> springs();
+    kit::vector<kit::scope<behaviour2D>> behaviours();
+    kit::vector<spring2D> springs();
 
     const std::vector<entity2D> &entities() const;
-    cvw::vector<entity2D> entities();
+    kit::vector<entity2D> entities();
     std::size_t size() const;
 
     const rk::integrator &integrator() const;
@@ -120,7 +119,7 @@ class engine2D : non_copyable
     std::vector<entity2D> m_entities;
     collider2D m_collider;
     compeller2D m_compeller;
-    std::vector<scope<behaviour2D>> m_behaviours;
+    std::vector<kit::scope<behaviour2D>> m_behaviours;
     std::vector<spring2D> m_springs;
     std::tuple<float, std::vector<float>, std::vector<entity2D>> m_checkpoint;
     rk::integrator m_integ;
@@ -133,24 +132,24 @@ class engine2D : non_copyable
     void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
     void load_interactions_and_externals(std::vector<float> &stchanges) const;
 
-    stk_vector<float> effective_inverse_masses() const;
+    kit::stack_vector<float> effective_inverse_masses() const;
 
     void reset_entities();
     void retrieve(const std::vector<float> &vars_buffer);
     void validate();
     std::optional<std::size_t> index_from_id(uuid id) const;
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
     friend YAML::Emitter &operator<<(YAML::Emitter &, const engine2D &);
     friend struct YAML::convert<engine2D>;
 #endif
 };
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng);
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 template <> struct convert<ppx::engine2D>

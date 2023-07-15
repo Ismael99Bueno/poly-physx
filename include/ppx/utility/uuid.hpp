@@ -1,6 +1,5 @@
 #ifndef PPX_UUID_HPP
 #define PPX_UUID_HPP
-#include "ppx/internal/core.hpp"
 
 #include <cstdint>
 

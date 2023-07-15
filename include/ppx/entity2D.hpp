@@ -1,6 +1,5 @@
 #ifndef PPX_ENTITY2D_HPP
 #define PPX_ENTITY2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"
@@ -25,14 +24,14 @@ class entity2D : public identifiable, public indexable
     {
         glm::vec2 pos{0.f}, vel{0.f};
         float angpos = 0.f, angvel = 0.f, mass = 1.f, charge = 1.f;
-        blk_vector<glm::vec2> vertices = geo::polygon::box(5.f);
+        kit::block_vector<glm::vec2> vertices = geo::polygon::box(5.f);
         float radius = 2.5f;
         bool kinematic = true;
         shape_type shape = POLYGON;
         static specs from_entity(const entity2D &e);
     };
 
-    entity2D(const blk_vector<glm::vec2> &vertices, const glm::vec2 &pos = glm::vec2(0.f),
+    entity2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &pos = glm::vec2(0.f),
              const glm::vec2 &vel = glm::vec2(0.f), float angpos = 0.f, float angvel = 0.f, float mass = 1.f,
              float charge = 1.f, bool kinematic = true);
     entity2D(float radius, const glm::vec2 &pos = glm::vec2(0.f), const glm::vec2 &vel = glm::vec2(0.f),
@@ -57,7 +56,7 @@ class entity2D : public identifiable, public indexable
 
     template <typename T> const T *shape_if() const;
 
-    void shape(const blk_vector<glm::vec2> &vertices);
+    void shape(const kit::block_vector<glm::vec2> &vertices);
     void shape(float radius);
     void shape(const geo::polygon &poly);
     void shape(const geo::circle &c);
@@ -106,12 +105,12 @@ class entity2D : public identifiable, public indexable
 
     friend class engine2D;
 };
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e);
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 template <> struct convert<ppx::entity2D>

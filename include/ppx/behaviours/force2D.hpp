@@ -1,6 +1,5 @@
 #ifndef PPX_FORCE2D_HPP
 #define PPX_FORCE2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/behaviours/behaviour2D.hpp"
 

@@ -1,6 +1,5 @@
 #ifndef PPX_ENGINE_EVENTS_HPP
 #define PPX_ENGINE_EVENTS_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraints/constraint_interface2D.hpp"

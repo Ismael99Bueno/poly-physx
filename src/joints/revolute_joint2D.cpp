@@ -137,7 +137,7 @@ bool revolute_joint2D::decode(const YAML::Node &node)
 }
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 Node convert<ppx::revolute_joint2D>::encode(const ppx::revolute_joint2D &rb)

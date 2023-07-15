@@ -1,6 +1,5 @@
 #ifndef PPX_BEHAVIOUR2D_HPP
 #define PPX_BEHAVIOUR2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
 #include "ppx/utility/non_copyable.hpp"
@@ -38,7 +37,7 @@ class behaviour2D : non_copyable, public identifiable
   protected:
     std::vector<const_entity2D_ptr> m_included;
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
     virtual void write(YAML::Emitter &out) const;
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
@@ -49,18 +48,18 @@ class behaviour2D : non_copyable, public identifiable
     const std::vector<entity2D> *m_entities = nullptr;
 
     friend class engine2D;
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
     friend YAML::Emitter &operator<<(YAML::Emitter &, const behaviour2D &);
     friend struct YAML::convert<behaviour2D>;
 #endif
 };
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv);
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 template <> struct convert<ppx::behaviour2D>

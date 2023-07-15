@@ -450,7 +450,7 @@ std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) con
     return {force.x, force.y, torque1, -force.x, -force.y, torque2};
 }
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
 {
     out << YAML::BeginMap;
@@ -470,7 +470,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)

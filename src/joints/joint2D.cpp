@@ -90,7 +90,7 @@ joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
     return {joint.e1(), joint.e2(), joint.anchor1(), joint.anchor2(), joint.length(), joint.has_anchors()};
 }
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 void joint2D::write(YAML::Emitter &out) const
 {
     out << YAML::Key << "ID1" << YAML::Value << (std::uint64_t)m_e1.id();
@@ -127,7 +127,7 @@ bool joint2D::decode(const YAML::Node &node)
     return true;
 }
 #endif
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const joint2D &joint)
 {
     out << YAML::BeginMap;
@@ -138,7 +138,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const joint2D &joint)
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 Node convert<ppx::joint2D>::encode(const ppx::joint2D &joint)

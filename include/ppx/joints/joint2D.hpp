@@ -1,6 +1,5 @@
 #ifndef PPX_JOINT2D_HPP
 #define PPX_JOINT2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
 
@@ -46,7 +45,7 @@ class joint2D
     float m_angle1, m_angle2, m_length;
     bool m_has_anchors;
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
     virtual void write(YAML::Emitter &out) const;
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
@@ -55,12 +54,12 @@ class joint2D
 #endif
 };
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const joint2D &joint);
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 template <> struct convert<ppx::joint2D>

@@ -116,10 +116,10 @@ void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) co
     }
 }
 
-stk_vector<float> engine2D::effective_inverse_masses() const
+kit::stack_vector<float> engine2D::effective_inverse_masses() const
 {
     PERF_FUNCTION()
-    stk_vector<float> inv_masses;
+    kit::stack_vector<float> inv_masses;
     inv_masses.reserve(3 * m_entities.size());
     for (std::size_t i = 0; i < m_entities.size(); i++)
     {
@@ -301,7 +301,7 @@ std::vector<float> engine2D::operator()(const float t, const float dt, const std
     retrieve(vars);
     load_velocities_and_added_forces(stchanges);
     load_interactions_and_externals(stchanges);
-    const stk_vector<float> inv_masses = effective_inverse_masses();
+    const kit::stack_vector<float> inv_masses = effective_inverse_masses();
 
     m_collider.solve_and_load_collisions(stchanges);
     m_compeller.solve_and_load_constraints(stchanges, inv_masses);
@@ -375,7 +375,7 @@ std::vector<entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb)
     return in_area;
 }
 
-const std::vector<scope<behaviour2D>> &engine2D::behaviours() const
+const std::vector<kit::scope<behaviour2D>> &engine2D::behaviours() const
 {
     return m_behaviours;
 }
@@ -384,11 +384,11 @@ const std::vector<spring2D> &engine2D::springs() const
     return m_springs;
 }
 
-cvw::vector<scope<behaviour2D>> engine2D::behaviours()
+kit::vector<kit::scope<behaviour2D>> engine2D::behaviours()
 {
     return m_behaviours;
 }
-cvw::vector<spring2D> engine2D::springs()
+kit::vector<spring2D> engine2D::springs()
 {
     return m_springs;
 }
@@ -414,7 +414,7 @@ const std::vector<entity2D> &engine2D::entities() const
 {
     return m_entities;
 }
-cvw::vector<entity2D> engine2D::entities()
+kit::vector<entity2D> engine2D::entities()
 {
     return m_entities;
 }
@@ -459,7 +459,7 @@ float engine2D::elapsed() const
 {
     return m_elapsed;
 }
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
 {
     out << YAML::BeginMap;
@@ -489,7 +489,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)

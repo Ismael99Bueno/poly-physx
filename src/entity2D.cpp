@@ -12,7 +12,7 @@ entity2D::entity2D(const glm::vec2 &pos, const glm::vec2 &vel, const float angpo
       m_kinematic(kinematic)
 {
 }
-entity2D::entity2D(const blk_vector<glm::vec2> &vertices, const glm::vec2 &pos, const glm::vec2 &vel,
+entity2D::entity2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &pos, const glm::vec2 &vel,
                    const float angpos, const float angvel, const float mass, const float charge, const bool kinematic)
     : m_shape(geo::polygon(pos, angpos, vertices)), m_vel(vel), m_angvel(angvel), m_mass(mass),
       m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge),
@@ -123,7 +123,7 @@ template <typename T> const T *entity2D::shape_if() const
 template const geo::polygon *entity2D::shape_if<geo::polygon>() const;
 template const geo::circle *entity2D::shape_if<geo::circle>() const;
 
-void entity2D::shape(const blk_vector<glm::vec2> &vertices)
+void entity2D::shape(const kit::block_vector<glm::vec2> &vertices)
 {
     const geo::shape2D &sh = shape();
     const geo::polygon poly(sh.centroid(), sh.rotation(), vertices);
@@ -267,7 +267,7 @@ entity2D::specs entity2D::specs::from_entity(const entity2D &e)
             e.kinematic(), e.type()};
 }
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
 {
     out << YAML::BeginMap;
@@ -285,7 +285,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 Node convert<ppx::entity2D>::encode(const ppx::entity2D &e)

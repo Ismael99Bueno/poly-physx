@@ -1,6 +1,5 @@
 #ifndef PPX_CONSTRAINT2D_HPP
 #define PPX_CONSTRAINT2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/constraints/constraint_interface2D.hpp"
 #include "ppx/entity2D_ptr.hpp"

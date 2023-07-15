@@ -1,6 +1,5 @@
 #ifndef PPX_COLLIDER_HPP
 #define PPX_COLLIDER_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D.hpp"
 #include "ppx/entity2D_ptr.hpp"
@@ -111,12 +110,12 @@ class collider2D final : non_copyable
     std::array<float, 6> forces_upon_collision(const collision2D &c) const;
 };
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld);
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 template <> struct convert<ppx::collider2D>

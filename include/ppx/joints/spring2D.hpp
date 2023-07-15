@@ -1,6 +1,5 @@
 #ifndef PPX_SPRING2D_HPP
 #define PPX_SPRING2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/joints/joint2D.hpp"
 #include <utility>
@@ -39,7 +38,7 @@ class spring2D : public joint2D, public identifiable, public indexable
     std::tuple<glm::vec2, float, float> without_anchors_force() const;
     std::tuple<glm::vec2, float, float> with_anchors_force() const;
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
     void write(YAML::Emitter &out) const override;
     YAML::Node encode() const override;
     bool decode(const YAML::Node &node) override;
@@ -49,7 +48,7 @@ class spring2D : public joint2D, public identifiable, public indexable
 
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 template <> struct convert<ppx::spring2D>

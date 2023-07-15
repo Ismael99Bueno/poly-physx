@@ -72,7 +72,7 @@ const char *behaviour2D::name() const
     return m_name;
 }
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 void behaviour2D::write(YAML::Emitter &out) const
 {
     out << YAML::Key << "UUID" << YAML::Value << id();
@@ -110,7 +110,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv)
 #endif
 } // namespace ppx
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 Node convert<ppx::behaviour2D>::encode(const ppx::behaviour2D &bhv)

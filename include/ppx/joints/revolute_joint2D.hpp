@@ -1,6 +1,5 @@
 #ifndef PPX_REVOLUTE_JOINT2D_HPP
 #define PPX_REVOLUTE_JOINT2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/joints/joint2D.hpp"
@@ -35,7 +34,7 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
     float with_anchors_constraint(const std::array<const_entity2D_ptr, 2> &entities) const;
     float with_anchors_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const;
 
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
     void write(YAML::Emitter &out) const override;
     YAML::Node encode() const override;
     bool decode(const YAML::Node &node) override;
@@ -43,7 +42,7 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
 #endif
 };
 } // namespace ppx
-#ifdef HAS_YAML_CPP
+#ifdef YAML_CPP_COMPAT
 namespace YAML
 {
 template <> struct convert<ppx::revolute_joint2D>

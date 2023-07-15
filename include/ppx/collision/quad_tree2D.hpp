@@ -1,8 +1,8 @@
 #ifndef PPX_QUAD_TREE2D_HPP
 #define PPX_QUAD_TREE2D_HPP
-#include "ppx/internal/core.hpp"
 
 #include "ppx/entity2D_ptr.hpp"
+#include "kit/memory/scope.hpp"
 #include <memory>
 #include <array>
 
@@ -26,7 +26,7 @@ class quad_tree2D final
     bool partitioned() const;
     const std::vector<const entity2D *> &entities() const;
 
-    const std::array<scope<quad_tree2D>, 4> &children() const;
+    const std::array<kit::scope<quad_tree2D>, 4> &children() const;
     const quad_tree2D &child(std::size_t index) const;
     const quad_tree2D &operator[](std::size_t index) const;
 
@@ -37,7 +37,7 @@ class quad_tree2D final
     static void min_size(float min_size);
 
   private:
-    std::array<scope<quad_tree2D>, 4> m_children = {nullptr, nullptr, nullptr, nullptr}; // TL, TR, BL, BR
+    std::array<kit::scope<quad_tree2D>, 4> m_children = {nullptr, nullptr, nullptr, nullptr}; // TL, TR, BL, BR
     geo::aabb2D m_aabb;
     std::size_t m_max_entities;
     std::uint32_t m_depth;

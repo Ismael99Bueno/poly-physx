@@ -53,12 +53,12 @@ void quad_tree2D::create_children()
     m_partitioned = true;
     const glm::vec2 &mm = m_aabb.min(), &mx = m_aabb.max();
     const glm::vec2 mid_point = 0.5f * (mm + mx), hdim = 0.5f * (mx - mm);
-    m_children[0] = make_scope<quad_tree2D>(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y),
-                                            m_max_entities, m_depth + 1);
-    m_children[1] = make_scope<quad_tree2D>(mid_point, mx, m_max_entities, m_depth + 1);
-    m_children[2] = make_scope<quad_tree2D>(mm, mid_point, m_max_entities, m_depth + 1);
-    m_children[3] = make_scope<quad_tree2D>(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y),
-                                            m_max_entities, m_depth + 1);
+    m_children[0] = kit::make_scope<quad_tree2D>(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y),
+                                                 m_max_entities, m_depth + 1);
+    m_children[1] = kit::make_scope<quad_tree2D>(mid_point, mx, m_max_entities, m_depth + 1);
+    m_children[2] = kit::make_scope<quad_tree2D>(mm, mid_point, m_max_entities, m_depth + 1);
+    m_children[3] = kit::make_scope<quad_tree2D>(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y),
+                                                 m_max_entities, m_depth + 1);
 }
 
 void quad_tree2D::reset_children()
@@ -130,7 +130,7 @@ const std::vector<const entity2D *> &quad_tree2D::entities() const
     return m_entities;
 }
 
-const std::array<scope<quad_tree2D>, 4> &quad_tree2D::children() const
+const std::array<kit::scope<quad_tree2D>, 4> &quad_tree2D::children() const
 {
     return m_children;
 }
