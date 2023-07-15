@@ -16,7 +16,7 @@ engine2D::engine2D(const rk::butcher_tableau &table, const std::size_t allocatio
 
 void engine2D::retrieve(const std::vector<float> &vars_buffer)
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     for (std::size_t i = 0; i < m_entities.size(); i++)
         m_entities[i].retrieve(vars_buffer);
 }
@@ -60,7 +60,7 @@ static void load_force(std::vector<float> &stchanges, const glm::vec2 &force, fl
 
 void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     for (std::size_t i = 0; i < m_entities.size(); i++)
     {
         const std::size_t index = 6 * i;
@@ -96,7 +96,7 @@ void engine2D::validate()
 
 void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     for (const auto &bhv : m_behaviours)
         for (const auto &e : bhv->entities())
         {
@@ -118,7 +118,7 @@ void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) co
 
 kit::stack_vector<float> engine2D::effective_inverse_masses() const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     kit::stack_vector<float> inv_masses;
     inv_masses.reserve(3 * m_entities.size());
     for (std::size_t i = 0; i < m_entities.size(); i++)
@@ -291,7 +291,7 @@ float engine2D::energy() const
 
 std::vector<float> engine2D::operator()(const float t, const float dt, const std::vector<float> &vars)
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     KIT_ASSERT_CRITICAL(
         vars.size() == 6 * m_entities.size(),
         "State vector size must be exactly 6 times greater than the entity array size - vars: {0}, entity array: {1}",

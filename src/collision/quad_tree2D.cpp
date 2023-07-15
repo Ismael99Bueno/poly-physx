@@ -33,7 +33,7 @@ void quad_tree2D::insert(const entity2D *e)
 
 void quad_tree2D::partitions(std::vector<const std::vector<const entity2D *> *> &partitions) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     if (!m_partitioned)
         partitions.push_back(&m_entities);
     else

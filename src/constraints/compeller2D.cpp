@@ -44,7 +44,7 @@ void compeller2D::validate()
 void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges,
                                              const kit::stack_vector<float> &inv_masses) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     if (m_constraints.empty())
         return;
     const kit::stack_vector<float> jcb = jacobian(), djcb = jacobian_derivative();
@@ -61,7 +61,7 @@ const std::vector<kit::scope<constraint_interface2D>> &compeller2D::constraints(
 
 kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
     kit::stack_vector<float> cmatrix(rows * cols, 0.f);
 
@@ -92,7 +92,7 @@ kit::stack_vector<float> compeller2D::jacobian_derivative() const
 kit::stack_vector<float> compeller2D::lhs(const kit::stack_vector<float> &jcb,
                                           const kit::stack_vector<float> &inv_masses) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
     kit::stack_vector<float> A(rows * rows, 0.f);
     for (std::size_t i = 0; i < rows; i++)
@@ -114,7 +114,7 @@ kit::stack_vector<float> compeller2D::rhs(const kit::stack_vector<float> &jcb, c
                                           const std::vector<float> &stchanges,
                                           const kit::stack_vector<float> &inv_masses) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
     kit::stack_vector<float> b(rows, 0.f);
 
@@ -140,7 +140,7 @@ kit::stack_vector<float> compeller2D::rhs(const kit::stack_vector<float> &jcb, c
 kit::stack_vector<float> compeller2D::lu_decomposition(const kit::stack_vector<float> &A,
                                                        const kit::stack_vector<float> &b) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     const std::size_t size = m_constraints.size();
     kit::stack_vector<float> sol(size, 0.f), L(size * size, 0.f), U(size * size, 0.f);
     for (std::size_t i = 0; i < size; i++)
@@ -183,7 +183,7 @@ kit::stack_vector<float> compeller2D::lu_decomposition(const kit::stack_vector<f
 void compeller2D::load_constraint_accels(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &lambda,
                                          std::vector<float> &stchanges) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
     for (std::size_t i = 0; i < m_entities->size(); i++)
         for (std::size_t j = 0; j < 3; j++)

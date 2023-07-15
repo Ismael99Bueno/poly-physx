@@ -65,7 +65,7 @@ void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
 
 void collider2D::broad_and_narrow_fase(std::vector<float> &stchanges)
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     if (!m_enabled)
         return;
     switch (m_coldet_method)
@@ -273,7 +273,7 @@ void collider2D::try_exit_callback(const entity2D &e1, const entity2D &e2) const
 
 void collider2D::brute_force(std::vector<float> &stchanges)
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
     const auto exec = [this, &stchanges](const std::size_t thread_idx, const entity2D &e1) {
         for (std::size_t j = 0; j < m_entities->size(); j++)
@@ -325,7 +325,7 @@ void collider2D::brute_force(std::vector<float> &stchanges)
 
 void collider2D::sort_and_sweep(std::vector<float> &stchanges)
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
 #ifdef DEBUG
     std::size_t checks = 0, collisions = 0;
 #endif
@@ -366,7 +366,7 @@ void collider2D::sort_and_sweep(std::vector<float> &stchanges)
 
 void collider2D::quad_tree(std::vector<float> &stchanges)
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     update_quad_tree();
 
     std::vector<const std::vector<const entity2D *> *> partitions;
@@ -426,7 +426,7 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
 
 void collider2D::solve(const collision2D &c, std::vector<float> &stchanges) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     const std::array<float, 6> forces = forces_upon_collision(c);
     for (std::size_t i = 0; i < 3; i++)
     {
@@ -439,7 +439,7 @@ void collider2D::solve(const collision2D &c, std::vector<float> &stchanges) cons
 
 std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) const
 {
-    PERF_FUNCTION()
+    KIT_PERF_FUNCTION()
     const glm::vec2 rel1 = c.touch1 - c.current->pos(), rel2 = c.touch2 - c.incoming->pos();
 
     const glm::vec2 vel1 = c.current->vel_at(rel1), vel2 = c.incoming->vel_at(rel2);
