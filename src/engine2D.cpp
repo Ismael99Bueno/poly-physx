@@ -384,11 +384,11 @@ const std::vector<spring2D> &engine2D::springs() const
     return m_springs;
 }
 
-kit::vector<kit::scope<behaviour2D>> engine2D::behaviours()
+kit::vector_view<kit::scope<behaviour2D>> engine2D::behaviours()
 {
     return m_behaviours;
 }
-kit::vector<spring2D> engine2D::springs()
+kit::vector_view<spring2D> engine2D::springs()
 {
     return m_springs;
 }
@@ -414,7 +414,7 @@ const std::vector<entity2D> &engine2D::entities() const
 {
     return m_entities;
 }
-kit::vector<entity2D> engine2D::entities()
+kit::vector_view<entity2D> engine2D::entities()
 {
     return m_entities;
 }

@@ -95,11 +95,11 @@ class engine2D : kit::non_copyable
     const std::vector<kit::scope<behaviour2D>> &behaviours() const;
     const std::vector<spring2D> &springs() const;
 
-    kit::vector<kit::scope<behaviour2D>> behaviours();
-    kit::vector<spring2D> springs();
+    kit::vector_view<kit::scope<behaviour2D>> behaviours();
+    kit::vector_view<spring2D> springs();
 
     const std::vector<entity2D> &entities() const;
-    kit::vector<entity2D> entities();
+    kit::vector_view<entity2D> entities();
     std::size_t size() const;
 
     const rk::integrator &integrator() const;
