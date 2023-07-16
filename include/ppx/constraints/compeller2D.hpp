@@ -4,7 +4,7 @@
 #include "ppx/entity2D.hpp"
 #include "ppx/events/engine_events.hpp"
 #include "kit/interface/non_copyable.hpp"
-#include "kit/memory/stack_vector.hpp"
+#include "kit/container/stack_vector.hpp"
 #include "kit/memory/scope.hpp"
 #include <vector>
 #include <functional>
