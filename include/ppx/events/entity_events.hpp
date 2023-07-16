@@ -1,8 +1,8 @@
 #ifndef PPX_ENTITY_EVENTS_HPP
 #define PPX_ENTITY_EVENTS_HPP
 
-#include "ppx/events/event.hpp"
-#include "kit/interface/uuid.hpp"
+#include "kit/utility/event.hpp"
+#include "kit/utility/uuid.hpp"
 #include <vector>
 #include <functional>
 #include <unordered_set>
@@ -17,8 +17,8 @@ class entity_events final
     void try_enter_or_stay(const collision2D &c) const;
     void try_exit(const entity2D_ptr &incoming) const;
 
-    event<const collision2D &> on_collision_enter, on_collision_stay;
-    event<const entity2D_ptr &> on_collision_exit;
+    kit::event<const collision2D &> on_collision_enter, on_collision_stay;
+    kit::event<const entity2D_ptr &> on_collision_exit;
 
   private:
     mutable bool m_processed = false;
