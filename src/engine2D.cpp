@@ -357,6 +357,10 @@ const kit::track_vector<spring2D> &engine2D::springs() const
 {
     return m_springs;
 }
+spring2D::const_ptr engine2D::spring(std::size_t index) const
+{
+    return {&m_springs, index};
+}
 
 kit::vector_view<kit::scope<behaviour2D>> engine2D::behaviours()
 {
@@ -365,6 +369,10 @@ kit::vector_view<kit::scope<behaviour2D>> engine2D::behaviours()
 kit::track_vector_view<spring2D> engine2D::springs()
 {
     return m_springs;
+}
+spring2D::ptr engine2D::spring(std::size_t index)
+{
+    return {&m_springs, index};
 }
 
 entity2D::const_ptr engine2D::operator[](const glm::vec2 &point) const
@@ -512,13 +520,13 @@ bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
         const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
         if (n["Anchor1"])
         {
-            ppx::spring2D &sp =
+            const ppx::spring2D::ptr sp =
                 eng.add_spring(eng[idx1], eng[idx2], n["Anchor1"].as<glm::vec2>(), n["Anchor2"].as<glm::vec2>());
-            n.as<ppx::spring2D>(sp);
+            n.as<ppx::spring2D>(*sp);
             continue;
         }
-        ppx::spring2D &sp = eng.add_spring(eng[idx1], eng[idx2]);
-        n.as<ppx::spring2D>(sp);
+        const ppx::spring2D::ptr sp = eng.add_spring(eng[idx1], eng[idx2]);
+        n.as<ppx::spring2D>(*sp);
     }
 
     for (const Node &n : node["Rigid bars"])

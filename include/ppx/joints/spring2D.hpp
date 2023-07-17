@@ -9,6 +9,9 @@ namespace ppx
 class spring2D : public joint2D, public kit::identifiable, public kit::indexable
 {
   public:
+    using ptr = kit::track_ptr<spring2D>;
+    using const_ptr = kit::const_track_ptr<spring2D>;
+
     struct specs : joint2D::specs
     {
         float stiffness = 1.f, dampening = 0.f;

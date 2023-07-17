@@ -46,11 +46,12 @@ class engine2D : kit::non_copyable
         return ptr;
     }
 
-    template <class... SpringArgs> spring2D &add_spring(SpringArgs &&...args)
+    template <class... SpringArgs> spring2D::ptr add_spring(SpringArgs &&...args)
     {
-        spring2D &sp = m_springs.emplace_back(std::forward<SpringArgs>(args)...);
-        m_events.on_spring_addition(&sp);
-        return sp;
+        m_springs.emplace_back(std::forward<SpringArgs>(args)...);
+        const spring2D::ptr sp_ptr = {&m_springs, m_springs.size() - 1};
+        m_events.on_spring_addition(sp_ptr);
+        return sp_ptr;
     }
 
     bool remove_behaviour(const behaviour2D *bhv);
@@ -90,9 +91,11 @@ class engine2D : kit::non_copyable
 
     const std::vector<kit::scope<behaviour2D>> &behaviours() const;
     const kit::track_vector<spring2D> &springs() const;
+    spring2D::const_ptr spring(std::size_t index) const;
 
     kit::vector_view<kit::scope<behaviour2D>> behaviours();
     kit::track_vector_view<spring2D> springs();
+    spring2D::ptr spring(std::size_t index);
 
     const kit::track_vector<entity2D> &entities() const;
     kit::track_vector_view<entity2D> entities();

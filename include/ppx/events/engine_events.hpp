@@ -16,9 +16,9 @@ class engine_events final : kit::non_copyable
 {
   public:
     kit::event<const entity2D::ptr &> on_entity_addition;
-    kit::event<entity2D &> on_early_entity_removal;
+    kit::event<const entity2D &> on_early_entity_removal;
     kit::event<std::size_t> on_late_entity_removal;
-    kit::event<spring2D *> on_spring_addition;
+    kit::event<const spring2D::ptr &> on_spring_addition;
     kit::event<const spring2D &> on_spring_removal;
     kit::event<constraint_interface2D *> on_constraint_addition;
     kit::event<const constraint_interface2D &> on_constraint_removal;
