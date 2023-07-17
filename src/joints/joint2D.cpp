@@ -3,12 +3,12 @@
 
 namespace ppx
 {
-joint2D::joint2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const float length)
+joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float length)
     : m_e1(e1), m_e2(e2), m_length(length), m_has_anchors(false)
 {
 }
 
-joint2D::joint2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
+joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
                  const float length)
     : m_e1(e1), m_e2(e2), m_anchor1(anchor1), m_anchor2(anchor2), m_angle1(e1->angpos()), m_angle2(e2->angpos()),
       m_length(length), m_has_anchors(true)
@@ -25,7 +25,7 @@ joint2D::joint2D(const specs &spc) : m_e1(spc.e1), m_e2(spc.e2), m_length(spc.le
     }
 }
 
-void joint2D::bind(const entity2D_ptr &e1, const entity2D_ptr &e2)
+void joint2D::bind(const entity2D::ptr &e1, const entity2D::ptr &e2)
 {
     m_e1 = e1;
     m_e2 = e2;
@@ -35,9 +35,9 @@ void joint2D::bind(const entity2D_ptr &e1, const entity2D_ptr &e2)
         anchor2(anchor2());
     }
 }
-bool joint2D::validate()
+bool joint2D::valid() const
 {
-    return m_e1.validate() && m_e2.validate();
+    return m_e1 && m_e2;
 }
 
 float joint2D::length() const
@@ -49,11 +49,11 @@ void joint2D::length(const float length)
     m_length = length;
 }
 
-const entity2D_ptr &joint2D::e1() const
+const entity2D::ptr &joint2D::e1() const
 {
     return m_e1;
 }
-const entity2D_ptr &joint2D::e2() const
+const entity2D::ptr &joint2D::e2() const
 {
     return m_e2;
 }
@@ -93,10 +93,10 @@ joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 #ifdef YAML_CPP_COMPAT
 void joint2D::write(YAML::Emitter &out) const
 {
-    out << YAML::Key << "ID1" << YAML::Value << (std::uint64_t)m_e1.id();
-    out << YAML::Key << "ID2" << YAML::Value << (std::uint64_t)m_e2.id();
-    out << YAML::Key << "Index1" << YAML::Value << m_e1.index();
-    out << YAML::Key << "Index2" << YAML::Value << m_e2.index();
+    out << YAML::Key << "ID1" << YAML::Value << (std::uint64_t)m_e1->id();
+    out << YAML::Key << "ID2" << YAML::Value << (std::uint64_t)m_e2->id();
+    out << YAML::Key << "Index1" << YAML::Value << m_e1->index();
+    out << YAML::Key << "Index2" << YAML::Value << m_e2->index();
     if (m_has_anchors)
     {
         out << YAML::Key << "Anchor1" << YAML::Value << anchor1();
@@ -107,10 +107,10 @@ void joint2D::write(YAML::Emitter &out) const
 YAML::Node joint2D::encode() const
 {
     YAML::Node node;
-    node["ID1"] = (std::uint64_t)m_e1.id();
-    node["ID2"] = (std::uint64_t)m_e2.id();
-    node["Index1"] = m_e1.index();
-    node["Index2"] = m_e2.index();
+    node["ID1"] = (std::uint64_t)m_e1->id();
+    node["ID2"] = (std::uint64_t)m_e2->id();
+    node["Index1"] = m_e1->index();
+    node["Index2"] = m_e2->index();
     if (m_has_anchors)
     {
         node["Anchor1"] = anchor1();

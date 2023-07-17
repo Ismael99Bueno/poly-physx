@@ -3,13 +3,13 @@
 
 namespace ppx
 {
-revolute_joint2D::revolute_joint2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const float stiffness,
+revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float stiffness,
                                    const float dampening)
     : constraint2D<2>({e1, e2}, stiffness, dampening), joint2D(e1, e2, glm::distance(e1->pos(), e2->pos()))
 {
 }
 
-revolute_joint2D::revolute_joint2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const glm::vec2 &anchor1,
+revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2, const float stiffness, const float dampening)
     : constraint2D<2>({e1, e2}, stiffness, dampening),
       joint2D(e1, e2, anchor1, anchor2, glm::distance(e1->pos() + anchor1, e2->pos() + anchor2))
@@ -20,33 +20,33 @@ revolute_joint2D::revolute_joint2D(const specs &spc)
 {
 }
 
-float revolute_joint2D::constraint(const std::array<const_entity2D_ptr, 2> &entities) const
+float revolute_joint2D::constraint(const std::array<entity2D::const_ptr, 2> &entities) const
 {
     return m_has_anchors ? with_anchors_constraint(entities) : without_anchors_constraint(entities);
 }
 
-float revolute_joint2D::constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
+float revolute_joint2D::constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const
 {
     return m_has_anchors ? with_anchors_constraint_derivative(entities)
                          : without_anchors_constraint_derivative(entities);
 }
 
-float revolute_joint2D::without_anchors_constraint(const std::array<const_entity2D_ptr, 2> &entities) const
+float revolute_joint2D::without_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const
 {
     return glm::distance2(m_e1->pos(), m_e2->pos()) - m_length * m_length;
 }
-float revolute_joint2D::without_anchors_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
+float revolute_joint2D::without_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const
 {
     return 2.f * glm::dot(m_e1->pos() - m_e2->pos(), m_e1->vel() - m_e2->vel());
 }
 
-float revolute_joint2D::with_anchors_constraint(const std::array<const_entity2D_ptr, 2> &entities) const
+float revolute_joint2D::with_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const
 {
     const glm::vec2 p1 = anchor1() + m_e1->pos(), p2 = anchor2() + m_e2->pos();
 
     return glm::distance2(p1, p2) - m_length * m_length;
 }
-float revolute_joint2D::with_anchors_constraint_derivative(const std::array<const_entity2D_ptr, 2> &entities) const
+float revolute_joint2D::with_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const
 {
     const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
 
@@ -101,9 +101,9 @@ std::array<float, 3> revolute_joint2D::constraint_grad_derivative(entity2D &e) c
     return {-cgd.x, -cgd.y, cgda};
 }
 
-bool revolute_joint2D::validate()
+bool revolute_joint2D::valid() const
 {
-    return constraint2D::validate() && joint2D::validate();
+    return constraint2D::valid() && joint2D::valid();
 }
 revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_joint2D &rb)
 {

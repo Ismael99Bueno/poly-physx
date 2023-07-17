@@ -85,7 +85,7 @@ void engine2D::validate()
     for (const auto &bhv : m_behaviours)
         bhv->validate();
     for (auto it = m_springs.begin(); it != m_springs.end();)
-        if (!it->validate())
+        if (!it->valid())
         {
             m_events.on_spring_removal(*it);
             it = m_springs.erase(it);
@@ -103,11 +103,11 @@ void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) co
             if (!e->kinematic())
                 continue;
             const auto [force, torque] = bhv->force(*e);
-            load_force(stchanges, force, torque, 6 * e.index());
+            load_force(stchanges, force, torque, 6 * e->index());
         }
     for (const spring2D &s : m_springs)
     {
-        const std::size_t index1 = 6 * s.e1().index(), index2 = 6 * s.e2().index();
+        const std::size_t index1 = 6 * s.e1()->index(), index2 = 6 * s.e2()->index();
         const auto [force, t1, t2] = s.force();
         if (s.e1()->kinematic())
             load_force(stchanges, force, t1, index1);
@@ -140,13 +140,12 @@ void engine2D::reset_entities()
     }
 }
 
-entity2D_ptr engine2D::process_entity_addition(entity2D &e)
+entity2D::ptr engine2D::process_entity_addition(entity2D &e)
 {
     rk::state &state = m_integ.state();
-    e.index(m_entities.size() - 1);
     e.m_state = &state;
 
-    const entity2D_ptr e_ptr = {&m_entities, m_entities.size() - 1};
+    const entity2D::ptr e_ptr = {&m_entities, m_entities.size() - 1};
     const glm::vec2 &pos = e.pos(), &vel = e.vel();
     state.append({pos.x, pos.y, e.angpos(), vel.x, vel.y, e.angvel()});
     e.retrieve();
@@ -173,15 +172,7 @@ bool engine2D::remove_entity(std::size_t index)
 
     m_events.on_early_entity_removal(m_entities[index]);
     rk::state &state = m_integ.state();
-    if (index == m_entities.size() - 1)
-        m_entities.pop_back();
-    else
-    {
-        m_entities[index] = m_entities.back();
-        m_entities.pop_back();
-        m_entities[index].index(index);
-        m_entities[index].m_state = &state;
-    }
+    m_entities.erase(index);
 
     for (std::size_t i = 0; i < 6; i++)
         state[6 * index + i] = state[state.size() - 6 + i];
@@ -251,23 +242,6 @@ void engine2D::clear()
     clear_entities();
 }
 
-void engine2D::checkpoint()
-{
-    m_checkpoint = std::make_tuple(m_elapsed, m_integ.state().vars(), m_entities);
-}
-void engine2D::revert()
-{
-    const auto &[elapsed, vars, entities] = m_checkpoint;
-    KIT_ASSERT_ERROR(
-        m_integ.state().vars().size() == vars.size() && m_entities.size() == entities.size(),
-        "Cannot revert to a checkpoint where the number of entities differ. Entities now: {0}, entities before: {1}",
-        m_entities.size(), entities.size())
-
-    m_elapsed = elapsed;
-    m_integ.state().vars(vars);
-    m_entities = entities;
-}
-
 float engine2D::kinetic_energy() const
 {
     float ke = 0.f;
@@ -322,13 +296,13 @@ std::optional<std::size_t> engine2D::index_from_id(const kit::uuid id) const
     return {};
 }
 
-const_entity2D_ptr engine2D::from_id(kit::uuid id) const
+entity2D::const_ptr engine2D::from_id(kit::uuid id) const
 {
     const auto index = index_from_id(id);
     return index ? (*this)[index.value()] : nullptr;
 }
 
-entity2D_ptr engine2D::from_id(kit::uuid id)
+entity2D::ptr engine2D::from_id(kit::uuid id)
 {
     const auto index = index_from_id(id);
     return index ? (*this)[index.value()] : nullptr;
@@ -342,22 +316,22 @@ template <> behaviour2D *engine2D::behaviour_from_name(const char *name) const
     return nullptr;
 }
 
-const_entity2D_ptr engine2D::operator[](const std::size_t index) const
+entity2D::const_ptr engine2D::operator[](const std::size_t index) const
 {
     KIT_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_entities.size())
     return {&m_entities, index};
 }
-entity2D_ptr engine2D::operator[](const std::size_t index)
+entity2D::ptr engine2D::operator[](const std::size_t index)
 {
     KIT_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_entities.size())
     return {&m_entities, index};
 }
 
-std::vector<const_entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
+std::vector<entity2D::const_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
 {
-    std::vector<const_entity2D_ptr> in_area;
+    std::vector<entity2D::const_ptr> in_area;
     in_area.reserve(m_entities.size() / 2);
 
     for (const entity2D &e : m_entities)
@@ -365,9 +339,9 @@ std::vector<const_entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb) co
             in_area.emplace_back(&m_entities, e.index());
     return in_area;
 }
-std::vector<entity2D_ptr> engine2D::operator[](const geo::aabb2D &aabb)
+std::vector<entity2D::ptr> engine2D::operator[](const geo::aabb2D &aabb)
 {
-    std::vector<entity2D_ptr> in_area;
+    std::vector<entity2D::ptr> in_area;
     in_area.reserve(m_entities.size() / 2);
     for (const entity2D &e : m_entities)
         if (geo::intersect(e.shape().bounding_box(), aabb))
@@ -379,7 +353,7 @@ const std::vector<kit::scope<behaviour2D>> &engine2D::behaviours() const
 {
     return m_behaviours;
 }
-const std::vector<spring2D> &engine2D::springs() const
+const kit::track_vector<spring2D> &engine2D::springs() const
 {
     return m_springs;
 }
@@ -388,12 +362,12 @@ kit::vector_view<kit::scope<behaviour2D>> engine2D::behaviours()
 {
     return m_behaviours;
 }
-kit::vector_view<spring2D> engine2D::springs()
+kit::track_vector_view<spring2D> engine2D::springs()
 {
     return m_springs;
 }
 
-const_entity2D_ptr engine2D::operator[](const glm::vec2 &point) const
+entity2D::const_ptr engine2D::operator[](const glm::vec2 &point) const
 {
     const geo::aabb2D aabb = point;
     for (const entity2D &e : m_entities)
@@ -401,7 +375,7 @@ const_entity2D_ptr engine2D::operator[](const glm::vec2 &point) const
             return {&m_entities, e.index()};
     return nullptr;
 }
-entity2D_ptr engine2D::operator[](const glm::vec2 &point)
+entity2D::ptr engine2D::operator[](const glm::vec2 &point)
 {
     const geo::aabb2D aabb = point;
     for (const entity2D &e : m_entities)
@@ -410,11 +384,11 @@ entity2D_ptr engine2D::operator[](const glm::vec2 &point)
     return nullptr;
 }
 
-const std::vector<entity2D> &engine2D::entities() const
+const kit::track_vector<entity2D> &engine2D::entities() const
 {
     return m_entities;
 }
-kit::vector_view<entity2D> engine2D::entities()
+kit::track_vector_view<entity2D> engine2D::entities()
 {
     return m_entities;
 }
@@ -463,9 +437,15 @@ float engine2D::elapsed() const
 YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
 {
     out << YAML::BeginMap;
-    out << YAML::Key << "Entities" << YAML::Value << eng.entities();
+    out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
+    for (const entity2D &e : eng.entities())
+        out << e;
+    out << YAML::EndSeq;
     out << YAML::Key << "Collider" << YAML::Value << eng.collider();
-    out << YAML::Key << "Springs" << YAML::Value << eng.springs();
+    out << YAML::Key << "Springs" << YAML::Value << YAML::BeginSeq;
+    for (const spring2D &sp : eng.springs())
+        out << sp;
+    out << YAML::EndSeq;
     out << YAML::Key << "Rigid bars" << YAML::Value << YAML::BeginSeq;
     for (const auto &ctr : eng.compeller().constraints())
     {
@@ -495,9 +475,11 @@ namespace YAML
 Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)
 {
     Node node;
-    node["Entities"] = eng.entities();
+    for (const ppx::entity2D &e : eng.entities())
+        node["Entities"].push_back(e);
     node["Collider"] = eng.collider();
-    node["Springs"] = eng.springs();
+    for (const ppx::spring2D &sp : eng.springs())
+        node["Springs"].push_back(sp);
     for (const auto &ctr : eng.compeller().constraints())
     {
         const auto revjoint = dynamic_cast<const ppx::revolute_joint2D *>(ctr.get());

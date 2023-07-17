@@ -21,7 +21,7 @@ class constraint_interface2D : public kit::identifiable
     void stiffness(float stiffness);
     void dampening(float dampening);
 
-    virtual bool validate() = 0;
+    virtual bool valid() const = 0;
 
   protected:
     float m_stiffness, m_dampening;

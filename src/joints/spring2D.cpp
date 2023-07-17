@@ -7,13 +7,13 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
 {
     return v1.x * v2.y - v1.y * v2.x;
 }
-spring2D::spring2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const float stiffness, const float dampening,
+spring2D::spring2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float stiffness, const float dampening,
                    const float length)
     : joint2D(e1, e2, length), m_stiffness(stiffness), m_dampening(dampening)
 {
 }
 
-spring2D::spring2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
+spring2D::spring2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
                    const float stiffness, const float dampening, const float length)
     : joint2D(e1, e2, anchor1, anchor2, length), m_stiffness(stiffness), m_dampening(dampening)
 {

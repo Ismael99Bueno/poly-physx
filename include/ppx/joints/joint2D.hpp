@@ -1,7 +1,7 @@
 #ifndef PPX_JOINT2D_HPP
 #define PPX_JOINT2D_HPP
 
-#include "ppx/entity2D_ptr.hpp"
+#include "ppx/entity2D.hpp"
 
 namespace ppx
 {
@@ -10,26 +10,26 @@ class joint2D
   public:
     struct specs
     {
-        entity2D_ptr e1 = nullptr, e2 = nullptr;
+        entity2D::ptr e1 = nullptr, e2 = nullptr;
         glm::vec2 anchor1{0.f}, anchor2{0.f};
         float length = 0.f;
         bool has_anchors = true;
         static specs from_joint(const joint2D &joint);
     };
-    joint2D(const entity2D_ptr &e1, const entity2D_ptr &e2, float length);
-    joint2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
+    joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, float length);
+    joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
             float length);
     joint2D(const specs &spc);
     virtual ~joint2D() = default;
 
-    void bind(const entity2D_ptr &e1, const entity2D_ptr &e2);
-    virtual bool validate();
+    void bind(const entity2D::ptr &e1, const entity2D::ptr &e2);
+    virtual bool valid() const;
 
     float length() const;
     void length(float length);
 
-    const entity2D_ptr &e1() const;
-    const entity2D_ptr &e2() const;
+    const entity2D::ptr &e1() const;
+    const entity2D::ptr &e2() const;
 
     glm::vec2 anchor1() const;
     glm::vec2 anchor2() const;
@@ -40,7 +40,7 @@ class joint2D
     bool has_anchors() const;
 
   protected:
-    entity2D_ptr m_e1 = nullptr, m_e2 = nullptr;
+    entity2D::ptr m_e1 = nullptr, m_e2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
     float m_angle1, m_angle2, m_length;
     bool m_has_anchors;

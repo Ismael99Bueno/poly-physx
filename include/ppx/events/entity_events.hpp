@@ -3,6 +3,7 @@
 
 #include "kit/utility/event.hpp"
 #include "kit/utility/uuid.hpp"
+#include "kit/memory/track_ptr.hpp"
 #include <vector>
 #include <functional>
 #include <unordered_set>
@@ -10,15 +11,15 @@
 namespace ppx
 {
 struct collision2D;
-class entity2D_ptr;
+class entity2D;
 class entity_events final
 {
   public:
     void try_enter_or_stay(const collision2D &c) const;
-    void try_exit(const entity2D_ptr &incoming) const;
+    void try_exit(const kit::track_ptr<entity2D> &incoming) const;
 
     kit::event<const collision2D &> on_collision_enter, on_collision_stay;
-    kit::event<const entity2D_ptr &> on_collision_exit;
+    kit::event<const kit::track_ptr<entity2D> &> on_collision_exit;
 
   private:
     mutable bool m_processed = false;

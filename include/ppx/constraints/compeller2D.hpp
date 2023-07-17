@@ -17,7 +17,7 @@ class constraint_interface2D;
 class compeller2D final : kit::non_copyable
 {
   public:
-    compeller2D(std::vector<entity2D> *entities, std::size_t allocations, engine_events *cbs);
+    compeller2D(kit::track_vector<entity2D> *entities, std::size_t allocations, engine_events *cbs);
 
     template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
     {
@@ -39,7 +39,7 @@ class compeller2D final : kit::non_copyable
     const std::vector<kit::scope<constraint_interface2D>> &constraints() const;
 
   private:
-    std::vector<entity2D> *m_entities;
+    kit::track_vector<entity2D> *m_entities;
     std::vector<kit::scope<constraint_interface2D>> m_constraints;
     engine_events *m_callbacks;
 

@@ -1,7 +1,7 @@
 #ifndef PPX_BEHAVIOUR2D_HPP
 #define PPX_BEHAVIOUR2D_HPP
 
-#include "ppx/entity2D_ptr.hpp"
+#include "ppx/entity2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/identifiable.hpp"
 
@@ -15,7 +15,7 @@ class behaviour2D : kit::non_copyable, public kit::identifiable
 
     void validate();
 
-    void include(const const_entity2D_ptr &e);
+    void include(const entity2D::const_ptr &e);
     void exclude(const entity2D &e);
     bool contains(const entity2D &e) const;
 
@@ -31,11 +31,11 @@ class behaviour2D : kit::non_copyable, public kit::identifiable
     void clear();
     std::size_t size() const;
 
-    const std::vector<const_entity2D_ptr> &entities() const;
+    const std::vector<entity2D::const_ptr> &entities() const;
     const char *name() const;
 
   protected:
-    std::vector<const_entity2D_ptr> m_included;
+    std::vector<entity2D::const_ptr> m_included;
 
 #ifdef YAML_CPP_COMPAT
     virtual void write(YAML::Emitter &out) const;
@@ -45,7 +45,7 @@ class behaviour2D : kit::non_copyable, public kit::identifiable
 
   private:
     const char *m_name;
-    const std::vector<entity2D> *m_entities = nullptr;
+    const kit::track_vector<entity2D> *m_entities = nullptr;
 
     friend class engine2D;
 #ifdef YAML_CPP_COMPAT

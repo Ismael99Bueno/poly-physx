@@ -15,7 +15,7 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-collider2D::collider2D(std::vector<entity2D> *entities, const std::size_t allocations)
+collider2D::collider2D(kit::track_vector<entity2D> *entities, const std::size_t allocations)
     : m_entities(entities), m_quad_tree({-10.f, -10.f}, {10.f, 10.f})
 {
     m_intervals.reserve(allocations);
@@ -26,7 +26,7 @@ collider2D::collider2D(std::vector<entity2D> *entities, const std::size_t alloca
 #endif
 }
 
-collider2D::interval::interval(const const_entity2D_ptr &e, const end end_type) : m_entity(e), m_end(end_type)
+collider2D::interval::interval(const entity2D::const_ptr &e, const end end_type) : m_entity(e), m_end(end_type)
 {
 }
 
@@ -44,12 +44,12 @@ collider2D::interval::end collider2D::interval::type() const
 {
     return m_end;
 }
-bool collider2D::interval::validate()
+bool collider2D::interval::valid() const
 {
-    return m_entity.validate();
+    return (bool)m_entity;
 }
 
-void collider2D::add_entity_intervals(const const_entity2D_ptr &e)
+void collider2D::add_entity_intervals(const entity2D::const_ptr &e)
 {
     m_intervals.emplace_back(e, interval::LOWER);
     m_intervals.emplace_back(e, interval::HIGHER);
@@ -89,7 +89,7 @@ template <typename It, typename Func> static void compute(It it1, It it2, Func f
         func(thread_idx, *it);
 }
 
-template <typename T, typename Func> static void for_each(const std::vector<T> &vec, Func func)
+template <template <typename...> typename C, typename T, typename Func> static void for_each(const C<T> &vec, Func func)
 {
     std::array<std::thread, PPX_THREAD_COUNT> threads;
     for (std::size_t i = 0; i < PPX_THREAD_COUNT; i++)
@@ -142,7 +142,7 @@ void collider2D::update_quad_tree()
 void collider2D::validate()
 {
     for (auto it = m_intervals.begin(); it != m_intervals.end();)
-        if (!it->validate())
+        if (!it->valid())
             it = m_intervals.erase(it);
         else
             ++it;

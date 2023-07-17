@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-compeller2D::compeller2D(std::vector<entity2D> *entities, const std::size_t allocations, engine_events *cbs)
+compeller2D::compeller2D(kit::track_vector<entity2D> *entities, const std::size_t allocations, engine_events *cbs)
     : m_entities(entities), m_callbacks(cbs)
 {
     m_constraints.reserve(allocations);
@@ -32,7 +32,7 @@ void compeller2D::clear_constraints()
 void compeller2D::validate()
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end();)
-        if (!((*it)->validate()))
+        if (!(*it))
         {
             m_callbacks->on_constraint_removal(**it);
             it = m_constraints.erase(it);

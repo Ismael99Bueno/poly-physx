@@ -2,7 +2,6 @@
 #define PPX_COLLIDER_HPP
 
 #include "ppx/entity2D.hpp"
-#include "ppx/entity2D_ptr.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/collision/quad_tree2D.hpp"
 #include "kit/interface/non_copyable.hpp"
@@ -17,7 +16,7 @@ namespace ppx
 {
 struct collision2D
 {
-    entity2D_ptr current, incoming;
+    entity2D::ptr current, incoming;
     glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
 };
 
@@ -31,9 +30,9 @@ class collider2D final : kit::non_copyable
         QUAD_TREE = 2
     };
 
-    collider2D(std::vector<entity2D> *entities, std::size_t allocations);
+    collider2D(kit::track_vector<entity2D> *entities, std::size_t allocations);
 
-    void add_entity_intervals(const const_entity2D_ptr &e);
+    void add_entity_intervals(const entity2D::const_ptr &e);
     void solve_and_load_collisions(std::vector<float> &stchanges);
     void validate();
     void flush_collisions();
@@ -63,20 +62,20 @@ class collider2D final : kit::non_copyable
             HIGHER
         };
 
-        interval(const const_entity2D_ptr &e, end end_type);
+        interval(const entity2D::const_ptr &e, end end_type);
 
         const entity2D *entity() const;
         float value() const;
         end type() const;
-        bool validate();
+        bool valid() const;
 
       private:
-        const_entity2D_ptr m_entity;
+        entity2D::const_ptr m_entity;
         end m_end;
     };
     using colpair = std::pair<const entity2D *, const entity2D *>; // Should only last for 1 frame
 
-    std::vector<entity2D> *m_entities;
+    kit::track_vector<entity2D> *m_entities;
     std::vector<interval> m_intervals;
     std::vector<colpair> m_collision_pairs;
 #ifdef PPX_MULTITHREADED

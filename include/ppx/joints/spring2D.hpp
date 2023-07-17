@@ -14,9 +14,9 @@ class spring2D : public joint2D, public kit::identifiable, public kit::indexable
         float stiffness = 1.f, dampening = 0.f;
         static specs from_spring(const spring2D &sp);
     };
-    spring2D(const entity2D_ptr &e1, const entity2D_ptr &e2, float stiffness = 1.f, float dampening = 0.f,
+    spring2D(const entity2D::ptr &e1, const entity2D::ptr &e2, float stiffness = 1.f, float dampening = 0.f,
              float length = 0.f);
-    spring2D(const entity2D_ptr &e1, const entity2D_ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
+    spring2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
              float stiffness = 1.f, float dampening = 0.f, float length = 0.f);
     spring2D(const specs &spc);
 

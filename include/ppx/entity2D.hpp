@@ -8,6 +8,7 @@
 #include "ppx/events/entity_events.hpp"
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/indexable.hpp"
+#include "kit/memory/track_ptr.hpp"
 #include <variant>
 
 namespace ppx
@@ -15,6 +16,8 @@ namespace ppx
 class entity2D : public kit::identifiable, public kit::indexable
 {
   public:
+    using ptr = kit::track_ptr<entity2D>;
+    using const_ptr = kit::const_track_ptr<entity2D>;
     enum shape_type
     {
         POLYGON = 0,
