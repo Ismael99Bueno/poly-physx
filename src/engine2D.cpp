@@ -224,10 +224,14 @@ void engine2D::clear_entities()
 }
 void engine2D::clear_behaviours()
 {
+    for (const auto &bhv : m_behaviours)
+        m_events.on_behaviour_removal(*bhv);
     m_behaviours.clear();
 }
 void engine2D::clear_springs()
 {
+    for (const spring2D &sp : m_springs)
+        m_events.on_spring_removal(sp);
     m_springs.clear();
 }
 void engine2D::clear_constraints()
