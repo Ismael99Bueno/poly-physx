@@ -3,18 +3,16 @@
 
 namespace ppx
 {
-joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float length)
-    : m_e1(e1), m_e2(e2), m_length(length), m_has_anchors(false)
+joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2) : m_e1(e1), m_e2(e2), m_has_anchors(false)
 {
 }
 
-joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
-                 const float length)
+joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2)
     : m_e1(e1), m_e2(e2), m_anchor1(anchor1), m_anchor2(anchor2), m_angle1(e1->angpos()), m_angle2(e2->angpos()),
-      m_length(length), m_has_anchors(true)
+      m_has_anchors(true)
 {
 }
-joint2D::joint2D(const specs &spc) : m_e1(spc.e1), m_e2(spc.e2), m_length(spc.length), m_has_anchors(spc.has_anchors)
+joint2D::joint2D(const specs &spc) : m_e1(spc.e1), m_e2(spc.e2), m_has_anchors(spc.has_anchors)
 {
     if (m_has_anchors)
     {
@@ -38,15 +36,6 @@ void joint2D::bind(const entity2D::ptr &e1, const entity2D::ptr &e2)
 bool joint2D::valid() const
 {
     return m_e1 && m_e2;
-}
-
-float joint2D::length() const
-{
-    return m_length;
-}
-void joint2D::length(const float length)
-{
-    m_length = length;
 }
 
 const entity2D::ptr &joint2D::e1() const
@@ -87,7 +76,7 @@ bool joint2D::has_anchors() const
 
 joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 {
-    return {joint.e1(), joint.e2(), joint.anchor1(), joint.anchor2(), joint.length(), joint.has_anchors()};
+    return {joint.e1(), joint.e2(), joint.anchor1(), joint.anchor2(), joint.has_anchors()};
 }
 
 #ifdef YAML_CPP_COMPAT
@@ -102,7 +91,6 @@ void joint2D::write(YAML::Emitter &out) const
         out << YAML::Key << "Anchor1" << YAML::Value << anchor1();
         out << YAML::Key << "Anchor2" << YAML::Value << anchor2();
     }
-    out << YAML::Key << "length" << YAML::Value << m_length;
 }
 YAML::Node joint2D::encode() const
 {
@@ -116,14 +104,12 @@ YAML::Node joint2D::encode() const
         node["Anchor1"] = anchor1();
         node["Anchor2"] = anchor2();
     }
-    node["length"] = m_length;
     return node;
 }
 bool joint2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 5)
+    if (!node.IsMap() || node.size() < 4)
         return false;
-    m_length = node["length"].as<float>();
     return true;
 }
 #endif

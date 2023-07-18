@@ -23,8 +23,11 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
     float constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const override;
 
     bool valid() const override;
+    float length() const;
 
   private:
+    float m_length;
+
     std::array<float, 3> constraint_grad(entity2D &e) const override;
     std::array<float, 3> constraint_grad_derivative(entity2D &e) const override;
 

@@ -9,16 +9,17 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
 }
 spring2D::spring2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float stiffness, const float dampening,
                    const float length)
-    : joint2D(e1, e2, length), m_stiffness(stiffness), m_dampening(dampening)
+    : joint2D(e1, e2), m_stiffness(stiffness), m_dampening(dampening), m_length(length)
 {
 }
 
 spring2D::spring2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
                    const float stiffness, const float dampening, const float length)
-    : joint2D(e1, e2, anchor1, anchor2, length), m_stiffness(stiffness), m_dampening(dampening)
+    : joint2D(e1, e2, anchor1, anchor2), m_stiffness(stiffness), m_dampening(dampening), m_length(length)
 {
 }
-spring2D::spring2D(const specs &spc) : joint2D(spc), m_stiffness(spc.stiffness), m_dampening(spc.dampening)
+spring2D::spring2D(const specs &spc)
+    : joint2D(spc), m_stiffness(spc.stiffness), m_dampening(spc.dampening), m_length(spc.length)
 {
 }
 
@@ -45,6 +46,15 @@ std::tuple<glm::vec2, float, float> spring2D::with_anchors_force() const
     const glm::vec2 force = m_stiffness * (relpos - vlen) + m_dampening * relvel;
     const float torque1 = cross(rot_anchor1, force), torque2 = cross(force, rot_anchor2);
     return {force, torque1, torque2};
+}
+
+float spring2D::length() const
+{
+    return m_length;
+}
+void spring2D::length(const float length)
+{
+    m_length = length;
 }
 
 float spring2D::stiffness() const
@@ -82,7 +92,7 @@ float spring2D::energy() const
 spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
 {
     return {
-        {sp.e1(), sp.e2(), sp.anchor1(), sp.anchor2(), sp.length(), sp.has_anchors()}, sp.stiffness(), sp.dampening()};
+        {sp.e1(), sp.e2(), sp.anchor1(), sp.anchor2(), sp.has_anchors()}, sp.stiffness(), sp.dampening(), sp.length()};
 }
 
 #ifdef YAML_CPP_COMPAT
@@ -92,6 +102,7 @@ void spring2D::write(YAML::Emitter &out) const
     joint2D::write(out);
     out << YAML::Key << "Stiffness" << YAML::Value << m_stiffness;
     out << YAML::Key << "Dampening" << YAML::Value << m_dampening;
+    out << YAML::Key << "Length" << YAML::Value << m_length;
 }
 YAML::Node spring2D::encode() const
 {
@@ -99,6 +110,7 @@ YAML::Node spring2D::encode() const
     node["UUID"] = (std::uint64_t)id();
     node["Stiffness"] = m_stiffness;
     node["Dampening"] = m_dampening;
+    node["Length"] = m_length;
     return node;
 }
 bool spring2D::decode(const YAML::Node &node)
@@ -108,6 +120,7 @@ bool spring2D::decode(const YAML::Node &node)
     id(node["UUID"].as<std::uint64_t>());
     m_stiffness = node["Stiffness"].as<float>();
     m_dampening = node["Dampening"].as<float>();
+    m_length = node["Length"].as<float>();
     return true;
 }
 #endif

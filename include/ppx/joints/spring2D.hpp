@@ -14,7 +14,7 @@ class spring2D : public joint2D, public kit::identifiable, public kit::indexable
 
     struct specs : joint2D::specs
     {
-        float stiffness = 1.f, dampening = 0.f;
+        float stiffness = 1.f, dampening = 0.f, length = 0.f;
         static specs from_spring(const spring2D &sp);
     };
     spring2D(const entity2D::ptr &e1, const entity2D::ptr &e2, float stiffness = 1.f, float dampening = 0.f,
@@ -24,6 +24,9 @@ class spring2D : public joint2D, public kit::identifiable, public kit::indexable
     spring2D(const specs &spc);
 
     std::tuple<glm::vec2, float, float> force() const;
+
+    float length() const;
+    void length(float length);
 
     float stiffness() const;
     float dampening() const;
@@ -36,7 +39,7 @@ class spring2D : public joint2D, public kit::identifiable, public kit::indexable
     float energy() const;
 
   private:
-    float m_stiffness, m_dampening;
+    float m_stiffness, m_dampening, m_length;
 
     std::tuple<glm::vec2, float, float> without_anchors_force() const;
     std::tuple<glm::vec2, float, float> with_anchors_force() const;

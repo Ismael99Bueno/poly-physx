@@ -5,19 +5,22 @@ namespace ppx
 {
 revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float stiffness,
                                    const float dampening)
-    : constraint2D<2>({e1, e2}, stiffness, dampening), joint2D(e1, e2, glm::distance(e1->pos(), e2->pos()))
+    : constraint2D<2>({e1, e2}, stiffness, dampening), joint2D(e1, e2), m_length(glm::distance(e1->pos(), e2->pos()))
 {
 }
 
 revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2, const float stiffness, const float dampening)
-    : constraint2D<2>({e1, e2}, stiffness, dampening),
-      joint2D(e1, e2, anchor1, anchor2, glm::distance(e1->pos() + anchor1, e2->pos() + anchor2))
+    : constraint2D<2>({e1, e2}, stiffness, dampening), joint2D(e1, e2, anchor1, anchor2),
+      m_length(glm::distance(e1->pos() + anchor1, e2->pos() + anchor2))
 {
 }
 revolute_joint2D::revolute_joint2D(const specs &spc)
     : constraint2D<2>({spc.e1, spc.e2}, spc.stiffness, spc.dampening), joint2D(spc)
 {
+
+    m_length = spc.has_anchors ? glm::distance(spc.e1->pos() + spc.anchor1, spc.e2->pos() + spc.anchor2)
+                               : glm::distance(spc.e1->pos(), spc.e2->pos());
 }
 
 float revolute_joint2D::constraint(const std::array<entity2D::const_ptr, 2> &entities) const
@@ -105,10 +108,14 @@ bool revolute_joint2D::valid() const
 {
     return constraint2D::valid() && joint2D::valid();
 }
+float revolute_joint2D::length() const
+{
+    return m_length;
+}
+
 revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_joint2D &rb)
 {
-    return {
-        {rb.e1(), rb.e2(), rb.anchor1(), rb.anchor2(), rb.length(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
+    return {{rb.e1(), rb.e2(), rb.anchor1(), rb.anchor2(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
 }
 
 void revolute_joint2D::write(YAML::Emitter &out) const

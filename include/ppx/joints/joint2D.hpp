@@ -12,21 +12,16 @@ class joint2D
     {
         entity2D::ptr e1 = nullptr, e2 = nullptr;
         glm::vec2 anchor1{0.f}, anchor2{0.f};
-        float length = 0.f;
         bool has_anchors = true;
         static specs from_joint(const joint2D &joint);
     };
-    joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, float length);
-    joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
-            float length);
+    joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2);
+    joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2);
     joint2D(const specs &spc);
     virtual ~joint2D() = default;
 
-    void bind(const entity2D::ptr &e1, const entity2D::ptr &e2);
+    void bind(const entity2D::ptr &e1, const entity2D::ptr &e2); // This shit has to be virtual
     virtual bool valid() const;
-
-    float length() const;
-    void length(float length);
 
     const entity2D::ptr &e1() const;
     const entity2D::ptr &e2() const;
@@ -42,7 +37,7 @@ class joint2D
   protected:
     entity2D::ptr m_e1 = nullptr, m_e2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
-    float m_angle1, m_angle2, m_length;
+    float m_angle1, m_angle2;
     bool m_has_anchors;
 
 #ifdef YAML_CPP_COMPAT
