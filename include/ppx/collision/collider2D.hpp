@@ -23,7 +23,7 @@ struct collision2D
 class collider2D final : kit::non_copyable
 {
   public:
-    enum detection_method
+    enum class detection
     {
         BRUTE_FORCE = 0,
         SORT_AND_SWEEP = 1,
@@ -46,8 +46,8 @@ class collider2D final : kit::non_copyable
     bool enabled() const;
     void enabled(bool enabled);
 
-    detection_method detection() const;
-    void detection(detection_method coldet);
+    detection detection_method() const;
+    void detection_method(detection coldet);
 
     const quad_tree2D &quad_tree() const;
     quad_tree2D &quad_tree();
@@ -56,7 +56,7 @@ class collider2D final : kit::non_copyable
     struct interval
     {
       public:
-        enum end
+        enum class end
         {
             LOWER,
             HIGHER
@@ -84,7 +84,7 @@ class collider2D final : kit::non_copyable
 
     quad_tree2D m_quad_tree;
     float m_stiffness = 5000.f, m_dampening = 10.f;
-    detection_method m_coldet_method = QUAD_TREE;
+    detection m_coldet_method = detection::QUAD_TREE;
     bool m_enabled = true;
 
     void sort_intervals();

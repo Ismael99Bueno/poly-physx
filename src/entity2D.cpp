@@ -29,7 +29,7 @@ entity2D::entity2D(const specs &spc)
     : m_vel(spc.vel), m_angvel(spc.angvel), m_mass(spc.mass), m_inv_mass(1.f / m_mass), m_charge(spc.charge),
       m_kinematic(spc.kinematic)
 {
-    if (spc.shape == POLYGON)
+    if (spc.shape == shape_type::POLYGON)
         m_shape = geo::polygon(spc.pos, spc.angpos, spc.vertices);
     else
         m_shape = geo::circle(spc.pos, spc.radius, spc.angpos);
@@ -156,7 +156,7 @@ void entity2D::compute_inertia(const geo::shape2D &sh)
 
 entity2D::shape_type entity2D::type() const
 {
-    return m_shape.index() == 0 ? POLYGON : CIRCLE;
+    return m_shape.index() == 0 ? shape_type::POLYGON : shape_type::CIRCLE;
 }
 
 float entity2D::inertia() const

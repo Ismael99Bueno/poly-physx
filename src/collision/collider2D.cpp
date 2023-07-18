@@ -37,7 +37,7 @@ const entity2D *collider2D::interval::entity() const
 float collider2D::interval::value() const
 {
     const geo::aabb2D &bbox = m_entity->shape().bounding_box();
-    return (m_end == LOWER) ? bbox.min().x : bbox.max().x;
+    return (m_end == end::LOWER) ? bbox.min().x : bbox.max().x;
 }
 
 collider2D::interval::end collider2D::interval::type() const
@@ -51,8 +51,8 @@ bool collider2D::interval::valid() const
 
 void collider2D::add_entity_intervals(const entity2D::const_ptr &e)
 {
-    m_intervals.emplace_back(e, interval::LOWER);
-    m_intervals.emplace_back(e, interval::HIGHER);
+    m_intervals.emplace_back(e, interval::end::LOWER);
+    m_intervals.emplace_back(e, interval::end::HIGHER);
 }
 
 void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
@@ -70,13 +70,13 @@ void collider2D::broad_and_narrow_fase(std::vector<float> &stchanges)
         return;
     switch (m_coldet_method)
     {
-    case BRUTE_FORCE:
+    case detection::BRUTE_FORCE:
         brute_force(stchanges);
         break;
-    case SORT_AND_SWEEP:
+    case detection::SORT_AND_SWEEP:
         sort_and_sweep(stchanges);
         break;
-    case QUAD_TREE:
+    case detection::QUAD_TREE:
         quad_tree(stchanges);
         break;
     }
@@ -183,11 +183,11 @@ void collider2D::enabled(const bool enabled)
     m_enabled = enabled;
 }
 
-collider2D::detection_method collider2D::detection() const
+collider2D::detection collider2D::detection_method() const
 {
     return m_coldet_method;
 }
-void collider2D::detection(detection_method coldet)
+void collider2D::detection_method(detection coldet)
 {
     m_coldet_method = coldet;
 }
@@ -213,7 +213,7 @@ static bool broad_detection(const entity2D &e1, const entity2D &e2)
 }
 static bool are_circles(const entity2D &e1, const entity2D &e2)
 {
-    return e1.type() == entity2D::CIRCLE && e2.type() == entity2D::CIRCLE;
+    return e1.type() == entity2D::shape_type::CIRCLE && e2.type() == entity2D::shape_type::CIRCLE;
 }
 
 bool collider2D::narrow_detection_mix(const entity2D &e1, const entity2D &e2, collision2D *c) const
@@ -334,7 +334,7 @@ void collider2D::sort_and_sweep(std::vector<float> &stchanges)
 
     eligible.reserve(30);
     for (const interval &itrv : m_intervals)
-        if (itrv.type() == interval::LOWER)
+        if (itrv.type() == interval::end::LOWER)
         {
             for (const entity2D *e : eligible)
             {
@@ -462,7 +462,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
     out << YAML::EndMap;
     out << YAML::Key << "Stiffness" << YAML::Value << cld.stiffness();
     out << YAML::Key << "Dampening" << YAML::Value << cld.dampening();
-    out << YAML::Key << "Collision detection" << YAML::Value << cld.detection();
+    out << YAML::Key << "Collision detection" << YAML::Value << (int)cld.detection_method();
     out << YAML::Key << "Enabled" << YAML::Value << cld.enabled();
     out << YAML::EndMap;
     return out;
@@ -485,7 +485,7 @@ Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)
 
     node["Stiffness"] = cld.stiffness();
     node["Dampening"] = cld.dampening();
-    node["Collision detection"] = (int)cld.detection();
+    node["Collision detection"] = (int)cld.detection_method();
     node["Enabled"] = cld.enabled();
     return node;
 }
@@ -502,7 +502,7 @@ bool convert<ppx::collider2D>::decode(const Node &node, ppx::collider2D &cld)
 
     cld.stiffness(node["Stiffness"].as<float>());
     cld.dampening(node["Dampening"].as<float>());
-    cld.detection((ppx::collider2D::detection_method)node["Collision detection"].as<int>());
+    cld.detection_method((ppx::collider2D::detection)node["Collision detection"].as<int>());
     cld.enabled(node["Enabled"].as<bool>());
 
     return true;

@@ -18,7 +18,7 @@ class entity2D : public kit::identifiable, public kit::indexable
   public:
     using ptr = kit::track_ptr<entity2D>;
     using const_ptr = kit::const_track_ptr<entity2D>;
-    enum shape_type
+    enum class shape_type
     {
         POLYGON = 0,
         CIRCLE = 1
@@ -30,7 +30,7 @@ class entity2D : public kit::identifiable, public kit::indexable
         kit::block_vector<glm::vec2> vertices = geo::polygon::box(5.f);
         float radius = 2.5f;
         bool kinematic = true;
-        shape_type shape = POLYGON;
+        shape_type shape = shape_type::POLYGON;
         static specs from_entity(const entity2D &e);
     };
 
