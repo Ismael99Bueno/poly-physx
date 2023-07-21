@@ -108,12 +108,12 @@ class entity2D : public kit::identifiable, public kit::indexable
 
     friend class engine2D;
 };
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e);
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 template <> struct convert<ppx::entity2D>

@@ -66,7 +66,7 @@ void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
 void collider2D::broad_and_narrow_fase(std::vector<float> &stchanges)
 {
     KIT_PERF_FUNCTION()
-    if (!m_enabled)
+    if (!enabled())
         return;
     switch (m_coldet_method)
     {
@@ -172,15 +172,6 @@ void collider2D::stiffness(float stiffness)
 void collider2D::dampening(float dampening)
 {
     m_dampening = dampening;
-}
-
-bool collider2D::enabled() const
-{
-    return m_enabled;
-}
-void collider2D::enabled(const bool enabled)
-{
-    m_enabled = enabled;
 }
 
 collider2D::detection collider2D::detection_method() const
@@ -450,7 +441,7 @@ std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) con
     return {force.x, force.y, torque1, -force.x, -force.y, torque2};
 }
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
 {
     out << YAML::BeginMap;
@@ -470,7 +461,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)

@@ -137,17 +137,17 @@ class engine2D : kit::non_copyable
     void validate();
     std::optional<std::size_t> index_from_id(kit::uuid id) const;
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
     friend YAML::Emitter &operator<<(YAML::Emitter &, const engine2D &);
     friend struct YAML::convert<engine2D>;
 #endif
 };
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng);
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 template <> struct convert<ppx::engine2D>

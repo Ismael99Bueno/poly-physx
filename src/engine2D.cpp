@@ -98,13 +98,14 @@ void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) co
 {
     KIT_PERF_FUNCTION()
     for (const auto &bhv : m_behaviours)
-        for (const auto &e : bhv->entities())
-        {
-            if (!e->kinematic())
-                continue;
-            const auto [force, torque] = bhv->force(*e);
-            load_force(stchanges, force, torque, 6 * e->index());
-        }
+        if (bhv->enabled())
+            for (const auto &e : bhv->entities())
+            {
+                if (!e->kinematic())
+                    continue;
+                const auto [force, torque] = bhv->force(*e);
+                load_force(stchanges, force, torque, 6 * e->index());
+            }
     for (const spring2D &s : m_springs)
     {
         const std::size_t index1 = 6 * s.e1()->index(), index2 = 6 * s.e2()->index();
@@ -445,7 +446,7 @@ float engine2D::elapsed() const
 {
     return m_elapsed;
 }
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
 {
     out << YAML::BeginMap;
@@ -481,7 +482,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)

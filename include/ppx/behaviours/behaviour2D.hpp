@@ -4,10 +4,12 @@
 #include "ppx/entity2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/identifiable.hpp"
+#include "kit/interface/nameable.hpp"
+#include "kit/interface/toggleable.hpp"
 
 namespace ppx
 {
-class behaviour2D : kit::non_copyable, public kit::identifiable
+class behaviour2D : kit::non_copyable, public kit::identifiable, public kit::nameable, public kit::toggleable
 {
   public:
     behaviour2D(const char *name, std::size_t allocations = 50);
@@ -32,34 +34,32 @@ class behaviour2D : kit::non_copyable, public kit::identifiable
     std::size_t size() const;
 
     const std::vector<entity2D::const_ptr> &entities() const;
-    const char *name() const;
 
   protected:
     std::vector<entity2D::const_ptr> m_included;
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
     virtual void write(YAML::Emitter &out) const;
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
 #endif
 
   private:
-    const char *m_name;
     const kit::track_vector<entity2D> *m_entities = nullptr;
 
     friend class engine2D;
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
     friend YAML::Emitter &operator<<(YAML::Emitter &, const behaviour2D &);
     friend struct YAML::convert<behaviour2D>;
 #endif
 };
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv);
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 template <> struct convert<ppx::behaviour2D>

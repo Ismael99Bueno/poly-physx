@@ -5,6 +5,7 @@
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/collision/quad_tree2D.hpp"
 #include "kit/interface/non_copyable.hpp"
+#include "kit/interface/toggleable.hpp"
 #include <vector>
 #include <utility>
 
@@ -20,7 +21,7 @@ struct collision2D
     glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
 };
 
-class collider2D final : kit::non_copyable
+class collider2D final : kit::non_copyable, public kit::toggleable
 {
   public:
     enum class detection
@@ -42,9 +43,6 @@ class collider2D final : kit::non_copyable
 
     void stiffness(float stiffness);
     void dampening(float dampening);
-
-    bool enabled() const;
-    void enabled(bool enabled);
 
     detection detection_method() const;
     void detection_method(detection coldet);
@@ -85,7 +83,6 @@ class collider2D final : kit::non_copyable
     quad_tree2D m_quad_tree;
     float m_stiffness = 5000.f, m_dampening = 10.f;
     detection m_coldet_method = detection::QUAD_TREE;
-    bool m_enabled = true;
 
     void sort_intervals();
     void update_quad_tree();
@@ -109,12 +106,12 @@ class collider2D final : kit::non_copyable
     std::array<float, 6> forces_upon_collision(const collision2D &c) const;
 };
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld);
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 template <> struct convert<ppx::collider2D>

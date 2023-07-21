@@ -95,7 +95,7 @@ spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
         {sp.e1(), sp.e2(), sp.anchor1(), sp.anchor2(), sp.has_anchors()}, sp.stiffness(), sp.dampening(), sp.length()};
 }
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 void spring2D::write(YAML::Emitter &out) const
 {
     out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)id();
@@ -126,7 +126,7 @@ bool spring2D::decode(const YAML::Node &node)
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 Node convert<ppx::spring2D>::encode(const ppx::spring2D &sp)

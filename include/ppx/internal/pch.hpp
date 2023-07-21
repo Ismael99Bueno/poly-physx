@@ -22,7 +22,7 @@
 #ifdef PPX_MULTITHREADED
 #include <thread>
 #endif
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 #include <yaml-cpp/yaml.h>
 #endif
 #include <random>

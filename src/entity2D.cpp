@@ -267,7 +267,7 @@ entity2D::specs entity2D::specs::from_entity(const entity2D &e)
             e.kinematic(), e.type()};
 }
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
 {
     out << YAML::BeginMap;
@@ -285,7 +285,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e)
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 Node convert<ppx::entity2D>::encode(const ppx::entity2D &e)

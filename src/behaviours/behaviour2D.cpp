@@ -3,7 +3,7 @@
 
 namespace ppx
 {
-behaviour2D::behaviour2D(const char *name, const std::size_t allocations) : m_name(name)
+behaviour2D::behaviour2D(const char *name, const std::size_t allocations) : kit::nameable(name)
 {
     m_included.reserve(allocations);
 }
@@ -67,12 +67,8 @@ const std::vector<entity2D::const_ptr> &behaviour2D::entities() const
 {
     return m_included;
 }
-const char *behaviour2D::name() const
-{
-    return m_name;
-}
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 void behaviour2D::write(YAML::Emitter &out) const
 {
     out << YAML::Key << "UUID" << YAML::Value << id();
@@ -110,7 +106,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv)
 #endif
 } // namespace ppx
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 Node convert<ppx::behaviour2D>::encode(const ppx::behaviour2D &bhv)

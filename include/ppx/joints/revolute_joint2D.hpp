@@ -37,7 +37,7 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
     float with_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const;
     float with_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const;
 
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
     void write(YAML::Emitter &out) const override;
     YAML::Node encode() const override;
     bool decode(const YAML::Node &node) override;
@@ -45,7 +45,7 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
 #endif
 };
 } // namespace ppx
-#ifdef YAML_CPP_COMPAT
+#ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
 template <> struct convert<ppx::revolute_joint2D>
