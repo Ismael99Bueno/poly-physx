@@ -118,6 +118,7 @@ revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_j
     return {{rb.e1(), rb.e2(), rb.anchor1(), rb.anchor2(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
 }
 
+#ifdef KIT_USE_YAML_CPP
 void revolute_joint2D::write(YAML::Emitter &out) const
 {
     out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)id();
@@ -142,6 +143,7 @@ bool revolute_joint2D::decode(const YAML::Node &node)
     m_dampening = node["Dampening"].as<float>();
     return true;
 }
+#endif
 } // namespace ppx
 
 #ifdef KIT_USE_YAML_CPP
