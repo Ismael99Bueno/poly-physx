@@ -14,10 +14,12 @@
 namespace ppx
 {
 class constraint_interface2D;
+class engine2D;
+
 class compeller2D final : kit::non_copyable
 {
   public:
-    compeller2D(kit::track_vector<entity2D> *entities, std::size_t allocations, engine_events *cbs);
+    compeller2D(const engine2D &parent, std::size_t allocations, engine_events *cbs);
 
     template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
     {
@@ -39,7 +41,7 @@ class compeller2D final : kit::non_copyable
     const std::vector<kit::scope<constraint_interface2D>> &constraints() const;
 
   private:
-    kit::track_vector<entity2D> *m_entities;
+    const engine2D &m_parent;
     std::vector<kit::scope<constraint_interface2D>> m_constraints;
     engine_events *m_callbacks;
 

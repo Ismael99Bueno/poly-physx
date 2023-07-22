@@ -23,7 +23,11 @@ template <std::size_t N> class constraint2D : public constraint_interface2D
         copy_to_const_entities(entities);
     }
 
-    void add_entities(const std::array<entity2D::ptr, N> &entities)
+    const std::array<entity2D::ptr, N> &entities() const
+    {
+        return m_grad_entities;
+    }
+    void entities(const std::array<entity2D::ptr, N> &entities)
     {
         m_grad_entities = entities;
         copy_to_const_entities(entities);

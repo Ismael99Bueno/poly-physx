@@ -21,9 +21,15 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
 
     float constraint(const std::array<entity2D::const_ptr, 2> &entities) const override;
     float constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const override;
+    void bind(const entity2D::ptr &e1, const entity2D::ptr &e2) override;
 
     bool valid() const override;
     float length() const;
+
+#ifdef KIT_USE_YAML_CPP
+    YAML::Node encode() const override;
+    bool decode(const YAML::Node &node) override;
+#endif
 
   private:
     float m_length;
@@ -36,23 +42,6 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
 
     float with_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const;
     float with_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const;
-
-#ifdef KIT_USE_YAML_CPP
-    void write(YAML::Emitter &out) const override;
-    YAML::Node encode() const override;
-    bool decode(const YAML::Node &node) override;
-    friend struct YAML::convert<revolute_joint2D>;
-#endif
 };
 } // namespace ppx
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-template <> struct convert<ppx::revolute_joint2D>
-{
-    static Node encode(const ppx::revolute_joint2D &rb);
-    static bool decode(const Node &node, ppx::revolute_joint2D &rb);
-};
-} // namespace YAML
-#endif
 #endif

@@ -6,13 +6,18 @@
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/nameable.hpp"
 #include "kit/interface/toggleable.hpp"
+#include "kit/interface/serialization.hpp"
 
 namespace ppx
 {
-class behaviour2D : kit::non_copyable, public kit::identifiable, public kit::nameable, public kit::toggleable
+class engine2D;
+class behaviour2D : kit::non_copyable,
+                    public kit::identifiable<std::string>,
+                    public kit::toggleable,
+                    public kit::serializable
 {
   public:
-    behaviour2D(const char *name, std::size_t allocations = 50);
+    behaviour2D(const std::string &name, std::size_t allocations = 50);
     virtual ~behaviour2D() = default;
 
     void validate();
@@ -35,39 +40,19 @@ class behaviour2D : kit::non_copyable, public kit::identifiable, public kit::nam
 
     const std::vector<entity2D::const_ptr> &entities() const;
 
-  protected:
-    std::vector<entity2D::const_ptr> m_included;
-
 #ifdef KIT_USE_YAML_CPP
-    virtual void write(YAML::Emitter &out) const;
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
 #endif
 
+  protected:
+    std::vector<entity2D::const_ptr> m_included;
+
   private:
-    const kit::track_vector<entity2D> *m_entities = nullptr;
-
+    const engine2D *m_parent = nullptr;
     friend class engine2D;
-#ifdef KIT_USE_YAML_CPP
-    friend YAML::Emitter &operator<<(YAML::Emitter &, const behaviour2D &);
-    friend struct YAML::convert<behaviour2D>;
-#endif
 };
 
-#ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv);
-#endif
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-template <> struct convert<ppx::behaviour2D>
-{
-    static Node encode(const ppx::behaviour2D &bhv);
-    static bool decode(const Node &node, ppx::behaviour2D &bhv);
-};
-} // namespace YAML
-#endif
 
 #endif

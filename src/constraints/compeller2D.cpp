@@ -1,12 +1,12 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/compeller2D.hpp"
-
 #include "ppx/constraints/constraint_interface2D.hpp"
+#include "ppx/engine2D.hpp"
 
 namespace ppx
 {
-compeller2D::compeller2D(kit::track_vector<entity2D> *entities, const std::size_t allocations, engine_events *cbs)
-    : m_entities(entities), m_callbacks(cbs)
+compeller2D::compeller2D(const engine2D &parent, const std::size_t allocations, engine_events *cbs)
+    : m_parent(parent), m_callbacks(cbs)
 {
     m_constraints.reserve(allocations);
 }
@@ -62,7 +62,7 @@ const std::vector<kit::scope<constraint_interface2D>> &compeller2D::constraints(
 kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
 {
     KIT_PERF_FUNCTION()
-    const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
+    const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
     kit::stack_vector<float> cmatrix(rows * cols, 0.f);
 
     for (std::size_t i = 0; i < rows; i++)
@@ -93,7 +93,7 @@ kit::stack_vector<float> compeller2D::lhs(const kit::stack_vector<float> &jcb,
                                           const kit::stack_vector<float> &inv_masses) const
 {
     KIT_PERF_FUNCTION()
-    const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
+    const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
     kit::stack_vector<float> A(rows * rows, 0.f);
     for (std::size_t i = 0; i < rows; i++)
         for (std::size_t j = 0; j < rows; j++)
@@ -115,12 +115,12 @@ kit::stack_vector<float> compeller2D::rhs(const kit::stack_vector<float> &jcb, c
                                           const kit::stack_vector<float> &inv_masses) const
 {
     KIT_PERF_FUNCTION()
-    const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
+    const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
     kit::stack_vector<float> b(rows, 0.f);
 
     for (std::size_t i = 0; i < rows; i++)
     {
-        for (std::size_t j = 0; j < m_entities->size(); j++)
+        for (std::size_t j = 0; j < m_parent.size(); j++)
             for (std::size_t k = 0; k < 3; k++)
             {
                 const std::size_t index1 = j * 3 + k, index2 = j * 6 + k;
@@ -184,8 +184,8 @@ void compeller2D::load_constraint_accels(const kit::stack_vector<float> &jcb, co
                                          std::vector<float> &stchanges) const
 {
     KIT_PERF_FUNCTION()
-    const std::size_t rows = m_constraints.size(), cols = 3 * m_entities->size();
-    for (std::size_t i = 0; i < m_entities->size(); i++)
+    const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
+    for (std::size_t i = 0; i < m_parent.size(); i++)
         for (std::size_t j = 0; j < 3; j++)
             for (std::size_t k = 0; k < rows; k++)
             {

@@ -13,9 +13,18 @@
 namespace ppx
 {
 class behaviour2D;
-class engine2D : kit::non_copyable
+class engine2D final : kit::non_copyable
 {
   public:
+#ifdef KIT_USE_YAML_CPP
+    class serializer : public kit::serializer<engine2D>
+    {
+      public:
+        YAML::Node encode(const engine2D &eng) const override;
+        bool decode(const YAML::Node &node, engine2D &eng) const override;
+    };
+#endif
+
     engine2D(const rk::butcher_tableau &table = rk::rk4, std::size_t allocations = 100);
 
     void retrieve();
@@ -41,7 +50,7 @@ class engine2D : kit::non_copyable
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
-        m_behaviours.back()->m_entities = &m_entities;
+        m_behaviours.back()->m_parent = this;
         m_events.on_behaviour_addition(*ptr);
         return ptr;
     }
@@ -55,6 +64,7 @@ class engine2D : kit::non_copyable
     }
 
     bool remove_behaviour(const behaviour2D *bhv);
+    bool remove_behaviour(const std::string &name);
     bool remove_spring(std::size_t index);
     bool remove_spring(const spring2D &sp);
 
@@ -73,7 +83,7 @@ class engine2D : kit::non_copyable
     entity2D::const_ptr from_id(kit::uuid id) const;
     entity2D::ptr from_id(kit::uuid id);
 
-    template <typename T> T *behaviour_from_name(const char *name) const
+    template <typename T> T *behaviour_from_name(const std::string &name) const
     {
         static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
                                                               "recommended to inherit from force2D or interaction2D)");
@@ -136,26 +146,8 @@ class engine2D : kit::non_copyable
     void retrieve(const std::vector<float> &vars_buffer);
     void validate();
     std::optional<std::size_t> index_from_id(kit::uuid id) const;
-
-#ifdef KIT_USE_YAML_CPP
-    friend YAML::Emitter &operator<<(YAML::Emitter &, const engine2D &);
-    friend struct YAML::convert<engine2D>;
-#endif
 };
-#ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng);
-#endif
+
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-template <> struct convert<ppx::engine2D>
-{
-    static Node encode(const ppx::engine2D &eng);
-    static bool decode(const Node &node, ppx::engine2D &eng);
-};
-} // namespace YAML
-#endif
 
 #endif

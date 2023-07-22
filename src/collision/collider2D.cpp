@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/collider2D.hpp"
+#include "ppx/engine2D.hpp"
 
 #include "geo/intersection.hpp"
 
@@ -15,8 +16,8 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-collider2D::collider2D(kit::track_vector<entity2D> *entities, const std::size_t allocations)
-    : m_entities(entities), m_quad_tree({-10.f, -10.f}, {10.f, 10.f})
+collider2D::collider2D(engine2D &parent, const std::size_t allocations)
+    : m_parent(parent), m_quad_tree({-10.f, -10.f}, {10.f, 10.f})
 {
     m_intervals.reserve(allocations);
     m_collision_pairs.reserve(allocations);
@@ -132,10 +133,11 @@ void collider2D::update_quad_tree()
 {
     m_quad_tree.clear();
     geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
-    for (const entity2D &e : *m_entities)
+    for (const entity2D &e : m_parent.entities())
         aabb += e.shape().bounding_box();
+
     m_quad_tree.aabb(aabb);
-    for (const entity2D &e : *m_entities)
+    for (const entity2D &e : m_parent.entities())
         m_quad_tree.insert(&e);
 }
 
@@ -222,7 +224,7 @@ bool collider2D::narrow_detection_mix(const entity2D &e1, const entity2D &e2, co
         return false;
 
     const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv.value());
-    *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv.value()};
+    *c = {m_parent[e1.index()], m_parent[e2.index()], contact1, contact2, mtv.value()};
 
     return true;
 }
@@ -234,7 +236,7 @@ bool collider2D::narrow_detection_circle(const entity2D &e1, const entity2D &e2,
         return false;
     const glm::vec2 mtv = geo::mtv(c1, c2);
     const auto &[contact1, contact2] = geo::contact_points(c1, c2);
-    *c = {{m_entities, e1.index()}, {m_entities, e2.index()}, contact1, contact2, mtv};
+    *c = {m_parent[e1.index()], m_parent[e2.index()], contact1, contact2, mtv};
     return true;
 }
 
@@ -258,8 +260,8 @@ void collider2D::try_enter_or_stay_callback(const entity2D &e1, const entity2D &
 }
 void collider2D::try_exit_callback(const entity2D &e1, const entity2D &e2) const
 {
-    e1.events().try_exit({m_entities, e2.index()});
-    e2.events().try_exit({m_entities, e1.index()});
+    e1.events().try_exit(m_parent[e2.index()]);
+    e2.events().try_exit(m_parent[e1.index()]);
 }
 
 void collider2D::brute_force(std::vector<float> &stchanges)
@@ -267,10 +269,11 @@ void collider2D::brute_force(std::vector<float> &stchanges)
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
     const auto exec = [this, &stchanges](const std::size_t thread_idx, const entity2D &e1) {
-        for (std::size_t j = 0; j < m_entities->size(); j++)
+        const auto entities = m_parent.entities();
+        for (std::size_t j = 0; j < m_parent.size(); j++)
         {
             collision2D c;
-            const entity2D &e2 = (*m_entities)[j];
+            const entity2D &e2 = entities[j];
             if (full_detection(e1, e2, &c))
             {
                 try_enter_or_stay_callback(e1, e2, c);
@@ -281,21 +284,22 @@ void collider2D::brute_force(std::vector<float> &stchanges)
                 try_exit_callback(e1, e2);
         }
     };
-    for_each(*m_entities, exec);
+    for_each(m_parent.entities().unwrap(), exec);
     for (const auto &pairs : m_mt_collision_pairs)
         m_collision_pairs.insert(m_collision_pairs.begin(), pairs.begin(), pairs.end());
 #else
 #ifdef DEBUG
     std::size_t checks = 0, collisions = 0;
 #endif
-    for (std::size_t i = 0; i < m_entities->size(); i++)
-        for (std::size_t j = i + 1; j < m_entities->size(); j++)
+    const auto entities = m_parent.entities();
+    for (std::size_t i = 0; i < m_parent.size(); i++)
+        for (std::size_t j = i + 1; j < m_parent.size(); j++)
         {
 #ifdef DEBUG
             checks++;
 #endif
             collision2D c;
-            const entity2D &e1 = (*m_entities)[i], &e2 = (*m_entities)[j];
+            const entity2D &e1 = entities[i], &e2 = entities[j];
             if (full_detection(e1, e2, &c))
             {
 #ifdef DEBUG
@@ -310,7 +314,7 @@ void collider2D::brute_force(std::vector<float> &stchanges)
         }
     KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for BRUTE FORCE "
               "collision detection (QUALITY: {3:.2f}%%)",
-              checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
+              checks, collisions, checks - collisions, 100.f * (float)m_parent.size() / (float)checks)
 #endif
 }
 
@@ -352,7 +356,7 @@ void collider2D::sort_and_sweep(std::vector<float> &stchanges)
             eligible.erase(itrv.entity());
     KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for SORT AND "
               "SWEEP collision detection (QUALITY: {3:.2f}%%)",
-              checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
+              checks, collisions, checks - collisions, 100.f * (float)m_parent.size() / (float)checks)
 }
 
 void collider2D::quad_tree(std::vector<float> &stchanges)
@@ -411,7 +415,7 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
             }
     KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for QUAD TREE "
               "collision detection (QUALITY: {3:.2f}%%)",
-              checks, collisions, checks - collisions, 100.f * (float)m_entities->size() / (float)checks)
+              checks, collisions, checks - collisions, 100.f * (float)m_parent.size() / (float)checks)
 #endif
 }
 
@@ -442,33 +446,11 @@ std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) con
 }
 
 #ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld)
+YAML::Node collider2D::serializer::encode(const collider2D &cld) const
 {
-    out << YAML::BeginMap;
-    out << YAML::Key << "Quad tree" << YAML::Value << YAML::BeginMap;
-    out << YAML::Key << "Dimensions" << YAML::Value << cld.quad_tree().aabb();
-    out << YAML::Key << "Max entities" << YAML::Value << cld.quad_tree().max_entities();
-    out << YAML::Key << "Max depth" << YAML::Value << ppx::quad_tree2D::max_depth();
-    out << YAML::Key << "Min size" << YAML::Value << ppx::quad_tree2D::min_size();
-    out << YAML::EndMap;
-    out << YAML::Key << "Stiffness" << YAML::Value << cld.stiffness();
-    out << YAML::Key << "Dampening" << YAML::Value << cld.dampening();
-    out << YAML::Key << "Collision detection" << YAML::Value << (int)cld.detection_method();
-    out << YAML::Key << "Enabled" << YAML::Value << cld.enabled();
-    out << YAML::EndMap;
-    return out;
-}
-#endif
-} // namespace ppx
+    YAML::Node node;
 
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)
-{
-    Node node;
-
-    Node qt = node["Quad tree"];
+    YAML::Node qt = node["Quad tree"];
     qt["Dimensions"] = cld.quad_tree().aabb();
     qt["Max entities"] = cld.quad_tree().max_entities();
     qt["Max depth"] = ppx::quad_tree2D::max_depth();
@@ -480,12 +462,12 @@ Node convert<ppx::collider2D>::encode(const ppx::collider2D &cld)
     node["Enabled"] = cld.enabled();
     return node;
 }
-bool convert<ppx::collider2D>::decode(const Node &node, ppx::collider2D &cld)
+bool collider2D::serializer::decode(const YAML::Node &node, collider2D &cld) const
 {
     if (!node.IsMap() || node.size() != 5)
         return false;
 
-    const Node &qt = node["Quad tree"];
+    const YAML::Node &qt = node["Quad tree"];
     cld.quad_tree().aabb(qt["Dimensions"].as<geo::aabb2D>());
     cld.quad_tree().max_entities(qt["Max entities"].as<std::size_t>());
     ppx::quad_tree2D::max_depth(qt["Max depth"].as<std::uint32_t>());
@@ -497,6 +479,6 @@ bool convert<ppx::collider2D>::decode(const Node &node, ppx::collider2D &cld)
     cld.enabled(node["Enabled"].as<bool>());
 
     return true;
-};
-} // namespace YAML
+}
 #endif
+} // namespace ppx

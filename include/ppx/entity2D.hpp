@@ -13,7 +13,7 @@
 
 namespace ppx
 {
-class entity2D : public kit::identifiable, public kit::indexable
+class entity2D : public kit::identifiable<>, public kit::indexable
 {
   public:
     using ptr = kit::track_ptr<entity2D>;

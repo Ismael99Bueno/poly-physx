@@ -6,7 +6,7 @@
 
 namespace ppx
 {
-class spring2D : public joint2D, public kit::identifiable, public kit::indexable
+class spring2D : public joint2D, public kit::identifiable<>, public kit::indexable
 {
   public:
     using ptr = kit::track_ptr<spring2D>;
@@ -38,31 +38,18 @@ class spring2D : public joint2D, public kit::identifiable, public kit::indexable
     float potential_energy() const;
     float energy() const;
 
+#ifdef KIT_USE_YAML_CPP
+    YAML::Node encode() const override;
+    bool decode(const YAML::Node &node) override;
+#endif
+
   private:
     float m_stiffness, m_dampening, m_length;
 
     std::tuple<glm::vec2, float, float> without_anchors_force() const;
     std::tuple<glm::vec2, float, float> with_anchors_force() const;
-
-#ifdef KIT_USE_YAML_CPP
-    void write(YAML::Emitter &out) const override;
-    YAML::Node encode() const override;
-    bool decode(const YAML::Node &node) override;
-    friend struct YAML::convert<spring2D>;
-#endif
 };
 
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-template <> struct convert<ppx::spring2D>
-{
-    static Node encode(const ppx::spring2D &sp);
-    static bool decode(const Node &node, ppx::spring2D &sp);
-};
-} // namespace YAML
-#endif
 
 #endif

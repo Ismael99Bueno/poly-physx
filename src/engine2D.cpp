@@ -8,7 +8,7 @@
 namespace ppx
 {
 engine2D::engine2D(const rk::butcher_tableau &table, const std::size_t allocations)
-    : m_collider(&m_entities, 2 * allocations), m_compeller(&m_entities, allocations, &m_events), m_integ(table)
+    : m_collider(*this, 2 * allocations), m_compeller(*this, allocations, &m_events), m_integ(table)
 {
     m_entities.reserve(allocations);
     m_integ.state().reserve(6 * allocations);
@@ -188,6 +188,7 @@ bool engine2D::remove_entity(const entity2D &e)
 {
     return remove_entity(e.index());
 }
+
 bool engine2D::remove_behaviour(const behaviour2D *bhv)
 {
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
@@ -199,6 +200,18 @@ bool engine2D::remove_behaviour(const behaviour2D *bhv)
         }
     return false;
 }
+bool engine2D::remove_behaviour(const std::string &name)
+{
+    for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
+        if ((*it)->id() == name)
+        {
+            m_events.on_behaviour_removal(**it);
+            m_behaviours.erase(it);
+            return true;
+        }
+    return false;
+}
+
 bool engine2D::remove_spring(std::size_t index)
 {
     if (index >= m_springs.size())
@@ -213,7 +226,7 @@ bool engine2D::remove_spring(std::size_t index)
 bool engine2D::remove_spring(const spring2D &sp)
 {
     for (std::size_t i = 0; i < m_springs.size(); i++)
-        if (sp.e1() == m_springs[i].e1() && sp.e2() == m_springs[i].e2())
+        if (m_springs[i] == sp)
             return remove_spring(i);
     return false;
 }
@@ -313,10 +326,10 @@ entity2D::ptr engine2D::from_id(kit::uuid id)
     return index ? (*this)[index.value()] : nullptr;
 }
 
-template <> behaviour2D *engine2D::behaviour_from_name(const char *name) const
+template <> behaviour2D *engine2D::behaviour_from_name(const std::string &name) const
 {
     for (const auto &bhv : m_behaviours)
-        if (strcmp(name, bhv->name()) == 0)
+        if (name == bhv->id())
             return bhv.get();
     return nullptr;
 }
@@ -447,47 +460,9 @@ float engine2D::elapsed() const
     return m_elapsed;
 }
 #ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const engine2D &eng)
+YAML::Node engine2D::serializer::encode(const engine2D &eng) const
 {
-    out << YAML::BeginMap;
-    out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-    for (const entity2D &e : eng.entities())
-        out << e;
-    out << YAML::EndSeq;
-    out << YAML::Key << "Collider" << YAML::Value << eng.collider();
-    out << YAML::Key << "Springs" << YAML::Value << YAML::BeginSeq;
-    for (const spring2D &sp : eng.springs())
-        out << sp;
-    out << YAML::EndSeq;
-    out << YAML::Key << "Rigid bars" << YAML::Value << YAML::BeginSeq;
-    for (const auto &ctr : eng.compeller().constraints())
-    {
-        const auto revjoint = dynamic_cast<const revolute_joint2D *>(ctr.get());
-        if (revjoint)
-            out << *revjoint;
-    }
-    out << YAML::EndSeq;
-
-    out << YAML::Key << "Behaviours" << YAML::Value << YAML::BeginMap;
-    for (const auto &bhv : eng.behaviours())
-        out << YAML::Key << bhv->name() << YAML::Value << *bhv;
-    out << YAML::EndMap;
-
-    // Save checkpoint?
-    out << YAML::Key << "Integrator" << YAML::Value << eng.integrator();
-    out << YAML::Key << "Elapsed" << YAML::Value << eng.elapsed();
-    out << YAML::EndMap;
-    return out;
-}
-#endif
-} // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)
-{
-    Node node;
+    YAML::Node node;
     for (const ppx::entity2D &e : eng.entities())
         node["Entities"].push_back(e);
     node["Collider"] = eng.collider();
@@ -500,14 +475,14 @@ Node convert<ppx::engine2D>::encode(const ppx::engine2D &eng)
             node["Rigid bars"].push_back(*revjoint);
     }
     for (const auto &bhv : eng.behaviours())
-        node["Behaviours"][bhv->name()] = *bhv;
+        node["Behaviours"][bhv->id()] = *bhv;
 
     // Save checkpoint?
     node["Integrator"] = eng.integrator();
     node["Elapsed"] = eng.elapsed();
     return node;
 }
-bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
+bool engine2D::serializer::decode(const YAML::Node &node, engine2D &eng) const
 {
     if (!node.IsMap() || node.size() != 7)
         return false;
@@ -516,11 +491,11 @@ bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
     eng.m_integ = node["Integrator"].as<rk::integrator>();
     eng.m_integ.state().clear();
 
-    for (const Node &n : node["Entities"])
+    for (const YAML::Node &n : node["Entities"])
         eng.add_entity(n.as<ppx::entity2D>());
 
     node["Collider"].as<ppx::collider2D>(eng.collider());
-    for (const Node &n : node["Springs"])
+    for (const YAML::Node &n : node["Springs"])
     {
         const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
         if (n["Anchor1"])
@@ -534,7 +509,7 @@ bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
         n.as<ppx::spring2D>(*sp);
     }
 
-    for (const Node &n : node["Rigid bars"])
+    for (const YAML::Node &n : node["Rigid bars"])
     {
         const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
         if (n["Anchor1"])
@@ -551,11 +526,11 @@ bool convert<ppx::engine2D>::decode(const Node &node, ppx::engine2D &eng)
     for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
     {
         const auto bhv = eng.behaviour_from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
-        node["Behaviours"][bhv->name()].as<ppx::behaviour2D>(*bhv);
+        node["Behaviours"][bhv->id()].as<ppx::behaviour2D>(*bhv);
     }
 
     eng.m_elapsed = node["Elapsed"].as<float>();
     return true;
-};
-} // namespace YAML
+}
 #endif
+} // namespace ppx

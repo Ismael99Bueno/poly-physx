@@ -80,18 +80,6 @@ joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 }
 
 #ifdef KIT_USE_YAML_CPP
-void joint2D::write(YAML::Emitter &out) const
-{
-    out << YAML::Key << "ID1" << YAML::Value << (std::uint64_t)m_e1->id();
-    out << YAML::Key << "ID2" << YAML::Value << (std::uint64_t)m_e2->id();
-    out << YAML::Key << "Index1" << YAML::Value << m_e1->index();
-    out << YAML::Key << "Index2" << YAML::Value << m_e2->index();
-    if (m_has_anchors)
-    {
-        out << YAML::Key << "Anchor1" << YAML::Value << anchor1();
-        out << YAML::Key << "Anchor2" << YAML::Value << anchor2();
-    }
-}
 YAML::Node joint2D::encode() const
 {
     YAML::Node node;
@@ -113,27 +101,4 @@ bool joint2D::decode(const YAML::Node &node)
     return true;
 }
 #endif
-#ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const joint2D &joint)
-{
-    out << YAML::BeginMap;
-    joint.write(out);
-    out << YAML::EndMap;
-    return out;
-}
-#endif
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-Node convert<ppx::joint2D>::encode(const ppx::joint2D &joint)
-{
-    return joint.encode();
-}
-bool convert<ppx::joint2D>::decode(const Node &node, ppx::joint2D &joint)
-{
-    return joint.decode(node);
-};
-} // namespace YAML
-#endif

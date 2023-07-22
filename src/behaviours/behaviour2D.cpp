@@ -1,9 +1,10 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
+#include "ppx/engine2D.hpp"
 
 namespace ppx
 {
-behaviour2D::behaviour2D(const char *name, const std::size_t allocations) : kit::nameable(name)
+behaviour2D::behaviour2D(const std::string &name, const std::size_t allocations) : kit::identifiable<std::string>(name)
 {
     m_included.reserve(allocations);
 }
@@ -69,53 +70,26 @@ const std::vector<entity2D::const_ptr> &behaviour2D::entities() const
 }
 
 #ifdef KIT_USE_YAML_CPP
-void behaviour2D::write(YAML::Emitter &out) const
-{
-    out << YAML::Key << "UUID" << YAML::Value << id();
-    out << YAML::Key << "Entities" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-    for (const auto &e : m_included)
-        out << e->index();
-    out << YAML::EndSeq;
-}
 YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
-    node["UUID"] = (std::uint64_t)id();
+    node["Name"] = id();
     for (const auto &e : m_included)
-        node["Entities"].push_back(e->index());
+        node["Entities"].push_back((std::uint64_t)e->id());
     node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
     return node;
 }
 bool behaviour2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 2)
+    KIT_ASSERT_ERROR(node["Name"].as<std::string>() != id(),
+                     "Behaviour to be deserialized must have the same name as the one contained in the YAML node")
+
+    if (!node.IsMap() || node.size() < 2 || node["Name"].as<std::string>() != id())
         return false;
-    id(node["UUID"].as<std::uint64_t>());
     clear();
     for (const YAML::Node &n : node["Entities"])
-        include({m_entities, n.as<std::size_t>()});
+        include(m_parent->from_id(n.as<std::uint64_t>()));
     return true;
-}
-YAML::Emitter &operator<<(YAML::Emitter &out, const behaviour2D &bhv)
-{
-    out << YAML::BeginMap;
-    bhv.write(out);
-    out << YAML::EndMap;
-    return out;
 }
 #endif
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-Node convert<ppx::behaviour2D>::encode(const ppx::behaviour2D &bhv)
-{
-    return bhv.encode();
-}
-bool convert<ppx::behaviour2D>::decode(const Node &node, ppx::behaviour2D &bhv)
-{
-    return bhv.decode(node);
-};
-} // namespace YAML
-#endif

@@ -6,6 +6,8 @@
 #include "ppx/collision/quad_tree2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/toggleable.hpp"
+#include "kit/interface/serialization.hpp"
+
 #include <vector>
 #include <utility>
 
@@ -15,6 +17,7 @@
 
 namespace ppx
 {
+class engine2D;
 struct collision2D
 {
     entity2D::ptr current, incoming;
@@ -24,6 +27,15 @@ struct collision2D
 class collider2D final : kit::non_copyable, public kit::toggleable
 {
   public:
+#ifdef KIT_USE_YAML_CPP
+    class serializer : public kit::serializer<collider2D>
+    {
+      public:
+        YAML::Node encode(const collider2D &tb) const override;
+        bool decode(const YAML::Node &node, collider2D &tb) const override;
+    };
+#endif
+
     enum class detection
     {
         BRUTE_FORCE = 0,
@@ -31,7 +43,7 @@ class collider2D final : kit::non_copyable, public kit::toggleable
         QUAD_TREE = 2
     };
 
-    collider2D(kit::track_vector<entity2D> *entities, std::size_t allocations);
+    collider2D(engine2D &parent, std::size_t allocations);
 
     void add_entity_intervals(const entity2D::const_ptr &e);
     void solve_and_load_collisions(std::vector<float> &stchanges);
@@ -73,9 +85,10 @@ class collider2D final : kit::non_copyable, public kit::toggleable
     };
     using colpair = std::pair<const entity2D *, const entity2D *>; // Should only last for 1 frame
 
-    kit::track_vector<entity2D> *m_entities;
+    engine2D &m_parent;
     std::vector<interval> m_intervals;
     std::vector<colpair> m_collision_pairs;
+
 #ifdef PPX_MULTITHREADED
     std::array<std::vector<colpair>, PPX_THREAD_COUNT> m_mt_collision_pairs;
 #endif
@@ -105,21 +118,6 @@ class collider2D final : kit::non_copyable, public kit::toggleable
     void solve(const collision2D &c, std::vector<float> &stchanges) const;
     std::array<float, 6> forces_upon_collision(const collision2D &c) const;
 };
-
-#ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const collider2D &cld);
-#endif
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-template <> struct convert<ppx::collider2D>
-{
-    static Node encode(const ppx::collider2D &cld);
-    static bool decode(const Node &node, ppx::collider2D &cld);
-};
-} // namespace YAML
-#endif
 
 #endif

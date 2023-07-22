@@ -2,10 +2,11 @@
 #define PPX_JOINT2D_HPP
 
 #include "ppx/entity2D.hpp"
+#include "kit/interface/serialization.hpp"
 
 namespace ppx
 {
-class joint2D
+class joint2D : public kit::serializable
 {
   public:
     struct specs
@@ -15,12 +16,13 @@ class joint2D
         bool has_anchors = true;
         static specs from_joint(const joint2D &joint);
     };
+
     joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2);
     joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2);
     joint2D(const specs &spc);
     virtual ~joint2D() = default;
 
-    void bind(const entity2D::ptr &e1, const entity2D::ptr &e2); // This shit has to be virtual
+    virtual void bind(const entity2D::ptr &e1, const entity2D::ptr &e2); // This shit has to be virtual
     virtual bool valid() const;
 
     const entity2D::ptr &e1() const;
@@ -34,35 +36,17 @@ class joint2D
 
     bool has_anchors() const;
 
+#ifdef KIT_USE_YAML_CPP
+    virtual YAML::Node encode() const override;
+    virtual bool decode(const YAML::Node &node) override;
+#endif
+
   protected:
     entity2D::ptr m_e1 = nullptr, m_e2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
     float m_angle1, m_angle2;
     bool m_has_anchors;
-
-#ifdef KIT_USE_YAML_CPP
-    virtual void write(YAML::Emitter &out) const;
-    virtual YAML::Node encode() const;
-    virtual bool decode(const YAML::Node &node);
-    friend YAML::Emitter &operator<<(YAML::Emitter &, const joint2D &);
-    friend struct YAML::convert<joint2D>;
-#endif
 };
-
-#ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const joint2D &joint);
-#endif
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-template <> struct convert<ppx::joint2D>
-{
-    static Node encode(const ppx::joint2D &joint);
-    static bool decode(const Node &node, ppx::joint2D &joint);
-};
-} // namespace YAML
-#endif
 
 #endif

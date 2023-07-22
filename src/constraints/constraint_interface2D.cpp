@@ -60,4 +60,26 @@ std::array<float, 3> constraint_interface2D::gradient(entity2D &e, const constra
 
     return {(cx2 - cx1) / (2.f * TOLERANCE), (cy2 - cy1) / (2.f * TOLERANCE), (ca2 - ca1) / (2.f * TOLERANCE)};
 }
+
+#ifdef KIT_USE_YAML_CPP
+YAML::Node constraint_interface2D::encode() const
+{
+    YAML::Node node;
+    node["UUID"] = (std::uint64_t)id();
+    node["Stiffness"] = m_stiffness;
+    node["Dampening"] = m_dampening;
+
+    return node;
+}
+bool constraint_interface2D::decode(const YAML::Node &node)
+{
+    if (!node.IsMap() || node.size() < 3)
+        return false;
+    id(node["UUID"].as<std::uint64_t>());
+    m_stiffness = node["Stiffness"].as<float>();
+    m_dampening = node["Dampening"].as<float>();
+
+    return true;
+}
+#endif
 } // namespace ppx

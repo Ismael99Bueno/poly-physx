@@ -34,6 +34,12 @@ float revolute_joint2D::constraint_derivative(const std::array<entity2D::const_p
                          : without_anchors_constraint_derivative(entities);
 }
 
+void revolute_joint2D::bind(const entity2D::ptr &e1, const entity2D::ptr &e2)
+{
+    joint2D::bind(e1, e2);
+    entities({e1, e2});
+}
+
 float revolute_joint2D::without_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const
 {
     return glm::distance2(m_e1->pos(), m_e2->pos()) - m_length * m_length;
@@ -119,43 +125,27 @@ revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_j
 }
 
 #ifdef KIT_USE_YAML_CPP
-void revolute_joint2D::write(YAML::Emitter &out) const
-{
-    out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)id();
-    joint2D::write(out);
-    out << YAML::Key << "Stiffness" << YAML::Value << m_stiffness;
-    out << YAML::Key << "Dampening" << YAML::Value << m_dampening;
-}
 YAML::Node revolute_joint2D::encode() const
 {
-    YAML::Node node = joint2D::encode();
-    node["UUID"] = (std::uint64_t)id();
-    node["Stiffness"] = m_stiffness;
-    node["Dampening"] = m_dampening;
+    const YAML::Node node1 = joint2D::encode();
+    const YAML::Node node2 = constraint_interface2D::encode();
+
+    YAML::Node node;
+    node["Joint2D"] = node1;
+    node["Constraint2D"] = node2;
+
     return node;
 }
 bool revolute_joint2D::decode(const YAML::Node &node)
 {
-    if (!joint2D::decode(node))
+    if (!node.IsMap() || node.size() != 2)
         return false;
-    id(node["UUID"].as<std::uint64_t>());
-    m_stiffness = node["Stiffness"].as<float>();
-    m_dampening = node["Dampening"].as<float>();
+
+    if (!joint2D::decode(node["Joint2D"]))
+        return false;
+    if (!constraint_interface2D::decode(node["Constraint2D"]))
+        return false;
     return true;
 }
 #endif
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-Node convert<ppx::revolute_joint2D>::encode(const ppx::revolute_joint2D &rb)
-{
-    return rb.encode();
-}
-bool convert<ppx::revolute_joint2D>::decode(const Node &node, ppx::revolute_joint2D &rb)
-{
-    return rb.decode(node);
-};
-} // namespace YAML
-#endif
