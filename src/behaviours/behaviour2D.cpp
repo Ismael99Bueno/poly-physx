@@ -74,8 +74,8 @@ YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
     for (const auto &body : m_included)
-        node["Entities"].push_back(body->index());
-    node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
+        node["Bodies"].push_back(body->index());
+    node["Bodies"].SetStyle(YAML::EmitterStyle::Flow);
     return node;
 }
 bool behaviour2D::decode(const YAML::Node &node)
@@ -83,7 +83,7 @@ bool behaviour2D::decode(const YAML::Node &node)
     if (!node.IsMap() || node.size() < 1)
         return false;
     clear();
-    for (const YAML::Node &n : node["Entities"])
+    for (const YAML::Node &n : node["Bodies"])
         include((*m_parent)[n.as<std::size_t>()]);
     return true;
 }

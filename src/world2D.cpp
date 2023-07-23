@@ -469,7 +469,7 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
 {
     YAML::Node node;
     for (const ppx::body2D &body : world.bodies())
-        node["Entities"].push_back(body);
+        node["Bodies"].push_back(body);
     node["Collider"] = world.collisions;
 
     for (const ppx::spring2D &sp : world.springs())
@@ -490,53 +490,60 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
 }
 bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
 {
-    if (!node.IsMap() || node.size() != 7)
+    if (!node.IsMap() || node.size() < 3)
         return false;
 
     world.clear_bodies();
     world.integrator = node["Integrator"].as<rk::integrator>();
     world.integrator.state().clear();
 
-    for (const YAML::Node &n : node["Entities"])
-        world.add_body(n.as<ppx::body2D>());
+    if (node["Bodies"])
+        for (const YAML::Node &n : node["Bodies"])
+            world.add_body(n.as<ppx::body2D>());
 
     node["Collider"].as<ppx::collider2D>(world.collisions);
-    for (const YAML::Node &n : node["Springs"])
-    {
-        const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
-        if (n["Anchor1"])
-        {
-            const ppx::spring2D::ptr sp =
-                world.add_spring(world[idx1], world[idx2], n["Anchor1"].as<glm::vec2>(), n["Anchor2"].as<glm::vec2>());
-            n.as<ppx::spring2D>(*sp);
-            continue;
-        }
-        const ppx::spring2D::ptr sp = world.add_spring(world[idx1], world[idx2]);
-        n.as<ppx::spring2D>(*sp);
-    }
 
-    for (const YAML::Node &n : node["Constraints"])
-        if (n["Revolute"])
+    if (node["Springs"])
+        for (const YAML::Node &n : node["Springs"])
         {
-            const YAML::Node revnode = n["Revolute"];
-            const std::size_t idx1 = revnode["Index1"].as<std::size_t>(), idx2 = revnode["Index2"].as<std::size_t>();
-            if (revnode["Anchor1"])
+            const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
+            if (n["Anchor1"])
             {
-                const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(
-                    world[idx1], world[idx2], revnode["Anchor1"].as<glm::vec2>(), revnode["Anchor2"].as<glm::vec2>());
-
-                revnode.as<ppx::revolute_joint2D>(*revjoint);
+                const ppx::spring2D::ptr sp = world.add_spring(world[idx1], world[idx2], n["Anchor1"].as<glm::vec2>(),
+                                                               n["Anchor2"].as<glm::vec2>());
+                n.as<ppx::spring2D>(*sp);
                 continue;
             }
-            const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(world[idx1], world[idx2]);
-            revnode.as<ppx::revolute_joint2D>(*revjoint);
+            const ppx::spring2D::ptr sp = world.add_spring(world[idx1], world[idx2]);
+            n.as<ppx::spring2D>(*sp);
         }
 
-    for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
-    {
-        const auto bhv = world.behaviour_from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
-        node["Behaviours"][bhv->id()].as<ppx::behaviour2D>(*bhv);
-    }
+    if (node["Constraints"])
+        for (const YAML::Node &n : node["Constraints"])
+            if (n["Revolute"])
+            {
+                const YAML::Node revnode = n["Revolute"];
+                const std::size_t idx1 = revnode["Index1"].as<std::size_t>(),
+                                  idx2 = revnode["Index2"].as<std::size_t>();
+                if (revnode["Anchor1"])
+                {
+                    const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(
+                        world[idx1], world[idx2], revnode["Anchor1"].as<glm::vec2>(),
+                        revnode["Anchor2"].as<glm::vec2>());
+
+                    revnode.as<ppx::revolute_joint2D>(*revjoint);
+                    continue;
+                }
+                const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(world[idx1], world[idx2]);
+                revnode.as<ppx::revolute_joint2D>(*revjoint);
+            }
+
+    if (node["Behaviours"])
+        for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
+        {
+            const auto bhv = world.behaviour_from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
+            node["Behaviours"][bhv->id()].as<ppx::behaviour2D>(*bhv);
+        }
 
     world.m_elapsed = node["Elapsed"].as<float>();
     return true;
