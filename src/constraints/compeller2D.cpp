@@ -4,36 +4,59 @@
 
 namespace ppx
 {
-compeller2D::compeller2D(const engine2D &parent, const std::size_t allocations, engine_events *cbs)
-    : m_parent(parent), m_callbacks(cbs)
+compeller2D::compeller2D(const engine2D &parent, const std::size_t allocations) : m_parent(parent)
 {
     m_constraints.reserve(allocations);
 }
 
-bool compeller2D::remove_constraint(const constraint2D *ctr)
+bool compeller2D::remove_constraint(std::size_t index, const kit::event<const constraint2D &> &event_callback)
+{
+    if (index >= m_constraints.size())
+    {
+        KIT_WARN("Constraint index exceeds array bounds. Aborting... - index: {0}, size: {1}", index,
+                 m_constraints.size())
+        return false;
+    }
+    event_callback(*m_constraints[index]);
+    m_constraints.erase(m_constraints.begin() + (long)index);
+    return true;
+}
+bool compeller2D::remove_constraint(const constraint2D *ctr, const kit::event<const constraint2D &> &event_callback)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if (it->get() == ctr)
         {
-            m_callbacks->on_constraint_removal(*ctr);
+            event_callback(*ctr);
             m_constraints.erase(it);
             return true;
         }
     return false;
 }
-void compeller2D::clear_constraints()
+bool compeller2D::remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback)
+{
+    for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
+        if ((*it)->id() == id)
+        {
+            event_callback(**it);
+            m_constraints.erase(it);
+            return true;
+        }
+    return false;
+}
+
+void compeller2D::clear_constraints(const kit::event<const constraint2D &> &event_callback)
 {
     for (const auto &ctr : m_constraints)
-        m_callbacks->on_constraint_removal(*ctr);
+        event_callback(*ctr);
     m_constraints.clear();
 }
 
-void compeller2D::validate()
+void compeller2D::validate(const kit::event<const constraint2D &> &event_callback)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end();)
         if (!(*it)->valid())
         {
-            m_callbacks->on_constraint_removal(**it);
+            event_callback(**it);
             it = m_constraints.erase(it);
         }
         else

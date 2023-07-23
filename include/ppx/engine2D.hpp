@@ -27,9 +27,11 @@ class engine2D final : kit::non_copyable
 
     engine2D(const rk::butcher_tableau &table = rk::rk4, std::size_t allocations = 100);
 
-    void retrieve();
+    collider2D collisions;
+    rk::integrator integrator;
+    engine_events events;
 
-    bool raw_forward(float &timestep);
+    bool raw_forward(float timestep);
     bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
     bool embedded_forward(float &timestep);
 
@@ -41,6 +43,7 @@ class engine2D final : kit::non_copyable
 
     bool remove_entity(std::size_t index);
     bool remove_entity(const entity2D &e);
+    bool remove_entity(kit::uuid id);
 
     template <typename T, class... BehaviourArgs> T *add_behaviour(BehaviourArgs &&...args)
     {
@@ -59,22 +62,35 @@ class engine2D final : kit::non_copyable
 
         m_behaviours.push_back(std::move(bhv));
         m_behaviours.back()->m_parent = this;
-        m_events.on_behaviour_addition(*ptr);
+        events.on_behaviour_addition(*ptr);
         return ptr;
     }
+
+    bool remove_behaviour(std::size_t index);
+    bool remove_behaviour(const behaviour2D *bhv);
+    bool remove_behaviour(const std::string &name);
 
     template <class... SpringArgs> spring2D::ptr add_spring(SpringArgs &&...args)
     {
         m_springs.emplace_back(std::forward<SpringArgs>(args)...);
         const spring2D::ptr sp_ptr = {&m_springs, m_springs.size() - 1};
-        m_events.on_spring_addition(sp_ptr);
+        events.on_spring_addition(sp_ptr);
         return sp_ptr;
     }
 
-    bool remove_behaviour(const behaviour2D *bhv);
-    bool remove_behaviour(const std::string &name);
     bool remove_spring(std::size_t index);
     bool remove_spring(const spring2D &sp);
+    bool remove_spring(kit::uuid id);
+
+    template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
+    {
+        T *ptr = m_compeller.add_constraint<T>(events.on_constraint_addition, std::forward<ConstraintArgs>(args)...);
+        return ptr;
+    }
+
+    bool remove_constraint(std::size_t index);
+    bool remove_constraint(const constraint2D *ctr);
+    bool remove_constraint(kit::uuid id);
 
     void clear_entities();
     void clear_behaviours();
@@ -107,39 +123,25 @@ class engine2D final : kit::non_copyable
     entity2D::const_ptr operator[](const glm::vec2 &point) const;
     entity2D::ptr operator[](const glm::vec2 &point);
 
-    const std::vector<kit::scope<behaviour2D>> &behaviours() const;
+    const kit::track_vector<entity2D> &entities() const;
     const kit::track_vector<spring2D> &springs() const;
     spring2D::const_ptr spring(std::size_t index) const;
 
-    kit::vector_view<kit::scope<behaviour2D>> behaviours();
+    kit::track_vector_view<entity2D> entities();
     kit::track_vector_view<spring2D> springs();
     spring2D::ptr spring(std::size_t index);
 
-    const kit::track_vector<entity2D> &entities() const;
-    kit::track_vector_view<entity2D> entities();
+    const std::vector<kit::scope<behaviour2D>> &behaviours() const;
+    const std::vector<kit::scope<constraint2D>> &constraints() const;
+
     std::size_t size() const;
-
-    const rk::integrator &integrator() const;
-    rk::integrator &integrator();
-
-    const collider2D &collider() const;
-    collider2D &collider();
-
-    const compeller2D &compeller() const;
-    compeller2D &compeller();
-
-    engine_events &events();
-
     float elapsed() const;
 
   private:
     kit::track_vector<entity2D> m_entities;
-    collider2D m_collider;
     compeller2D m_compeller;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
     kit::track_vector<spring2D> m_springs;
-    rk::integrator m_integ;
-    engine_events m_events;
 
     float m_elapsed = 0.f;
 
@@ -152,6 +154,7 @@ class engine2D final : kit::non_copyable
 
     void reset_entities();
     void retrieve(const std::vector<float> &vars_buffer);
+    void retrieve();
     void validate();
     std::optional<std::size_t> index_from_id(kit::uuid id) const;
 };

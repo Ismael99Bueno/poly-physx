@@ -22,17 +22,13 @@ class entity_events final
     kit::event<const kit::track_ptr<entity2D> &> on_collision_exit;
 
   private:
-    mutable bool m_processed = false;
     mutable std::unordered_set<kit::uuid> m_collided_ids;
-
-    void reset();
 
     entity_events(std::size_t allocations = 15);
     entity_events(const entity_events &) = default;
     entity_events &operator=(const entity_events &) = default;
 
     friend class entity2D;
-    friend class engine2D;
 };
 } // namespace ppx
 

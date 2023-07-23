@@ -8,10 +8,10 @@
 namespace ppx
 {
 engine2D::engine2D(const rk::butcher_tableau &table, const std::size_t allocations)
-    : m_collider(*this, 2 * allocations), m_compeller(*this, allocations, &m_events), m_integ(table)
+    : collisions(*this, 2 * allocations), integrator(table), m_compeller(*this, allocations)
 {
     m_entities.reserve(allocations);
-    m_integ.state().reserve(6 * allocations);
+    integrator.state().reserve(6 * allocations);
 }
 
 void engine2D::retrieve(const std::vector<float> &vars_buffer)
@@ -23,31 +23,31 @@ void engine2D::retrieve(const std::vector<float> &vars_buffer)
 
 void engine2D::retrieve()
 {
-    retrieve(m_integ.state().vars());
+    retrieve(integrator.state().vars());
 }
 
-bool engine2D::raw_forward(float &timestep)
+bool engine2D::raw_forward(const float timestep)
 {
-    const bool valid = m_integ.raw_forward(m_elapsed, timestep, *this);
+    const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
     reset_entities();
     retrieve();
-    m_collider.flush_collisions();
+    collisions.flush_collisions();
     return valid;
 }
 bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
 {
-    const bool valid = m_integ.reiterative_forward(m_elapsed, timestep, *this, reiterations);
+    const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
     reset_entities();
     retrieve();
-    m_collider.flush_collisions();
+    collisions.flush_collisions();
     return valid;
 }
 bool engine2D::embedded_forward(float &timestep)
 {
-    const bool valid = m_integ.embedded_forward(m_elapsed, timestep, *this);
+    const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
     reset_entities();
     retrieve();
-    m_collider.flush_collisions();
+    collisions.flush_collisions();
     return valid;
 }
 
@@ -80,14 +80,14 @@ void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) c
 
 void engine2D::validate()
 {
-    m_collider.validate();
-    m_compeller.validate();
+    collisions.validate();
+    m_compeller.validate(events.on_constraint_removal);
     for (const auto &bhv : m_behaviours)
         bhv->validate();
     for (auto it = m_springs.begin(); it != m_springs.end();)
         if (!it->valid())
         {
-            m_events.on_spring_removal(*it);
+            events.on_spring_removal(*it);
             it = m_springs.erase(it);
         }
         else
@@ -137,20 +137,19 @@ void engine2D::reset_entities()
     {
         e.m_added_force = glm::vec2(0.f);
         e.m_added_torque = 0.f;
-        e.events().reset();
     }
 }
 
 entity2D::ptr engine2D::process_entity_addition(entity2D &e)
 {
-    rk::state &state = m_integ.state();
+    rk::state &state = integrator.state();
     e.m_state = &state;
 
     const entity2D::ptr e_ptr = {&m_entities, m_entities.size() - 1};
     const glm::vec2 &pos = e.pos(), &vel = e.vel();
     state.append({pos.x, pos.y, e.angpos(), vel.x, vel.y, e.angvel()});
     e.retrieve();
-    m_collider.add_entity_intervals(e_ptr);
+    collisions.add_entity_intervals(e_ptr);
 
     KIT_INFO("Added entity with index {0} and id {1}.", e.index(), (std::uint64_t)e.id())
 #ifdef DEBUG
@@ -158,7 +157,7 @@ entity2D::ptr engine2D::process_entity_addition(entity2D &e)
         KIT_ASSERT_CRITICAL(m_entities[i].id() != e.id(),
                             "Entity with index {0} has the same id as entity with index {1}", i, e.index())
 #endif
-    m_events.on_entity_addition(e_ptr);
+    events.on_entity_addition(e_ptr);
     return e_ptr;
 }
 
@@ -166,13 +165,13 @@ bool engine2D::remove_entity(std::size_t index)
 {
     if (index >= m_entities.size())
     {
-        KIT_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_entities.size())
+        KIT_WARN("Entity index exceeds array bounds. Aborting... - index: {0}, size: {1}", index, m_entities.size())
         return false;
     }
     KIT_INFO("Removing entity with index {0} and id {1}", index, m_entities[index].id())
 
-    m_events.on_early_entity_removal(m_entities[index]);
-    rk::state &state = m_integ.state();
+    events.on_early_entity_removal(m_entities[index]);
+    rk::state &state = integrator.state();
     m_entities.erase(index);
 
     for (std::size_t i = 0; i < 6; i++)
@@ -180,7 +179,7 @@ bool engine2D::remove_entity(std::size_t index)
     state.resize(6 * m_entities.size());
 
     validate();
-    m_events.on_late_entity_removal(std::move(index)); // It just made me do this...
+    events.on_late_entity_removal(std::move(index)); // It just made me do this...
     return true;
 }
 
@@ -189,12 +188,32 @@ bool engine2D::remove_entity(const entity2D &e)
     return remove_entity(e.index());
 }
 
+bool engine2D::remove_entity(kit::uuid id)
+{
+    for (const entity2D &e : m_entities)
+        if (e.id() == id)
+            return remove_entity(e.index());
+    return false;
+}
+
+bool engine2D::remove_behaviour(std::size_t index)
+{
+    if (index >= m_behaviours.size())
+    {
+        KIT_WARN("Behaviour index exceeds array bounds. Aborting... - index: {0}, size: {1}", index,
+                 m_behaviours.size())
+        return false;
+    }
+    events.on_behaviour_removal(*m_behaviours[index]);
+    m_behaviours.erase(m_behaviours.begin() + (long)index);
+    return true;
+}
 bool engine2D::remove_behaviour(const behaviour2D *bhv)
 {
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
         if (it->get() == bhv)
         {
-            m_events.on_behaviour_removal(*bhv);
+            events.on_behaviour_removal(*bhv);
             m_behaviours.erase(it);
             return true;
         }
@@ -205,7 +224,7 @@ bool engine2D::remove_behaviour(const std::string &name)
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
         if ((*it)->id() == name)
         {
-            m_events.on_behaviour_removal(**it);
+            events.on_behaviour_removal(**it);
             m_behaviours.erase(it);
             return true;
         }
@@ -216,19 +235,36 @@ bool engine2D::remove_spring(std::size_t index)
 {
     if (index >= m_springs.size())
     {
-        KIT_WARN("Index exceeds entity array bounds. Aborting... - index: {0}, size: {1}", index, m_springs.size())
+        KIT_WARN("Spring index exceeds array bounds. Aborting... - index: {0}, size: {1}", index, m_springs.size())
         return false;
     }
-    m_events.on_spring_removal(m_springs[index]);
+    events.on_spring_removal(m_springs[index]);
     m_springs.erase(m_springs.begin() + (long)index);
     return true;
 }
 bool engine2D::remove_spring(const spring2D &sp)
 {
-    for (std::size_t i = 0; i < m_springs.size(); i++)
-        if (m_springs[i] == sp)
-            return remove_spring(i);
+    return remove_spring(sp.index());
+}
+bool engine2D::remove_spring(kit::uuid id)
+{
+    for (const spring2D &sp : m_springs)
+        if (sp.id() == id)
+            return remove_spring(sp.index());
     return false;
+}
+
+bool engine2D::remove_constraint(std::size_t index)
+{
+    return m_compeller.remove_constraint(index, events.on_constraint_removal);
+}
+bool engine2D::remove_constraint(const constraint2D *ctr)
+{
+    return m_compeller.remove_constraint(ctr, events.on_constraint_removal);
+}
+bool engine2D::remove_constraint(kit::uuid id)
+{
+    return m_compeller.remove_constraint(id, events.on_constraint_removal);
 }
 
 void engine2D::clear_entities()
@@ -239,24 +275,24 @@ void engine2D::clear_entities()
 void engine2D::clear_behaviours()
 {
     for (const auto &bhv : m_behaviours)
-        m_events.on_behaviour_removal(*bhv);
+        events.on_behaviour_removal(*bhv);
     m_behaviours.clear();
 }
 void engine2D::clear_springs()
 {
     for (const spring2D &sp : m_springs)
-        m_events.on_spring_removal(sp);
+        events.on_spring_removal(sp);
     m_springs.clear();
 }
 void engine2D::clear_constraints()
 {
-    m_compeller.clear_constraints();
+    m_compeller.clear_constraints(events.on_constraint_removal);
 }
 void engine2D::clear()
 {
     m_behaviours.clear();
     m_springs.clear();
-    m_compeller.clear_constraints();
+    m_compeller.clear_constraints(events.on_constraint_removal);
     clear_entities();
 }
 
@@ -295,7 +331,7 @@ std::vector<float> engine2D::operator()(const float t, const float dt, const std
     load_interactions_and_externals(stchanges);
     const kit::stack_vector<float> inv_masses = effective_inverse_masses();
 
-    m_collider.solve_and_load_collisions(stchanges);
+    collisions.solve_and_load_collisions(stchanges);
     m_compeller.solve_and_load_constraints(stchanges, inv_masses);
     for (std::size_t i = 0; i < m_entities.size(); i++)
     {
@@ -371,6 +407,11 @@ const std::vector<kit::scope<behaviour2D>> &engine2D::behaviours() const
 {
     return m_behaviours;
 }
+const std::vector<kit::scope<constraint2D>> &engine2D::constraints() const
+{
+    return m_compeller.constraints();
+}
+
 const kit::track_vector<spring2D> &engine2D::springs() const
 {
     return m_springs;
@@ -380,10 +421,6 @@ spring2D::const_ptr engine2D::spring(std::size_t index) const
     return {&m_springs, index};
 }
 
-kit::vector_view<kit::scope<behaviour2D>> engine2D::behaviours()
-{
-    return m_behaviours;
-}
 kit::track_vector_view<spring2D> engine2D::springs()
 {
     return m_springs;
@@ -423,38 +460,6 @@ std::size_t engine2D::size() const
     return m_entities.size();
 }
 
-const rk::integrator &engine2D::integrator() const
-{
-    return m_integ;
-}
-rk::integrator &engine2D::integrator()
-{
-    return m_integ;
-}
-
-const collider2D &engine2D::collider() const
-{
-    return m_collider;
-}
-collider2D &engine2D::collider()
-{
-    return m_collider;
-}
-
-const compeller2D &engine2D::compeller() const
-{
-    return m_compeller;
-}
-compeller2D &engine2D::compeller()
-{
-    return m_compeller;
-}
-
-engine_events &engine2D::events()
-{
-    return m_events;
-}
-
 float engine2D::elapsed() const
 {
     return m_elapsed;
@@ -465,11 +470,11 @@ YAML::Node engine2D::serializer::encode(const engine2D &eng) const
     YAML::Node node;
     for (const ppx::entity2D &e : eng.entities())
         node["Entities"].push_back(e);
-    node["Collider"] = eng.collider();
+    node["Collider"] = eng.collisions;
 
     for (const ppx::spring2D &sp : eng.springs())
         node["Springs"].push_back(sp);
-    for (const auto &ctr : eng.compeller().constraints())
+    for (const auto &ctr : eng.constraints())
     {
         YAML::Node child;
         child[ctr->name()] = *ctr;
@@ -479,7 +484,7 @@ YAML::Node engine2D::serializer::encode(const engine2D &eng) const
     for (const auto &bhv : eng.behaviours())
         node["Behaviours"][bhv->id()] = *bhv;
 
-    node["Integrator"] = eng.integrator();
+    node["Integrator"] = eng.integrator;
     node["Elapsed"] = eng.elapsed();
     return node;
 }
@@ -489,13 +494,13 @@ bool engine2D::serializer::decode(const YAML::Node &node, engine2D &eng) const
         return false;
 
     eng.clear_entities();
-    eng.m_integ = node["Integrator"].as<rk::integrator>();
-    eng.m_integ.state().clear();
+    eng.integrator = node["Integrator"].as<rk::integrator>();
+    eng.integrator.state().clear();
 
     for (const YAML::Node &n : node["Entities"])
         eng.add_entity(n.as<ppx::entity2D>());
 
-    node["Collider"].as<ppx::collider2D>(eng.collider());
+    node["Collider"].as<ppx::collider2D>(eng.collisions);
     for (const YAML::Node &n : node["Springs"])
     {
         const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
@@ -517,13 +522,13 @@ bool engine2D::serializer::decode(const YAML::Node &node, engine2D &eng) const
             const std::size_t idx1 = revnode["Index1"].as<std::size_t>(), idx2 = revnode["Index2"].as<std::size_t>();
             if (revnode["Anchor1"])
             {
-                const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(
+                const auto revjoint = eng.add_constraint<ppx::revolute_joint2D>(
                     eng[idx1], eng[idx2], revnode["Anchor1"].as<glm::vec2>(), revnode["Anchor2"].as<glm::vec2>());
 
                 revnode.as<ppx::revolute_joint2D>(*revjoint);
                 continue;
             }
-            const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(eng[idx1], eng[idx2]);
+            const auto revjoint = eng.add_constraint<ppx::revolute_joint2D>(eng[idx1], eng[idx2]);
             revnode.as<ppx::revolute_joint2D>(*revjoint);
         }
 

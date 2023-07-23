@@ -18,22 +18,27 @@ class engine2D;
 class compeller2D final : kit::non_copyable
 {
   public:
-    compeller2D(const engine2D &parent, std::size_t allocations, engine_events *cbs);
+    compeller2D(const engine2D &parent, std::size_t allocations);
 
-    template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
+    template <typename T, class... ConstraintArgs>
+    T *add_constraint(const kit::event<constraint2D *> &event_callback, ConstraintArgs &&...args)
     {
         static_assert(std::is_base_of<constraint2D, T>::value, "Constraint must inherit from constraint2D!");
         auto ctr = kit::make_scope<T>(std::forward<ConstraintArgs>(args)...);
         T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));
-        m_callbacks->on_constraint_addition(ptr);
+        event_callback(ptr);
         return ptr;
     }
-    bool remove_constraint(const constraint2D *ctr);
-    void clear_constraints();
 
-    void validate();
+    bool remove_constraint(std::size_t index, const kit::event<const constraint2D &> &event_callback);
+    bool remove_constraint(const constraint2D *ctr, const kit::event<const constraint2D &> &event_callback);
+    bool remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback);
+
+    void clear_constraints(const kit::event<const constraint2D &> &event_callback);
+
+    void validate(const kit::event<const constraint2D &> &event_callback);
 
     void solve_and_load_constraints(std::vector<float> &stchanges, const kit::stack_vector<float> &inv_masses) const;
 
@@ -42,7 +47,6 @@ class compeller2D final : kit::non_copyable
   private:
     const engine2D &m_parent;
     std::vector<kit::scope<constraint2D>> m_constraints;
-    engine_events *m_callbacks;
 
     using constraint_gradient_fun = std::function<std::vector<constraint2D::entity_gradient>(const constraint2D &)>;
     kit::stack_vector<float> constraint_matrix(const constraint_gradient_fun &constraint_grad) const;

@@ -90,7 +90,8 @@ template <typename It, typename Func> static void compute(It it1, It it2, Func f
         func(thread_idx, *it);
 }
 
-template <template <typename...> typename C, typename T, typename Func> static void for_each(const C<T> &vec, Func func)
+template <template <typename...> typename C, typename T, typename Func>
+static void for_each_mt(const C<T> &vec, Func func)
 {
     std::array<std::thread, PPX_THREAD_COUNT> threads;
     for (std::size_t i = 0; i < PPX_THREAD_COUNT; i++)
@@ -118,7 +119,7 @@ void collider2D::narrow_fase(std::vector<float> &stchanges)
         if (narrow_detection(*cp.first, *cp.second, &c))
             solve(c, stchanges);
     };
-    for_each(m_collision_pairs, exec);
+    for_each_mt(m_collision_pairs, exec);
 #else
     for (const colpair &cp : m_collision_pairs)
     {
@@ -284,7 +285,7 @@ void collider2D::brute_force(std::vector<float> &stchanges)
                 try_exit_callback(e1, e2);
         }
     };
-    for_each(m_parent.entities().unwrap(), exec);
+    for_each_mt(m_parent.entities().unwrap(), exec);
     for (const auto &pairs : m_mt_collision_pairs)
         m_collision_pairs.insert(m_collision_pairs.begin(), pairs.begin(), pairs.end());
 #else
@@ -385,7 +386,7 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
                     try_exit_callback(*e1, *e2);
             }
     };
-    for_each(partitions, exec);
+    for_each_mt(partitions, exec);
     for (const auto &pairs : m_mt_collision_pairs)
         m_collision_pairs.insert(m_collision_pairs.begin(), pairs.begin(), pairs.end());
 #else
