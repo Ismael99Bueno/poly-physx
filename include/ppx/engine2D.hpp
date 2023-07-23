@@ -37,7 +37,7 @@ class engine2D final : kit::non_copyable
 
     template <class... BodyArgs> body2D::ptr add_body(BodyArgs &&...args)
     {
-        body2D &bd = m_entities.emplace_back(std::forward<BodyArgs>(args)...);
+        body2D &bd = m_bodies.emplace_back(std::forward<BodyArgs>(args)...);
         return process_body_addition(bd);
     }
 
@@ -92,7 +92,7 @@ class engine2D final : kit::non_copyable
     bool remove_constraint(const constraint2D *ctr);
     bool remove_constraint(kit::uuid id);
 
-    void clear_entities();
+    void clear_bodies();
     void clear_behaviours();
     void clear_springs();
     void clear_constraints();
@@ -123,11 +123,11 @@ class engine2D final : kit::non_copyable
     body2D::const_ptr operator[](const glm::vec2 &point) const;
     body2D::ptr operator[](const glm::vec2 &point);
 
-    const kit::track_vector<body2D> &entities() const;
+    const kit::track_vector<body2D> &bodies() const;
     const kit::track_vector<spring2D> &springs() const;
     spring2D::const_ptr spring(std::size_t index) const;
 
-    kit::track_vector_view<body2D> entities();
+    kit::track_vector_view<body2D> bodies();
     kit::track_vector_view<spring2D> springs();
     spring2D::ptr spring(std::size_t index);
 
@@ -138,7 +138,7 @@ class engine2D final : kit::non_copyable
     float elapsed() const;
 
   private:
-    kit::track_vector<body2D> m_entities;
+    kit::track_vector<body2D> m_bodies;
     compeller2D m_compeller;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
     kit::track_vector<spring2D> m_springs;
@@ -152,7 +152,7 @@ class engine2D final : kit::non_copyable
 
     kit::stack_vector<float> effective_inverse_masses() const;
 
-    void reset_entities();
+    void reset_bodies();
     void retrieve(const std::vector<float> &vars_buffer);
     void retrieve();
     void validate();

@@ -10,15 +10,15 @@ namespace ppx
 engine2D::engine2D(const rk::butcher_tableau &table, const std::size_t allocations)
     : collisions(*this, 2 * allocations), integrator(table), m_compeller(*this, allocations)
 {
-    m_entities.reserve(allocations);
+    m_bodies.reserve(allocations);
     integrator.state().reserve(6 * allocations);
 }
 
 void engine2D::retrieve(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()
-    for (std::size_t i = 0; i < m_entities.size(); i++)
-        m_entities[i].retrieve(vars_buffer);
+    for (std::size_t i = 0; i < m_bodies.size(); i++)
+        m_bodies[i].retrieve(vars_buffer);
 }
 
 void engine2D::retrieve()
@@ -29,7 +29,7 @@ void engine2D::retrieve()
 bool engine2D::raw_forward(const float timestep)
 {
     const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
-    reset_entities();
+    reset_bodies();
     retrieve();
     collisions.flush_collisions();
     return valid;
@@ -37,7 +37,7 @@ bool engine2D::raw_forward(const float timestep)
 bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
 {
     const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
-    reset_entities();
+    reset_bodies();
     retrieve();
     collisions.flush_collisions();
     return valid;
@@ -45,7 +45,7 @@ bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterati
 bool engine2D::embedded_forward(float &timestep)
 {
     const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
-    reset_entities();
+    reset_bodies();
     retrieve();
     collisions.flush_collisions();
     return valid;
@@ -61,18 +61,18 @@ static void load_force(std::vector<float> &stchanges, const glm::vec2 &force, fl
 void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
 {
     KIT_PERF_FUNCTION()
-    for (std::size_t i = 0; i < m_entities.size(); i++)
+    for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
         const std::size_t index = 6 * i;
-        const glm::vec2 &vel = m_entities[i].vel();
-        const float angvel = m_entities[i].angvel();
+        const glm::vec2 &vel = m_bodies[i].vel();
+        const float angvel = m_bodies[i].angvel();
         stchanges[index] = vel.x;
         stchanges[index + 1] = vel.y;
         stchanges[index + 2] = angvel;
-        if (m_entities[i].kinematic())
+        if (m_bodies[i].kinematic())
         {
-            const glm::vec2 &force = m_entities[i].added_force();
-            const float torque = m_entities[i].added_torque();
+            const glm::vec2 &force = m_bodies[i].added_force();
+            const float torque = m_bodies[i].added_torque();
             load_force(stchanges, force, torque, index);
         }
     }
@@ -99,7 +99,7 @@ void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) co
     KIT_PERF_FUNCTION()
     for (const auto &bhv : m_behaviours)
         if (bhv->enabled())
-            for (const auto &bd : bhv->entities())
+            for (const auto &bd : bhv->bodies())
             {
                 if (!bd->kinematic())
                     continue;
@@ -121,19 +121,19 @@ kit::stack_vector<float> engine2D::effective_inverse_masses() const
 {
     KIT_PERF_FUNCTION()
     kit::stack_vector<float> inv_masses;
-    inv_masses.reserve(3 * m_entities.size());
-    for (std::size_t i = 0; i < m_entities.size(); i++)
+    inv_masses.reserve(3 * m_bodies.size());
+    for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
-        const float inv_mass = m_entities[i].kinematic() ? m_entities[i].inverse_mass() : 0.f,
-                    inv_inertia = m_entities[i].kinematic() ? m_entities[i].inverse_inertia() : 0.f;
+        const float inv_mass = m_bodies[i].kinematic() ? m_bodies[i].inverse_mass() : 0.f,
+                    inv_inertia = m_bodies[i].kinematic() ? m_bodies[i].inverse_inertia() : 0.f;
         inv_masses.insert(inv_masses.end(), {inv_mass, inv_mass, inv_inertia});
     }
     return inv_masses;
 }
 
-void engine2D::reset_entities()
+void engine2D::reset_bodies()
 {
-    for (body2D &bd : m_entities)
+    for (body2D &bd : m_bodies)
     {
         bd.m_added_force = glm::vec2(0.f);
         bd.m_added_torque = 0.f;
@@ -145,7 +145,7 @@ body2D::ptr engine2D::process_body_addition(body2D &bd)
     rk::state &state = integrator.state();
     bd.m_state = &state;
 
-    const body2D::ptr e_ptr = {&m_entities, m_entities.size() - 1};
+    const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
     const glm::vec2 &pos = bd.pos(), &vel = bd.vel();
     state.append({pos.x, pos.y, bd.angpos(), vel.x, vel.y, bd.angvel()});
     bd.retrieve();
@@ -153,8 +153,8 @@ body2D::ptr engine2D::process_body_addition(body2D &bd)
 
     KIT_INFO("Added body with index {0} and id {1}.", bd.index(), (std::uint64_t)bd.id())
 #ifdef DEBUG
-    for (std::size_t i = 0; i < m_entities.size() - 1; i++)
-        KIT_ASSERT_CRITICAL(m_entities[i].id() != bd.id(), "Body with index {0} has the same id as body with index {1}",
+    for (std::size_t i = 0; i < m_bodies.size() - 1; i++)
+        KIT_ASSERT_CRITICAL(m_bodies[i].id() != bd.id(), "Body with index {0} has the same id as body with index {1}",
                             i, bd.index())
 #endif
     events.on_body_addition(e_ptr);
@@ -163,20 +163,20 @@ body2D::ptr engine2D::process_body_addition(body2D &bd)
 
 bool engine2D::remove_body(std::size_t index)
 {
-    if (index >= m_entities.size())
+    if (index >= m_bodies.size())
     {
-        KIT_WARN("Body index exceeds array bounds. Aborting... - index: {0}, size: {1}", index, m_entities.size())
+        KIT_WARN("Body index exceeds array bounds. Aborting... - index: {0}, size: {1}", index, m_bodies.size())
         return false;
     }
-    KIT_INFO("Removing body with index {0} and id {1}", index, m_entities[index].id())
+    KIT_INFO("Removing body with index {0} and id {1}", index, m_bodies[index].id())
 
-    events.on_early_body_removal(m_entities[index]);
+    events.on_early_body_removal(m_bodies[index]);
     rk::state &state = integrator.state();
-    m_entities.erase(index);
+    m_bodies.erase(index);
 
     for (std::size_t i = 0; i < 6; i++)
         state[6 * index + i] = state[state.size() - 6 + i];
-    state.resize(6 * m_entities.size());
+    state.resize(6 * m_bodies.size());
 
     validate();
     events.on_late_body_removal(std::move(index)); // It just made me do this...
@@ -190,7 +190,7 @@ bool engine2D::remove_body(const body2D &bd)
 
 bool engine2D::remove_body(kit::uuid id)
 {
-    for (const body2D &bd : m_entities)
+    for (const body2D &bd : m_bodies)
         if (bd.id() == id)
             return remove_body(bd.index());
     return false;
@@ -267,9 +267,9 @@ bool engine2D::remove_constraint(kit::uuid id)
     return m_compeller.remove_constraint(id, events.on_constraint_removal);
 }
 
-void engine2D::clear_entities()
+void engine2D::clear_bodies()
 {
-    for (std::size_t i = m_entities.size() - 1; i < m_entities.size(); i--)
+    for (std::size_t i = m_bodies.size() - 1; i < m_bodies.size(); i--)
         remove_body(i);
 }
 void engine2D::clear_behaviours()
@@ -293,13 +293,13 @@ void engine2D::clear()
     m_behaviours.clear();
     m_springs.clear();
     m_compeller.clear_constraints(events.on_constraint_removal);
-    clear_entities();
+    clear_bodies();
 }
 
 float engine2D::kinetic_energy() const
 {
     float ke = 0.f;
-    for (const body2D &bd : m_entities)
+    for (const body2D &bd : m_bodies)
         ke += bd.kinetic_energy();
     return ke;
 }
@@ -321,9 +321,9 @@ std::vector<float> engine2D::operator()(const float t, const float dt, const std
 {
     KIT_PERF_FUNCTION()
     KIT_ASSERT_CRITICAL(
-        vars.size() == 6 * m_entities.size(),
+        vars.size() == 6 * m_bodies.size(),
         "State vector size must be exactly 6 times greater than the body array size - vars: {0}, body array: {1}",
-        vars.size(), m_entities.size())
+        vars.size(), m_bodies.size())
     std::vector<float> stchanges(vars.size(), 0.f);
 
     retrieve(vars);
@@ -333,7 +333,7 @@ std::vector<float> engine2D::operator()(const float t, const float dt, const std
 
     collisions.solve_and_load_collisions(stchanges);
     m_compeller.solve_and_load_constraints(stchanges, inv_masses);
-    for (std::size_t i = 0; i < m_entities.size(); i++)
+    for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
         stchanges[6 * i + 3] *= inv_masses[3 * i];
         stchanges[6 * i + 4] *= inv_masses[3 * i + 1];
@@ -344,8 +344,8 @@ std::vector<float> engine2D::operator()(const float t, const float dt, const std
 
 std::optional<std::size_t> engine2D::index_from_id(const kit::uuid id) const
 {
-    for (std::size_t i = 0; i < m_entities.size(); i++)
-        if (m_entities[i].id() == id)
+    for (std::size_t i = 0; i < m_bodies.size(); i++)
+        if (m_bodies[i].id() == id)
             return i;
     return {};
 }
@@ -372,34 +372,34 @@ template <> behaviour2D *engine2D::behaviour_from_name(const std::string &name) 
 
 body2D::const_ptr engine2D::operator[](const std::size_t index) const
 {
-    KIT_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
-                     m_entities.size())
-    return {&m_entities, index};
+    KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
+                     m_bodies.size())
+    return {&m_bodies, index};
 }
 body2D::ptr engine2D::operator[](const std::size_t index)
 {
-    KIT_ASSERT_ERROR(index < m_entities.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
-                     m_entities.size())
-    return {&m_entities, index};
+    KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
+                     m_bodies.size())
+    return {&m_bodies, index};
 }
 
 std::vector<body2D::const_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
 {
     std::vector<body2D::const_ptr> in_area;
-    in_area.reserve(m_entities.size() / 2);
+    in_area.reserve(m_bodies.size() / 2);
 
-    for (const body2D &bd : m_entities)
+    for (const body2D &bd : m_bodies)
         if (geo::intersect(bd.shape().bounding_box(), aabb))
-            in_area.emplace_back(&m_entities, bd.index());
+            in_area.emplace_back(&m_bodies, bd.index());
     return in_area;
 }
 std::vector<body2D::ptr> engine2D::operator[](const geo::aabb2D &aabb)
 {
     std::vector<body2D::ptr> in_area;
-    in_area.reserve(m_entities.size() / 2);
-    for (const body2D &bd : m_entities)
+    in_area.reserve(m_bodies.size() / 2);
+    for (const body2D &bd : m_bodies)
         if (geo::intersect(bd.shape().bounding_box(), aabb))
-            in_area.emplace_back(&m_entities, bd.index());
+            in_area.emplace_back(&m_bodies, bd.index());
     return in_area;
 }
 
@@ -433,31 +433,31 @@ spring2D::ptr engine2D::spring(std::size_t index)
 body2D::const_ptr engine2D::operator[](const glm::vec2 &point) const
 {
     const geo::aabb2D aabb = point;
-    for (const body2D &bd : m_entities)
+    for (const body2D &bd : m_bodies)
         if (geo::intersect(bd.shape().bounding_box(), aabb))
-            return {&m_entities, bd.index()};
+            return {&m_bodies, bd.index()};
     return nullptr;
 }
 body2D::ptr engine2D::operator[](const glm::vec2 &point)
 {
     const geo::aabb2D aabb = point;
-    for (const body2D &bd : m_entities)
+    for (const body2D &bd : m_bodies)
         if (geo::intersect(bd.shape().bounding_box(), aabb))
-            return {&m_entities, bd.index()};
+            return {&m_bodies, bd.index()};
     return nullptr;
 }
 
-const kit::track_vector<body2D> &engine2D::entities() const
+const kit::track_vector<body2D> &engine2D::bodies() const
 {
-    return m_entities;
+    return m_bodies;
 }
-kit::track_vector_view<body2D> engine2D::entities()
+kit::track_vector_view<body2D> engine2D::bodies()
 {
-    return m_entities;
+    return m_bodies;
 }
 std::size_t engine2D::size() const
 {
-    return m_entities.size();
+    return m_bodies.size();
 }
 
 float engine2D::elapsed() const
@@ -468,7 +468,7 @@ float engine2D::elapsed() const
 YAML::Node engine2D::serializer::encode(const engine2D &eng) const
 {
     YAML::Node node;
-    for (const ppx::body2D &bd : eng.entities())
+    for (const ppx::body2D &bd : eng.bodies())
         node["Entities"].push_back(bd);
     node["Collider"] = eng.collisions;
 
@@ -493,7 +493,7 @@ bool engine2D::serializer::decode(const YAML::Node &node, engine2D &eng) const
     if (!node.IsMap() || node.size() != 7)
         return false;
 
-    eng.clear_entities();
+    eng.clear_bodies();
     eng.integrator = node["Integrator"].as<rk::integrator>();
     eng.integrator.state().clear();
 

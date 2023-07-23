@@ -32,7 +32,7 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     virtual std::vector<body_gradient> constraint_derivative_gradients() const = 0;
 
   private:
-    std::vector<ppx::body2D::const_ptr> m_entities;
+    std::vector<ppx::body2D::const_ptr> m_bodies;
     float m_stiffness;
     float m_dampening;
 };
@@ -42,58 +42,58 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 //     constraint2D() = default;
 //     virtual ~constraint2D() = default;
 
-//     constraint2D(const std::array<body2D::ptr, N> &entities) : m_grad_entities(entities)
+//     constraint2D(const std::array<body2D::ptr, N> &bodies) : m_grad_bodies(bodies)
 //     {
-//         copy_to_const_entities(entities);
+//         copy_to_const_bodies(bodies);
 //     }
 
-//     constraint2D(const std::array<body2D::ptr, N> &entities, float stiffness, float dampening)
-//         : constraint_interface2D(stiffness, dampening), m_grad_entities(entities)
+//     constraint2D(const std::array<body2D::ptr, N> &bodies, float stiffness, float dampening)
+//         : constraint_interface2D(stiffness, dampening), m_grad_bodies(bodies)
 //     {
-//         copy_to_const_entities(entities);
+//         copy_to_const_bodies(bodies);
 //     }
 
-//     const std::array<body2D::ptr, N> &entities() const
+//     const std::array<body2D::ptr, N> &bodies() const
 //     {
-//         return m_grad_entities;
+//         return m_grad_bodies;
 //     }
-//     void entities(const std::array<body2D::ptr, N> &entities)
+//     void bodies(const std::array<body2D::ptr, N> &bodies)
 //     {
-//         m_grad_entities = entities;
-//         copy_to_const_entities(entities);
+//         m_grad_bodies = bodies;
+//         copy_to_const_bodies(bodies);
 //     }
 
 //     float value() const override
 //     {
-//         return constraint(m_entities);
+//         return constraint(m_bodies);
 //     }
 //     virtual bool valid() const override
 //     {
-//         for (const body2D::const_ptr &bd : m_entities)
+//         for (const body2D::const_ptr &bd : m_bodies)
 //             if (!bd)
 //                 return false;
-//         for (const body2D::ptr &bd : m_grad_entities)
+//         for (const body2D::ptr &bd : m_grad_bodies)
 //             if (!bd)
 //                 return false;
 //         return true;
 //     }
 
 //   private:
-//     std::array<body2D::const_ptr, N> m_entities;
-//     std::array<body2D::ptr, N> m_grad_entities;
+//     std::array<body2D::const_ptr, N> m_bodies;
+//     std::array<body2D::ptr, N> m_grad_bodies;
 
-//     void copy_to_const_entities(const std::array<body2D::ptr, N> &entities)
+//     void copy_to_const_bodies(const std::array<body2D::ptr, N> &bodies)
 //     {
 //         for (std::size_t i = 0; i < N; i++)
-//             m_entities[i] = entities[i];
+//             m_bodies[i] = bodies[i];
 //     }
 
-//     virtual float constraint(const std::array<body2D::const_ptr, N> &entities) const = 0;
-//     virtual float constraint_derivative(const std::array<body2D::const_ptr, N> &entities) const = 0;
+//     virtual float constraint(const std::array<body2D::const_ptr, N> &bodies) const = 0;
+//     virtual float constraint_derivative(const std::array<body2D::const_ptr, N> &bodies) const = 0;
 
 //     float derivative() const override
 //     {
-//         return constraint_derivative(m_entities);
+//         return constraint_derivative(m_bodies);
 //     }
 //     std::size_t size() const override
 //     {
@@ -101,7 +101,7 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 //     }
 //     body2D &operator[](std::size_t index) const override
 //     {
-//         return *m_grad_entities[index];
+//         return *m_grad_bodies[index];
 //     }
 // };
 } // namespace ppx

@@ -134,11 +134,11 @@ void collider2D::update_quad_tree()
 {
     m_quad_tree.clear();
     geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
-    for (const body2D &bd : m_parent.entities())
+    for (const body2D &bd : m_parent.bodies())
         aabb += bd.shape().bounding_box();
 
     m_quad_tree.aabb(aabb);
-    for (const body2D &bd : m_parent.entities())
+    for (const body2D &bd : m_parent.bodies())
         m_quad_tree.insert(&bd);
 }
 
@@ -270,11 +270,11 @@ void collider2D::brute_force(std::vector<float> &stchanges)
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
     const auto exec = [this, &stchanges](const std::size_t thread_idx, const body2D &bd1) {
-        const auto entities = m_parent.entities();
+        const auto bodies = m_parent.bodies();
         for (std::size_t j = 0; j < m_parent.size(); j++)
         {
             collision2D c;
-            const body2D &bd2 = entities[j];
+            const body2D &bd2 = bodies[j];
             if (full_detection(bd1, bd2, &c))
             {
                 try_enter_or_stay_callback(bd1, bd2, c);
@@ -285,14 +285,14 @@ void collider2D::brute_force(std::vector<float> &stchanges)
                 try_exit_callback(bd1, bd2);
         }
     };
-    for_each_mt(m_parent.entities().unwrap(), exec);
+    for_each_mt(m_parent.bodies().unwrap(), exec);
     for (const auto &pairs : m_mt_collision_pairs)
         m_collision_pairs.insert(m_collision_pairs.begin(), pairs.begin(), pairs.end());
 #else
 #ifdef DEBUG
     std::size_t checks = 0, collisions = 0;
 #endif
-    const auto entities = m_parent.entities();
+    const auto bodies = m_parent.bodies();
     for (std::size_t i = 0; i < m_parent.size(); i++)
         for (std::size_t j = i + 1; j < m_parent.size(); j++)
         {
@@ -300,7 +300,7 @@ void collider2D::brute_force(std::vector<float> &stchanges)
             checks++;
 #endif
             collision2D c;
-            const body2D &bd1 = entities[i], &bd2 = entities[j];
+            const body2D &bd1 = bodies[i], &bd2 = bodies[j];
             if (full_detection(bd1, bd2, &c))
             {
 #ifdef DEBUG
@@ -453,7 +453,7 @@ YAML::Node collider2D::serializer::encode(const collider2D &cld) const
 
     YAML::Node qt = node["Quad tree"];
     qt["Dimensions"] = cld.quad_tree().aabb();
-    qt["Max entities"] = cld.quad_tree().max_entities();
+    qt["Max bodies"] = cld.quad_tree().max_bodies();
     qt["Max depth"] = ppx::quad_tree2D::max_depth();
     qt["Min size"] = ppx::quad_tree2D::min_size();
 
@@ -470,7 +470,7 @@ bool collider2D::serializer::decode(const YAML::Node &node, collider2D &cld) con
 
     const YAML::Node &qt = node["Quad tree"];
     cld.quad_tree().aabb(qt["Dimensions"].as<geo::aabb2D>());
-    cld.quad_tree().max_entities(qt["Max entities"].as<std::size_t>());
+    cld.quad_tree().max_bodies(qt["Max bodies"].as<std::size_t>());
     ppx::quad_tree2D::max_depth(qt["Max depth"].as<std::uint32_t>());
     ppx::quad_tree2D::min_size(qt["Min size"].as<float>());
 

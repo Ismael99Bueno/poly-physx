@@ -64,7 +64,7 @@ std::size_t behaviour2D::size() const
     return m_included.size();
 }
 
-const std::vector<body2D::const_ptr> &behaviour2D::entities() const
+const std::vector<body2D::const_ptr> &behaviour2D::bodies() const
 {
     return m_included;
 }

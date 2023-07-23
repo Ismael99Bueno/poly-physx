@@ -38,7 +38,7 @@ class behaviour2D : kit::non_copyable,
     void clear();
     std::size_t size() const;
 
-    const std::vector<body2D::const_ptr> &entities() const;
+    const std::vector<body2D::const_ptr> &bodies() const;
 
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const;

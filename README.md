@@ -1,13 +1,13 @@
 # poly-physx
 
-poly-physx is a 2D physics engine that simulates collisions between convex polygons, forces and interactions between entities, and constraints. It is designed to be flexible and easy to use, allowing developers to create complex 2D physics simulations with ease.
+poly-physx is a 2D physics engine that simulates collisions between convex polygons, forces and interactions between bodies, and constraints. It is designed to be flexible and easy to use, allowing developers to create complex 2D physics simulations with ease.
 
 ## Features
 
 - Collision detection and resolution between convex polygons
-- Forces and interactions between entities, including gravity, friction, and spring forces
+- Forces and interactions between bodies, including gravity, friction, and spring forces
 - Constraints, including distance constraints and hinge constraints
-- Integration with the Runge-Kutta method for accurate movement of entities
+- Integration with the Runge-Kutta method for accurate movement of bodies
 - Debugging and profiling tools for better development experience
 - Ability to write and read the state of the simulation to and from a file using an ini-parser
 
