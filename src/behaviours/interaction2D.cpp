@@ -3,14 +3,14 @@
 
 namespace ppx
 {
-float interaction2D::potential(const body2D &bd, const glm::vec2 &pos) const
+float interaction2D::potential(const body2D &bd, const glm::vec2 &position) const
 {
-    m_unit.pos(pos);
+    m_unit.position(position);
     return potential_energy_pair(m_unit, bd);
 }
-float interaction2D::potential(const glm::vec2 &pos) const
+float interaction2D::potential(const glm::vec2 &position) const
 {
-    m_unit.pos(pos);
+    m_unit.position(position);
     float pot = 0.f;
     for (const auto &bd : m_included)
         pot += potential_energy_pair(m_unit, *bd);

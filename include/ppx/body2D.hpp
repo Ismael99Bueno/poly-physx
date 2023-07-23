@@ -26,8 +26,8 @@ class body2D : public kit::identifiable<>, public kit::indexable
     };
     struct specs
     {
-        glm::vec2 pos{0.f}, vel{0.f};
-        float angpos = 0.f, angvel = 0.f, mass = 1.f, charge = 1.f;
+        glm::vec2 position{0.f}, velocity{0.f};
+        float rotation = 0.f, angular_velocity = 0.f, mass = 1.f, charge = 1.f;
         kit::block_vector<glm::vec2> vertices = geo::polygon::box(5.f);
         float radius = 2.5f;
         bool kinematic = true;
@@ -35,13 +35,14 @@ class body2D : public kit::identifiable<>, public kit::indexable
         static specs from_body(const body2D &bd);
     };
 
-    body2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &pos = glm::vec2(0.f),
-           const glm::vec2 &vel = glm::vec2(0.f), float angpos = 0.f, float angvel = 0.f, float mass = 1.f,
-           float charge = 1.f, bool kinematic = true);
-    body2D(float radius, const glm::vec2 &pos = glm::vec2(0.f), const glm::vec2 &vel = glm::vec2(0.f),
-           float angpos = 0.f, float angvel = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    body2D(const glm::vec2 &pos = glm::vec2(0.f), const glm::vec2 &vel = glm::vec2(0.f), float angpos = 0.f,
-           float angvel = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
+    body2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &position = glm::vec2(0.f),
+           const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f, float angular_velocity = 0.f,
+           float mass = 1.f, float charge = 1.f, bool kinematic = true);
+    body2D(float radius, const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f),
+           float rotation = 0.f, float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f,
+           bool kinematic = true);
+    body2D(const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f,
+           float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
     body2D(const specs &spc);
 
     void retrieve();
@@ -79,19 +80,19 @@ class body2D : public kit::identifiable<>, public kit::indexable
     const body_events &events() const;
     body_events &events();
 
-    const glm::vec2 &pos() const;
-    const glm::vec2 &vel() const;
+    const glm::vec2 &position() const;
+    const glm::vec2 &velocity() const;
     const glm::vec2 vel_at(const glm::vec2 &at) const;
-    float angpos() const;
-    float angvel() const;
+    float rotation() const;
+    float angular_velocity() const;
     float mass() const;
     float inverse_mass() const;
     float charge() const;
 
-    void pos(const glm::vec2 &pos);
-    void vel(const glm::vec2 &vel);
-    void angpos(float angpos);
-    void angvel(float angvel);
+    void position(const glm::vec2 &position);
+    void velocity(const glm::vec2 &velocity);
+    void rotation(float rotation);
+    void angular_velocity(float angular_velocity);
     void mass(float mass);
     void charge(float charge);
 

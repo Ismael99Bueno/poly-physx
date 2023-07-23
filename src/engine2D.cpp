@@ -64,11 +64,11 @@ void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) c
     for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
         const std::size_t index = 6 * i;
-        const glm::vec2 &vel = m_bodies[i].vel();
-        const float angvel = m_bodies[i].angvel();
-        stchanges[index] = vel.x;
-        stchanges[index + 1] = vel.y;
-        stchanges[index + 2] = angvel;
+        const glm::vec2 &velocity = m_bodies[i].velocity();
+        const float angular_velocity = m_bodies[i].angular_velocity();
+        stchanges[index] = velocity.x;
+        stchanges[index + 1] = velocity.y;
+        stchanges[index + 2] = angular_velocity;
         if (m_bodies[i].kinematic())
         {
             const glm::vec2 &force = m_bodies[i].added_force();
@@ -146,8 +146,8 @@ body2D::ptr engine2D::process_body_addition(body2D &bd)
     bd.m_state = &state;
 
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
-    const glm::vec2 &pos = bd.pos(), &vel = bd.vel();
-    state.append({pos.x, pos.y, bd.angpos(), vel.x, vel.y, bd.angvel()});
+    const glm::vec2 &position = bd.position(), &velocity = bd.velocity();
+    state.append({position.x, position.y, bd.rotation(), velocity.x, velocity.y, bd.angular_velocity()});
     bd.retrieve();
     collisions.add_body_intervals(e_ptr);
 

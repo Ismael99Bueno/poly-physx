@@ -8,8 +8,8 @@ joint2D::joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2) : m_e1(bd1), m_
 }
 
 joint2D::joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const glm::vec2 &anchor1, const glm::vec2 &anchor2)
-    : m_e1(bd1), m_e2(bd2), m_anchor1(anchor1), m_anchor2(anchor2), m_angle1(bd1->angpos()), m_angle2(bd2->angpos()),
-      m_has_anchors(true)
+    : m_e1(bd1), m_e2(bd2), m_anchor1(anchor1), m_anchor2(anchor2), m_angle1(bd1->rotation()),
+      m_angle2(bd2->rotation()), m_has_anchors(true)
 {
 }
 joint2D::joint2D(const specs &spc) : m_e1(spc.bd1), m_e2(spc.bd2), m_has_anchors(spc.has_anchors)
@@ -18,8 +18,8 @@ joint2D::joint2D(const specs &spc) : m_e1(spc.bd1), m_e2(spc.bd2), m_has_anchors
     {
         m_anchor1 = spc.anchor1;
         m_anchor2 = spc.anchor2;
-        m_angle1 = m_e1->angpos();
-        m_angle2 = m_e2->angpos();
+        m_angle1 = m_e1->rotation();
+        m_angle2 = m_e2->rotation();
     }
 }
 
@@ -49,23 +49,23 @@ const body2D::ptr &joint2D::bd2() const
 
 glm::vec2 joint2D::anchor1() const
 {
-    return glm::rotate(m_anchor1, m_e1->angpos() - m_angle1);
+    return glm::rotate(m_anchor1, m_e1->rotation() - m_angle1);
 }
 glm::vec2 joint2D::anchor2() const
 {
-    return glm::rotate(m_anchor2, m_e2->angpos() - m_angle2);
+    return glm::rotate(m_anchor2, m_e2->rotation() - m_angle2);
 }
 
 void joint2D::anchor1(const glm::vec2 &anchor1)
 {
     m_anchor1 = anchor1;
-    m_angle1 = m_e1->angpos();
+    m_angle1 = m_e1->rotation();
     m_has_anchors = true;
 }
 void joint2D::anchor2(const glm::vec2 &anchor2)
 {
     m_anchor2 = anchor2;
-    m_angle2 = m_e2->angpos();
+    m_angle2 = m_e2->rotation();
     m_has_anchors = true;
 }
 

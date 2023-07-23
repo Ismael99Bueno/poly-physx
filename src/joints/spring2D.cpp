@@ -30,15 +30,16 @@ std::tuple<glm::vec2, float, float> spring2D::force() const
 
 std::tuple<glm::vec2, float, float> spring2D::without_anchors_force() const
 {
-    const glm::vec2 relpos = m_e2->pos() - m_e1->pos(), direction = glm::normalize(relpos),
-                    relvel = direction * glm::dot(m_e2->vel() - m_e1->vel(), direction), vlen = m_length * direction;
+    const glm::vec2 relpos = m_e2->position() - m_e1->position(), direction = glm::normalize(relpos),
+                    relvel = direction * glm::dot(m_e2->velocity() - m_e1->velocity(), direction),
+                    vlen = m_length * direction;
     return {m_stiffness * (relpos - vlen) + m_dampening * relvel, 0.f, 0.f};
 }
 
 std::tuple<glm::vec2, float, float> spring2D::with_anchors_force() const
 {
     const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
-    const glm::vec2 p1 = m_e1->pos() + rot_anchor1, p2 = m_e2->pos() + rot_anchor2;
+    const glm::vec2 p1 = m_e1->position() + rot_anchor1, p2 = m_e2->position() + rot_anchor2;
     const glm::vec2 relpos = p2 - p1, direction = glm::normalize(relpos),
                     relvel = direction * glm::dot(m_e2->vel_at(rot_anchor2) - m_e1->vel_at(rot_anchor1), direction),
                     vlen = m_length * direction;
@@ -81,7 +82,7 @@ float spring2D::kinetic_energy() const
 }
 float spring2D::potential_energy() const
 {
-    const glm::vec2 p1 = m_e1->pos() + anchor1(), p2 = m_e2->pos() + anchor2();
+    const glm::vec2 p1 = m_e1->position() + anchor1(), p2 = m_e2->position() + anchor2();
     const float dist = glm::distance(p1, p2) - m_length;
     return 0.5f * m_stiffness * dist * dist;
 }
