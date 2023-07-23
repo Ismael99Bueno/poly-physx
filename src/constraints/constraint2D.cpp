@@ -3,8 +3,8 @@
 
 namespace ppx
 {
-constraint2D::constraint2D(const float stiffness, const float dampening)
-    : m_stiffness(stiffness), m_dampening(dampening)
+constraint2D::constraint2D(const char *name, const float stiffness, const float dampening)
+    : nameable(name), m_stiffness(stiffness), m_dampening(dampening)
 {
 }
 

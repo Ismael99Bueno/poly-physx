@@ -5,10 +5,10 @@
 
 namespace ppx
 {
-class constraint2D : public kit::identifiable<>, public kit::serializable
+class constraint2D : public kit::identifiable<>, public kit::serializable, public kit::nameable
 {
   public:
-    constraint2D(float stiffness = 500.f, float dampening = 30.f);
+    constraint2D(const char *name, float stiffness = 500.f, float dampening = 30.f);
     virtual ~constraint2D() = default;
 
     float stiffness() const;

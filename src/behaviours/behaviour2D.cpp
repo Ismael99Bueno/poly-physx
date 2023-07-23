@@ -74,7 +74,7 @@ YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
     for (const auto &e : m_included)
-        node["Entities"].push_back((std::uint64_t)e->id());
+        node["Entities"].push_back(e->index());
     node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
     return node;
 }
@@ -84,7 +84,7 @@ bool behaviour2D::decode(const YAML::Node &node)
         return false;
     clear();
     for (const YAML::Node &n : node["Entities"])
-        include(m_parent->from_id(n.as<std::uint64_t>()));
+        include((*m_parent)[n.as<std::size_t>()]);
     return true;
 }
 #endif

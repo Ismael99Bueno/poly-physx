@@ -18,6 +18,7 @@ class entity2D : public kit::identifiable<>, public kit::indexable
   public:
     using ptr = kit::track_ptr<entity2D>;
     using const_ptr = kit::const_track_ptr<entity2D>;
+
     enum class shape_type
     {
         POLYGON = 0,

@@ -204,7 +204,7 @@ static bool broad_detection(const entity2D &e1, const entity2D &e2)
 {
     return e1 != e2 && (e1.kinematic() || e2.kinematic()) && geo::may_intersect(e1.shape(), e2.shape());
 }
-static bool are_circles(const entity2D &e1, const entity2D &e2)
+static bool are_both_circles(const entity2D &e1, const entity2D &e2)
 {
     return e1.type() == entity2D::shape_type::CIRCLE && e2.type() == entity2D::shape_type::CIRCLE;
 }
@@ -242,7 +242,7 @@ bool collider2D::narrow_detection_circle(const entity2D &e1, const entity2D &e2,
 
 bool collider2D::narrow_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const
 {
-    if (are_circles(e1, e2))
+    if (are_both_circles(e1, e2))
         return narrow_detection_circle(e1, e2, c);
     return narrow_detection_mix(e1, e2, c);
 }

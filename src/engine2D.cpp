@@ -470,7 +470,11 @@ YAML::Node engine2D::serializer::encode(const engine2D &eng) const
     for (const ppx::spring2D &sp : eng.springs())
         node["Springs"].push_back(sp);
     for (const auto &ctr : eng.compeller().constraints())
-        node["Constraints"].push_back(*ctr);
+    {
+        YAML::Node child;
+        child[ctr->name()] = *ctr;
+        node["Constraints"].push_back(child);
+    }
 
     for (const auto &bhv : eng.behaviours())
         node["Behaviours"][bhv->id()] = *bhv;
@@ -506,19 +510,22 @@ bool engine2D::serializer::decode(const YAML::Node &node, engine2D &eng) const
         n.as<ppx::spring2D>(*sp);
     }
 
-    for (const YAML::Node &n : node["Rigid bars"])
-    {
-        const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
-        if (n["Anchor1"])
+    for (const YAML::Node &n : node["Constraints"])
+        if (n["Revolute"])
         {
-            const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(
-                eng[idx1], eng[idx2], n["Anchor1"].as<glm::vec2>(), n["Anchor2"].as<glm::vec2>());
-            n.as<ppx::revolute_joint2D>(*revjoint);
-            continue;
+            const YAML::Node revnode = n["Revolute"];
+            const std::size_t idx1 = revnode["Index1"].as<std::size_t>(), idx2 = revnode["Index2"].as<std::size_t>();
+            if (revnode["Anchor1"])
+            {
+                const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(
+                    eng[idx1], eng[idx2], revnode["Anchor1"].as<glm::vec2>(), revnode["Anchor2"].as<glm::vec2>());
+
+                revnode.as<ppx::revolute_joint2D>(*revjoint);
+                continue;
+            }
+            const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(eng[idx1], eng[idx2]);
+            revnode.as<ppx::revolute_joint2D>(*revjoint);
         }
-        const auto revjoint = eng.compeller().add_constraint<ppx::revolute_joint2D>(eng[idx1], eng[idx2]);
-        n.as<ppx::revolute_joint2D>(*revjoint);
-    }
 
     for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
     {
