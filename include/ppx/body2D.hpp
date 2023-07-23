@@ -1,11 +1,11 @@
-#ifndef PPX_ENTITY2D_HPP
-#define PPX_ENTITY2D_HPP
+#ifndef PPX_BODY2D_HPP
+#define PPX_BODY2D_HPP
 
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"
 #include "geo/circle.hpp"
 #include "rk/state.hpp"
-#include "ppx/events/entity_events.hpp"
+#include "ppx/events/body_events.hpp"
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/indexable.hpp"
 #include "kit/memory/track_ptr.hpp"
@@ -13,11 +13,11 @@
 
 namespace ppx
 {
-class entity2D : public kit::identifiable<>, public kit::indexable
+class body2D : public kit::identifiable<>, public kit::indexable
 {
   public:
-    using ptr = kit::track_ptr<entity2D>;
-    using const_ptr = kit::const_track_ptr<entity2D>;
+    using ptr = kit::track_ptr<body2D>;
+    using const_ptr = kit::const_track_ptr<body2D>;
 
     enum class shape_type
     {
@@ -32,17 +32,17 @@ class entity2D : public kit::identifiable<>, public kit::indexable
         float radius = 2.5f;
         bool kinematic = true;
         shape_type shape = shape_type::POLYGON;
-        static specs from_entity(const entity2D &e);
+        static specs from_body(const body2D &bd);
     };
 
-    entity2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &pos = glm::vec2(0.f),
-             const glm::vec2 &vel = glm::vec2(0.f), float angpos = 0.f, float angvel = 0.f, float mass = 1.f,
-             float charge = 1.f, bool kinematic = true);
-    entity2D(float radius, const glm::vec2 &pos = glm::vec2(0.f), const glm::vec2 &vel = glm::vec2(0.f),
-             float angpos = 0.f, float angvel = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    entity2D(const glm::vec2 &pos = glm::vec2(0.f), const glm::vec2 &vel = glm::vec2(0.f), float angpos = 0.f,
-             float angvel = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    entity2D(const specs &spc);
+    body2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &pos = glm::vec2(0.f),
+           const glm::vec2 &vel = glm::vec2(0.f), float angpos = 0.f, float angvel = 0.f, float mass = 1.f,
+           float charge = 1.f, bool kinematic = true);
+    body2D(float radius, const glm::vec2 &pos = glm::vec2(0.f), const glm::vec2 &vel = glm::vec2(0.f),
+           float angpos = 0.f, float angvel = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
+    body2D(const glm::vec2 &pos = glm::vec2(0.f), const glm::vec2 &vel = glm::vec2(0.f), float angpos = 0.f,
+           float angvel = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
+    body2D(const specs &spc);
 
     void retrieve();
     void dispatch() const;
@@ -76,8 +76,8 @@ class entity2D : public kit::identifiable<>, public kit::indexable
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
-    const entity_events &events() const;
-    entity_events &events();
+    const body_events &events() const;
+    body_events &events();
 
     const glm::vec2 &pos() const;
     const glm::vec2 &vel() const;
@@ -99,7 +99,7 @@ class entity2D : public kit::identifiable<>, public kit::indexable
     std::variant<geo::polygon, geo::circle> m_shape;
     rk::state *m_state = nullptr;
     glm::vec2 m_vel{0.f}, m_added_force{0.f};
-    entity_events m_events;
+    body_events m_events;
     float m_angvel, m_added_torque = 0.f, m_mass, m_inv_mass, m_inertia, m_inv_inertia, m_charge;
     bool m_kinematic;
 
@@ -110,17 +110,17 @@ class entity2D : public kit::identifiable<>, public kit::indexable
     friend class engine2D;
 };
 #ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const entity2D &e);
+YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &bd);
 #endif
 } // namespace ppx
 
 #ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
-template <> struct convert<ppx::entity2D>
+template <> struct convert<ppx::body2D>
 {
-    static Node encode(const ppx::entity2D &e);
-    static bool decode(const Node &node, ppx::entity2D &e);
+    static Node encode(const ppx::body2D &bd);
+    static bool decode(const Node &node, ppx::body2D &bd);
 };
 } // namespace YAML
 #endif

@@ -1,7 +1,7 @@
 #ifndef PPX_CONSTRAINT2D_HPP
 #define PPX_CONSTRAINT2D_HPP
 
-#include "ppx/entity2D.hpp"
+#include "ppx/body2D.hpp"
 
 namespace ppx
 {
@@ -27,12 +27,12 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     virtual float constraint_value() const = 0;
     virtual float constraint_derivative() const = 0;
 
-    using entity_gradient = std::pair<const entity2D *, std::array<float, 3>>;
-    virtual std::vector<entity_gradient> constraint_gradients() const = 0;
-    virtual std::vector<entity_gradient> constraint_derivative_gradients() const = 0;
+    using body_gradient = std::pair<const body2D *, std::array<float, 3>>;
+    virtual std::vector<body_gradient> constraint_gradients() const = 0;
+    virtual std::vector<body_gradient> constraint_derivative_gradients() const = 0;
 
   private:
-    std::vector<ppx::entity2D::const_ptr> m_entities;
+    std::vector<ppx::body2D::const_ptr> m_entities;
     float m_stiffness;
     float m_dampening;
 };
@@ -42,22 +42,22 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 //     constraint2D() = default;
 //     virtual ~constraint2D() = default;
 
-//     constraint2D(const std::array<entity2D::ptr, N> &entities) : m_grad_entities(entities)
+//     constraint2D(const std::array<body2D::ptr, N> &entities) : m_grad_entities(entities)
 //     {
 //         copy_to_const_entities(entities);
 //     }
 
-//     constraint2D(const std::array<entity2D::ptr, N> &entities, float stiffness, float dampening)
+//     constraint2D(const std::array<body2D::ptr, N> &entities, float stiffness, float dampening)
 //         : constraint_interface2D(stiffness, dampening), m_grad_entities(entities)
 //     {
 //         copy_to_const_entities(entities);
 //     }
 
-//     const std::array<entity2D::ptr, N> &entities() const
+//     const std::array<body2D::ptr, N> &entities() const
 //     {
 //         return m_grad_entities;
 //     }
-//     void entities(const std::array<entity2D::ptr, N> &entities)
+//     void entities(const std::array<body2D::ptr, N> &entities)
 //     {
 //         m_grad_entities = entities;
 //         copy_to_const_entities(entities);
@@ -69,27 +69,27 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 //     }
 //     virtual bool valid() const override
 //     {
-//         for (const entity2D::const_ptr &e : m_entities)
-//             if (!e)
+//         for (const body2D::const_ptr &bd : m_entities)
+//             if (!bd)
 //                 return false;
-//         for (const entity2D::ptr &e : m_grad_entities)
-//             if (!e)
+//         for (const body2D::ptr &bd : m_grad_entities)
+//             if (!bd)
 //                 return false;
 //         return true;
 //     }
 
 //   private:
-//     std::array<entity2D::const_ptr, N> m_entities;
-//     std::array<entity2D::ptr, N> m_grad_entities;
+//     std::array<body2D::const_ptr, N> m_entities;
+//     std::array<body2D::ptr, N> m_grad_entities;
 
-//     void copy_to_const_entities(const std::array<entity2D::ptr, N> &entities)
+//     void copy_to_const_entities(const std::array<body2D::ptr, N> &entities)
 //     {
 //         for (std::size_t i = 0; i < N; i++)
 //             m_entities[i] = entities[i];
 //     }
 
-//     virtual float constraint(const std::array<entity2D::const_ptr, N> &entities) const = 0;
-//     virtual float constraint_derivative(const std::array<entity2D::const_ptr, N> &entities) const = 0;
+//     virtual float constraint(const std::array<body2D::const_ptr, N> &entities) const = 0;
+//     virtual float constraint_derivative(const std::array<body2D::const_ptr, N> &entities) const = 0;
 
 //     float derivative() const override
 //     {
@@ -99,7 +99,7 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 //     {
 //         return N;
 //     }
-//     entity2D &operator[](std::size_t index) const override
+//     body2D &operator[](std::size_t index) const override
 //     {
 //         return *m_grad_entities[index];
 //     }

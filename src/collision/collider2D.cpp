@@ -27,17 +27,17 @@ collider2D::collider2D(engine2D &parent, const std::size_t allocations)
 #endif
 }
 
-collider2D::interval::interval(const entity2D::const_ptr &e, const end end_type) : m_entity(e), m_end(end_type)
+collider2D::interval::interval(const body2D::const_ptr &bd, const end end_type) : m_body(bd), m_end(end_type)
 {
 }
 
-const entity2D *collider2D::interval::entity() const
+const body2D *collider2D::interval::body() const
 {
-    return m_entity.raw();
+    return m_body.raw();
 }
 float collider2D::interval::value() const
 {
-    const geo::aabb2D &bbox = m_entity->shape().bounding_box();
+    const geo::aabb2D &bbox = m_body->shape().bounding_box();
     return (m_end == end::LOWER) ? bbox.min().x : bbox.max().x;
 }
 
@@ -47,13 +47,13 @@ collider2D::interval::end collider2D::interval::type() const
 }
 bool collider2D::interval::valid() const
 {
-    return (bool)m_entity;
+    return (bool)m_body;
 }
 
-void collider2D::add_entity_intervals(const entity2D::const_ptr &e)
+void collider2D::add_body_intervals(const body2D::const_ptr &bd)
 {
-    m_intervals.emplace_back(e, interval::end::LOWER);
-    m_intervals.emplace_back(e, interval::end::HIGHER);
+    m_intervals.emplace_back(bd, interval::end::LOWER);
+    m_intervals.emplace_back(bd, interval::end::HIGHER);
 }
 
 void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
@@ -134,12 +134,12 @@ void collider2D::update_quad_tree()
 {
     m_quad_tree.clear();
     geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
-    for (const entity2D &e : m_parent.entities())
-        aabb += e.shape().bounding_box();
+    for (const body2D &bd : m_parent.entities())
+        aabb += bd.shape().bounding_box();
 
     m_quad_tree.aabb(aabb);
-    for (const entity2D &e : m_parent.entities())
-        m_quad_tree.insert(&e);
+    for (const body2D &bd : m_parent.entities())
+        m_quad_tree.insert(&bd);
 }
 
 void collider2D::validate()
@@ -201,18 +201,18 @@ void collider2D::sort_intervals()
     std::sort(m_intervals.begin(), m_intervals.end(), cmp);
 }
 
-static bool broad_detection(const entity2D &e1, const entity2D &e2)
+static bool broad_detection(const body2D &bd1, const body2D &bd2)
 {
-    return e1 != e2 && (e1.kinematic() || e2.kinematic()) && geo::may_intersect(e1.shape(), e2.shape());
+    return bd1 != bd2 && (bd1.kinematic() || bd2.kinematic()) && geo::may_intersect(bd1.shape(), bd2.shape());
 }
-static bool are_both_circles(const entity2D &e1, const entity2D &e2)
+static bool are_both_circles(const body2D &bd1, const body2D &bd2)
 {
-    return e1.type() == entity2D::shape_type::CIRCLE && e2.type() == entity2D::shape_type::CIRCLE;
+    return bd1.type() == body2D::shape_type::CIRCLE && bd2.type() == body2D::shape_type::CIRCLE;
 }
 
-bool collider2D::narrow_detection_mix(const entity2D &e1, const entity2D &e2, collision2D *c) const
+bool collider2D::narrow_detection_mix(const body2D &bd1, const body2D &bd2, collision2D *c) const
 {
-    const geo::shape2D &sh1 = e1.shape(), &sh2 = e2.shape();
+    const geo::shape2D &sh1 = bd1.shape(), &sh2 = bd2.shape();
     if (!geo::may_intersect(sh1, sh2))
         return false;
 
@@ -225,64 +225,64 @@ bool collider2D::narrow_detection_mix(const entity2D &e1, const entity2D &e2, co
         return false;
 
     const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv.value());
-    *c = {m_parent[e1.index()], m_parent[e2.index()], contact1, contact2, mtv.value()};
+    *c = {m_parent[bd1.index()], m_parent[bd2.index()], contact1, contact2, mtv.value()};
 
     return true;
 }
 
-bool collider2D::narrow_detection_circle(const entity2D &e1, const entity2D &e2, collision2D *c) const
+bool collider2D::narrow_detection_circle(const body2D &bd1, const body2D &bd2, collision2D *c) const
 {
-    const geo::circle &c1 = e1.shape<geo::circle>(), &c2 = e2.shape<geo::circle>();
+    const geo::circle &c1 = bd1.shape<geo::circle>(), &c2 = bd2.shape<geo::circle>();
     if (!geo::intersect(c1, c2))
         return false;
     const glm::vec2 mtv = geo::mtv(c1, c2);
     const auto &[contact1, contact2] = geo::contact_points(c1, c2);
-    *c = {m_parent[e1.index()], m_parent[e2.index()], contact1, contact2, mtv};
+    *c = {m_parent[bd1.index()], m_parent[bd2.index()], contact1, contact2, mtv};
     return true;
 }
 
-bool collider2D::narrow_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const
+bool collider2D::narrow_detection(const body2D &bd1, const body2D &bd2, collision2D *c) const
 {
-    if (are_both_circles(e1, e2))
-        return narrow_detection_circle(e1, e2, c);
-    return narrow_detection_mix(e1, e2, c);
+    if (are_both_circles(bd1, bd2))
+        return narrow_detection_circle(bd1, bd2, c);
+    return narrow_detection_mix(bd1, bd2, c);
 }
-bool collider2D::full_detection(const entity2D &e1, const entity2D &e2, collision2D *c) const
+bool collider2D::full_detection(const body2D &bd1, const body2D &bd2, collision2D *c) const
 {
-    if (!broad_detection(e1, e2))
+    if (!broad_detection(bd1, bd2))
         return false;
-    return narrow_detection(e1, e2, c);
+    return narrow_detection(bd1, bd2, c);
 }
 
-void collider2D::try_enter_or_stay_callback(const entity2D &e1, const entity2D &e2, const collision2D &c) const
+void collider2D::try_enter_or_stay_callback(const body2D &bd1, const body2D &bd2, const collision2D &c) const
 {
-    e1.events().try_enter_or_stay(c);
-    e2.events().try_enter_or_stay({c.incoming, c.current, c.touch2, c.touch1, -c.normal});
+    bd1.events().try_enter_or_stay(c);
+    bd2.events().try_enter_or_stay({c.incoming, c.current, c.touch2, c.touch1, -c.normal});
 }
-void collider2D::try_exit_callback(const entity2D &e1, const entity2D &e2) const
+void collider2D::try_exit_callback(const body2D &bd1, const body2D &bd2) const
 {
-    e1.events().try_exit(m_parent[e2.index()]);
-    e2.events().try_exit(m_parent[e1.index()]);
+    bd1.events().try_exit(m_parent[bd2.index()]);
+    bd2.events().try_exit(m_parent[bd1.index()]);
 }
 
 void collider2D::brute_force(std::vector<float> &stchanges)
 {
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
-    const auto exec = [this, &stchanges](const std::size_t thread_idx, const entity2D &e1) {
+    const auto exec = [this, &stchanges](const std::size_t thread_idx, const body2D &bd1) {
         const auto entities = m_parent.entities();
         for (std::size_t j = 0; j < m_parent.size(); j++)
         {
             collision2D c;
-            const entity2D &e2 = entities[j];
-            if (full_detection(e1, e2, &c))
+            const body2D &bd2 = entities[j];
+            if (full_detection(bd1, bd2, &c))
             {
-                try_enter_or_stay_callback(e1, e2, c);
+                try_enter_or_stay_callback(bd1, bd2, c);
                 solve(c, stchanges);
-                m_mt_collision_pairs[thread_idx].emplace_back(&e1, &e2);
+                m_mt_collision_pairs[thread_idx].emplace_back(&bd1, &bd2);
             }
             else
-                try_exit_callback(e1, e2);
+                try_exit_callback(bd1, bd2);
         }
     };
     for_each_mt(m_parent.entities().unwrap(), exec);
@@ -300,18 +300,18 @@ void collider2D::brute_force(std::vector<float> &stchanges)
             checks++;
 #endif
             collision2D c;
-            const entity2D &e1 = entities[i], &e2 = entities[j];
-            if (full_detection(e1, e2, &c))
+            const body2D &bd1 = entities[i], &bd2 = entities[j];
+            if (full_detection(bd1, bd2, &c))
             {
 #ifdef DEBUG
                 collisions++;
 #endif
-                try_enter_or_stay_callback(e1, e2, c);
+                try_enter_or_stay_callback(bd1, bd2, c);
                 solve(c, stchanges);
-                m_collision_pairs.emplace_back(&e1, &e2);
+                m_collision_pairs.emplace_back(&bd1, &bd2);
             }
             else
-                try_exit_callback(e1, e2);
+                try_exit_callback(bd1, bd2);
         }
     KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for BRUTE FORCE "
               "collision detection (QUALITY: {3:.2f}%%)",
@@ -325,36 +325,36 @@ void collider2D::sort_and_sweep(std::vector<float> &stchanges)
 #ifdef DEBUG
     std::size_t checks = 0, collisions = 0;
 #endif
-    std::unordered_set<const entity2D *> eligible;
+    std::unordered_set<const body2D *> eligible;
     sort_intervals();
 
     eligible.reserve(30);
     for (const interval &itrv : m_intervals)
         if (itrv.type() == interval::end::LOWER)
         {
-            for (const entity2D *e : eligible)
+            for (const body2D *bd : eligible)
             {
 #ifdef DEBUG
                 checks++;
 #endif
                 collision2D c;
-                const entity2D &e1 = *e, &e2 = *itrv.entity();
-                if (full_detection(e1, e2, &c))
+                const body2D &bd1 = *bd, &bd2 = *itrv.body();
+                if (full_detection(bd1, bd2, &c))
                 {
 #ifdef DEBUG
                     collisions++;
 #endif
-                    try_enter_or_stay_callback(e1, e2, c);
+                    try_enter_or_stay_callback(bd1, bd2, c);
                     solve(c, stchanges);
-                    m_collision_pairs.emplace_back(&e1, &e2);
+                    m_collision_pairs.emplace_back(&bd1, &bd2);
                 }
                 else
-                    try_exit_callback(e1, e2);
+                    try_exit_callback(bd1, bd2);
             }
-            eligible.insert(itrv.entity());
+            eligible.insert(itrv.body());
         }
         else
-            eligible.erase(itrv.entity());
+            eligible.erase(itrv.body());
     KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for SORT AND "
               "SWEEP collision detection (QUALITY: {3:.2f}%%)",
               checks, collisions, checks - collisions, 100.f * (float)m_parent.size() / (float)checks)
@@ -365,25 +365,25 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
     KIT_PERF_FUNCTION()
     update_quad_tree();
 
-    std::vector<const std::vector<const entity2D *> *> partitions;
+    std::vector<const std::vector<const body2D *> *> partitions;
     partitions.reserve(20);
     m_quad_tree.partitions(partitions);
 
 #ifdef PPX_MULTITHREADED
-    const auto exec = [this, &stchanges](const std::size_t thread_idx, const std::vector<const entity2D *> *partition) {
+    const auto exec = [this, &stchanges](const std::size_t thread_idx, const std::vector<const body2D *> *partition) {
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
                 collision2D c;
-                const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
-                if (full_detection(*e1, *e2, &c))
+                const auto &bd1 = (*partition)[i], &bd2 = (*partition)[j];
+                if (full_detection(*bd1, *bd2, &c))
                 {
-                    try_enter_or_stay_callback(*e1, *e2, c);
+                    try_enter_or_stay_callback(*bd1, *bd2, c);
                     solve(c, stchanges);
-                    m_mt_collision_pairs[thread_idx].emplace_back(e1, e2);
+                    m_mt_collision_pairs[thread_idx].emplace_back(bd1, bd2);
                 }
                 else
-                    try_exit_callback(*e1, *e2);
+                    try_exit_callback(*bd1, *bd2);
             }
     };
     for_each_mt(partitions, exec);
@@ -393,7 +393,7 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
 #ifdef DEBUG
     std::size_t checks = 0, collisions = 0;
 #endif
-    for (const std::vector<const entity2D *> *partition : partitions)
+    for (const std::vector<const body2D *> *partition : partitions)
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
@@ -401,18 +401,18 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
                 checks++;
 #endif
                 collision2D c;
-                const auto &e1 = (*partition)[i], &e2 = (*partition)[j];
-                if (full_detection(*e1, *e2, &c))
+                const auto &bd1 = (*partition)[i], &bd2 = (*partition)[j];
+                if (full_detection(*bd1, *bd2, &c))
                 {
 #ifdef DEBUG
                     collisions++;
 #endif
-                    try_enter_or_stay_callback(*e1, *e2, c);
+                    try_enter_or_stay_callback(*bd1, *bd2, c);
                     solve(c, stchanges);
-                    m_collision_pairs.emplace_back(e1, e2);
+                    m_collision_pairs.emplace_back(bd1, bd2);
                 }
                 else
-                    try_exit_callback(*e1, *e2);
+                    try_exit_callback(*bd1, *bd2);
             }
     KIT_TRACE("Checked for {0} collisions and solved {1} of them, with a total of {2} false positives for QUAD TREE "
               "collision detection (QUALITY: {3:.2f}%%)",

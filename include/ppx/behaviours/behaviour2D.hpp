@@ -1,7 +1,7 @@
 #ifndef PPX_BEHAVIOUR2D_HPP
 #define PPX_BEHAVIOUR2D_HPP
 
-#include "ppx/entity2D.hpp"
+#include "ppx/body2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/nameable.hpp"
@@ -22,23 +22,23 @@ class behaviour2D : kit::non_copyable,
 
     void validate();
 
-    void include(const entity2D::const_ptr &e);
-    void exclude(const entity2D &e);
-    bool contains(const entity2D &e) const;
+    void include(const body2D::const_ptr &bd);
+    void exclude(const body2D &bd);
+    bool contains(const body2D &bd) const;
 
-    virtual std::pair<glm::vec2, float> force(const entity2D &e) const = 0;
+    virtual std::pair<glm::vec2, float> force(const body2D &bd) const = 0;
 
     float kinetic_energy() const;
     virtual float potential_energy() const = 0;
-    virtual float potential_energy(const entity2D &e) const = 0;
+    virtual float potential_energy(const body2D &bd) const = 0;
 
-    float energy(const entity2D &e) const;
+    float energy(const body2D &bd) const;
     float energy() const;
 
     void clear();
     std::size_t size() const;
 
-    const std::vector<entity2D::const_ptr> &entities() const;
+    const std::vector<body2D::const_ptr> &entities() const;
 
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const;
@@ -46,7 +46,7 @@ class behaviour2D : kit::non_copyable,
 #endif
 
   protected:
-    std::vector<entity2D::const_ptr> m_included;
+    std::vector<body2D::const_ptr> m_included;
 
   private:
     const engine2D *m_parent = nullptr;

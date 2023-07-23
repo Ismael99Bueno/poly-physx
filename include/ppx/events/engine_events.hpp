@@ -1,7 +1,7 @@
 #ifndef PPX_ENGINE_EVENTS_HPP
 #define PPX_ENGINE_EVENTS_HPP
 
-#include "ppx/entity2D.hpp"
+#include "ppx/body2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "kit/utility/event.hpp"
@@ -15,9 +15,9 @@ namespace ppx
 class engine_events final : kit::non_copyable
 {
   public:
-    kit::event<const entity2D::ptr &> on_entity_addition;
-    kit::event<const entity2D &> on_early_entity_removal;
-    kit::event<std::size_t> on_late_entity_removal;
+    kit::event<const body2D::ptr &> on_body_addition;
+    kit::event<const body2D &> on_early_body_removal;
+    kit::event<std::size_t> on_late_body_removal;
     kit::event<const spring2D::ptr &> on_spring_addition;
     kit::event<const spring2D &> on_spring_removal;
     kit::event<constraint2D *> on_constraint_addition;

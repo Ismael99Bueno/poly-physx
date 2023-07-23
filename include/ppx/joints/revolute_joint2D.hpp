@@ -14,9 +14,9 @@ class revolute_joint2D : public constraint2D, public joint2D
         float stiffness = 500.f, dampening = 30.f;
         static specs from_rigid_bar(const revolute_joint2D &rb);
     };
-    revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, float stiffness = 500.f, float dampening = 30.f);
-    revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1,
-                     const glm::vec2 &anchor2, float stiffness = 500.f, float dampening = 30.f);
+    revolute_joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, float stiffness = 500.f, float dampening = 30.f);
+    revolute_joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
+                     float stiffness = 500.f, float dampening = 30.f);
     revolute_joint2D(const specs &spc);
 
     float constraint_value() const override;
@@ -33,8 +33,8 @@ class revolute_joint2D : public constraint2D, public joint2D
   private:
     float m_length;
 
-    std::vector<entity_gradient> constraint_gradients() const override;
-    std::vector<entity_gradient> constraint_derivative_gradients() const override;
+    std::vector<body_gradient> constraint_gradients() const override;
+    std::vector<body_gradient> constraint_derivative_gradients() const override;
 
     float without_anchors_constraint() const;
     float without_anchors_constraint_derivative() const;

@@ -1,7 +1,7 @@
 #ifndef PPX_COMPELLER2D_HPP
 #define PPX_COMPELLER2D_HPP
 
-#include "ppx/entity2D.hpp"
+#include "ppx/body2D.hpp"
 #include "ppx/events/engine_events.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/container/stack_vector.hpp"
@@ -48,7 +48,7 @@ class compeller2D final : kit::non_copyable
     const engine2D &m_parent;
     std::vector<kit::scope<constraint2D>> m_constraints;
 
-    using constraint_gradient_fun = std::function<std::vector<constraint2D::entity_gradient>(const constraint2D &)>;
+    using constraint_gradient_fun = std::function<std::vector<constraint2D::body_gradient>(const constraint2D &)>;
     kit::stack_vector<float> constraint_matrix(const constraint_gradient_fun &constraint_grad) const;
     kit::stack_vector<float> jacobian() const;
     kit::stack_vector<float> jacobian_derivative() const;

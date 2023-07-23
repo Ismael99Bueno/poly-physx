@@ -35,15 +35,15 @@ class engine2D final : kit::non_copyable
     bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
     bool embedded_forward(float &timestep);
 
-    template <class... EntityArgs> entity2D::ptr add_entity(EntityArgs &&...args)
+    template <class... BodyArgs> body2D::ptr add_body(BodyArgs &&...args)
     {
-        entity2D &e = m_entities.emplace_back(std::forward<EntityArgs>(args)...);
-        return process_entity_addition(e);
+        body2D &bd = m_entities.emplace_back(std::forward<BodyArgs>(args)...);
+        return process_body_addition(bd);
     }
 
-    bool remove_entity(std::size_t index);
-    bool remove_entity(const entity2D &e);
-    bool remove_entity(kit::uuid id);
+    bool remove_body(std::size_t index);
+    bool remove_body(const body2D &bd);
+    bool remove_body(kit::uuid id);
 
     template <typename T, class... BehaviourArgs> T *add_behaviour(BehaviourArgs &&...args)
     {
@@ -104,8 +104,8 @@ class engine2D final : kit::non_copyable
 
     std::vector<float> operator()(float t, float dt, const std::vector<float> &vars);
 
-    entity2D::const_ptr from_id(kit::uuid id) const;
-    entity2D::ptr from_id(kit::uuid id);
+    body2D::const_ptr from_id(kit::uuid id) const;
+    body2D::ptr from_id(kit::uuid id);
 
     template <typename T> T *behaviour_from_name(const std::string &name) const
     {
@@ -114,20 +114,20 @@ class engine2D final : kit::non_copyable
         return dynamic_cast<T *>(behaviour_from_name<behaviour2D>(name));
     }
 
-    entity2D::const_ptr operator[](std::size_t index) const;
-    entity2D::ptr operator[](std::size_t index);
+    body2D::const_ptr operator[](std::size_t index) const;
+    body2D::ptr operator[](std::size_t index);
 
-    std::vector<entity2D::const_ptr> operator[](const geo::aabb2D &aabb) const;
-    std::vector<entity2D::ptr> operator[](const geo::aabb2D &aabb);
+    std::vector<body2D::const_ptr> operator[](const geo::aabb2D &aabb) const;
+    std::vector<body2D::ptr> operator[](const geo::aabb2D &aabb);
 
-    entity2D::const_ptr operator[](const glm::vec2 &point) const;
-    entity2D::ptr operator[](const glm::vec2 &point);
+    body2D::const_ptr operator[](const glm::vec2 &point) const;
+    body2D::ptr operator[](const glm::vec2 &point);
 
-    const kit::track_vector<entity2D> &entities() const;
+    const kit::track_vector<body2D> &entities() const;
     const kit::track_vector<spring2D> &springs() const;
     spring2D::const_ptr spring(std::size_t index) const;
 
-    kit::track_vector_view<entity2D> entities();
+    kit::track_vector_view<body2D> entities();
     kit::track_vector_view<spring2D> springs();
     spring2D::ptr spring(std::size_t index);
 
@@ -138,14 +138,14 @@ class engine2D final : kit::non_copyable
     float elapsed() const;
 
   private:
-    kit::track_vector<entity2D> m_entities;
+    kit::track_vector<body2D> m_entities;
     compeller2D m_compeller;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
     kit::track_vector<spring2D> m_springs;
 
     float m_elapsed = 0.f;
 
-    entity2D::ptr process_entity_addition(entity2D &e);
+    body2D::ptr process_body_addition(body2D &bd);
 
     void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
     void load_interactions_and_externals(std::vector<float> &stchanges) const;

@@ -3,24 +3,24 @@
 
 namespace ppx
 {
-revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float stiffness,
+revolute_joint2D::revolute_joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const float stiffness,
                                    const float dampening)
-    : constraint2D("Revolute", stiffness, dampening), joint2D(e1, e2), m_length(glm::distance(e1->pos(), e2->pos()))
+    : constraint2D("Revolute", stiffness, dampening), joint2D(bd1, bd2), m_length(glm::distance(bd1->pos(), bd2->pos()))
 {
 }
 
-revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1,
+revolute_joint2D::revolute_joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2, const float stiffness, const float dampening)
-    : constraint2D("Revolute", stiffness, dampening), joint2D(e1, e2, anchor1, anchor2),
-      m_length(glm::distance(e1->pos() + anchor1, e2->pos() + anchor2))
+    : constraint2D("Revolute", stiffness, dampening), joint2D(bd1, bd2, anchor1, anchor2),
+      m_length(glm::distance(bd1->pos() + anchor1, bd2->pos() + anchor2))
 {
 }
 revolute_joint2D::revolute_joint2D(const specs &spc)
     : constraint2D("Revolute", spc.stiffness, spc.dampening), joint2D(spc)
 {
 
-    m_length = spc.has_anchors ? glm::distance(spc.e1->pos() + spc.anchor1, spc.e2->pos() + spc.anchor2)
-                               : glm::distance(spc.e1->pos(), spc.e2->pos());
+    m_length = spc.has_anchors ? glm::distance(spc.bd1->pos() + spc.anchor1, spc.bd2->pos() + spc.anchor2)
+                               : glm::distance(spc.bd1->pos(), spc.bd2->pos());
 }
 
 float revolute_joint2D::constraint_value() const
@@ -56,7 +56,7 @@ float revolute_joint2D::with_anchors_constraint_derivative() const
                           m_e1->vel_at(rot_anchor1) - m_e2->vel_at(rot_anchor2));
 }
 
-std::vector<constraint2D::entity_gradient> revolute_joint2D::constraint_gradients() const
+std::vector<constraint2D::body_gradient> revolute_joint2D::constraint_gradients() const
 {
     if (!m_has_anchors)
     {
@@ -72,7 +72,7 @@ std::vector<constraint2D::entity_gradient> revolute_joint2D::constraint_gradient
 
     return {{m_e1.raw(), {cg.x, cg.y, cga1}}, {m_e2.raw(), {-cg.x, -cg.y, cga2}}};
 }
-std::vector<constraint2D::entity_gradient> revolute_joint2D::constraint_derivative_gradients() const
+std::vector<constraint2D::body_gradient> revolute_joint2D::constraint_derivative_gradients() const
 {
     if (!m_has_anchors)
     {
@@ -99,7 +99,7 @@ float revolute_joint2D::length() const
 
 revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_joint2D &rb)
 {
-    return {{rb.e1(), rb.e2(), rb.anchor1(), rb.anchor2(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
+    return {{rb.bd1(), rb.bd2(), rb.anchor1(), rb.anchor2(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
 }
 
 #ifdef KIT_USE_YAML_CPP

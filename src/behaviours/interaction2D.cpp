@@ -3,26 +3,26 @@
 
 namespace ppx
 {
-float interaction2D::potential(const entity2D &e, const glm::vec2 &pos) const
+float interaction2D::potential(const body2D &bd, const glm::vec2 &pos) const
 {
     m_unit.pos(pos);
-    return potential_energy_pair(m_unit, e);
+    return potential_energy_pair(m_unit, bd);
 }
 float interaction2D::potential(const glm::vec2 &pos) const
 {
     m_unit.pos(pos);
     float pot = 0.f;
-    for (const auto &e : m_included)
-        pot += potential_energy_pair(m_unit, *e);
+    for (const auto &bd : m_included)
+        pot += potential_energy_pair(m_unit, *bd);
     return pot;
 }
 
-float interaction2D::potential_energy(const entity2D &e) const
+float interaction2D::potential_energy(const body2D &bd) const
 {
     float pot = 0.f;
-    for (const auto &entt : m_included)
-        if (*entt != e)
-            pot += potential_energy_pair(e, *entt);
+    for (const auto &bdptr : m_included)
+        if (*bdptr != bd)
+            pot += potential_energy_pair(bd, *bdptr);
     return pot;
 }
 float interaction2D::potential_energy() const
@@ -34,14 +34,14 @@ float interaction2D::potential_energy() const
     return pot;
 }
 
-std::pair<glm::vec2, float> interaction2D::force(const entity2D &e1) const
+std::pair<glm::vec2, float> interaction2D::force(const body2D &bd1) const
 {
     glm::vec2 total_force{0.f};
     float total_torque = 0.f;
-    for (const auto &e2 : m_included)
-        if (e1 != *e2)
+    for (const auto &bd2 : m_included)
+        if (bd1 != *bd2)
         {
-            const auto &[f, t] = force_pair(e1, *e2);
+            const auto &[f, t] = force_pair(bd1, *bd2);
             total_force += f;
             total_torque += t;
         }

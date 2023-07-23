@@ -1,15 +1,15 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/events/entity_events.hpp"
+#include "ppx/events/body_events.hpp"
 #include "ppx/collision/collider2D.hpp"
 
 namespace ppx
 {
-entity_events::entity_events(const std::size_t allocations)
+body_events::body_events(const std::size_t allocations)
 {
     m_collided_ids.reserve(allocations);
 }
 
-void entity_events::try_enter_or_stay(const collision2D &c) const
+void body_events::try_enter_or_stay(const collision2D &c) const
 {
     if (on_collision_enter.callbacks().empty() && on_collision_stay.callbacks().empty())
         return;
@@ -18,7 +18,7 @@ void entity_events::try_enter_or_stay(const collision2D &c) const
     else
         on_collision_enter(c);
 }
-void entity_events::try_exit(const entity2D::ptr &incoming) const
+void body_events::try_exit(const body2D::ptr &incoming) const
 {
     if (on_collision_stay.callbacks().empty() || m_collided_ids.find(incoming->id()) == m_collided_ids.end())
         return;

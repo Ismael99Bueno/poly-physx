@@ -88,10 +88,10 @@ kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_gradien
     kit::stack_vector<float> cmatrix(rows * cols, 0.f);
 
     for (std::size_t i = 0; i < rows; i++)
-        for (const auto &[e, gradient] : constraint_gradients(*m_constraints[i]))
+        for (const auto &[bd, gradient] : constraint_gradients(*m_constraints[i]))
             for (std::size_t k = 0; k < 3; k++)
             {
-                const std::size_t j = e->index() * 3 + k;
+                const std::size_t j = bd->index() * 3 + k;
                 cmatrix[i * cols + j] = gradient[k];
             }
 

@@ -11,7 +11,7 @@ class force2D : public behaviour2D
     using behaviour2D::behaviour2D;
     virtual ~force2D() = default;
 
-    virtual float potential_energy(const entity2D &e) const override
+    virtual float potential_energy(const body2D &bd) const override
     {
         return 0.f;
     }

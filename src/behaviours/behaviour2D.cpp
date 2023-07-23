@@ -18,37 +18,37 @@ void behaviour2D::validate()
             ++it;
 }
 
-void behaviour2D::include(const entity2D::const_ptr &e)
+void behaviour2D::include(const body2D::const_ptr &bd)
 {
-    m_included.push_back(e);
+    m_included.push_back(bd);
 }
-void behaviour2D::exclude(const entity2D &e)
+void behaviour2D::exclude(const body2D &bd)
 {
     for (auto it = m_included.begin(); it != m_included.end(); ++it)
-        if (*(*it) == e)
+        if (*(*it) == bd)
         {
             m_included.erase(it);
             break;
         }
 }
-bool behaviour2D::contains(const entity2D &e) const
+bool behaviour2D::contains(const body2D &bd) const
 {
-    for (const entity2D::const_ptr &entt : m_included)
-        if (*entt == e)
+    for (const body2D::const_ptr &bdptr : m_included)
+        if (*bdptr == bd)
             return true;
     return false;
 }
 float behaviour2D::kinetic_energy() const
 {
     float ke = 0.f;
-    for (const auto &e : m_included)
-        ke += e->kinetic_energy();
+    for (const auto &bd : m_included)
+        ke += bd->kinetic_energy();
     return ke;
 }
 
-float behaviour2D::energy(const entity2D &e) const
+float behaviour2D::energy(const body2D &bd) const
 {
-    return e.kinetic_energy() + potential_energy(e);
+    return bd.kinetic_energy() + potential_energy(bd);
 }
 float behaviour2D::energy() const
 {
@@ -64,7 +64,7 @@ std::size_t behaviour2D::size() const
     return m_included.size();
 }
 
-const std::vector<entity2D::const_ptr> &behaviour2D::entities() const
+const std::vector<body2D::const_ptr> &behaviour2D::entities() const
 {
     return m_included;
 }
@@ -73,8 +73,8 @@ const std::vector<entity2D::const_ptr> &behaviour2D::entities() const
 YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
-    for (const auto &e : m_included)
-        node["Entities"].push_back(e->index());
+    for (const auto &bd : m_included)
+        node["Entities"].push_back(bd->index());
     node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
     return node;
 }

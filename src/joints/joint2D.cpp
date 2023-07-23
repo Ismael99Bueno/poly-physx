@@ -3,16 +3,16 @@
 
 namespace ppx
 {
-joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2) : m_e1(e1), m_e2(e2), m_has_anchors(false)
+joint2D::joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2) : m_e1(bd1), m_e2(bd2), m_has_anchors(false)
 {
 }
 
-joint2D::joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1, const glm::vec2 &anchor2)
-    : m_e1(e1), m_e2(e2), m_anchor1(anchor1), m_anchor2(anchor2), m_angle1(e1->angpos()), m_angle2(e2->angpos()),
+joint2D::joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const glm::vec2 &anchor1, const glm::vec2 &anchor2)
+    : m_e1(bd1), m_e2(bd2), m_anchor1(anchor1), m_anchor2(anchor2), m_angle1(bd1->angpos()), m_angle2(bd2->angpos()),
       m_has_anchors(true)
 {
 }
-joint2D::joint2D(const specs &spc) : m_e1(spc.e1), m_e2(spc.e2), m_has_anchors(spc.has_anchors)
+joint2D::joint2D(const specs &spc) : m_e1(spc.bd1), m_e2(spc.bd2), m_has_anchors(spc.has_anchors)
 {
     if (m_has_anchors)
     {
@@ -23,10 +23,10 @@ joint2D::joint2D(const specs &spc) : m_e1(spc.e1), m_e2(spc.e2), m_has_anchors(s
     }
 }
 
-void joint2D::bind(const entity2D::ptr &e1, const entity2D::ptr &e2)
+void joint2D::bind(const body2D::ptr &bd1, const body2D::ptr &bd2)
 {
-    m_e1 = e1;
-    m_e2 = e2;
+    m_e1 = bd1;
+    m_e2 = bd2;
     if (m_has_anchors)
     {
         anchor1(anchor1());
@@ -38,11 +38,11 @@ bool joint2D::valid() const
     return m_e1 && m_e2;
 }
 
-const entity2D::ptr &joint2D::e1() const
+const body2D::ptr &joint2D::bd1() const
 {
     return m_e1;
 }
-const entity2D::ptr &joint2D::e2() const
+const body2D::ptr &joint2D::bd2() const
 {
     return m_e2;
 }
@@ -76,7 +76,7 @@ bool joint2D::has_anchors() const
 
 joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 {
-    return {joint.e1(), joint.e2(), joint.anchor1(), joint.anchor2(), joint.has_anchors()};
+    return {joint.bd1(), joint.bd2(), joint.anchor1(), joint.anchor2(), joint.has_anchors()};
 }
 
 #ifdef KIT_USE_YAML_CPP
