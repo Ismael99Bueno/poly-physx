@@ -5,57 +5,49 @@ namespace ppx
 {
 revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const float stiffness,
                                    const float dampening)
-    : constraint2D<2>({e1, e2}, stiffness, dampening), joint2D(e1, e2), m_length(glm::distance(e1->pos(), e2->pos()))
+    : constraint2D(stiffness, dampening), joint2D(e1, e2), m_length(glm::distance(e1->pos(), e2->pos()))
 {
 }
 
 revolute_joint2D::revolute_joint2D(const entity2D::ptr &e1, const entity2D::ptr &e2, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2, const float stiffness, const float dampening)
-    : constraint2D<2>({e1, e2}, stiffness, dampening), joint2D(e1, e2, anchor1, anchor2),
+    : constraint2D(stiffness, dampening), joint2D(e1, e2, anchor1, anchor2),
       m_length(glm::distance(e1->pos() + anchor1, e2->pos() + anchor2))
 {
 }
-revolute_joint2D::revolute_joint2D(const specs &spc)
-    : constraint2D<2>({spc.e1, spc.e2}, spc.stiffness, spc.dampening), joint2D(spc)
+revolute_joint2D::revolute_joint2D(const specs &spc) : constraint2D(spc.stiffness, spc.dampening), joint2D(spc)
 {
 
     m_length = spc.has_anchors ? glm::distance(spc.e1->pos() + spc.anchor1, spc.e2->pos() + spc.anchor2)
                                : glm::distance(spc.e1->pos(), spc.e2->pos());
 }
 
-float revolute_joint2D::constraint(const std::array<entity2D::const_ptr, 2> &entities) const
+float revolute_joint2D::constraint_value() const
 {
-    return m_has_anchors ? with_anchors_constraint(entities) : without_anchors_constraint(entities);
+    return m_has_anchors ? with_anchors_constraint() : without_anchors_constraint();
 }
 
-float revolute_joint2D::constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const
+float revolute_joint2D::constraint_derivative() const
 {
-    return m_has_anchors ? with_anchors_constraint_derivative(entities)
-                         : without_anchors_constraint_derivative(entities);
+    return m_has_anchors ? with_anchors_constraint_derivative() : without_anchors_constraint_derivative();
 }
 
-void revolute_joint2D::bind(const entity2D::ptr &e1, const entity2D::ptr &e2)
-{
-    joint2D::bind(e1, e2);
-    entities({e1, e2});
-}
-
-float revolute_joint2D::without_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const
+float revolute_joint2D::without_anchors_constraint() const
 {
     return glm::distance2(m_e1->pos(), m_e2->pos()) - m_length * m_length;
 }
-float revolute_joint2D::without_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const
+float revolute_joint2D::without_anchors_constraint_derivative() const
 {
     return 2.f * glm::dot(m_e1->pos() - m_e2->pos(), m_e1->vel() - m_e2->vel());
 }
 
-float revolute_joint2D::with_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const
+float revolute_joint2D::with_anchors_constraint() const
 {
     const glm::vec2 p1 = anchor1() + m_e1->pos(), p2 = anchor2() + m_e2->pos();
 
     return glm::distance2(p1, p2) - m_length * m_length;
 }
-float revolute_joint2D::with_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const
+float revolute_joint2D::with_anchors_constraint_derivative() const
 {
     const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
 
@@ -63,56 +55,41 @@ float revolute_joint2D::with_anchors_constraint_derivative(const std::array<enti
                           m_e1->vel_at(rot_anchor1) - m_e2->vel_at(rot_anchor2));
 }
 
-std::array<float, 3> revolute_joint2D::constraint_grad(entity2D &e) const
+std::vector<constraint2D::entity_gradient> revolute_joint2D::constraint_gradients() const
 {
-    KIT_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2,
-                        "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
     if (!m_has_anchors)
     {
         const glm::vec2 cg = 2.f * (m_e1->pos() - m_e2->pos());
-        if (e == *m_e1)
-            return {cg.x, cg.y, 0.f};
-        return {-cg.x, -cg.y, 0.f};
+        return {{m_e1.raw(), {cg.x, cg.y, 0.f}}, {m_e2.raw(), {-cg.x, -cg.y, 0.f}}};
     }
-    const float a1 = m_e1->angpos() - m_angle1, a2 = m_e2->angpos() - m_angle2;
-    const glm::vec2 rot_anchor1 = glm::rotate(m_anchor1, a1), rot_anchor2 = glm::rotate(m_anchor2, a2);
+    const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
     const glm::vec2 cg = 2.f * (m_e1->pos() + rot_anchor1 - m_e2->pos() - rot_anchor2);
-    if (e == *m_e1)
-    {
-        const float cos = cosf(a1), sin = sinf(a1);
-        const float cga =
-            -cg.x * (m_anchor1.x * sin + m_anchor1.y * cos) + cg.y * (m_anchor1.x * cos - m_anchor1.y * sin);
-        return {cg.x, cg.y, cga};
-    }
-    const float cos = cosf(a2), sin = sinf(a2);
-    const float cga = cg.x * (m_anchor2.x * sin + m_anchor2.y * cos) + cg.y * (-m_anchor2.x * cos + m_anchor2.y * sin);
-    return {-cg.x, -cg.y, cga};
+
+    const glm::vec2 perp_cg = {cg.y, -cg.x};
+    const float cga1 = glm::dot(rot_anchor1, perp_cg);
+    const float cga2 = glm::dot(rot_anchor2, -perp_cg);
+
+    return {{m_e1.raw(), {cg.x, cg.y, cga1}}, {m_e2.raw(), {-cg.x, -cg.y, cga2}}};
 }
-std::array<float, 3> revolute_joint2D::constraint_grad_derivative(entity2D &e) const
+std::vector<constraint2D::entity_gradient> revolute_joint2D::constraint_derivative_gradients() const
 {
-    KIT_ASSERT_CRITICAL(e == *m_e1 || e == *m_e2,
-                        "Passed entity to compute constraint gradient must be equal to some entity of the constraint!")
     if (!m_has_anchors)
     {
         const glm::vec2 cgd = 2.f * (m_e1->vel() - m_e2->vel());
-        if (e == *m_e1)
-            return {cgd.x, cgd.y, 0.f};
-        return {-cgd.x, -cgd.y, 0.f};
+        return {{m_e1.raw(), {cgd.x, cgd.y, 0.f}}, {m_e2.raw(), {-cgd.x, -cgd.y, 0.f}}};
     }
     const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
     const glm::vec2 cgd = 2.f * (m_e1->vel_at(rot_anchor1) - m_e2->vel_at(rot_anchor2));
-    if (e == *m_e1)
-    {
-        const float cgda = -cgd.x * rot_anchor1.x - cgd.y * rot_anchor1.y;
-        return {cgd.x, cgd.y, cgda};
-    }
-    const float cgda = cgd.x * rot_anchor2.x + cgd.y * rot_anchor2.y;
-    return {-cgd.x, -cgd.y, cgda};
+
+    const float cgda1 = glm::dot(rot_anchor1, -cgd);
+    const float cgda2 = glm::dot(rot_anchor2, cgd);
+
+    return {{m_e1.raw(), {cgd.x, cgd.y, cgda1}}, {m_e2.raw(), {-cgd.x, -cgd.y, cgda2}}};
 }
 
 bool revolute_joint2D::valid() const
 {
-    return constraint2D::valid() && joint2D::valid();
+    return joint2D::valid();
 }
 float revolute_joint2D::length() const
 {
@@ -128,7 +105,7 @@ revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_j
 YAML::Node revolute_joint2D::encode() const
 {
     const YAML::Node node1 = joint2D::encode();
-    const YAML::Node node2 = constraint_interface2D::encode();
+    const YAML::Node node2 = constraint2D::encode();
 
     YAML::Node node;
     node["Joint2D"] = node1;
@@ -143,7 +120,7 @@ bool revolute_joint2D::decode(const YAML::Node &node)
 
     if (!joint2D::decode(node["Joint2D"]))
         return false;
-    if (!constraint_interface2D::decode(node["Constraint2D"]))
+    if (!constraint2D::decode(node["Constraint2D"]))
         return false;
     return true;
 }

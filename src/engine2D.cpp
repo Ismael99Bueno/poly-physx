@@ -466,18 +466,15 @@ YAML::Node engine2D::serializer::encode(const engine2D &eng) const
     for (const ppx::entity2D &e : eng.entities())
         node["Entities"].push_back(e);
     node["Collider"] = eng.collider();
+
     for (const ppx::spring2D &sp : eng.springs())
         node["Springs"].push_back(sp);
     for (const auto &ctr : eng.compeller().constraints())
-    {
-        const auto revjoint = dynamic_cast<const ppx::revolute_joint2D *>(ctr.get());
-        if (revjoint)
-            node["Rigid bars"].push_back(*revjoint);
-    }
+        node["Constraints"].push_back(*ctr);
+
     for (const auto &bhv : eng.behaviours())
         node["Behaviours"][bhv->id()] = *bhv;
 
-    // Save checkpoint?
     node["Integrator"] = eng.integrator();
     node["Elapsed"] = eng.elapsed();
     return node;

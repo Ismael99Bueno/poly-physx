@@ -73,7 +73,6 @@ const std::vector<entity2D::const_ptr> &behaviour2D::entities() const
 YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
-    node["Name"] = id();
     for (const auto &e : m_included)
         node["Entities"].push_back((std::uint64_t)e->id());
     node["Entities"].SetStyle(YAML::EmitterStyle::Flow);
@@ -81,10 +80,7 @@ YAML::Node behaviour2D::encode() const
 }
 bool behaviour2D::decode(const YAML::Node &node)
 {
-    KIT_ASSERT_ERROR(node["Name"].as<std::string>() != id(),
-                     "Behaviour to be deserialized must have the same name as the one contained in the YAML node")
-
-    if (!node.IsMap() || node.size() < 2 || node["Name"].as<std::string>() != id())
+    if (!node.IsMap() || node.size() < 1)
         return false;
     clear();
     for (const YAML::Node &n : node["Entities"])

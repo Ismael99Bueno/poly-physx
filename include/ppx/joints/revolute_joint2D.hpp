@@ -6,7 +6,7 @@
 
 namespace ppx
 {
-class revolute_joint2D : public constraint2D<2>, public joint2D
+class revolute_joint2D : public constraint2D, public joint2D
 {
   public:
     struct specs : joint2D::specs
@@ -19,9 +19,8 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
                      const glm::vec2 &anchor2, float stiffness = 500.f, float dampening = 30.f);
     revolute_joint2D(const specs &spc);
 
-    float constraint(const std::array<entity2D::const_ptr, 2> &entities) const override;
-    float constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const override;
-    void bind(const entity2D::ptr &e1, const entity2D::ptr &e2) override;
+    float constraint_value() const override;
+    float constraint_derivative() const override;
 
     bool valid() const override;
     float length() const;
@@ -34,14 +33,14 @@ class revolute_joint2D : public constraint2D<2>, public joint2D
   private:
     float m_length;
 
-    std::array<float, 3> constraint_grad(entity2D &e) const override;
-    std::array<float, 3> constraint_grad_derivative(entity2D &e) const override;
+    std::vector<entity_gradient> constraint_gradients() const override;
+    std::vector<entity_gradient> constraint_derivative_gradients() const override;
 
-    float without_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const;
-    float without_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const;
+    float without_anchors_constraint() const;
+    float without_anchors_constraint_derivative() const;
 
-    float with_anchors_constraint(const std::array<entity2D::const_ptr, 2> &entities) const;
-    float with_anchors_constraint_derivative(const std::array<entity2D::const_ptr, 2> &entities) const;
+    float with_anchors_constraint() const;
+    float with_anchors_constraint_derivative() const;
 };
 } // namespace ppx
 #endif

@@ -47,6 +47,14 @@ class engine2D final : kit::non_copyable
         static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
                                                               "recommended to inherit from force2D or interaction2D)");
         auto bhv = kit::make_scope<T>(std::forward<BehaviourArgs>(args)...);
+#ifdef DEBUG
+        for (const auto &old : m_behaviours)
+        {
+            KIT_ASSERT_ERROR(
+                *old != *bhv,
+                "Cannot add a behaviour with a name that already exists. Behaviour names act as identifiers")
+        }
+#endif
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));

@@ -13,7 +13,6 @@
 
 namespace ppx
 {
-class constraint_interface2D;
 class engine2D;
 
 class compeller2D final : kit::non_copyable
@@ -23,7 +22,7 @@ class compeller2D final : kit::non_copyable
 
     template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
     {
-        static_assert(std::is_base_of<constraint_interface2D, T>::value, "Constraint must inherit from constraint2D!");
+        static_assert(std::is_base_of<constraint2D, T>::value, "Constraint must inherit from constraint2D!");
         auto ctr = kit::make_scope<T>(std::forward<ConstraintArgs>(args)...);
         T *ptr = ctr.get();
 
@@ -31,22 +30,22 @@ class compeller2D final : kit::non_copyable
         m_callbacks->on_constraint_addition(ptr);
         return ptr;
     }
-    bool remove_constraint(const constraint_interface2D *ctr);
+    bool remove_constraint(const constraint2D *ctr);
     void clear_constraints();
 
     void validate();
 
     void solve_and_load_constraints(std::vector<float> &stchanges, const kit::stack_vector<float> &inv_masses) const;
 
-    const std::vector<kit::scope<constraint_interface2D>> &constraints() const;
+    const std::vector<kit::scope<constraint2D>> &constraints() const;
 
   private:
     const engine2D &m_parent;
-    std::vector<kit::scope<constraint_interface2D>> m_constraints;
+    std::vector<kit::scope<constraint2D>> m_constraints;
     engine_events *m_callbacks;
 
-    using constraint_grad_fun = std::function<std::array<float, 3>(const constraint_interface2D &, entity2D &)>;
-    kit::stack_vector<float> constraint_matrix(const constraint_grad_fun &constraint_grad) const;
+    using constraint_gradient_fun = std::function<std::vector<constraint2D::entity_gradient>(const constraint2D &)>;
+    kit::stack_vector<float> constraint_matrix(const constraint_gradient_fun &constraint_grad) const;
     kit::stack_vector<float> jacobian() const;
     kit::stack_vector<float> jacobian_derivative() const;
 

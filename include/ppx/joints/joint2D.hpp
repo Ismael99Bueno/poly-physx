@@ -22,7 +22,7 @@ class joint2D : public kit::serializable
     joint2D(const specs &spc);
     virtual ~joint2D() = default;
 
-    virtual void bind(const entity2D::ptr &e1, const entity2D::ptr &e2); // This shit has to be virtual
+    void bind(const entity2D::ptr &e1, const entity2D::ptr &e2);
     virtual bool valid() const;
 
     const entity2D::ptr &e1() const;

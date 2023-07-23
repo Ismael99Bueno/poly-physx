@@ -2,7 +2,7 @@
 #define PPX_ENGINE_EVENTS_HPP
 
 #include "ppx/entity2D.hpp"
-#include "ppx/constraints/constraint_interface2D.hpp"
+#include "ppx/constraints/constraint2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "kit/utility/event.hpp"
 #include "ppx/behaviours/force2D.hpp"
@@ -20,8 +20,8 @@ class engine_events final : kit::non_copyable
     kit::event<std::size_t> on_late_entity_removal;
     kit::event<const spring2D::ptr &> on_spring_addition;
     kit::event<const spring2D &> on_spring_removal;
-    kit::event<constraint_interface2D *> on_constraint_addition;
-    kit::event<const constraint_interface2D &> on_constraint_removal;
+    kit::event<constraint2D *> on_constraint_addition;
+    kit::event<const constraint2D &> on_constraint_removal;
     kit::event<behaviour2D *> on_behaviour_addition;
     kit::event<const behaviour2D &> on_behaviour_removal;
 };

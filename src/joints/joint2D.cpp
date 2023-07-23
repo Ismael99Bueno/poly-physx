@@ -83,8 +83,6 @@ joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 YAML::Node joint2D::encode() const
 {
     YAML::Node node;
-    node["ID1"] = (std::uint64_t)m_e1->id();
-    node["ID2"] = (std::uint64_t)m_e2->id();
     node["Index1"] = m_e1->index();
     node["Index2"] = m_e2->index();
     if (m_has_anchors)

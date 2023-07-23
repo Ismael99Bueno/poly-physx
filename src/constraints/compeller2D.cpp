@@ -1,6 +1,5 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/compeller2D.hpp"
-#include "ppx/constraints/constraint_interface2D.hpp"
 #include "ppx/engine2D.hpp"
 
 namespace ppx
@@ -11,7 +10,7 @@ compeller2D::compeller2D(const engine2D &parent, const std::size_t allocations, 
     m_constraints.reserve(allocations);
 }
 
-bool compeller2D::remove_constraint(const constraint_interface2D *ctr)
+bool compeller2D::remove_constraint(const constraint2D *ctr)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if (it->get() == ctr)
@@ -54,39 +53,35 @@ void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges,
     load_constraint_accels(jcb, lambda, stchanges);
 }
 
-const std::vector<kit::scope<constraint_interface2D>> &compeller2D::constraints() const
+const std::vector<kit::scope<constraint2D>> &compeller2D::constraints() const
 {
     return m_constraints;
 }
 
-kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_grad_fun &constraint_grad) const
+kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_gradient_fun &constraint_gradients) const
 {
     KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
     kit::stack_vector<float> cmatrix(rows * cols, 0.f);
 
     for (std::size_t i = 0; i < rows; i++)
-        for (std::size_t ct_idx = 0; ct_idx < m_constraints[i]->size(); ct_idx++)
-        {
-            entity2D &e = (*m_constraints[i])[ct_idx];
-            const std::array<float, 3> state = constraint_grad(*m_constraints[i], e);
-
+        for (const auto &[e, gradient] : constraint_gradients(*m_constraints[i]))
             for (std::size_t k = 0; k < 3; k++)
             {
-                const std::size_t j = e.index() * 3 + k;
-                cmatrix[i * cols + j] = state[k];
+                const std::size_t j = e->index() * 3 + k;
+                cmatrix[i * cols + j] = gradient[k];
             }
-        }
+
     return cmatrix;
 }
 
 kit::stack_vector<float> compeller2D::jacobian() const
 {
-    return constraint_matrix(&constraint_interface2D::constraint_grad);
+    return constraint_matrix(&constraint2D::constraint_gradients);
 }
 kit::stack_vector<float> compeller2D::jacobian_derivative() const
 {
-    return constraint_matrix(&constraint_interface2D::constraint_grad_derivative);
+    return constraint_matrix(&constraint2D::constraint_derivative_gradients);
 }
 
 kit::stack_vector<float> compeller2D::lhs(const kit::stack_vector<float> &jcb,
@@ -130,8 +125,8 @@ kit::stack_vector<float> compeller2D::rhs(const kit::stack_vector<float> &jcb, c
                     djcb[idx] * stchanges[index2] + jcb[idx] * stchanges[index2 + 3] * inv_masses[index1];
                 b[i] -= to_substract;
             }
-        const float anti_drift = (m_constraints[i]->stiffness() * m_constraints[i]->value() +
-                                  m_constraints[i]->dampening() * m_constraints[i]->derivative());
+        const float anti_drift = (m_constraints[i]->stiffness() * m_constraints[i]->constraint_value() +
+                                  m_constraints[i]->dampening() * m_constraints[i]->constraint_derivative());
         b[i] -= anti_drift;
     }
     return b;
