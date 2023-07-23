@@ -37,12 +37,12 @@ class world2D final : kit::non_copyable
 
     template <class... BodyArgs> body2D::ptr add_body(BodyArgs &&...args)
     {
-        body2D &bd = m_bodies.emplace_back(std::forward<BodyArgs>(args)...);
-        return process_body_addition(bd);
+        body2D &body = m_bodies.emplace_back(std::forward<BodyArgs>(args)...);
+        return process_body_addition(body);
     }
 
     bool remove_body(std::size_t index);
-    bool remove_body(const body2D &bd);
+    bool remove_body(const body2D &body);
     bool remove_body(kit::uuid id);
 
     template <typename T, class... BehaviourArgs> T *add_behaviour(BehaviourArgs &&...args)
@@ -145,7 +145,7 @@ class world2D final : kit::non_copyable
 
     float m_elapsed = 0.f;
 
-    body2D::ptr process_body_addition(body2D &bd);
+    body2D::ptr process_body_addition(body2D &body);
 
     void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
     void load_interactions_and_externals(std::vector<float> &stchanges) const;

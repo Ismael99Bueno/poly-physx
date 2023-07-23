@@ -69,11 +69,11 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 //     }
 //     virtual bool valid() const override
 //     {
-//         for (const body2D::const_ptr &bd : m_bodies)
-//             if (!bd)
+//         for (const body2D::const_ptr &body : m_bodies)
+//             if (!body)
 //                 return false;
-//         for (const body2D::ptr &bd : m_grad_bodies)
-//             if (!bd)
+//         for (const body2D::ptr &body : m_grad_bodies)
+//             if (!body)
 //                 return false;
 //         return true;
 //     }

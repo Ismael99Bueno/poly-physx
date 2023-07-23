@@ -7,15 +7,15 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
 {
     return v1.x * v2.y - v1.y * v2.x;
 }
-spring2D::spring2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const float stiffness, const float dampening,
+spring2D::spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const float stiffness, const float dampening,
                    const float length)
-    : joint2D(bd1, bd2), m_stiffness(stiffness), m_dampening(dampening), m_length(length)
+    : joint2D(body1, body2), m_stiffness(stiffness), m_dampening(dampening), m_length(length)
 {
 }
 
-spring2D::spring2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
-                   const float stiffness, const float dampening, const float length)
-    : joint2D(bd1, bd2, anchor1, anchor2), m_stiffness(stiffness), m_dampening(dampening), m_length(length)
+spring2D::spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
+                   const glm::vec2 &anchor2, const float stiffness, const float dampening, const float length)
+    : joint2D(body1, body2, anchor1, anchor2), m_stiffness(stiffness), m_dampening(dampening), m_length(length)
 {
 }
 spring2D::spring2D(const specs &spc)
@@ -92,7 +92,7 @@ float spring2D::energy() const
 }
 spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
 {
-    return {{sp.bd1(), sp.bd2(), sp.anchor1(), sp.anchor2(), sp.has_anchors()},
+    return {{sp.body1(), sp.body2(), sp.anchor1(), sp.anchor2(), sp.has_anchors()},
             sp.stiffness(),
             sp.dampening(),
             sp.length()};

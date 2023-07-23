@@ -32,7 +32,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
         float radius = 2.5f;
         bool kinematic = true;
         shape_type shape = shape_type::POLYGON;
-        static specs from_body(const body2D &bd);
+        static specs from_body(const body2D &body);
     };
 
     body2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &position = glm::vec2(0.f),
@@ -111,7 +111,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     friend class world2D;
 };
 #ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &bd);
+YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &body);
 #endif
 } // namespace ppx
 
@@ -120,8 +120,8 @@ namespace YAML
 {
 template <> struct convert<ppx::body2D>
 {
-    static Node encode(const ppx::body2D &bd);
-    static bool decode(const Node &node, ppx::body2D &bd);
+    static Node encode(const ppx::body2D &body);
+    static bool decode(const Node &node, ppx::body2D &body);
 };
 } // namespace YAML
 #endif

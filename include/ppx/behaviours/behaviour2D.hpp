@@ -22,17 +22,17 @@ class behaviour2D : kit::non_copyable,
 
     void validate();
 
-    void include(const body2D::const_ptr &bd);
-    void exclude(const body2D &bd);
-    bool contains(const body2D &bd) const;
+    void include(const body2D::const_ptr &body);
+    void exclude(const body2D &body);
+    bool contains(const body2D &body) const;
 
-    virtual std::pair<glm::vec2, float> force(const body2D &bd) const = 0;
+    virtual std::pair<glm::vec2, float> force(const body2D &body) const = 0;
 
     float kinetic_energy() const;
     virtual float potential_energy() const = 0;
-    virtual float potential_energy(const body2D &bd) const = 0;
+    virtual float potential_energy(const body2D &body) const = 0;
 
-    float energy(const body2D &bd) const;
+    float energy(const body2D &body) const;
     float energy() const;
 
     void clear();

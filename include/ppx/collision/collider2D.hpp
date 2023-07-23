@@ -45,7 +45,7 @@ class collider2D final : kit::non_copyable, public kit::toggleable
 
     collider2D(world2D &parent, std::size_t allocations);
 
-    void add_body_intervals(const body2D::const_ptr &bd);
+    void add_body_intervals(const body2D::const_ptr &body);
     void solve_and_load_collisions(std::vector<float> &stchanges);
     void validate();
     void flush_collisions();
@@ -72,7 +72,7 @@ class collider2D final : kit::non_copyable, public kit::toggleable
             HIGHER
         };
 
-        interval(const body2D::const_ptr &bd, end end_type);
+        interval(const body2D::const_ptr &body, end end_type);
 
         const body2D *body() const;
         float value() const;
@@ -100,13 +100,13 @@ class collider2D final : kit::non_copyable, public kit::toggleable
     void sort_intervals();
     void update_quad_tree();
 
-    bool narrow_detection(const body2D &bd1, const body2D &bd2, collision2D *c) const;
-    bool narrow_detection_mix(const body2D &bd1, const body2D &bd2, collision2D *c) const;
-    bool narrow_detection_circle(const body2D &bd1, const body2D &bd2, collision2D *c) const;
-    bool full_detection(const body2D &bd1, const body2D &bd2, collision2D *c) const;
+    bool narrow_detection(const body2D &body1, const body2D &body2, collision2D *c) const;
+    bool narrow_detection_mix(const body2D &body1, const body2D &body2, collision2D *c) const;
+    bool narrow_detection_circle(const body2D &body1, const body2D &body2, collision2D *c) const;
+    bool full_detection(const body2D &body1, const body2D &body2, collision2D *c) const;
 
-    void try_enter_or_stay_callback(const body2D &bd1, const body2D &bd2, const collision2D &c) const;
-    void try_exit_callback(const body2D &bd1, const body2D &bd2) const;
+    void try_enter_or_stay_callback(const body2D &body1, const body2D &body2, const collision2D &c) const;
+    void try_exit_callback(const body2D &body1, const body2D &body2) const;
 
     void broad_and_narrow_fase(std::vector<float> &stchanges);
     void narrow_fase(std::vector<float> &stchanges);

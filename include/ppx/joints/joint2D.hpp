@@ -11,22 +11,22 @@ class joint2D : public kit::serializable
   public:
     struct specs
     {
-        body2D::ptr bd1 = nullptr, bd2 = nullptr;
+        body2D::ptr body1 = nullptr, body2 = nullptr;
         glm::vec2 anchor1{0.f}, anchor2{0.f};
         bool has_anchors = true;
         static specs from_joint(const joint2D &joint);
     };
 
-    joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2);
-    joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const glm::vec2 &anchor1, const glm::vec2 &anchor2);
+    joint2D(const body2D::ptr &body1, const body2D::ptr &body2);
+    joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1, const glm::vec2 &anchor2);
     joint2D(const specs &spc);
     virtual ~joint2D() = default;
 
-    void bind(const body2D::ptr &bd1, const body2D::ptr &bd2);
+    void bind(const body2D::ptr &body1, const body2D::ptr &body2);
     virtual bool valid() const;
 
-    const body2D::ptr &bd1() const;
-    const body2D::ptr &bd2() const;
+    const body2D::ptr &body1() const;
+    const body2D::ptr &body2() const;
 
     glm::vec2 anchor1() const;
     glm::vec2 anchor2() const;

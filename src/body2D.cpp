@@ -260,35 +260,36 @@ void body2D::charge(const float charge)
     m_charge = charge;
 }
 
-body2D::specs body2D::specs::from_body(const body2D &bd)
+body2D::specs body2D::specs::from_body(const body2D &body)
 {
-    if (const auto *poly = bd.shape_if<geo::polygon>())
-        return {bd.position(), bd.velocity(),  bd.rotation(), bd.angular_velocity(), bd.mass(),
-                bd.charge(),   poly->locals(), 0.f,           bd.kinematic(),        bd.type()};
-    return {bd.position(),
-            bd.velocity(),
-            bd.rotation(),
-            bd.angular_velocity(),
-            bd.mass(),
-            bd.charge(),
+    if (const auto *poly = body.shape_if<geo::polygon>())
+        return {body.position(),  body.velocity(), body.rotation(), body.angular_velocity(),
+                body.mass(),      body.charge(),   poly->locals(),  0.f,
+                body.kinematic(), body.type()};
+    return {body.position(),
+            body.velocity(),
+            body.rotation(),
+            body.angular_velocity(),
+            body.mass(),
+            body.charge(),
             {},
-            bd.shape<geo::circle>().radius(),
-            bd.kinematic(),
-            bd.type()};
+            body.shape<geo::circle>().radius(),
+            body.kinematic(),
+            body.type()};
 }
 
 #ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &bd)
+YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &body)
 {
     out << YAML::BeginMap;
-    out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)bd.id();
-    out << YAML::Key << "Index" << YAML::Value << bd.index();
-    out << YAML::Key << "Shape" << YAML::Value << bd.shape();
-    out << YAML::Key << "Velocity" << YAML::Value << bd.velocity();
-    out << YAML::Key << "Angular velocity" << YAML::Value << bd.angular_velocity();
-    out << YAML::Key << "Mass" << YAML::Value << bd.mass();
-    out << YAML::Key << "Charge" << YAML::Value << bd.charge();
-    out << YAML::Key << "Kinematic" << YAML::Value << bd.kinematic();
+    out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)body.id();
+    out << YAML::Key << "Index" << YAML::Value << body.index();
+    out << YAML::Key << "Shape" << YAML::Value << body.shape();
+    out << YAML::Key << "Velocity" << YAML::Value << body.velocity();
+    out << YAML::Key << "Angular velocity" << YAML::Value << body.angular_velocity();
+    out << YAML::Key << "Mass" << YAML::Value << body.mass();
+    out << YAML::Key << "Charge" << YAML::Value << body.charge();
+    out << YAML::Key << "Kinematic" << YAML::Value << body.kinematic();
     out << YAML::EndMap;
     return out;
 }
@@ -298,35 +299,35 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &bd)
 #ifdef KIT_USE_YAML_CPP
 namespace YAML
 {
-Node convert<ppx::body2D>::encode(const ppx::body2D &bd)
+Node convert<ppx::body2D>::encode(const ppx::body2D &body)
 {
     Node node;
-    node["UUID"] = (std::uint64_t)bd.id();
-    node["Index"] = bd.index();
-    node["Shape"] = bd.shape();
-    node["Velocity"] = bd.velocity();
-    node["Angular velocity"] = bd.angular_velocity();
-    node["Mass"] = bd.mass();
-    node["Charge"] = bd.charge();
-    node["Kinematic"] = bd.kinematic();
+    node["UUID"] = (std::uint64_t)body.id();
+    node["Index"] = body.index();
+    node["Shape"] = body.shape();
+    node["Velocity"] = body.velocity();
+    node["Angular velocity"] = body.angular_velocity();
+    node["Mass"] = body.mass();
+    node["Charge"] = body.charge();
+    node["Kinematic"] = body.kinematic();
     return node;
 }
-bool convert<ppx::body2D>::decode(const Node &node, ppx::body2D &bd)
+bool convert<ppx::body2D>::decode(const Node &node, ppx::body2D &body)
 {
     if (!node.IsMap() || node.size() != 8)
         return false;
 
-    bd.id(node["UUID"].as<std::uint64_t>());
-    bd.index(node["Index"].as<std::size_t>());
+    body.id(node["UUID"].as<std::uint64_t>());
+    body.index(node["Index"].as<std::size_t>());
     if (node["Shape"]["Radius"])
-        bd.shape(node["Shape"].as<geo::circle>());
+        body.shape(node["Shape"].as<geo::circle>());
     else
-        bd.shape(node["Shape"].as<geo::polygon>());
-    bd.velocity(node["Velocity"].as<glm::vec2>());
-    bd.angular_velocity(node["Angular velocity"].as<float>());
-    bd.mass(node["Mass"].as<float>());
-    bd.charge(node["Charge"].as<float>());
-    bd.kinematic(node["Kinematic"].as<bool>());
+        body.shape(node["Shape"].as<geo::polygon>());
+    body.velocity(node["Velocity"].as<glm::vec2>());
+    body.angular_velocity(node["Angular velocity"].as<float>());
+    body.mass(node["Mass"].as<float>());
+    body.charge(node["Charge"].as<float>());
+    body.kinematic(node["Kinematic"].as<bool>());
 
     return true;
 };

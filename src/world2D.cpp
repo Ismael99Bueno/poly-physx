@@ -99,20 +99,20 @@ void world2D::load_interactions_and_externals(std::vector<float> &stchanges) con
     KIT_PERF_FUNCTION()
     for (const auto &bhv : m_behaviours)
         if (bhv->enabled())
-            for (const auto &bd : bhv->bodies())
+            for (const auto &body : bhv->bodies())
             {
-                if (!bd->kinematic())
+                if (!body->kinematic())
                     continue;
-                const auto [force, torque] = bhv->force(*bd);
-                load_force(stchanges, force, torque, 6 * bd->index());
+                const auto [force, torque] = bhv->force(*body);
+                load_force(stchanges, force, torque, 6 * body->index());
             }
     for (const spring2D &s : m_springs)
     {
-        const std::size_t index1 = 6 * s.bd1()->index(), index2 = 6 * s.bd2()->index();
+        const std::size_t index1 = 6 * s.body1()->index(), index2 = 6 * s.body2()->index();
         const auto [force, t1, t2] = s.force();
-        if (s.bd1()->kinematic())
+        if (s.body1()->kinematic())
             load_force(stchanges, force, t1, index1);
-        if (s.bd2()->kinematic())
+        if (s.body2()->kinematic())
             load_force(stchanges, -force, t2, index2);
     }
 }
@@ -133,29 +133,29 @@ kit::stack_vector<float> world2D::effective_inverse_masses() const
 
 void world2D::reset_bodies()
 {
-    for (body2D &bd : m_bodies)
+    for (body2D &body : m_bodies)
     {
-        bd.m_added_force = glm::vec2(0.f);
-        bd.m_added_torque = 0.f;
+        body.m_added_force = glm::vec2(0.f);
+        body.m_added_torque = 0.f;
     }
 }
 
-body2D::ptr world2D::process_body_addition(body2D &bd)
+body2D::ptr world2D::process_body_addition(body2D &body)
 {
     rk::state &state = integrator.state();
-    bd.m_state = &state;
+    body.m_state = &state;
 
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
-    const glm::vec2 &position = bd.position(), &velocity = bd.velocity();
-    state.append({position.x, position.y, bd.rotation(), velocity.x, velocity.y, bd.angular_velocity()});
-    bd.retrieve();
+    const glm::vec2 &position = body.position(), &velocity = body.velocity();
+    state.append({position.x, position.y, body.rotation(), velocity.x, velocity.y, body.angular_velocity()});
+    body.retrieve();
     collisions.add_body_intervals(e_ptr);
 
-    KIT_INFO("Added body with index {0} and id {1}.", bd.index(), (std::uint64_t)bd.id())
+    KIT_INFO("Added body with index {0} and id {1}.", body.index(), (std::uint64_t)body.id())
 #ifdef DEBUG
     for (std::size_t i = 0; i < m_bodies.size() - 1; i++)
-        KIT_ASSERT_CRITICAL(m_bodies[i].id() != bd.id(), "Body with index {0} has the same id as body with index {1}",
-                            i, bd.index())
+        KIT_ASSERT_CRITICAL(m_bodies[i].id() != body.id(), "Body with index {0} has the same id as body with index {1}",
+                            i, body.index())
 #endif
     events.on_body_addition(e_ptr);
     return e_ptr;
@@ -183,16 +183,16 @@ bool world2D::remove_body(std::size_t index)
     return true;
 }
 
-bool world2D::remove_body(const body2D &bd)
+bool world2D::remove_body(const body2D &body)
 {
-    return remove_body(bd.index());
+    return remove_body(body.index());
 }
 
 bool world2D::remove_body(kit::uuid id)
 {
-    for (const body2D &bd : m_bodies)
-        if (bd.id() == id)
-            return remove_body(bd.index());
+    for (const body2D &body : m_bodies)
+        if (body.id() == id)
+            return remove_body(body.index());
     return false;
 }
 
@@ -299,8 +299,8 @@ void world2D::clear()
 float world2D::kinetic_energy() const
 {
     float ke = 0.f;
-    for (const body2D &bd : m_bodies)
-        ke += bd.kinetic_energy();
+    for (const body2D &body : m_bodies)
+        ke += body.kinetic_energy();
     return ke;
 }
 float world2D::potential_energy() const
@@ -388,18 +388,18 @@ std::vector<body2D::const_ptr> world2D::operator[](const geo::aabb2D &aabb) cons
     std::vector<body2D::const_ptr> in_area;
     in_area.reserve(m_bodies.size() / 2);
 
-    for (const body2D &bd : m_bodies)
-        if (geo::intersect(bd.shape().bounding_box(), aabb))
-            in_area.emplace_back(&m_bodies, bd.index());
+    for (const body2D &body : m_bodies)
+        if (geo::intersect(body.shape().bounding_box(), aabb))
+            in_area.emplace_back(&m_bodies, body.index());
     return in_area;
 }
 std::vector<body2D::ptr> world2D::operator[](const geo::aabb2D &aabb)
 {
     std::vector<body2D::ptr> in_area;
     in_area.reserve(m_bodies.size() / 2);
-    for (const body2D &bd : m_bodies)
-        if (geo::intersect(bd.shape().bounding_box(), aabb))
-            in_area.emplace_back(&m_bodies, bd.index());
+    for (const body2D &body : m_bodies)
+        if (geo::intersect(body.shape().bounding_box(), aabb))
+            in_area.emplace_back(&m_bodies, body.index());
     return in_area;
 }
 
@@ -433,17 +433,17 @@ spring2D::ptr world2D::spring(std::size_t index)
 body2D::const_ptr world2D::operator[](const glm::vec2 &point) const
 {
     const geo::aabb2D aabb = point;
-    for (const body2D &bd : m_bodies)
-        if (geo::intersect(bd.shape().bounding_box(), aabb))
-            return {&m_bodies, bd.index()};
+    for (const body2D &body : m_bodies)
+        if (geo::intersect(body.shape().bounding_box(), aabb))
+            return {&m_bodies, body.index()};
     return nullptr;
 }
 body2D::ptr world2D::operator[](const glm::vec2 &point)
 {
     const geo::aabb2D aabb = point;
-    for (const body2D &bd : m_bodies)
-        if (geo::intersect(bd.shape().bounding_box(), aabb))
-            return {&m_bodies, bd.index()};
+    for (const body2D &body : m_bodies)
+        if (geo::intersect(body.shape().bounding_box(), aabb))
+            return {&m_bodies, body.index()};
     return nullptr;
 }
 
@@ -468,8 +468,8 @@ float world2D::elapsed() const
 YAML::Node world2D::serializer::encode(const world2D &world) const
 {
     YAML::Node node;
-    for (const ppx::body2D &bd : world.bodies())
-        node["Entities"].push_back(bd);
+    for (const ppx::body2D &body : world.bodies())
+        node["Entities"].push_back(body);
     node["Collider"] = world.collisions;
 
     for (const ppx::spring2D &sp : world.springs())

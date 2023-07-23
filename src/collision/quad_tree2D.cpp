@@ -15,19 +15,19 @@ quad_tree2D::quad_tree2D(const glm::vec2 &min, const glm::vec2 &max, const std::
     m_bodies.reserve(4 * max_bodies);
 }
 
-void quad_tree2D::insert(const body2D *bd)
+void quad_tree2D::insert(const body2D *body)
 {
     KIT_ASSERT_CRITICAL(m_bodies.size() <= m_max_bodies || rock_bottom(),
                         "Quad tree contains more bodies than allowed! - Contained bodies: {0}, maximum bodies: {1}",
                         m_bodies.size(), m_max_bodies)
-    if (!geo::intersect(m_aabb, bd->shape().bounding_box()))
+    if (!geo::intersect(m_aabb, body->shape().bounding_box()))
         return;
     if (full() && !rock_bottom())
         partition();
     if (m_partitioned)
-        insert_to_children(bd);
+        insert_to_children(body);
     else
-        m_bodies.push_back(bd);
+        m_bodies.push_back(body);
 }
 
 void quad_tree2D::partitions(std::vector<const std::vector<const body2D *> *> &partitions) const
@@ -79,15 +79,15 @@ void quad_tree2D::partition()
         reset_children();
     else
         create_children();
-    for (const body2D *bd : m_bodies)
-        insert_to_children(bd);
+    for (const body2D *body : m_bodies)
+        insert_to_children(body);
     m_bodies.clear();
 }
 
-void quad_tree2D::insert_to_children(const body2D *bd)
+void quad_tree2D::insert_to_children(const body2D *body)
 {
     for (const auto &q : m_children)
-        q->insert(bd);
+        q->insert(body);
 }
 
 bool quad_tree2D::full() const

@@ -3,25 +3,25 @@
 
 namespace ppx
 {
-revolute_joint2D::revolute_joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const float stiffness,
+revolute_joint2D::revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const float stiffness,
                                    const float dampening)
-    : constraint2D("Revolute", stiffness, dampening), joint2D(bd1, bd2),
-      m_length(glm::distance(bd1->position(), bd2->position()))
+    : constraint2D("Revolute", stiffness, dampening), joint2D(body1, body2),
+      m_length(glm::distance(body1->position(), body2->position()))
 {
 }
 
-revolute_joint2D::revolute_joint2D(const body2D::ptr &bd1, const body2D::ptr &bd2, const glm::vec2 &anchor1,
+revolute_joint2D::revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2, const float stiffness, const float dampening)
-    : constraint2D("Revolute", stiffness, dampening), joint2D(bd1, bd2, anchor1, anchor2),
-      m_length(glm::distance(bd1->position() + anchor1, bd2->position() + anchor2))
+    : constraint2D("Revolute", stiffness, dampening), joint2D(body1, body2, anchor1, anchor2),
+      m_length(glm::distance(body1->position() + anchor1, body2->position() + anchor2))
 {
 }
 revolute_joint2D::revolute_joint2D(const specs &spc)
     : constraint2D("Revolute", spc.stiffness, spc.dampening), joint2D(spc)
 {
 
-    m_length = spc.has_anchors ? glm::distance(spc.bd1->position() + spc.anchor1, spc.bd2->position() + spc.anchor2)
-                               : glm::distance(spc.bd1->position(), spc.bd2->position());
+    m_length = spc.has_anchors ? glm::distance(spc.body1->position() + spc.anchor1, spc.body2->position() + spc.anchor2)
+                               : glm::distance(spc.body1->position(), spc.body2->position());
 }
 
 float revolute_joint2D::constraint_value() const
@@ -100,7 +100,7 @@ float revolute_joint2D::length() const
 
 revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_joint2D &rb)
 {
-    return {{rb.bd1(), rb.bd2(), rb.anchor1(), rb.anchor2(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
+    return {{rb.body1(), rb.body2(), rb.anchor1(), rb.anchor2(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
 }
 
 #ifdef KIT_USE_YAML_CPP
