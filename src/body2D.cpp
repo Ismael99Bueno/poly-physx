@@ -55,7 +55,7 @@ void body2D::retrieve(const std::vector<float> &vars_buffer)
 void body2D::retrieve()
 {
     KIT_ASSERT_CRITICAL(m_state, "Trying to retrieve body data from a stateless body (the body is not tied to an "
-                                 "engine -> its internal state is null)")
+                                 "world -> its internal state is null)")
     retrieve(m_state->vars());
 }
 void body2D::dispatch() const

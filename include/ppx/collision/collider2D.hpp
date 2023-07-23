@@ -17,7 +17,7 @@
 
 namespace ppx
 {
-class engine2D;
+class world2D;
 struct collision2D
 {
     body2D::ptr current, incoming;
@@ -43,7 +43,7 @@ class collider2D final : kit::non_copyable, public kit::toggleable
         QUAD_TREE = 2
     };
 
-    collider2D(engine2D &parent, std::size_t allocations);
+    collider2D(world2D &parent, std::size_t allocations);
 
     void add_body_intervals(const body2D::const_ptr &bd);
     void solve_and_load_collisions(std::vector<float> &stchanges);
@@ -85,7 +85,7 @@ class collider2D final : kit::non_copyable, public kit::toggleable
     };
     using colpair = std::pair<const body2D *, const body2D *>; // Should only last for 1 frame
 
-    engine2D &m_parent;
+    world2D &m_parent;
     std::vector<interval> m_intervals;
     std::vector<colpair> m_collision_pairs;
 

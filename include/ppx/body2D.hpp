@@ -108,7 +108,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void retrieve(const std::vector<float> &vars_buffer);
     void compute_inertia(const geo::shape2D &sh);
 
-    friend class engine2D;
+    friend class world2D;
 };
 #ifdef KIT_USE_YAML_CPP
 YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &bd);

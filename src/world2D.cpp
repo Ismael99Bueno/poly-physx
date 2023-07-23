@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/engine2D.hpp"
+#include "ppx/world2D.hpp"
 #include "geo/intersection.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
@@ -7,26 +7,26 @@
 
 namespace ppx
 {
-engine2D::engine2D(const rk::butcher_tableau &table, const std::size_t allocations)
+world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations)
     : collisions(*this, 2 * allocations), integrator(table), m_compeller(*this, allocations)
 {
     m_bodies.reserve(allocations);
     integrator.state().reserve(6 * allocations);
 }
 
-void engine2D::retrieve(const std::vector<float> &vars_buffer)
+void world2D::retrieve(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()
     for (std::size_t i = 0; i < m_bodies.size(); i++)
         m_bodies[i].retrieve(vars_buffer);
 }
 
-void engine2D::retrieve()
+void world2D::retrieve()
 {
     retrieve(integrator.state().vars());
 }
 
-bool engine2D::raw_forward(const float timestep)
+bool world2D::raw_forward(const float timestep)
 {
     const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
     reset_bodies();
@@ -34,7 +34,7 @@ bool engine2D::raw_forward(const float timestep)
     collisions.flush_collisions();
     return valid;
 }
-bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
+bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
 {
     const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
     reset_bodies();
@@ -42,7 +42,7 @@ bool engine2D::reiterative_forward(float &timestep, const std::uint8_t reiterati
     collisions.flush_collisions();
     return valid;
 }
-bool engine2D::embedded_forward(float &timestep)
+bool world2D::embedded_forward(float &timestep)
 {
     const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
     reset_bodies();
@@ -58,7 +58,7 @@ static void load_force(std::vector<float> &stchanges, const glm::vec2 &force, fl
     stchanges[index + 5] += torque;
 }
 
-void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
+void world2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
 {
     KIT_PERF_FUNCTION()
     for (std::size_t i = 0; i < m_bodies.size(); i++)
@@ -78,7 +78,7 @@ void engine2D::load_velocities_and_added_forces(std::vector<float> &stchanges) c
     }
 }
 
-void engine2D::validate()
+void world2D::validate()
 {
     collisions.validate();
     m_compeller.validate(events.on_constraint_removal);
@@ -94,7 +94,7 @@ void engine2D::validate()
             ++it;
 }
 
-void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) const
+void world2D::load_interactions_and_externals(std::vector<float> &stchanges) const
 {
     KIT_PERF_FUNCTION()
     for (const auto &bhv : m_behaviours)
@@ -117,7 +117,7 @@ void engine2D::load_interactions_and_externals(std::vector<float> &stchanges) co
     }
 }
 
-kit::stack_vector<float> engine2D::effective_inverse_masses() const
+kit::stack_vector<float> world2D::effective_inverse_masses() const
 {
     KIT_PERF_FUNCTION()
     kit::stack_vector<float> inv_masses;
@@ -131,7 +131,7 @@ kit::stack_vector<float> engine2D::effective_inverse_masses() const
     return inv_masses;
 }
 
-void engine2D::reset_bodies()
+void world2D::reset_bodies()
 {
     for (body2D &bd : m_bodies)
     {
@@ -140,7 +140,7 @@ void engine2D::reset_bodies()
     }
 }
 
-body2D::ptr engine2D::process_body_addition(body2D &bd)
+body2D::ptr world2D::process_body_addition(body2D &bd)
 {
     rk::state &state = integrator.state();
     bd.m_state = &state;
@@ -161,7 +161,7 @@ body2D::ptr engine2D::process_body_addition(body2D &bd)
     return e_ptr;
 }
 
-bool engine2D::remove_body(std::size_t index)
+bool world2D::remove_body(std::size_t index)
 {
     if (index >= m_bodies.size())
     {
@@ -183,12 +183,12 @@ bool engine2D::remove_body(std::size_t index)
     return true;
 }
 
-bool engine2D::remove_body(const body2D &bd)
+bool world2D::remove_body(const body2D &bd)
 {
     return remove_body(bd.index());
 }
 
-bool engine2D::remove_body(kit::uuid id)
+bool world2D::remove_body(kit::uuid id)
 {
     for (const body2D &bd : m_bodies)
         if (bd.id() == id)
@@ -196,7 +196,7 @@ bool engine2D::remove_body(kit::uuid id)
     return false;
 }
 
-bool engine2D::remove_behaviour(std::size_t index)
+bool world2D::remove_behaviour(std::size_t index)
 {
     if (index >= m_behaviours.size())
     {
@@ -208,7 +208,7 @@ bool engine2D::remove_behaviour(std::size_t index)
     m_behaviours.erase(m_behaviours.begin() + (long)index);
     return true;
 }
-bool engine2D::remove_behaviour(const behaviour2D *bhv)
+bool world2D::remove_behaviour(const behaviour2D *bhv)
 {
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
         if (it->get() == bhv)
@@ -219,7 +219,7 @@ bool engine2D::remove_behaviour(const behaviour2D *bhv)
         }
     return false;
 }
-bool engine2D::remove_behaviour(const std::string &name)
+bool world2D::remove_behaviour(const std::string &name)
 {
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
         if ((*it)->id() == name)
@@ -231,7 +231,7 @@ bool engine2D::remove_behaviour(const std::string &name)
     return false;
 }
 
-bool engine2D::remove_spring(std::size_t index)
+bool world2D::remove_spring(std::size_t index)
 {
     if (index >= m_springs.size())
     {
@@ -242,11 +242,11 @@ bool engine2D::remove_spring(std::size_t index)
     m_springs.erase(m_springs.begin() + (long)index);
     return true;
 }
-bool engine2D::remove_spring(const spring2D &sp)
+bool world2D::remove_spring(const spring2D &sp)
 {
     return remove_spring(sp.index());
 }
-bool engine2D::remove_spring(kit::uuid id)
+bool world2D::remove_spring(kit::uuid id)
 {
     for (const spring2D &sp : m_springs)
         if (sp.id() == id)
@@ -254,41 +254,41 @@ bool engine2D::remove_spring(kit::uuid id)
     return false;
 }
 
-bool engine2D::remove_constraint(std::size_t index)
+bool world2D::remove_constraint(std::size_t index)
 {
     return m_compeller.remove_constraint(index, events.on_constraint_removal);
 }
-bool engine2D::remove_constraint(const constraint2D *ctr)
+bool world2D::remove_constraint(const constraint2D *ctr)
 {
     return m_compeller.remove_constraint(ctr, events.on_constraint_removal);
 }
-bool engine2D::remove_constraint(kit::uuid id)
+bool world2D::remove_constraint(kit::uuid id)
 {
     return m_compeller.remove_constraint(id, events.on_constraint_removal);
 }
 
-void engine2D::clear_bodies()
+void world2D::clear_bodies()
 {
     for (std::size_t i = m_bodies.size() - 1; i < m_bodies.size(); i--)
         remove_body(i);
 }
-void engine2D::clear_behaviours()
+void world2D::clear_behaviours()
 {
     for (const auto &bhv : m_behaviours)
         events.on_behaviour_removal(*bhv);
     m_behaviours.clear();
 }
-void engine2D::clear_springs()
+void world2D::clear_springs()
 {
     for (const spring2D &sp : m_springs)
         events.on_spring_removal(sp);
     m_springs.clear();
 }
-void engine2D::clear_constraints()
+void world2D::clear_constraints()
 {
     m_compeller.clear_constraints(events.on_constraint_removal);
 }
-void engine2D::clear()
+void world2D::clear()
 {
     m_behaviours.clear();
     m_springs.clear();
@@ -296,14 +296,14 @@ void engine2D::clear()
     clear_bodies();
 }
 
-float engine2D::kinetic_energy() const
+float world2D::kinetic_energy() const
 {
     float ke = 0.f;
     for (const body2D &bd : m_bodies)
         ke += bd.kinetic_energy();
     return ke;
 }
-float engine2D::potential_energy() const
+float world2D::potential_energy() const
 {
     float pot = 0.f;
     for (const auto &bhv : m_behaviours)
@@ -312,12 +312,12 @@ float engine2D::potential_energy() const
         pot += sp.potential_energy();
     return pot;
 }
-float engine2D::energy() const
+float world2D::energy() const
 {
     return kinetic_energy() + potential_energy();
 }
 
-std::vector<float> engine2D::operator()(const float t, const float dt, const std::vector<float> &vars)
+std::vector<float> world2D::operator()(const float t, const float dt, const std::vector<float> &vars)
 {
     KIT_PERF_FUNCTION()
     KIT_ASSERT_CRITICAL(
@@ -342,7 +342,7 @@ std::vector<float> engine2D::operator()(const float t, const float dt, const std
     return stchanges;
 }
 
-std::optional<std::size_t> engine2D::index_from_id(const kit::uuid id) const
+std::optional<std::size_t> world2D::index_from_id(const kit::uuid id) const
 {
     for (std::size_t i = 0; i < m_bodies.size(); i++)
         if (m_bodies[i].id() == id)
@@ -350,19 +350,19 @@ std::optional<std::size_t> engine2D::index_from_id(const kit::uuid id) const
     return {};
 }
 
-body2D::const_ptr engine2D::from_id(kit::uuid id) const
+body2D::const_ptr world2D::from_id(kit::uuid id) const
 {
     const auto index = index_from_id(id);
     return index ? (*this)[index.value()] : nullptr;
 }
 
-body2D::ptr engine2D::from_id(kit::uuid id)
+body2D::ptr world2D::from_id(kit::uuid id)
 {
     const auto index = index_from_id(id);
     return index ? (*this)[index.value()] : nullptr;
 }
 
-template <> behaviour2D *engine2D::behaviour_from_name(const std::string &name) const
+template <> behaviour2D *world2D::behaviour_from_name(const std::string &name) const
 {
     for (const auto &bhv : m_behaviours)
         if (name == bhv->id())
@@ -370,20 +370,20 @@ template <> behaviour2D *engine2D::behaviour_from_name(const std::string &name) 
     return nullptr;
 }
 
-body2D::const_ptr engine2D::operator[](const std::size_t index) const
+body2D::const_ptr world2D::operator[](const std::size_t index) const
 {
     KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_bodies.size())
     return {&m_bodies, index};
 }
-body2D::ptr engine2D::operator[](const std::size_t index)
+body2D::ptr world2D::operator[](const std::size_t index)
 {
     KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_bodies.size())
     return {&m_bodies, index};
 }
 
-std::vector<body2D::const_ptr> engine2D::operator[](const geo::aabb2D &aabb) const
+std::vector<body2D::const_ptr> world2D::operator[](const geo::aabb2D &aabb) const
 {
     std::vector<body2D::const_ptr> in_area;
     in_area.reserve(m_bodies.size() / 2);
@@ -393,7 +393,7 @@ std::vector<body2D::const_ptr> engine2D::operator[](const geo::aabb2D &aabb) con
             in_area.emplace_back(&m_bodies, bd.index());
     return in_area;
 }
-std::vector<body2D::ptr> engine2D::operator[](const geo::aabb2D &aabb)
+std::vector<body2D::ptr> world2D::operator[](const geo::aabb2D &aabb)
 {
     std::vector<body2D::ptr> in_area;
     in_area.reserve(m_bodies.size() / 2);
@@ -403,34 +403,34 @@ std::vector<body2D::ptr> engine2D::operator[](const geo::aabb2D &aabb)
     return in_area;
 }
 
-const std::vector<kit::scope<behaviour2D>> &engine2D::behaviours() const
+const std::vector<kit::scope<behaviour2D>> &world2D::behaviours() const
 {
     return m_behaviours;
 }
-const std::vector<kit::scope<constraint2D>> &engine2D::constraints() const
+const std::vector<kit::scope<constraint2D>> &world2D::constraints() const
 {
     return m_compeller.constraints();
 }
 
-const kit::track_vector<spring2D> &engine2D::springs() const
+const kit::track_vector<spring2D> &world2D::springs() const
 {
     return m_springs;
 }
-spring2D::const_ptr engine2D::spring(std::size_t index) const
+spring2D::const_ptr world2D::spring(std::size_t index) const
 {
     return {&m_springs, index};
 }
 
-kit::track_vector_view<spring2D> engine2D::springs()
+kit::track_vector_view<spring2D> world2D::springs()
 {
     return m_springs;
 }
-spring2D::ptr engine2D::spring(std::size_t index)
+spring2D::ptr world2D::spring(std::size_t index)
 {
     return {&m_springs, index};
 }
 
-body2D::const_ptr engine2D::operator[](const glm::vec2 &point) const
+body2D::const_ptr world2D::operator[](const glm::vec2 &point) const
 {
     const geo::aabb2D aabb = point;
     for (const body2D &bd : m_bodies)
@@ -438,7 +438,7 @@ body2D::const_ptr engine2D::operator[](const glm::vec2 &point) const
             return {&m_bodies, bd.index()};
     return nullptr;
 }
-body2D::ptr engine2D::operator[](const glm::vec2 &point)
+body2D::ptr world2D::operator[](const glm::vec2 &point)
 {
     const geo::aabb2D aabb = point;
     for (const body2D &bd : m_bodies)
@@ -447,71 +447,71 @@ body2D::ptr engine2D::operator[](const glm::vec2 &point)
     return nullptr;
 }
 
-const kit::track_vector<body2D> &engine2D::bodies() const
+const kit::track_vector<body2D> &world2D::bodies() const
 {
     return m_bodies;
 }
-kit::track_vector_view<body2D> engine2D::bodies()
+kit::track_vector_view<body2D> world2D::bodies()
 {
     return m_bodies;
 }
-std::size_t engine2D::size() const
+std::size_t world2D::size() const
 {
     return m_bodies.size();
 }
 
-float engine2D::elapsed() const
+float world2D::elapsed() const
 {
     return m_elapsed;
 }
 #ifdef KIT_USE_YAML_CPP
-YAML::Node engine2D::serializer::encode(const engine2D &eng) const
+YAML::Node world2D::serializer::encode(const world2D &world) const
 {
     YAML::Node node;
-    for (const ppx::body2D &bd : eng.bodies())
+    for (const ppx::body2D &bd : world.bodies())
         node["Entities"].push_back(bd);
-    node["Collider"] = eng.collisions;
+    node["Collider"] = world.collisions;
 
-    for (const ppx::spring2D &sp : eng.springs())
+    for (const ppx::spring2D &sp : world.springs())
         node["Springs"].push_back(sp);
-    for (const auto &ctr : eng.constraints())
+    for (const auto &ctr : world.constraints())
     {
         YAML::Node child;
         child[ctr->name()] = *ctr;
         node["Constraints"].push_back(child);
     }
 
-    for (const auto &bhv : eng.behaviours())
+    for (const auto &bhv : world.behaviours())
         node["Behaviours"][bhv->id()] = *bhv;
 
-    node["Integrator"] = eng.integrator;
-    node["Elapsed"] = eng.elapsed();
+    node["Integrator"] = world.integrator;
+    node["Elapsed"] = world.elapsed();
     return node;
 }
-bool engine2D::serializer::decode(const YAML::Node &node, engine2D &eng) const
+bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
 {
     if (!node.IsMap() || node.size() != 7)
         return false;
 
-    eng.clear_bodies();
-    eng.integrator = node["Integrator"].as<rk::integrator>();
-    eng.integrator.state().clear();
+    world.clear_bodies();
+    world.integrator = node["Integrator"].as<rk::integrator>();
+    world.integrator.state().clear();
 
     for (const YAML::Node &n : node["Entities"])
-        eng.add_body(n.as<ppx::body2D>());
+        world.add_body(n.as<ppx::body2D>());
 
-    node["Collider"].as<ppx::collider2D>(eng.collisions);
+    node["Collider"].as<ppx::collider2D>(world.collisions);
     for (const YAML::Node &n : node["Springs"])
     {
         const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
         if (n["Anchor1"])
         {
             const ppx::spring2D::ptr sp =
-                eng.add_spring(eng[idx1], eng[idx2], n["Anchor1"].as<glm::vec2>(), n["Anchor2"].as<glm::vec2>());
+                world.add_spring(world[idx1], world[idx2], n["Anchor1"].as<glm::vec2>(), n["Anchor2"].as<glm::vec2>());
             n.as<ppx::spring2D>(*sp);
             continue;
         }
-        const ppx::spring2D::ptr sp = eng.add_spring(eng[idx1], eng[idx2]);
+        const ppx::spring2D::ptr sp = world.add_spring(world[idx1], world[idx2]);
         n.as<ppx::spring2D>(*sp);
     }
 
@@ -522,23 +522,23 @@ bool engine2D::serializer::decode(const YAML::Node &node, engine2D &eng) const
             const std::size_t idx1 = revnode["Index1"].as<std::size_t>(), idx2 = revnode["Index2"].as<std::size_t>();
             if (revnode["Anchor1"])
             {
-                const auto revjoint = eng.add_constraint<ppx::revolute_joint2D>(
-                    eng[idx1], eng[idx2], revnode["Anchor1"].as<glm::vec2>(), revnode["Anchor2"].as<glm::vec2>());
+                const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(
+                    world[idx1], world[idx2], revnode["Anchor1"].as<glm::vec2>(), revnode["Anchor2"].as<glm::vec2>());
 
                 revnode.as<ppx::revolute_joint2D>(*revjoint);
                 continue;
             }
-            const auto revjoint = eng.add_constraint<ppx::revolute_joint2D>(eng[idx1], eng[idx2]);
+            const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(world[idx1], world[idx2]);
             revnode.as<ppx::revolute_joint2D>(*revjoint);
         }
 
     for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
     {
-        const auto bhv = eng.behaviour_from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
+        const auto bhv = world.behaviour_from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
         node["Behaviours"][bhv->id()].as<ppx::behaviour2D>(*bhv);
     }
 
-    eng.m_elapsed = node["Elapsed"].as<float>();
+    world.m_elapsed = node["Elapsed"].as<float>();
     return true;
 }
 #endif

@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/collider2D.hpp"
-#include "ppx/engine2D.hpp"
+#include "ppx/world2D.hpp"
 
 #include "geo/intersection.hpp"
 
@@ -16,7 +16,7 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-collider2D::collider2D(engine2D &parent, const std::size_t allocations)
+collider2D::collider2D(world2D &parent, const std::size_t allocations)
     : m_parent(parent), m_quad_tree({-10.f, -10.f}, {10.f, 10.f})
 {
     m_intervals.reserve(allocations);

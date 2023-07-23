@@ -10,7 +10,7 @@
 
 namespace ppx
 {
-class engine2D;
+class world2D;
 class behaviour2D : kit::non_copyable,
                     public kit::identifiable<std::string>,
                     public kit::toggleable,
@@ -49,8 +49,8 @@ class behaviour2D : kit::non_copyable,
     std::vector<body2D::const_ptr> m_included;
 
   private:
-    const engine2D *m_parent = nullptr;
-    friend class engine2D;
+    const world2D *m_parent = nullptr;
+    friend class world2D;
 };
 
 } // namespace ppx

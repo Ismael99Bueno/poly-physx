@@ -5,7 +5,7 @@
 #include "ppx/constraints/compeller2D.hpp"
 #include "ppx/collision/collider2D.hpp"
 #include "ppx/joints/spring2D.hpp"
-#include "ppx/events/engine_events.hpp"
+#include "ppx/events/world_events.hpp"
 #include "kit/container/container_view.hpp"
 #include "rk/tableaus.hpp"
 #include "kit/interface/non_copyable.hpp"
@@ -13,23 +13,23 @@
 namespace ppx
 {
 class behaviour2D;
-class engine2D final : kit::non_copyable
+class world2D final : kit::non_copyable
 {
   public:
 #ifdef KIT_USE_YAML_CPP
-    class serializer : public kit::serializer<engine2D>
+    class serializer : public kit::serializer<world2D>
     {
       public:
-        YAML::Node encode(const engine2D &eng) const override;
-        bool decode(const YAML::Node &node, engine2D &eng) const override;
+        YAML::Node encode(const world2D &world) const override;
+        bool decode(const YAML::Node &node, world2D &world) const override;
     };
 #endif
 
-    engine2D(const rk::butcher_tableau &table = rk::rk4, std::size_t allocations = 100);
+    world2D(const rk::butcher_tableau &table = rk::rk4, std::size_t allocations = 100);
 
     collider2D collisions;
     rk::integrator integrator;
-    engine_events events;
+    world_events events;
 
     bool raw_forward(float timestep);
     bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);

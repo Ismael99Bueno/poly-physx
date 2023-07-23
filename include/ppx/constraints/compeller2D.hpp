@@ -2,7 +2,7 @@
 #define PPX_COMPELLER2D_HPP
 
 #include "ppx/body2D.hpp"
-#include "ppx/events/engine_events.hpp"
+#include "ppx/events/world_events.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/container/stack_vector.hpp"
 #include "kit/memory/scope.hpp"
@@ -13,12 +13,12 @@
 
 namespace ppx
 {
-class engine2D;
+class world2D;
 
 class compeller2D final : kit::non_copyable
 {
   public:
-    compeller2D(const engine2D &parent, std::size_t allocations);
+    compeller2D(const world2D &parent, std::size_t allocations);
 
     template <typename T, class... ConstraintArgs>
     T *add_constraint(const kit::event<constraint2D *> &event_callback, ConstraintArgs &&...args)
@@ -45,7 +45,7 @@ class compeller2D final : kit::non_copyable
     const std::vector<kit::scope<constraint2D>> &constraints() const;
 
   private:
-    const engine2D &m_parent;
+    const world2D &m_parent;
     std::vector<kit::scope<constraint2D>> m_constraints;
 
     using constraint_gradient_fun = std::function<std::vector<constraint2D::body_gradient>(const constraint2D &)>;

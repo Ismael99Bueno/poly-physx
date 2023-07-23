@@ -1,10 +1,10 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/compeller2D.hpp"
-#include "ppx/engine2D.hpp"
+#include "ppx/world2D.hpp"
 
 namespace ppx
 {
-compeller2D::compeller2D(const engine2D &parent, const std::size_t allocations) : m_parent(parent)
+compeller2D::compeller2D(const world2D &parent, const std::size_t allocations) : m_parent(parent)
 {
     m_constraints.reserve(allocations);
 }
