@@ -34,17 +34,13 @@ float interaction2D::potential_energy() const
     return pot;
 }
 
-std::pair<glm::vec2, float> interaction2D::force(const body2D &body1) const
+glm::vec3 interaction2D::force(const body2D &body1) const
 {
-    glm::vec2 total_force{0.f};
-    float total_torque = 0.f;
+    glm::vec3 total_force{0.f};
     for (const auto &body2 : m_included)
         if (body1 != *body2)
-        {
-            const auto &[f, t] = force_pair(body1, *body2);
-            total_force += f;
-            total_torque += t;
-        }
-    return {total_force, total_torque};
+            total_force += force_pair(body1, *body2);
+
+    return total_force;
 }
 } // namespace ppx

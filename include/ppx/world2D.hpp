@@ -62,7 +62,7 @@ class world2D final : kit::non_copyable
 
         m_behaviours.push_back(std::move(bhv));
         m_behaviours.back()->m_parent = this;
-        events.on_behaviour_addition(*ptr);
+        events.on_behaviour_addition(ptr);
         return ptr;
     }
 
@@ -72,7 +72,7 @@ class world2D final : kit::non_copyable
 
     template <class... SpringArgs> spring2D::ptr add_spring(SpringArgs &&...args)
     {
-        m_springs.emplace_back(std::forward<SpringArgs>(args)...);
+        m_springs.emplace_back(std::forward<SpringArgs>(args)...).index(m_springs.size() - 1);
         const spring2D::ptr sp_ptr = {&m_springs, m_springs.size() - 1};
         events.on_spring_addition(sp_ptr);
         return sp_ptr;
@@ -123,12 +123,12 @@ class world2D final : kit::non_copyable
     body2D::const_ptr operator[](const glm::vec2 &point) const;
     body2D::ptr operator[](const glm::vec2 &point);
 
-    const kit::track_vector<body2D> &bodies() const;
-    const kit::track_vector<spring2D> &springs() const;
+    const std::vector<body2D> &bodies() const;
+    const std::vector<spring2D> &springs() const;
     spring2D::const_ptr spring(std::size_t index) const;
 
-    kit::track_vector_view<body2D> bodies();
-    kit::track_vector_view<spring2D> springs();
+    kit::vector_view<body2D> bodies();
+    kit::vector_view<spring2D> springs();
     spring2D::ptr spring(std::size_t index);
 
     const std::vector<kit::scope<behaviour2D>> &behaviours() const;
@@ -138,10 +138,10 @@ class world2D final : kit::non_copyable
     float elapsed() const;
 
   private:
-    kit::track_vector<body2D> m_bodies;
+    std::vector<body2D> m_bodies;
     compeller2D m_compeller;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
-    kit::track_vector<spring2D> m_springs;
+    std::vector<spring2D> m_springs;
 
     float m_elapsed = 0.f;
 

@@ -2,6 +2,7 @@
 #define PPX_CONSTRAINT2D_HPP
 
 #include "ppx/body2D.hpp"
+#include "kit/interface/nameable.hpp"
 
 namespace ppx
 {
@@ -36,74 +37,6 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     float m_stiffness;
     float m_dampening;
 };
-// template <std::size_t N> class constraint2D : public constraint_interface2D
-// {
-//   public:
-//     constraint2D() = default;
-//     virtual ~constraint2D() = default;
-
-//     constraint2D(const std::array<body2D::ptr, N> &bodies) : m_grad_bodies(bodies)
-//     {
-//         copy_to_const_bodies(bodies);
-//     }
-
-//     constraint2D(const std::array<body2D::ptr, N> &bodies, float stiffness, float dampening)
-//         : constraint_interface2D(stiffness, dampening), m_grad_bodies(bodies)
-//     {
-//         copy_to_const_bodies(bodies);
-//     }
-
-//     const std::array<body2D::ptr, N> &bodies() const
-//     {
-//         return m_grad_bodies;
-//     }
-//     void bodies(const std::array<body2D::ptr, N> &bodies)
-//     {
-//         m_grad_bodies = bodies;
-//         copy_to_const_bodies(bodies);
-//     }
-
-//     float value() const override
-//     {
-//         return constraint(m_bodies);
-//     }
-//     virtual bool valid() const override
-//     {
-//         for (const body2D::const_ptr &body : m_bodies)
-//             if (!body)
-//                 return false;
-//         for (const body2D::ptr &body : m_grad_bodies)
-//             if (!body)
-//                 return false;
-//         return true;
-//     }
-
-//   private:
-//     std::array<body2D::const_ptr, N> m_bodies;
-//     std::array<body2D::ptr, N> m_grad_bodies;
-
-//     void copy_to_const_bodies(const std::array<body2D::ptr, N> &bodies)
-//     {
-//         for (std::size_t i = 0; i < N; i++)
-//             m_bodies[i] = bodies[i];
-//     }
-
-//     virtual float constraint(const std::array<body2D::const_ptr, N> &bodies) const = 0;
-//     virtual float constraint_derivative(const std::array<body2D::const_ptr, N> &bodies) const = 0;
-
-//     float derivative() const override
-//     {
-//         return constraint_derivative(m_bodies);
-//     }
-//     std::size_t size() const override
-//     {
-//         return N;
-//     }
-//     body2D &operator[](std::size_t index) const override
-//     {
-//         return *m_grad_bodies[index];
-//     }
-// };
 } // namespace ppx
 
 #endif

@@ -2,7 +2,6 @@
 #define PPX_SPRING2D_HPP
 
 #include "ppx/joints/joint2D.hpp"
-#include <utility>
 
 namespace ppx
 {
@@ -23,7 +22,7 @@ class spring2D : public joint2D, public kit::identifiable<>, public kit::indexab
              float stiffness = 1.f, float dampening = 0.f, float length = 0.f);
     spring2D(const specs &spc);
 
-    std::tuple<glm::vec2, float, float> force() const;
+    glm::vec4 force() const;
 
     float length() const;
     void length(float length);
@@ -46,8 +45,8 @@ class spring2D : public joint2D, public kit::identifiable<>, public kit::indexab
   private:
     float m_stiffness, m_dampening, m_length;
 
-    std::tuple<glm::vec2, float, float> without_anchors_force() const;
-    std::tuple<glm::vec2, float, float> with_anchors_force() const;
+    glm::vec4 without_anchors_force() const;
+    glm::vec4 with_anchors_force() const;
 };
 
 } // namespace ppx

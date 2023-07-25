@@ -1,7 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/quad_tree2D.hpp"
-
 #include "geo/intersection.hpp"
+#include "kit/profile/perf.hpp"
 
 namespace ppx
 {

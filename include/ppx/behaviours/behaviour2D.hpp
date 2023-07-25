@@ -26,7 +26,7 @@ class behaviour2D : kit::non_copyable,
     void exclude(const body2D &body);
     bool contains(const body2D &body) const;
 
-    virtual std::pair<glm::vec2, float> force(const body2D &body) const = 0;
+    virtual glm::vec3 force(const body2D &body) const = 0;
 
     float kinetic_energy() const;
     virtual float potential_energy() const = 0;

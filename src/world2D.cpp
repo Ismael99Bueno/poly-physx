@@ -51,11 +51,11 @@ bool world2D::embedded_forward(float &timestep)
     return valid;
 }
 
-static void load_force(std::vector<float> &stchanges, const glm::vec2 &force, float torque, std::size_t index)
+static void load_force(std::vector<float> &stchanges, const glm::vec3 &force, std::size_t index)
 {
     stchanges[index + 3] += force.x;
     stchanges[index + 4] += force.y;
-    stchanges[index + 5] += torque;
+    stchanges[index + 5] += force.z;
 }
 
 void world2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
@@ -73,7 +73,7 @@ void world2D::load_velocities_and_added_forces(std::vector<float> &stchanges) co
         {
             const glm::vec2 &force = m_bodies[i].added_force();
             const float torque = m_bodies[i].added_torque();
-            load_force(stchanges, force, torque, index);
+            load_force(stchanges, glm::vec3(force, torque), index);
         }
     }
 }
@@ -103,17 +103,17 @@ void world2D::load_interactions_and_externals(std::vector<float> &stchanges) con
             {
                 if (!body->kinematic())
                     continue;
-                const auto [force, torque] = bhv->force(*body);
-                load_force(stchanges, force, torque, 6 * body->index());
+                const glm::vec3 force = bhv->force(*body);
+                load_force(stchanges, force, 6 * body->index());
             }
     for (const spring2D &s : m_springs)
     {
         const std::size_t index1 = 6 * s.body1()->index(), index2 = 6 * s.body2()->index();
-        const auto [force, t1, t2] = s.force();
+        const glm::vec4 force = s.force();
         if (s.body1()->kinematic())
-            load_force(stchanges, force, t1, index1);
+            load_force(stchanges, glm::vec3(force), index1);
         if (s.body2()->kinematic())
-            load_force(stchanges, -force, t2, index2);
+            load_force(stchanges, glm::vec3(-glm::vec2(force), force.w), index2);
     }
 }
 
@@ -145,7 +145,9 @@ body2D::ptr world2D::process_body_addition(body2D &body)
     rk::state &state = integrator.state();
     body.m_state = &state;
 
+    body.index(m_bodies.size() - 1);
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
+
     const glm::vec2 &position = body.position(), &velocity = body.velocity();
     state.append({position.x, position.y, body.rotation(), velocity.x, velocity.y, body.angular_velocity()});
     body.retrieve();
@@ -172,7 +174,12 @@ bool world2D::remove_body(std::size_t index)
 
     events.on_early_body_removal(m_bodies[index]);
     rk::state &state = integrator.state();
-    m_bodies.erase(index);
+    if (index != m_bodies.size() - 1)
+    {
+        m_bodies[index] = m_bodies.back();
+        m_bodies[index].index(index);
+    }
+    m_bodies.pop_back();
 
     for (std::size_t i = 0; i < 6; i++)
         state[6 * index + i] = state[state.size() - 6 + i];
@@ -239,7 +246,12 @@ bool world2D::remove_spring(std::size_t index)
         return false;
     }
     events.on_spring_removal(m_springs[index]);
-    m_springs.erase(m_springs.begin() + (long)index);
+    if (index != m_springs.size() - 1)
+    {
+        m_springs[index] = m_springs.back();
+        m_springs[index].index(index);
+    }
+    m_springs.pop_back();
     return true;
 }
 bool world2D::remove_spring(const spring2D &sp)
@@ -412,7 +424,7 @@ const std::vector<kit::scope<constraint2D>> &world2D::constraints() const
     return m_compeller.constraints();
 }
 
-const kit::track_vector<spring2D> &world2D::springs() const
+const std::vector<spring2D> &world2D::springs() const
 {
     return m_springs;
 }
@@ -421,7 +433,7 @@ spring2D::const_ptr world2D::spring(std::size_t index) const
     return {&m_springs, index};
 }
 
-kit::track_vector_view<spring2D> world2D::springs()
+kit::vector_view<spring2D> world2D::springs()
 {
     return m_springs;
 }
@@ -447,11 +459,11 @@ body2D::ptr world2D::operator[](const glm::vec2 &point)
     return nullptr;
 }
 
-const kit::track_vector<body2D> &world2D::bodies() const
+const std::vector<body2D> &world2D::bodies() const
 {
     return m_bodies;
 }
-kit::track_vector_view<body2D> world2D::bodies()
+kit::vector_view<body2D> world2D::bodies()
 {
     return m_bodies;
 }

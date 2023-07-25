@@ -11,8 +11,8 @@ class interaction2D : public behaviour2D
     using behaviour2D::behaviour2D;
     virtual ~interaction2D() = default;
 
-    virtual std::pair<glm::vec2, float> force_pair(const body2D &body1, const body2D &body2) const = 0;
-    std::pair<glm::vec2, float> force(const body2D &body) const override;
+    virtual glm::vec3 force_pair(const body2D &body1, const body2D &body2) const = 0;
+    glm::vec3 force(const body2D &body) const override;
 
     float potential(const body2D &body, const glm::vec2 &position) const;
     float potential(const glm::vec2 &position) const;
