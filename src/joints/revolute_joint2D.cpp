@@ -54,7 +54,7 @@ float revolute_joint2D::with_anchors_constraint_derivative() const
     const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
 
     return 2.f * glm::dot(rot_anchor1 - rot_anchor2 + m_e1->position() - m_e2->position(),
-                          m_e1->vel_at(rot_anchor1) - m_e2->vel_at(rot_anchor2));
+                          m_e1->velocity_at(rot_anchor1) - m_e2->velocity_at(rot_anchor2));
 }
 
 std::vector<constraint2D::body_gradient> revolute_joint2D::constraint_gradients() const
@@ -81,7 +81,7 @@ std::vector<constraint2D::body_gradient> revolute_joint2D::constraint_derivative
         return {{m_e1.raw(), {cgd.x, cgd.y, 0.f}}, {m_e2.raw(), {-cgd.x, -cgd.y, 0.f}}};
     }
     const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
-    const glm::vec2 cgd = 2.f * (m_e1->vel_at(rot_anchor1) - m_e2->vel_at(rot_anchor2));
+    const glm::vec2 cgd = 2.f * (m_e1->velocity_at(rot_anchor1) - m_e2->velocity_at(rot_anchor2));
 
     const float cgda1 = glm::dot(rot_anchor1, -cgd);
     const float cgda2 = glm::dot(rot_anchor2, cgd);

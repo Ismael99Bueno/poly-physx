@@ -27,7 +27,10 @@ class body2D : public kit::identifiable<>, public kit::indexable
     struct specs
     {
         glm::vec2 position{0.f}, velocity{0.f};
-        float rotation = 0.f, angular_velocity = 0.f, mass = 1.f, charge = 1.f;
+        float rotation = 0.f;
+        float angular_velocity = 0.f;
+        float mass = 1.f;
+        float charge = 1.f;
         kit::block_vector<glm::vec2> vertices = geo::polygon::box(5.f);
         float radius = 2.5f;
         bool kinematic = true;
@@ -43,7 +46,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
            bool kinematic = true);
     body2D(const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f,
            float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    body2D(const specs &spc);
+    explicit body2D(const specs &spc);
 
     void retrieve();
     void dispatch() const;
@@ -82,7 +85,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     const glm::vec2 &position() const;
     const glm::vec2 &velocity() const;
-    const glm::vec2 vel_at(const glm::vec2 &at) const;
+    glm::vec2 velocity_at(const glm::vec2 &at) const;
     float rotation() const;
     float angular_velocity() const;
     float mass() const;
@@ -101,7 +104,13 @@ class body2D : public kit::identifiable<>, public kit::indexable
     rk::state *m_state = nullptr;
     glm::vec2 m_vel{0.f}, m_added_force{0.f};
     body_events m_events;
-    float m_angvel, m_added_torque = 0.f, m_mass, m_inv_mass, m_inertia, m_inv_inertia, m_charge;
+    float m_angvel;
+    float m_added_torque = 0.f;
+    float m_mass;
+    float m_inv_mass;
+    float m_inertia;
+    float m_inv_inertia;
+    float m_charge;
     bool m_kinematic;
 
     geo::shape2D &get_shape();

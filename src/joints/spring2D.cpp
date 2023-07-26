@@ -41,7 +41,8 @@ glm::vec4 spring2D::with_anchors_force() const
     const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
     const glm::vec2 p1 = m_e1->position() + rot_anchor1, p2 = m_e2->position() + rot_anchor2;
     const glm::vec2 relpos = p2 - p1, direction = glm::normalize(relpos),
-                    relvel = direction * glm::dot(m_e2->vel_at(rot_anchor2) - m_e1->vel_at(rot_anchor1), direction),
+                    relvel = direction *
+                             glm::dot(m_e2->velocity_at(rot_anchor2) - m_e1->velocity_at(rot_anchor1), direction),
                     vlen = m_length * direction;
 
     const glm::vec2 force = m_stiffness * (relpos - vlen) + m_dampening * relvel;
@@ -112,7 +113,7 @@ bool spring2D::decode(const YAML::Node &node)
 {
     if (!joint2D::decode(node))
         return false;
-    id(node["UUID"].as<std::uint64_t>());
+    id(kit::uuid(node["UUID"].as<std::uint64_t>()));
     m_stiffness = node["Stiffness"].as<float>();
     m_dampening = node["Dampening"].as<float>();
     m_length = node["Length"].as<float>();

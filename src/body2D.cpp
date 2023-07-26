@@ -205,7 +205,7 @@ const glm::vec2 &body2D::velocity() const
 {
     return m_vel;
 }
-const glm::vec2 body2D::vel_at(const glm::vec2 &at) const
+glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
 {
     return m_vel + m_angvel * glm::vec2(-at.y, at.x);
 }
@@ -317,7 +317,7 @@ bool convert<ppx::body2D>::decode(const Node &node, ppx::body2D &body)
     if (!node.IsMap() || node.size() != 8)
         return false;
 
-    body.id(node["UUID"].as<std::uint64_t>());
+    body.id(kit::uuid(node["UUID"].as<std::uint64_t>()));
     body.index(node["Index"].as<std::size_t>());
     if (node["Shape"]["Radius"])
         body.shape(node["Shape"].as<geo::circle>());
