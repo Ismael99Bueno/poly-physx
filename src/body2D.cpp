@@ -12,7 +12,7 @@ body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float
       m_charge(charge), m_kinematic(kinematic)
 {
 }
-body2D::body2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &position, const glm::vec2 &velocity,
+body2D::body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position, const glm::vec2 &velocity,
                const float rotation, const float angular_velocity, const float mass, const float charge,
                const bool kinematic)
     : m_shape(geo::polygon(position, rotation, vertices)), m_vel(velocity), m_angvel(angular_velocity), m_mass(mass),
@@ -125,7 +125,7 @@ template <typename T> const T *body2D::shape_if() const
 template const geo::polygon *body2D::shape_if<geo::polygon>() const;
 template const geo::circle *body2D::shape_if<geo::circle>() const;
 
-void body2D::shape(const kit::block_vector<glm::vec2> &vertices)
+void body2D::shape(const std::vector<glm::vec2> &vertices)
 {
     const geo::shape2D &sh = shape();
     const geo::polygon poly(sh.centroid(), sh.rotation(), vertices);

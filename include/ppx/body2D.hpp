@@ -31,14 +31,14 @@ class body2D : public kit::identifiable<>, public kit::indexable
         float angular_velocity = 0.f;
         float mass = 1.f;
         float charge = 1.f;
-        kit::block_vector<glm::vec2> vertices = geo::polygon::box(5.f);
+        std::vector<glm::vec2> vertices = geo::polygon::box(5.f);
         float radius = 2.5f;
         bool kinematic = true;
         shape_type shape = shape_type::POLYGON;
         static specs from_body(const body2D &body);
     };
 
-    body2D(const kit::block_vector<glm::vec2> &vertices, const glm::vec2 &position = glm::vec2(0.f),
+    body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position = glm::vec2(0.f),
            const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f, float angular_velocity = 0.f,
            float mass = 1.f, float charge = 1.f, bool kinematic = true);
     body2D(float radius, const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f),
@@ -64,7 +64,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     template <typename T> const T *shape_if() const;
 
-    void shape(const kit::block_vector<glm::vec2> &vertices);
+    void shape(const std::vector<glm::vec2> &vertices);
     void shape(float radius);
     void shape(const geo::polygon &poly);
     void shape(const geo::circle &c);
