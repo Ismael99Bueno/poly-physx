@@ -4,6 +4,12 @@
 
 #include "geo/intersection.hpp"
 
+#if defined(PPX_MULTITHREADED) && defined(KIT_PROFILE)
+#pragma message(                                                                                                       \
+        "Multithreading for PPX will be disabled because the thread unsafe profiling features of cpp-kit are enabled")
+#undef PPX_MULTITHREADED
+#endif
+
 #ifdef PPX_MULTITHREADED
 #include <execution>
 #include <mutex>
@@ -438,9 +444,7 @@ std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) con
 {
     KIT_PERF_FUNCTION()
     const glm::vec2 rel1 = c.touch1 - c.current->position(), rel2 = c.touch2 - c.incoming->position();
-
     const glm::vec2 vel1 = c.current->velocity_at(rel1), vel2 = c.incoming->velocity_at(rel2);
-
     const glm::vec2 force = m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1);
 
     const float torque1 = cross(rel1, force), torque2 = cross(force, rel2);
