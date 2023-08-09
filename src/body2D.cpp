@@ -279,29 +279,9 @@ body2D::specs body2D::specs::from_body(const body2D &body)
 }
 
 #ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &body)
+YAML::Node body2D::serializer::encode(const body2D &body) const
 {
-    out << YAML::BeginMap;
-    out << YAML::Key << "UUID" << YAML::Value << (std::uint64_t)body.id();
-    out << YAML::Key << "Index" << YAML::Value << body.index();
-    out << YAML::Key << "Shape" << YAML::Value << body.shape();
-    out << YAML::Key << "Velocity" << YAML::Value << body.velocity();
-    out << YAML::Key << "Angular velocity" << YAML::Value << body.angular_velocity();
-    out << YAML::Key << "Mass" << YAML::Value << body.mass();
-    out << YAML::Key << "Charge" << YAML::Value << body.charge();
-    out << YAML::Key << "Kinematic" << YAML::Value << body.kinematic();
-    out << YAML::EndMap;
-    return out;
-}
-#endif
-} // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-Node convert<ppx::body2D>::encode(const ppx::body2D &body)
-{
-    Node node;
+    YAML::Node node;
     node["UUID"] = (std::uint64_t)body.id();
     node["Index"] = body.index();
     node["Shape"] = body.shape();
@@ -312,7 +292,8 @@ Node convert<ppx::body2D>::encode(const ppx::body2D &body)
     node["Kinematic"] = body.kinematic();
     return node;
 }
-bool convert<ppx::body2D>::decode(const Node &node, ppx::body2D &body)
+
+bool body2D::serializer::decode(const YAML::Node &node, body2D &body) const
 {
     if (!node.IsMap() || node.size() != 8)
         return false;
@@ -330,6 +311,6 @@ bool convert<ppx::body2D>::decode(const Node &node, ppx::body2D &body)
     body.kinematic(node["Kinematic"].as<bool>());
 
     return true;
-};
-} // namespace YAML
+}
 #endif
+} // namespace ppx

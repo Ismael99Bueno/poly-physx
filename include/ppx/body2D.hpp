@@ -38,6 +38,15 @@ class body2D : public kit::identifiable<>, public kit::indexable
         static specs from_body(const body2D &body);
     };
 
+#ifdef KIT_USE_YAML_CPP
+    class serializer : public kit::serializer<body2D>
+    {
+      public:
+        YAML::Node encode(const body2D &world) const override;
+        bool decode(const YAML::Node &node, body2D &world) const override;
+    };
+#endif
+
     body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position = glm::vec2(0.f),
            const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f, float angular_velocity = 0.f,
            float mass = 1.f, float charge = 1.f, bool kinematic = true);
@@ -119,20 +128,5 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     friend class world2D;
 };
-#ifdef KIT_USE_YAML_CPP
-YAML::Emitter &operator<<(YAML::Emitter &out, const body2D &body);
-#endif
 } // namespace ppx
-
-#ifdef KIT_USE_YAML_CPP
-namespace YAML
-{
-template <> struct convert<ppx::body2D>
-{
-    static Node encode(const ppx::body2D &body);
-    static bool decode(const Node &node, ppx::body2D &body);
-};
-} // namespace YAML
-#endif
-
 #endif
