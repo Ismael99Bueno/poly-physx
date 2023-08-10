@@ -1,6 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/compeller2D.hpp"
 #include "ppx/world2D.hpp"
+#include "kit/utility/utils.hpp"
 
 namespace ppx
 {
@@ -119,7 +120,7 @@ kit::stack_vector<float> compeller2D::lhs(const kit::stack_vector<float> &jcb,
             const std::size_t idx = i * rows + j;
             for (std::size_t k = 0; k < cols; k++)
             {
-                if (inv_masses[k] <= std::numeric_limits<float>::epsilon())
+                if (kit::approaches_zero(inv_masses[k]))
                     continue;
                 const std::size_t idx1 = i * cols + k, idx2 = j * cols + k;
                 A[idx] += jcb[idx1] * jcb[idx2] * inv_masses[k];

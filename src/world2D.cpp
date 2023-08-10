@@ -534,20 +534,20 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
         for (const YAML::Node &n : node["Constraints"])
             if (n["Revolute"])
             {
-                const YAML::Node revnode = n["Revolute"];
-                const std::size_t idx1 = revnode["Index1"].as<std::size_t>(),
-                                  idx2 = revnode["Index2"].as<std::size_t>();
-                if (revnode["Anchor1"])
+                const YAML::Node jointnode = n["Revolute"]["Joint2D"];
+                const std::size_t idx1 = jointnode["Index1"].as<std::size_t>(),
+                                  idx2 = jointnode["Index2"].as<std::size_t>();
+                if (jointnode["Anchor1"])
                 {
                     const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(
-                        world[idx1], world[idx2], revnode["Anchor1"].as<glm::vec2>(),
-                        revnode["Anchor2"].as<glm::vec2>());
+                        world[idx1], world[idx2], jointnode["Anchor1"].as<glm::vec2>(),
+                        jointnode["Anchor2"].as<glm::vec2>());
 
-                    revnode.as<ppx::revolute_joint2D>(*revjoint);
+                    n["Revolute"].as<ppx::revolute_joint2D>(*revjoint);
                     continue;
                 }
                 const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(world[idx1], world[idx2]);
-                revnode.as<ppx::revolute_joint2D>(*revjoint);
+                n["Revolute"].as<ppx::revolute_joint2D>(*revjoint);
             }
 
     if (node["Behaviours"])
