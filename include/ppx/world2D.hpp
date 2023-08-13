@@ -72,7 +72,7 @@ class world2D final : kit::non_copyable
 
     template <class... SpringArgs> spring2D::ptr add_spring(SpringArgs &&...args)
     {
-        m_springs.emplace_back(std::forward<SpringArgs>(args)...).index(m_springs.size() - 1);
+        m_springs.emplace_back(std::forward<SpringArgs>(args)...).index = m_springs.size() - 1;
         const spring2D::ptr sp_ptr = {&m_springs, m_springs.size() - 1};
         events.on_spring_addition(sp_ptr);
         return sp_ptr;

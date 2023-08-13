@@ -40,7 +40,7 @@ body2D::body2D(const specs &spc)
 
 void body2D::retrieve(const std::vector<float> &vars_buffer)
 {
-    const std::size_t idx = 6 * index();
+    const std::size_t idx = 6 * index;
     geo::shape2D &sh = get_shape();
 
     sh.begin_update();
@@ -65,7 +65,7 @@ void body2D::dispatch() const
     const float rotation = sh.rotation();
     rk::state &st = *m_state;
 
-    const std::size_t idx = 6 * index();
+    const std::size_t idx = 6 * index;
     st[idx + 0] = position.x;
     st[idx + 1] = position.y;
     st[idx + 2] = rotation;
@@ -282,8 +282,8 @@ body2D::specs body2D::specs::from_body(const body2D &body)
 YAML::Node body2D::serializer::encode(const body2D &body) const
 {
     YAML::Node node;
-    node["UUID"] = (std::uint64_t)body.id();
-    node["Index"] = body.index();
+    node["UUID"] = (std::uint64_t)body.id;
+    node["Index"] = body.index;
     node["Shape"] = body.shape();
     node["Velocity"] = body.velocity();
     node["Angular velocity"] = body.angular_velocity();
@@ -298,8 +298,8 @@ bool body2D::serializer::decode(const YAML::Node &node, body2D &body) const
     if (!node.IsMap() || node.size() != 8)
         return false;
 
-    body.id(kit::uuid(node["UUID"].as<std::uint64_t>()));
-    body.index(node["Index"].as<std::size_t>());
+    body.id = kit::uuid(node["UUID"].as<std::uint64_t>());
+    body.index = node["Index"].as<std::size_t>();
     if (node["Shape"]["Radius"])
         body.shape(node["Shape"].as<geo::circle>());
     else

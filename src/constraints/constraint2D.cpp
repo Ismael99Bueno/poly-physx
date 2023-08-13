@@ -29,7 +29,7 @@ void constraint2D::dampening(float dampening)
 YAML::Node constraint2D::encode() const
 {
     YAML::Node node;
-    node["UUID"] = (std::uint64_t)id();
+    node["UUID"] = (std::uint64_t)id;
     node["Stiffness"] = m_stiffness;
     node["Dampening"] = m_dampening;
 
@@ -39,7 +39,7 @@ bool constraint2D::decode(const YAML::Node &node)
 {
     if (!node.IsMap() || node.size() < 3)
         return false;
-    id(kit::uuid(node["UUID"].as<std::uint64_t>()));
+    id = kit::uuid(node["UUID"].as<std::uint64_t>());
     m_stiffness = node["Stiffness"].as<float>();
     m_dampening = node["Dampening"].as<float>();
 

@@ -73,7 +73,7 @@ void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
 void collider2D::broad_and_narrow_fase(std::vector<float> &stchanges)
 {
     KIT_PERF_FUNCTION()
-    if (!enabled())
+    if (!enabled)
         return;
     switch (m_coldet_method)
     {
@@ -232,7 +232,7 @@ bool collider2D::narrow_detection_mix(const body2D &body1, const body2D &body2, 
         return false;
 
     const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv.value());
-    *c = {m_parent[body1.index()], m_parent[body2.index()], contact1, contact2, mtv.value()};
+    *c = {m_parent[body1.index], m_parent[body2.index], contact1, contact2, mtv.value()};
 
     return true;
 }
@@ -244,7 +244,7 @@ bool collider2D::narrow_detection_circle(const body2D &body1, const body2D &body
         return false;
     const glm::vec2 mtv = geo::mtv(c1, c2);
     const auto &[contact1, contact2] = geo::contact_points(c1, c2);
-    *c = {m_parent[body1.index()], m_parent[body2.index()], contact1, contact2, mtv};
+    *c = {m_parent[body1.index], m_parent[body2.index], contact1, contact2, mtv};
     return true;
 }
 
@@ -268,8 +268,8 @@ void collider2D::try_enter_or_stay_callback(const body2D &body1, const body2D &b
 }
 void collider2D::try_exit_callback(const body2D &body1, const body2D &body2) const
 {
-    body1.events().try_exit(m_parent[body2.index()]);
-    body2.events().try_exit(m_parent[body1.index()]);
+    body1.events().try_exit(m_parent[body2.index]);
+    body2.events().try_exit(m_parent[body1.index]);
 }
 
 void collider2D::brute_force(std::vector<float> &stchanges)
@@ -434,9 +434,9 @@ void collider2D::solve(const collision2D &c, std::vector<float> &stchanges) cons
     for (std::size_t i = 0; i < 3; i++)
     {
         if (c.current->kinematic())
-            stchanges[c.current->index() * 6 + i + 3] += forces[i];
+            stchanges[c.current->index * 6 + i + 3] += forces[i];
         if (c.incoming->kinematic())
-            stchanges[c.incoming->index() * 6 + i + 3] += forces[i + 3];
+            stchanges[c.incoming->index * 6 + i + 3] += forces[i + 3];
     }
 }
 
@@ -465,7 +465,7 @@ YAML::Node collider2D::serializer::encode(const collider2D &cld) const
     node["Stiffness"] = cld.stiffness();
     node["Dampening"] = cld.dampening();
     node["Collision detection"] = (int)cld.detection_method();
-    node["Enabled"] = cld.enabled();
+    node["Enabled"] = cld.enabled;
     return node;
 }
 bool collider2D::serializer::decode(const YAML::Node &node, collider2D &cld) const
@@ -482,7 +482,7 @@ bool collider2D::serializer::decode(const YAML::Node &node, collider2D &cld) con
     cld.stiffness(node["Stiffness"].as<float>());
     cld.dampening(node["Dampening"].as<float>());
     cld.detection_method((ppx::collider2D::detection)node["Collision detection"].as<int>());
-    cld.enabled(node["Enabled"].as<bool>());
+    cld.enabled = node["Enabled"].as<bool>();
 
     return true;
 }

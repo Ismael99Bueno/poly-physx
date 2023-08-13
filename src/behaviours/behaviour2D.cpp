@@ -74,7 +74,7 @@ YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
     for (const auto &body : m_included)
-        node["Bodies"].push_back(body->index());
+        node["Bodies"].push_back(body->index);
     node["Bodies"].SetStyle(YAML::EmitterStyle::Flow);
     return node;
 }

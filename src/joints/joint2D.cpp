@@ -83,8 +83,8 @@ joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
 YAML::Node joint2D::encode() const
 {
     YAML::Node node;
-    node["Index1"] = m_e1->index();
-    node["Index2"] = m_e2->index();
+    node["Index1"] = m_e1->index;
+    node["Index2"] = m_e2->index;
     if (m_has_anchors)
     {
         node["Anchor1"] = anchor1();

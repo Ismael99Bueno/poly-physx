@@ -36,7 +36,7 @@ bool compeller2D::remove_constraint(const constraint2D *ctr, const kit::event<co
 bool compeller2D::remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
-        if ((*it)->id() == id)
+        if ((*it)->id == id)
         {
             event_callback(**it);
             m_constraints.erase(it);
@@ -92,7 +92,7 @@ kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_gradien
         for (const auto &[body, gradient] : constraint_gradients(*m_constraints[i]))
             for (std::size_t k = 0; k < 3; k++)
             {
-                const std::size_t j = body->index() * 3 + k;
+                const std::size_t j = body->index * 3 + k;
                 cmatrix[i * cols + j] = gradient[k];
             }
 
