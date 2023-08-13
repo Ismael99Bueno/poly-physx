@@ -319,7 +319,8 @@ float world2D::potential_energy() const
 {
     float pot = 0.f;
     for (const auto &bhv : m_behaviours)
-        pot += bhv->potential_energy();
+        if (bhv->enabled)
+            pot += bhv->potential_energy();
     for (const spring2D &sp : m_springs)
         pot += sp.potential_energy();
     return pot;
