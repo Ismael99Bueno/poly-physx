@@ -443,7 +443,8 @@ void collider2D::solve(const collision2D &c, std::vector<float> &stchanges) cons
 std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) const
 {
     KIT_PERF_FUNCTION()
-    const glm::vec2 rel1 = c.touch1 - c.current->position(), rel2 = c.touch2 - c.incoming->position();
+    const glm::vec2 rel1 = c.touch1 - c.current->transform().position,
+                    rel2 = c.touch2 - c.incoming->transform().position;
     const glm::vec2 vel1 = c.current->velocity_at(rel1), vel2 = c.incoming->velocity_at(rel2);
     const glm::vec2 force = m_stiffness * (c.touch2 - c.touch1) + m_dampening * (vel2 - vel1);
 

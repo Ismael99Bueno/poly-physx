@@ -148,8 +148,11 @@ body2D::ptr world2D::process_body_addition(body2D &body)
     body.index = m_bodies.size() - 1;
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
 
-    const glm::vec2 &position = body.position(), &velocity = body.velocity();
-    state.append({position.x, position.y, body.rotation(), velocity.x, velocity.y, body.angular_velocity()});
+    const kit::transform2D &transform = body.transform();
+    const glm::vec2 &velocity = body.velocity();
+
+    state.append({transform.position.x, transform.position.y, transform.rotation, velocity.x, velocity.y,
+                  body.angular_velocity()});
     body.retrieve();
     collisions.add_body_intervals(e_ptr);
 

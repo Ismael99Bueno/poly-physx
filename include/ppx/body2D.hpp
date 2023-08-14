@@ -92,10 +92,10 @@ class body2D : public kit::identifiable<>, public kit::indexable
     const body_events &events() const;
     body_events &events();
 
-    const glm::vec2 &position() const;
+    const kit::transform2D &transform() const;
+
     const glm::vec2 &velocity() const;
     glm::vec2 velocity_at(const glm::vec2 &at) const;
-    float rotation() const;
     float angular_velocity() const;
     float mass() const;
     float inverse_mass() const;
@@ -122,9 +122,10 @@ class body2D : public kit::identifiable<>, public kit::indexable
     float m_charge;
     bool m_kinematic;
 
-    geo::shape2D &get_shape();
+    geo::shape2D &mutable_shape();
     void retrieve(const std::vector<float> &vars_buffer);
-    void compute_inertia(const geo::shape2D &sh);
+
+    template <typename T> void compute_inertia(const T &shape);
 
     friend class world2D;
 };
