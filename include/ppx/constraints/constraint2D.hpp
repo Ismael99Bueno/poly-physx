@@ -28,12 +28,15 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     virtual float constraint_value() const = 0;
     virtual float constraint_derivative() const = 0;
 
+    virtual std::size_t size() const = 0;
+    virtual const body2D::ptr &body(std::size_t index) const = 0;
+    virtual void body(std::size_t index, const body2D::ptr &body) = 0;
+
     using body_gradient = std::pair<const body2D *, std::array<float, 3>>;
     virtual std::vector<body_gradient> constraint_gradients() const = 0;
     virtual std::vector<body_gradient> constraint_derivative_gradients() const = 0;
 
   private:
-    std::vector<ppx::body2D::const_ptr> m_bodies;
     float m_stiffness;
     float m_dampening;
 };

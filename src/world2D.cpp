@@ -358,24 +358,54 @@ std::vector<float> world2D::operator()(const float t, const float dt, const std:
     return stchanges;
 }
 
-std::optional<std::size_t> world2D::index_from_id(const kit::uuid id) const
+template <typename T> static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<T> &vec)
 {
-    for (std::size_t i = 0; i < m_bodies.size(); i++)
-        if (m_bodies[i].id == id)
-            return i;
+    constexpr bool is_ctr = std::is_same<T, kit::scope<constraint2D>>::value;
+    for (std::size_t i = 0; i < vec.size(); i++)
+        if constexpr (!is_ctr)
+        {
+            if (vec[i].id == id)
+                return i;
+        }
+        else
+        {
+            if (vec[i]->id == id)
+                return i;
+        }
     return {};
 }
 
-body2D::const_ptr world2D::from_id(kit::uuid id) const
+body2D::const_ptr world2D::body_from_id(const kit::uuid id) const
 {
-    const auto index = index_from_id(id);
+    const auto index = index_from_id(id, m_bodies);
+    return index ? (*this)[index.value()] : nullptr;
+}
+body2D::ptr world2D::body_from_id(const kit::uuid id)
+{
+    const auto index = index_from_id(id, m_bodies);
     return index ? (*this)[index.value()] : nullptr;
 }
 
-body2D::ptr world2D::from_id(kit::uuid id)
+spring2D::const_ptr world2D::spring_from_id(const kit::uuid id) const
 {
-    const auto index = index_from_id(id);
-    return index ? (*this)[index.value()] : nullptr;
+    const auto index = index_from_id(id, m_springs);
+    return index ? spring(index.value()) : nullptr;
+}
+spring2D::ptr world2D::spring_from_id(const kit::uuid id)
+{
+    const auto index = index_from_id(id, m_springs);
+    return index ? spring(index.value()) : nullptr;
+}
+
+const constraint2D *world2D::constraint_from_id(const kit::uuid id) const
+{
+    const auto index = index_from_id(id, m_compeller.constraints());
+    return index ? m_compeller.constraints()[index.value()].get() : nullptr;
+}
+constraint2D *world2D::constraint_from_id(const kit::uuid id)
+{
+    const auto index = index_from_id(id, m_compeller.constraints());
+    return index ? m_compeller.constraints()[index.value()].get() : nullptr;
 }
 
 template <> behaviour2D *world2D::behaviour_from_name(const std::string &name) const
@@ -419,6 +449,65 @@ std::vector<body2D::ptr> world2D::operator[](const geo::aabb2D &aabb)
     return in_area;
 }
 
+std::vector<const constraint2D *> world2D::constraints_from_ids(const std::vector<kit::uuid> &ids) const
+{
+#ifdef DEBUG
+    KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
+                     "IDs list must not contain duplicates!")
+#endif
+
+    std::vector<const constraint2D *> constraints;
+    if (ids.empty())
+        return constraints;
+
+    constraints.reserve(m_compeller.constraints().size());
+    for (const auto &ctr : m_compeller.constraints())
+    {
+        if (ctr->size() != ids.size())
+            continue;
+
+        bool found_match = true;
+        for (std::size_t i = 0; i < ctr->size(); i++)
+            if (std::find(ids.begin(), ids.end(), ctr->body(i)->id) == ids.end())
+            {
+                found_match = false;
+                break;
+            }
+        if (found_match)
+            constraints.push_back(ctr.get());
+    }
+    return constraints;
+}
+std::vector<constraint2D *> world2D::constraints_from_ids(const std::vector<kit::uuid> &ids)
+{
+#ifdef DEBUG
+    KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
+                     "IDs list must not contain duplicates!")
+#endif
+
+    std::vector<constraint2D *> constraints;
+    if (ids.empty())
+        return constraints;
+
+    constraints.reserve(m_compeller.constraints().size());
+    for (const auto &ctr : m_compeller.constraints())
+    {
+        if (ctr->size() != ids.size())
+            continue;
+
+        bool found_match = true;
+        for (std::size_t i = 0; i < ctr->size(); i++)
+            if (std::find(ids.begin(), ids.end(), ctr->body(i)->id) == ids.end())
+            {
+                found_match = false;
+                break;
+            }
+        if (found_match)
+            constraints.push_back(ctr.get());
+    }
+    return constraints;
+}
+
 const std::vector<kit::scope<behaviour2D>> &world2D::behaviours() const
 {
     return m_behaviours;
@@ -437,6 +526,17 @@ spring2D::const_ptr world2D::spring(std::size_t index) const
     return {&m_springs, index};
 }
 
+std::vector<spring2D::const_ptr> world2D::springs_from_ids(const kit::uuid id1, const kit::uuid id2) const
+{
+    std::vector<spring2D::const_ptr> springs;
+    springs.reserve(m_springs.size());
+
+    for (const spring2D &sp : m_springs)
+        if ((sp.body1().id == id1 && sp.body2().id == id2) || (sp.body1().id == id2 && sp.body2().id == id1))
+            springs.emplace_back(&m_springs, sp.index);
+    return springs;
+}
+
 kit::vector_view<spring2D> world2D::springs()
 {
     return m_springs;
@@ -444,6 +544,17 @@ kit::vector_view<spring2D> world2D::springs()
 spring2D::ptr world2D::spring(std::size_t index)
 {
     return {&m_springs, index};
+}
+
+std::vector<spring2D::ptr> world2D::springs_from_ids(const kit::uuid id1, const kit::uuid id2)
+{
+    std::vector<spring2D::ptr> springs;
+    springs.reserve(m_springs.size());
+
+    for (const spring2D &sp : m_springs)
+        if ((sp.body1().id == id1 && sp.body2().id == id2) || (sp.body1().id == id2 && sp.body2().id == id1))
+            springs.emplace_back(&m_springs, sp.index);
+    return springs;
 }
 
 body2D::const_ptr world2D::operator[](const glm::vec2 &point) const

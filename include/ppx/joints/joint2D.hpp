@@ -22,14 +22,19 @@ class joint2D : public kit::serializable
     joint2D(const specs &spc);
     virtual ~joint2D() = default;
 
-    void bind(const body2D::ptr &body1, const body2D::ptr &body2);
     virtual bool valid() const;
 
     const body2D::ptr &body1() const;
     const body2D::ptr &body2() const;
 
-    glm::vec2 anchor1() const;
-    glm::vec2 anchor2() const;
+    void body1(const body2D::ptr &body1);
+    void body2(const body2D::ptr &body2);
+
+    glm::vec2 rotated_anchor1() const;
+    glm::vec2 rotated_anchor2() const;
+
+    const glm::vec2 &anchor1() const;
+    const glm::vec2 &anchor2() const;
 
     void anchor1(const glm::vec2 &anchor1);
     void anchor2(const glm::vec2 &anchor2);
@@ -42,7 +47,7 @@ class joint2D : public kit::serializable
 #endif
 
   protected:
-    body2D::ptr m_e1 = nullptr, m_e2 = nullptr;
+    body2D::ptr m_body1 = nullptr, m_body2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
     float m_angle1, m_angle2;
     bool m_has_anchors;

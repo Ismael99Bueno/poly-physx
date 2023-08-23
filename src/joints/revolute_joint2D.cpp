@@ -37,57 +37,60 @@ float revolute_joint2D::constraint_derivative() const
 
 float revolute_joint2D::without_anchors_constraint() const
 {
-    return glm::distance2(m_e1->transform().position, m_e2->transform().position) - m_length * m_length;
+    return glm::distance2(m_body1->transform().position, m_body2->transform().position) - m_length * m_length;
 }
 float revolute_joint2D::without_anchors_constraint_derivative() const
 {
-    return 2.f * glm::dot(m_e1->transform().position - m_e2->transform().position, m_e1->velocity() - m_e2->velocity());
+    return 2.f * glm::dot(m_body1->transform().position - m_body2->transform().position,
+                          m_body1->velocity() - m_body2->velocity());
 }
 
 float revolute_joint2D::with_anchors_constraint() const
 {
-    const glm::vec2 p1 = anchor1() + m_e1->transform().position, p2 = anchor2() + m_e2->transform().position;
+    const glm::vec2 p1 = rotated_anchor1() + m_body1->transform().position,
+                    p2 = rotated_anchor2() + m_body2->transform().position;
 
     return glm::distance2(p1, p2) - m_length * m_length;
 }
 float revolute_joint2D::with_anchors_constraint_derivative() const
 {
-    const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
+    const glm::vec2 rot_anchor1 = rotated_anchor1(), rot_anchor2 = rotated_anchor2();
 
-    return 2.f * glm::dot(rot_anchor1 - rot_anchor2 + m_e1->transform().position - m_e2->transform().position,
-                          m_e1->velocity_at(rot_anchor1) - m_e2->velocity_at(rot_anchor2));
+    return 2.f * glm::dot(rot_anchor1 - rot_anchor2 + m_body1->transform().position - m_body2->transform().position,
+                          m_body1->velocity_at(rot_anchor1) - m_body2->velocity_at(rot_anchor2));
 }
 
 std::vector<constraint2D::body_gradient> revolute_joint2D::constraint_gradients() const
 {
     if (!m_has_anchors)
     {
-        const glm::vec2 cg = 2.f * (m_e1->transform().position - m_e2->transform().position);
-        return {{m_e1.raw(), {cg.x, cg.y, 0.f}}, {m_e2.raw(), {-cg.x, -cg.y, 0.f}}};
+        const glm::vec2 cg = 2.f * (m_body1->transform().position - m_body2->transform().position);
+        return {{m_body1.raw(), {cg.x, cg.y, 0.f}}, {m_body2.raw(), {-cg.x, -cg.y, 0.f}}};
     }
-    const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
-    const glm::vec2 cg = 2.f * (m_e1->transform().position + rot_anchor1 - m_e2->transform().position - rot_anchor2);
+    const glm::vec2 rot_anchor1 = rotated_anchor1(), rot_anchor2 = rotated_anchor2();
+    const glm::vec2 cg =
+        2.f * (m_body1->transform().position + rot_anchor1 - m_body2->transform().position - rot_anchor2);
 
     const glm::vec2 perp_cg = {cg.y, -cg.x};
     const float cga1 = glm::dot(rot_anchor1, perp_cg);
     const float cga2 = glm::dot(rot_anchor2, -perp_cg);
 
-    return {{m_e1.raw(), {cg.x, cg.y, cga1}}, {m_e2.raw(), {-cg.x, -cg.y, cga2}}};
+    return {{m_body1.raw(), {cg.x, cg.y, cga1}}, {m_body2.raw(), {-cg.x, -cg.y, cga2}}};
 }
 std::vector<constraint2D::body_gradient> revolute_joint2D::constraint_derivative_gradients() const
 {
     if (!m_has_anchors)
     {
-        const glm::vec2 cgd = 2.f * (m_e1->velocity() - m_e2->velocity());
-        return {{m_e1.raw(), {cgd.x, cgd.y, 0.f}}, {m_e2.raw(), {-cgd.x, -cgd.y, 0.f}}};
+        const glm::vec2 cgd = 2.f * (m_body1->velocity() - m_body2->velocity());
+        return {{m_body1.raw(), {cgd.x, cgd.y, 0.f}}, {m_body2.raw(), {-cgd.x, -cgd.y, 0.f}}};
     }
-    const glm::vec2 rot_anchor1 = anchor1(), rot_anchor2 = anchor2();
-    const glm::vec2 cgd = 2.f * (m_e1->velocity_at(rot_anchor1) - m_e2->velocity_at(rot_anchor2));
+    const glm::vec2 rot_anchor1 = rotated_anchor1(), rot_anchor2 = rotated_anchor2();
+    const glm::vec2 cgd = 2.f * (m_body1->velocity_at(rot_anchor1) - m_body2->velocity_at(rot_anchor2));
 
     const float cgda1 = glm::dot(rot_anchor1, -cgd);
     const float cgda2 = glm::dot(rot_anchor2, cgd);
 
-    return {{m_e1.raw(), {cgd.x, cgd.y, cgda1}}, {m_e2.raw(), {-cgd.x, -cgd.y, cgda2}}};
+    return {{m_body1.raw(), {cgd.x, cgd.y, cgda1}}, {m_body2.raw(), {-cgd.x, -cgd.y, cgda2}}};
 }
 
 bool revolute_joint2D::valid() const
@@ -99,9 +102,29 @@ float revolute_joint2D::length() const
     return m_length;
 }
 
-revolute_joint2D::specs revolute_joint2D::specs::from_rigid_bar(const revolute_joint2D &rb)
+std::size_t revolute_joint2D::size() const
 {
-    return {{rb.body1(), rb.body2(), rb.anchor1(), rb.anchor2(), rb.has_anchors()}, rb.stiffness(), rb.dampening()};
+    return 2;
+}
+const body2D::ptr &revolute_joint2D::body(std::size_t index) const
+{
+    KIT_ASSERT_ERROR(index < 2, "Index exceeds constraint body count: index: {0}, size: 2", index)
+    return index == 0 ? m_body1 : m_body2;
+}
+void revolute_joint2D::body(std::size_t index, const body2D::ptr &body)
+{
+    KIT_ASSERT_ERROR(index < 2, "Index exceeds constraint body count: index: {0}, size: 2", index)
+    if (index == 0)
+        body1(body);
+    else
+        body2(body);
+}
+
+revolute_joint2D::specs revolute_joint2D::specs::from_revolute_joint(const revolute_joint2D &rj)
+{
+    return {{rj.body1(), rj.body2(), rj.rotated_anchor1(), rj.rotated_anchor2(), rj.has_anchors()},
+            rj.stiffness(),
+            rj.dampening()};
 }
 
 #ifdef KIT_USE_YAML_CPP

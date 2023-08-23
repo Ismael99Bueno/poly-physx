@@ -72,8 +72,10 @@ class world2D final : kit::non_copyable
 
     template <class... SpringArgs> spring2D::ptr add_spring(SpringArgs &&...args)
     {
-        m_springs.emplace_back(std::forward<SpringArgs>(args)...).index = m_springs.size() - 1;
-        const spring2D::ptr sp_ptr = {&m_springs, m_springs.size() - 1};
+        spring2D &sp = m_springs.emplace_back(std::forward<SpringArgs>(args)...);
+        sp.index = m_springs.size() - 1;
+
+        const spring2D::ptr sp_ptr = {&m_springs, sp.index};
         events.on_spring_addition(sp_ptr);
         return sp_ptr;
     }
@@ -104,8 +106,14 @@ class world2D final : kit::non_copyable
 
     std::vector<float> operator()(float t, float dt, const std::vector<float> &vars);
 
-    body2D::const_ptr from_id(kit::uuid id) const;
-    body2D::ptr from_id(kit::uuid id);
+    body2D::const_ptr body_from_id(kit::uuid id) const;
+    body2D::ptr body_from_id(kit::uuid id);
+
+    spring2D::const_ptr spring_from_id(kit::uuid id) const;
+    spring2D::ptr spring_from_id(kit::uuid id);
+
+    const constraint2D *constraint_from_id(kit::uuid id) const;
+    constraint2D *constraint_from_id(kit::uuid id);
 
     template <typename T> T *behaviour_from_name(const std::string &name) const
     {
@@ -125,14 +133,21 @@ class world2D final : kit::non_copyable
 
     const std::vector<body2D> &bodies() const;
     const std::vector<spring2D> &springs() const;
+
     spring2D::const_ptr spring(std::size_t index) const;
+    std::vector<spring2D::const_ptr> springs_from_ids(kit::uuid id1, kit::uuid id2) const;
 
     kit::vector_view<body2D> bodies();
     kit::vector_view<spring2D> springs();
+
     spring2D::ptr spring(std::size_t index);
+    std::vector<spring2D::ptr> springs_from_ids(kit::uuid id1, kit::uuid id2);
 
     const std::vector<kit::scope<behaviour2D>> &behaviours() const;
     const std::vector<kit::scope<constraint2D>> &constraints() const;
+
+    std::vector<const constraint2D *> constraints_from_ids(const std::vector<kit::uuid> &ids) const;
+    std::vector<constraint2D *> constraints_from_ids(const std::vector<kit::uuid> &ids);
 
     std::size_t size() const;
     float elapsed() const;
@@ -156,7 +171,6 @@ class world2D final : kit::non_copyable
     void retrieve(const std::vector<float> &vars_buffer);
     void retrieve();
     void validate();
-    std::optional<std::size_t> index_from_id(kit::uuid id) const;
 };
 
 } // namespace ppx

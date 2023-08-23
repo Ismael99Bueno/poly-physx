@@ -12,7 +12,7 @@ class revolute_joint2D : public constraint2D, public joint2D
     struct specs : joint2D::specs
     {
         float stiffness = 500.f, dampening = 30.f;
-        static specs from_rigid_bar(const revolute_joint2D &rb);
+        static specs from_revolute_joint(const revolute_joint2D &rj);
     };
     revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, float stiffness = 500.f,
                      float dampening = 30.f);
@@ -24,6 +24,10 @@ class revolute_joint2D : public constraint2D, public joint2D
     float constraint_derivative() const override;
 
     bool valid() const override;
+    std::size_t size() const override;
+    const body2D::ptr &body(std::size_t index) const override;
+    void body(std::size_t index, const body2D::ptr &body) override;
+
     float length() const;
 
 #ifdef KIT_USE_YAML_CPP
