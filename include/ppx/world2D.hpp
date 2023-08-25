@@ -47,8 +47,8 @@ class world2D final : kit::non_copyable
 
     template <typename T, class... BehaviourArgs> T *add_behaviour(BehaviourArgs &&...args)
     {
-        static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
-                                                              "recommended to inherit from force2D or interaction2D)");
+        static_assert(std::is_base_of_v<behaviour2D, T>, "Type must inherit from behaviour2D! (Although it is "
+                                                         "recommended to inherit from force2D or interaction2D)");
         auto bhv = kit::make_scope<T>(std::forward<BehaviourArgs>(args)...);
 #ifdef DEBUG
         for (const auto &old : m_behaviours)
@@ -117,8 +117,8 @@ class world2D final : kit::non_copyable
 
     template <typename T> T *behaviour_from_name(const std::string &name) const
     {
-        static_assert(std::is_base_of<behaviour2D, T>::value, "Type must inherit from behaviour2D! (Although it is "
-                                                              "recommended to inherit from force2D or interaction2D)");
+        static_assert(std::is_base_of_v<behaviour2D, T>, "Type must inherit from behaviour2D! (Although it is "
+                                                         "recommended to inherit from force2D or interaction2D)");
         return dynamic_cast<T *>(behaviour_from_name<behaviour2D>(name));
     }
 

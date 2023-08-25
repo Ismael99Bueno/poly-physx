@@ -23,7 +23,7 @@ class compeller2D final : kit::non_copyable
     template <typename T, class... ConstraintArgs>
     T *add_constraint(const kit::event<constraint2D *> &event_callback, ConstraintArgs &&...args)
     {
-        static_assert(std::is_base_of<constraint2D, T>::value, "Constraint must inherit from constraint2D!");
+        static_assert(std::is_base_of_v<constraint2D, T>, "Constraint must inherit from constraint2D!");
         auto ctr = kit::make_scope<T>(std::forward<ConstraintArgs>(args)...);
         T *ptr = ctr.get();
 

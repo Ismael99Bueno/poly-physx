@@ -16,8 +16,8 @@ namespace ppx
 class body2D : public kit::identifiable<>, public kit::indexable
 {
   public:
-    using ptr = kit::track_ptr<body2D>;
-    using const_ptr = kit::const_track_ptr<body2D>;
+    using ptr = kit::vector_ptr<body2D>;
+    using const_ptr = kit::const_vector_ptr<body2D>;
 
     enum class shape_type
     {

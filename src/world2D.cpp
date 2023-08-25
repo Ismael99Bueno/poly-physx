@@ -360,7 +360,7 @@ std::vector<float> world2D::operator()(const float t, const float dt, const std:
 
 template <typename T> static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<T> &vec)
 {
-    constexpr bool is_ctr = std::is_same<T, kit::scope<constraint2D>>::value;
+    constexpr bool is_ctr = std::is_same_v<T, kit::scope<constraint2D>>;
     for (std::size_t i = 0; i < vec.size(); i++)
         if constexpr (!is_ctr)
         {
