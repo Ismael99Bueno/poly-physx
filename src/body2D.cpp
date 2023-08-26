@@ -9,7 +9,7 @@ body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float
                const float mass, const float charge, const bool kinematic)
     : m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(),
                            geo::polygon::box(5.f))),
-      m_vel(velocity), m_angvel(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
+      m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
       m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge),
       m_kinematic(kinematic)
 {
@@ -18,7 +18,7 @@ body2D::body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position
                const float rotation, const float angular_velocity, const float mass, const float charge,
                const bool kinematic)
     : m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(), vertices)),
-      m_vel(velocity), m_angvel(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
+      m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
       m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge),
       m_kinematic(kinematic)
 {
@@ -26,13 +26,13 @@ body2D::body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position
 body2D::body2D(const float radius, const glm::vec2 &position, const glm::vec2 &velocity, const float rotation,
                const float angular_velocity, const float mass, const float charge, const bool kinematic)
     : m_shape(geo::circle(kit::transform2D::builder().position(position).rotation(rotation).build(), radius)),
-      m_vel(velocity), m_angvel(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
+      m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
       m_inertia(m_mass * shape<geo::circle>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge),
       m_kinematic(kinematic)
 {
 }
 body2D::body2D(const specs &spc)
-    : m_vel(spc.velocity), m_angvel(spc.angular_velocity), m_mass(spc.mass), m_inv_mass(1.f / m_mass),
+    : m_vel(spc.velocity), m_angular_velocity(spc.angular_velocity), m_mass(spc.mass), m_inv_mass(1.f / m_mass),
       m_charge(spc.charge), m_kinematic(spc.kinematic)
 {
     if (spc.shape == shape_type::POLYGON)
@@ -60,7 +60,7 @@ void body2D::retrieve(const std::vector<float> &vars_buffer)
     sh.end_update();
 
     m_vel = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
-    m_angvel = vars_buffer[idx + 5];
+    m_angular_velocity = vars_buffer[idx + 5];
 }
 
 void body2D::retrieve()
@@ -69,25 +69,10 @@ void body2D::retrieve()
                                  "world -> its internal state is null)")
     retrieve(m_state->vars());
 }
-void body2D::dispatch() const
-{
-    const geo::shape2D &sh = shape();
-    const glm::vec2 &position = sh.centroid();
-    const float rotation = sh.transform().rotation;
-    rk::state &st = *m_state;
-
-    const std::size_t idx = 6 * index;
-    st[idx + 0] = position.x;
-    st[idx + 1] = position.y;
-    st[idx + 2] = rotation;
-    st[idx + 3] = m_vel.x;
-    st[idx + 4] = m_vel.y;
-    st[idx + 5] = m_angvel;
-}
 
 float body2D::kinetic_energy() const
 {
-    return 0.5f * (m_mass * glm::length2(m_vel) + m_angvel * m_angvel * shape().inertia());
+    return 0.5f * (m_mass * glm::length2(m_vel) + m_angular_velocity * m_angular_velocity * shape().inertia());
 }
 
 void body2D::add_force(const glm::vec2 &force)
@@ -221,12 +206,12 @@ const glm::vec2 &body2D::velocity() const
 }
 glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
 {
-    return m_vel + m_angvel * glm::vec2(-at.y, at.x);
+    return m_vel + m_angular_velocity * glm::vec2(-at.y, at.x);
 }
 
 float body2D::angular_velocity() const
 {
-    return m_angvel;
+    return m_angular_velocity;
 }
 
 float body2D::mass() const
@@ -245,19 +230,37 @@ float body2D::charge() const
 void body2D::position(const glm::vec2 &position)
 {
     mutable_shape().centroid(position);
+
+    rk::state &st = *m_state;
+    const std::size_t idx = 6 * index;
+    st[idx + 0] = position.x;
+    st[idx + 1] = position.y;
 }
 void body2D::velocity(const glm::vec2 &velocity)
 {
     m_vel = velocity;
+
+    rk::state &st = *m_state;
+    const std::size_t idx = 6 * index;
+    st[idx + 3] = velocity.x;
+    st[idx + 4] = velocity.y;
 }
 
 void body2D::rotation(const float rotation)
 {
     mutable_shape().rotation(rotation);
+
+    rk::state &st = *m_state;
+    const std::size_t idx = 6 * index;
+    st[idx + 2] = rotation;
 }
 void body2D::angular_velocity(const float angular_velocity)
 {
-    m_angvel = angular_velocity;
+    m_angular_velocity = angular_velocity;
+
+    rk::state &st = *m_state;
+    const std::size_t idx = 6 * index;
+    st[idx + 5] = angular_velocity;
 }
 
 void body2D::mass(const float mass)

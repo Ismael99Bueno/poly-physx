@@ -57,8 +57,6 @@ class body2D : public kit::identifiable<>, public kit::indexable
            float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
     explicit body2D(const specs &spc);
 
-    void retrieve();
-    void dispatch() const;
     float kinetic_energy() const;
 
     void add_force(const glm::vec2 &force);
@@ -113,7 +111,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     rk::state *m_state = nullptr;
     glm::vec2 m_vel{0.f}, m_added_force{0.f};
     body_events m_events;
-    float m_angvel;
+    float m_angular_velocity;
     float m_added_torque = 0.f;
     float m_mass;
     float m_inv_mass;
@@ -124,6 +122,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     geo::shape2D &mutable_shape();
     void retrieve(const std::vector<float> &vars_buffer);
+    void retrieve();
 
     template <typename T> void compute_inertia(const T &shape);
 
