@@ -169,10 +169,23 @@ float body2D::inverse_inertia() const
 void body2D::translate(const glm::vec2 &dpos)
 {
     mutable_shape().translate(dpos);
+    if (!m_state)
+        return;
+
+    rk::state &st = *m_state;
+    const std::size_t idx = 6 * index;
+    st[idx + 0] += dpos.x;
+    st[idx + 1] += dpos.y;
 }
 void body2D::rotate(const float dangle)
 {
     mutable_shape().rotate(dangle);
+    if (!m_state)
+        return;
+
+    rk::state &st = *m_state;
+    const std::size_t idx = 6 * index;
+    st[idx + 2] += dangle;
 }
 
 const body_events &body2D::events() const
@@ -221,6 +234,8 @@ float body2D::charge() const
 void body2D::position(const glm::vec2 &position)
 {
     mutable_shape().centroid(position);
+    if (!m_state)
+        return;
 
     rk::state &st = *m_state;
     const std::size_t idx = 6 * index;
@@ -230,6 +245,8 @@ void body2D::position(const glm::vec2 &position)
 void body2D::velocity(const glm::vec2 &velocity)
 {
     m_vel = velocity;
+    if (!m_state)
+        return;
 
     rk::state &st = *m_state;
     const std::size_t idx = 6 * index;
@@ -240,6 +257,8 @@ void body2D::velocity(const glm::vec2 &velocity)
 void body2D::rotation(const float rotation)
 {
     mutable_shape().rotation(rotation);
+    if (!m_state)
+        return;
 
     rk::state &st = *m_state;
     const std::size_t idx = 6 * index;
@@ -248,6 +267,8 @@ void body2D::rotation(const float rotation)
 void body2D::angular_velocity(const float angular_velocity)
 {
     m_angular_velocity = angular_velocity;
+    if (!m_state)
+        return;
 
     rk::state &st = *m_state;
     const std::size_t idx = 6 * index;
