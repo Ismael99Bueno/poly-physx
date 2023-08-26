@@ -57,6 +57,8 @@ class body2D : public kit::identifiable<>, public kit::indexable
            float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
     explicit body2D(const specs &spc);
 
+    bool kinematic;
+
     float kinetic_energy() const;
 
     void add_force(const glm::vec2 &force);
@@ -80,9 +82,6 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     float inertia() const;
     float inverse_inertia() const;
-
-    bool kinematic() const;
-    void kinematic(bool kinematic);
 
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
@@ -118,7 +117,6 @@ class body2D : public kit::identifiable<>, public kit::indexable
     float m_inertia;
     float m_inv_inertia;
     float m_charge;
-    bool m_kinematic;
 
     geo::shape2D &mutable_shape();
     void retrieve(const std::vector<float> &vars_buffer);

@@ -7,33 +7,33 @@ namespace ppx
 {
 body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float rotation, const float angular_velocity,
                const float mass, const float charge, const bool kinematic)
-    : m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(),
+    : kinematic(kinematic),
+      m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(),
                            geo::polygon::box(5.f))),
       m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
-      m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge),
-      m_kinematic(kinematic)
+      m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge)
 {
 }
 body2D::body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position, const glm::vec2 &velocity,
                const float rotation, const float angular_velocity, const float mass, const float charge,
                const bool kinematic)
-    : m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(), vertices)),
+    : kinematic(kinematic),
+      m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(), vertices)),
       m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
-      m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge),
-      m_kinematic(kinematic)
+      m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge)
 {
 }
 body2D::body2D(const float radius, const glm::vec2 &position, const glm::vec2 &velocity, const float rotation,
                const float angular_velocity, const float mass, const float charge, const bool kinematic)
-    : m_shape(geo::circle(kit::transform2D::builder().position(position).rotation(rotation).build(), radius)),
+    : kinematic(kinematic),
+      m_shape(geo::circle(kit::transform2D::builder().position(position).rotation(rotation).build(), radius)),
       m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
-      m_inertia(m_mass * shape<geo::circle>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge),
-      m_kinematic(kinematic)
+      m_inertia(m_mass * shape<geo::circle>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge)
 {
 }
 body2D::body2D(const specs &spc)
-    : m_vel(spc.velocity), m_angular_velocity(spc.angular_velocity), m_mass(spc.mass), m_inv_mass(1.f / m_mass),
-      m_charge(spc.charge), m_kinematic(spc.kinematic)
+    : kinematic(spc.kinematic), m_vel(spc.velocity), m_angular_velocity(spc.angular_velocity), m_mass(spc.mass),
+      m_inv_mass(1.f / m_mass), m_charge(spc.charge)
 {
     if (spc.shape == shape_type::POLYGON)
     {
@@ -166,15 +166,6 @@ float body2D::inverse_inertia() const
     return m_inv_inertia;
 }
 
-bool body2D::kinematic() const
-{
-    return m_kinematic;
-}
-void body2D::kinematic(const bool kinematic)
-{
-    m_kinematic = kinematic;
-}
-
 void body2D::translate(const glm::vec2 &dpos)
 {
     mutable_shape().translate(dpos);
@@ -280,7 +271,7 @@ body2D::specs body2D::specs::from_body(const body2D &body)
         const kit::transform2D &transform = poly->transform();
         return {transform.position, body.velocity(), transform.rotation, body.angular_velocity(),
                 body.mass(),        body.charge(),   poly->locals(),     0.f,
-                body.kinematic(),   body.type()};
+                body.kinematic,     body.type()};
     }
 
     const geo::circle &circle = body.shape<geo::circle>();
@@ -293,7 +284,7 @@ body2D::specs body2D::specs::from_body(const body2D &body)
             body.charge(),
             {},
             circle.radius,
-            body.kinematic(),
+            body.kinematic,
             body.type()};
 }
 
@@ -308,7 +299,7 @@ YAML::Node body2D::serializer::encode(const body2D &body) const
     node["Angular velocity"] = body.angular_velocity();
     node["Mass"] = body.mass();
     node["Charge"] = body.charge();
-    node["Kinematic"] = body.kinematic();
+    node["Kinematic"] = body.kinematic;
     return node;
 }
 
@@ -327,7 +318,7 @@ bool body2D::serializer::decode(const YAML::Node &node, body2D &body) const
     body.angular_velocity(node["Angular velocity"].as<float>());
     body.mass(node["Mass"].as<float>());
     body.charge(node["Charge"].as<float>());
-    body.kinematic(node["Kinematic"].as<bool>());
+    body.kinematic = node["Kinematic"].as<bool>();
 
     return true;
 }

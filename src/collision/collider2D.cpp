@@ -209,8 +209,7 @@ void collider2D::sort_intervals()
 
 static bool broad_detection(const body2D &body1, const body2D &body2)
 {
-    return body1 != body2 && (body1.kinematic() || body2.kinematic()) &&
-           geo::may_intersect(body1.shape(), body2.shape());
+    return body1 != body2 && (body1.kinematic || body2.kinematic) && geo::may_intersect(body1.shape(), body2.shape());
 }
 static bool are_both_circles(const body2D &body1, const body2D &body2)
 {
@@ -433,9 +432,9 @@ void collider2D::solve(const collision2D &c, std::vector<float> &stchanges) cons
     const std::array<float, 6> forces = forces_upon_collision(c);
     for (std::size_t i = 0; i < 3; i++)
     {
-        if (c.current->kinematic())
+        if (c.current->kinematic)
             stchanges[c.current->index * 6 + i + 3] += forces[i];
-        if (c.incoming->kinematic())
+        if (c.incoming->kinematic)
             stchanges[c.incoming->index * 6 + i + 3] += forces[i + 3];
     }
 }

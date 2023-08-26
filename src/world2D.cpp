@@ -69,7 +69,7 @@ void world2D::load_velocities_and_added_forces(std::vector<float> &stchanges) co
         stchanges[index] = velocity.x;
         stchanges[index + 1] = velocity.y;
         stchanges[index + 2] = angular_velocity;
-        if (m_bodies[i].kinematic())
+        if (m_bodies[i].kinematic)
         {
             const glm::vec2 &force = m_bodies[i].added_force();
             const float torque = m_bodies[i].added_torque();
@@ -101,7 +101,7 @@ void world2D::load_interactions_and_externals(std::vector<float> &stchanges) con
         if (bhv->enabled)
             for (const auto &body : bhv->bodies())
             {
-                if (!body->kinematic())
+                if (!body->kinematic)
                     continue;
                 const glm::vec3 force = bhv->force(*body);
                 load_force(stchanges, force, 6 * body->index);
@@ -110,9 +110,9 @@ void world2D::load_interactions_and_externals(std::vector<float> &stchanges) con
     {
         const std::size_t index1 = 6 * s.body1()->index, index2 = 6 * s.body2()->index;
         const glm::vec4 force = s.force();
-        if (s.body1()->kinematic())
+        if (s.body1()->kinematic)
             load_force(stchanges, glm::vec3(force), index1);
-        if (s.body2()->kinematic())
+        if (s.body2()->kinematic)
             load_force(stchanges, glm::vec3(-glm::vec2(force), force.w), index2);
     }
 }
@@ -124,8 +124,8 @@ kit::stack_vector<float> world2D::effective_inverse_masses() const
     inv_masses.reserve(3 * m_bodies.size());
     for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
-        const float inv_mass = m_bodies[i].kinematic() ? m_bodies[i].inverse_mass() : 0.f,
-                    inv_inertia = m_bodies[i].kinematic() ? m_bodies[i].inverse_inertia() : 0.f;
+        const float inv_mass = m_bodies[i].kinematic ? m_bodies[i].inverse_mass() : 0.f,
+                    inv_inertia = m_bodies[i].kinematic ? m_bodies[i].inverse_inertia() : 0.f;
         inv_masses.insert(inv_masses.end(), {inv_mass, inv_mass, inv_inertia});
     }
     return inv_masses;
