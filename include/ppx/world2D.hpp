@@ -7,7 +7,6 @@
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/events/world_events.hpp"
 #include "kit/container/container_view.hpp"
-#include "rk/tableaus.hpp"
 #include "kit/interface/non_copyable.hpp"
 
 namespace ppx
@@ -25,7 +24,7 @@ class world2D final : kit::non_copyable
     };
 #endif
 
-    world2D(const rk::butcher_tableau &table = rk::rk4, std::size_t allocations = 100);
+    world2D(const rk::butcher_tableau &table = rk::butcher_tableau::rk4, std::size_t allocations = 100);
 
     collider2D collisions;
     rk::integrator integrator;
@@ -104,7 +103,7 @@ class world2D final : kit::non_copyable
     float potential_energy() const;
     float energy() const;
 
-    std::vector<float> operator()(float t, float dt, const std::vector<float> &vars);
+    std::vector<float> operator()(float time, float timestep, const std::vector<float> &vars);
 
     body2D::const_ptr body_from_id(kit::uuid id) const;
     body2D::ptr body_from_id(kit::uuid id);

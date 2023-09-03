@@ -11,7 +11,7 @@ world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations
     : collisions(*this, 2 * allocations), integrator(table), m_compeller(*this, allocations)
 {
     m_bodies.reserve(allocations);
-    integrator.state().reserve(6 * allocations);
+    integrator.state.reserve(6 * allocations);
 }
 
 void world2D::retrieve(const std::vector<float> &vars_buffer)
@@ -23,7 +23,7 @@ void world2D::retrieve(const std::vector<float> &vars_buffer)
 
 void world2D::retrieve()
 {
-    retrieve(integrator.state().vars());
+    retrieve(integrator.state.vars());
 }
 
 bool world2D::raw_forward(const float timestep)
@@ -142,7 +142,7 @@ void world2D::reset_bodies()
 
 body2D::ptr world2D::process_body_addition(body2D &body)
 {
-    rk::state &state = integrator.state();
+    rk::state &state = integrator.state;
     body.m_state = &state;
 
     body.index = m_bodies.size() - 1;
@@ -176,7 +176,7 @@ bool world2D::remove_body(std::size_t index)
     KIT_INFO("Removing body with index {0} and id {1}", index, m_bodies[index].id)
 
     events.on_early_body_removal(m_bodies[index]);
-    rk::state &state = integrator.state();
+    rk::state &state = integrator.state;
     if (index != m_bodies.size() - 1)
     {
         m_bodies[index] = m_bodies.back();
@@ -333,7 +333,7 @@ float world2D::energy() const
     return kinetic_energy() + potential_energy();
 }
 
-std::vector<float> world2D::operator()(const float t, const float dt, const std::vector<float> &vars)
+std::vector<float> world2D::operator()(const float time, const float timestep, const std::vector<float> &vars)
 {
     KIT_PERF_FUNCTION()
     KIT_ASSERT_CRITICAL(
@@ -622,7 +622,7 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
 
     world.clear_bodies();
     world.integrator = node["Integrator"].as<rk::integrator>();
-    world.integrator.state().clear();
+    world.integrator.state.clear();
 
     if (node["Bodies"])
         for (const YAML::Node &n : node["Bodies"])
