@@ -63,15 +63,15 @@ void collision_manager2D::add_body_intervals(const body2D::const_ptr &body)
     m_intervals.emplace_back(body, interval::end::HIGHER);
 }
 
-void collision_manager2D::solve_and_load_collisions(std::vector<float> &stchanges)
+void collision_manager2D::solve_and_load_collisions(std::vector<float> &state_derivative)
 {
     if (m_collision_pairs.empty())
-        broad_and_narrow_fase(stchanges);
+        broad_and_narrow_fase(state_derivative);
     else
-        narrow_fase(stchanges);
+        narrow_fase(state_derivative);
 }
 
-void collision_manager2D::broad_and_narrow_fase(std::vector<float> &stchanges)
+void collision_manager2D::broad_and_narrow_fase(std::vector<float> &state_derivative)
 {
     KIT_PERF_FUNCTION()
     if (!enabled)
@@ -79,13 +79,13 @@ void collision_manager2D::broad_and_narrow_fase(std::vector<float> &stchanges)
     switch (m_coldet_method)
     {
     case detection::BRUTE_FORCE:
-        brute_force(stchanges);
+        brute_force(state_derivative);
         break;
     case detection::SORT_AND_SWEEP:
-        sort_and_sweep(stchanges);
+        sort_and_sweep(state_derivative);
         break;
     case detection::QUAD_TREE:
-        quad_tree(stchanges);
+        quad_tree(state_derivative);
         break;
     }
 }
@@ -118,13 +118,13 @@ static void for_each_mt(const C<T> &vec, Func func)
 }
 #endif
 
-void collision_manager2D::narrow_fase(std::vector<float> &stchanges)
+void collision_manager2D::narrow_fase(std::vector<float> &state_derivative)
 {
 #ifdef PPX_MULTITHREADED
-    const auto exec = [this, &stchanges](const std::size_t thread_idx, const colpair &cp) {
+    const auto exec = [this, &state_derivative](const std::size_t thread_idx, const colpair &cp) {
         collision2D c;
         if (narrow_detection(*cp.first, *cp.second, &c))
-            solve(c, stchanges);
+            solve(c, state_derivative);
     };
     for_each_mt(m_collision_pairs, exec);
 #else
@@ -132,7 +132,7 @@ void collision_manager2D::narrow_fase(std::vector<float> &stchanges)
     {
         collision2D c;
         if (narrow_detection(*cp.first, *cp.second, &c))
-            solve(c, stchanges);
+            solve(c, state_derivative);
     }
 #endif
 }
@@ -273,11 +273,11 @@ void collision_manager2D::try_exit_callback(const body2D &body1, const body2D &b
     body2.events().try_exit(m_parent[body1.index]);
 }
 
-void collision_manager2D::brute_force(std::vector<float> &stchanges)
+void collision_manager2D::brute_force(std::vector<float> &state_derivative)
 {
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
-    const auto exec = [this, &stchanges](const std::size_t thread_idx, const body2D &body1) {
+    const auto exec = [this, &state_derivative](const std::size_t thread_idx, const body2D &body1) {
         const auto bodies = m_parent.bodies();
         for (std::size_t j = 0; j < m_parent.size(); j++)
         {
@@ -286,7 +286,7 @@ void collision_manager2D::brute_force(std::vector<float> &stchanges)
             if (full_detection(body1, body2, &c))
             {
                 try_enter_or_stay_callback(body1, body2, c);
-                solve(c, stchanges);
+                solve(c, state_derivative);
                 m_mt_collision_pairs[thread_idx].emplace_back(&body1, &body2);
             }
             else
@@ -315,7 +315,7 @@ void collision_manager2D::brute_force(std::vector<float> &stchanges)
                 collisions++;
 #endif
                 try_enter_or_stay_callback(body1, body2, c);
-                solve(c, stchanges);
+                solve(c, state_derivative);
                 m_collision_pairs.emplace_back(&body1, &body2);
             }
             else
@@ -327,7 +327,7 @@ void collision_manager2D::brute_force(std::vector<float> &stchanges)
 #endif
 }
 
-void collision_manager2D::sort_and_sweep(std::vector<float> &stchanges)
+void collision_manager2D::sort_and_sweep(std::vector<float> &state_derivative)
 {
     KIT_PERF_FUNCTION()
 #ifdef DEBUG
@@ -353,7 +353,7 @@ void collision_manager2D::sort_and_sweep(std::vector<float> &stchanges)
                     collisions++;
 #endif
                     try_enter_or_stay_callback(body1, body2, c);
-                    solve(c, stchanges);
+                    solve(c, state_derivative);
                     m_collision_pairs.emplace_back(&body1, &body2);
                 }
                 else
@@ -368,7 +368,7 @@ void collision_manager2D::sort_and_sweep(std::vector<float> &stchanges)
               checks, collisions, checks - collisions, 100.f * (float)m_parent.size() / (float)checks)
 }
 
-void collision_manager2D::quad_tree(std::vector<float> &stchanges)
+void collision_manager2D::quad_tree(std::vector<float> &state_derivative)
 {
     KIT_PERF_FUNCTION()
     update_quad_tree();
@@ -378,7 +378,8 @@ void collision_manager2D::quad_tree(std::vector<float> &stchanges)
     m_quad_tree.partitions(partitions);
 
 #ifdef PPX_MULTITHREADED
-    const auto exec = [this, &stchanges](const std::size_t thread_idx, const std::vector<const body2D *> *partition) {
+    const auto exec = [this, &state_derivative](const std::size_t thread_idx,
+                                                const std::vector<const body2D *> *partition) {
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
@@ -387,7 +388,7 @@ void collision_manager2D::quad_tree(std::vector<float> &stchanges)
                 if (full_detection(*body1, *body2, &c))
                 {
                     try_enter_or_stay_callback(*body1, *body2, c);
-                    solve(c, stchanges);
+                    solve(c, state_derivative);
                     m_mt_collision_pairs[thread_idx].emplace_back(body1, body2);
                 }
                 else
@@ -416,7 +417,7 @@ void collision_manager2D::quad_tree(std::vector<float> &stchanges)
                     collisions++;
 #endif
                     try_enter_or_stay_callback(*body1, *body2, c);
-                    solve(c, stchanges);
+                    solve(c, state_derivative);
                     m_collision_pairs.emplace_back(body1, body2);
                 }
                 else
@@ -428,16 +429,16 @@ void collision_manager2D::quad_tree(std::vector<float> &stchanges)
 #endif
 }
 
-void collision_manager2D::solve(const collision2D &c, std::vector<float> &stchanges) const
+void collision_manager2D::solve(const collision2D &c, std::vector<float> &state_derivative) const
 {
     KIT_PERF_FUNCTION()
     const std::array<float, 6> forces = forces_upon_collision(c);
     for (std::size_t i = 0; i < 3; i++)
     {
         if (c.current->kinematic)
-            stchanges[c.current->index * 6 + i + 3] += forces[i];
+            state_derivative[c.current->index * 6 + i + 3] += forces[i];
         if (c.incoming->kinematic)
-            stchanges[c.incoming->index * 6 + i + 3] += forces[i + 3];
+            state_derivative[c.incoming->index * 6 + i + 3] += forces[i + 3];
     }
 }
 

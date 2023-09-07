@@ -40,7 +40,8 @@ class constraint_manager2D final : kit::non_copyable
 
     void validate(const kit::event<const constraint2D &> &event_callback);
 
-    void solve_and_load_constraints(std::vector<float> &stchanges, const kit::stack_vector<float> &inv_masses) const;
+    void solve_and_load_constraints(std::vector<float> &state_derivative,
+                                    const kit::stack_vector<float> &inv_masses) const;
 
     const std::vector<kit::scope<constraint2D>> &constraints() const;
 
@@ -56,12 +57,13 @@ class constraint_manager2D final : kit::non_copyable
     kit::stack_vector<float> lhs(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &inv_masses) const;
 
     kit::stack_vector<float> rhs(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &djcb,
-                                 const std::vector<float> &stchanges, const kit::stack_vector<float> &inv_masses) const;
+                                 const std::vector<float> &state_derivative,
+                                 const kit::stack_vector<float> &inv_masses) const;
 
     kit::stack_vector<float> lu_decomposition(const kit::stack_vector<float> &A,
                                               const kit::stack_vector<float> &b) const;
     void load_constraint_accels(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &lambda,
-                                std::vector<float> &stchanges) const;
+                                std::vector<float> &state_derivative) const;
 };
 } // namespace ppx
 

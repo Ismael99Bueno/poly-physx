@@ -162,8 +162,8 @@ class world2D final : kit::non_copyable
 
     body2D::ptr process_body_addition(body2D &body);
 
-    void load_velocities_and_added_forces(std::vector<float> &stchanges) const;
-    void load_interactions_and_externals(std::vector<float> &stchanges) const;
+    void load_velocities_and_added_forces(std::vector<float> &state_derivative) const;
+    void load_interactions_and_externals(std::vector<float> &state_derivative) const;
 
     kit::stack_vector<float> effective_inverse_masses() const;
 

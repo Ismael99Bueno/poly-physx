@@ -51,14 +51,14 @@ bool world2D::embedded_forward(float &timestep)
     return valid;
 }
 
-static void load_force(std::vector<float> &stchanges, const glm::vec3 &force, std::size_t index)
+static void load_force(std::vector<float> &state_derivative, const glm::vec3 &force, std::size_t index)
 {
-    stchanges[index + 3] += force.x;
-    stchanges[index + 4] += force.y;
-    stchanges[index + 5] += force.z;
+    state_derivative[index + 3] += force.x;
+    state_derivative[index + 4] += force.y;
+    state_derivative[index + 5] += force.z;
 }
 
-void world2D::load_velocities_and_added_forces(std::vector<float> &stchanges) const
+void world2D::load_velocities_and_added_forces(std::vector<float> &state_derivative) const
 {
     KIT_PERF_FUNCTION()
     for (std::size_t i = 0; i < m_bodies.size(); i++)
@@ -66,14 +66,14 @@ void world2D::load_velocities_and_added_forces(std::vector<float> &stchanges) co
         const std::size_t index = 6 * i;
         const glm::vec2 &velocity = m_bodies[i].velocity();
         const float angular_velocity = m_bodies[i].angular_velocity();
-        stchanges[index] = velocity.x;
-        stchanges[index + 1] = velocity.y;
-        stchanges[index + 2] = angular_velocity;
+        state_derivative[index] = velocity.x;
+        state_derivative[index + 1] = velocity.y;
+        state_derivative[index + 2] = angular_velocity;
         if (m_bodies[i].kinematic)
         {
             const glm::vec2 &force = m_bodies[i].added_force();
             const float torque = m_bodies[i].added_torque();
-            load_force(stchanges, glm::vec3(force, torque), index);
+            load_force(state_derivative, glm::vec3(force, torque), index);
         }
     }
 }
@@ -94,7 +94,7 @@ void world2D::validate()
             ++it;
 }
 
-void world2D::load_interactions_and_externals(std::vector<float> &stchanges) const
+void world2D::load_interactions_and_externals(std::vector<float> &state_derivative) const
 {
     KIT_PERF_FUNCTION()
     for (const auto &bhv : m_behaviours)
@@ -104,16 +104,16 @@ void world2D::load_interactions_and_externals(std::vector<float> &stchanges) con
                 if (!body->kinematic)
                     continue;
                 const glm::vec3 force = bhv->force(*body);
-                load_force(stchanges, force, 6 * body->index);
+                load_force(state_derivative, force, 6 * body->index);
             }
     for (const spring2D &s : m_springs)
     {
         const std::size_t index1 = 6 * s.body1()->index, index2 = 6 * s.body2()->index;
         const glm::vec4 force = s.force();
         if (s.body1()->kinematic)
-            load_force(stchanges, glm::vec3(force), index1);
+            load_force(state_derivative, glm::vec3(force), index1);
         if (s.body2()->kinematic)
-            load_force(stchanges, glm::vec3(-glm::vec2(force), force.w), index2);
+            load_force(state_derivative, glm::vec3(-glm::vec2(force), force.w), index2);
     }
 }
 
@@ -340,22 +340,22 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         vars.size() == 6 * m_bodies.size(),
         "State vector size must be exactly 6 times greater than the body array size - vars: {0}, body array: {1}",
         vars.size(), m_bodies.size())
-    std::vector<float> stchanges(vars.size(), 0.f);
+    std::vector<float> state_derivative(vars.size(), 0.f);
 
     retrieve(vars);
-    load_velocities_and_added_forces(stchanges);
-    load_interactions_and_externals(stchanges);
+    load_velocities_and_added_forces(state_derivative);
+    load_interactions_and_externals(state_derivative);
     const kit::stack_vector<float> inv_masses = effective_inverse_masses();
 
-    collisions.solve_and_load_collisions(stchanges);
-    m_constraint_manager.solve_and_load_constraints(stchanges, inv_masses);
+    collisions.solve_and_load_collisions(state_derivative);
+    m_constraint_manager.solve_and_load_constraints(state_derivative, inv_masses);
     for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
-        stchanges[6 * i + 3] *= inv_masses[3 * i];
-        stchanges[6 * i + 4] *= inv_masses[3 * i + 1];
-        stchanges[6 * i + 5] *= inv_masses[3 * i + 2];
+        state_derivative[6 * i + 3] *= inv_masses[3 * i];
+        state_derivative[6 * i + 4] *= inv_masses[3 * i + 1];
+        state_derivative[6 * i + 5] *= inv_masses[3 * i + 2];
     }
-    return stchanges;
+    return state_derivative;
 }
 
 template <typename T> static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<T> &vec)

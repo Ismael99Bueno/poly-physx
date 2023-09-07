@@ -65,7 +65,7 @@ void constraint_manager2D::validate(const kit::event<const constraint2D &> &even
             ++it;
 }
 
-void constraint_manager2D::solve_and_load_constraints(std::vector<float> &stchanges,
+void constraint_manager2D::solve_and_load_constraints(std::vector<float> &state_derivative,
                                                       const kit::stack_vector<float> &inv_masses) const
 {
     KIT_PERF_FUNCTION()
@@ -73,9 +73,9 @@ void constraint_manager2D::solve_and_load_constraints(std::vector<float> &stchan
         return;
     const kit::stack_vector<float> jcb = jacobian(), djcb = jacobian_derivative();
     const kit::stack_vector<float> A = lhs(jcb, inv_masses);
-    const kit::stack_vector<float> b = rhs(jcb, djcb, stchanges, inv_masses);
+    const kit::stack_vector<float> b = rhs(jcb, djcb, state_derivative, inv_masses);
     const kit::stack_vector<float> lambda = lu_decomposition(A, b);
-    load_constraint_accels(jcb, lambda, stchanges);
+    load_constraint_accels(jcb, lambda, state_derivative);
 }
 
 const std::vector<kit::scope<constraint2D>> &constraint_manager2D::constraints() const
@@ -133,7 +133,7 @@ kit::stack_vector<float> constraint_manager2D::lhs(const kit::stack_vector<float
 
 kit::stack_vector<float> constraint_manager2D::rhs(const kit::stack_vector<float> &jcb,
                                                    const kit::stack_vector<float> &djcb,
-                                                   const std::vector<float> &stchanges,
+                                                   const std::vector<float> &state_derivative,
                                                    const kit::stack_vector<float> &inv_masses) const
 {
     KIT_PERF_FUNCTION()
@@ -149,7 +149,7 @@ kit::stack_vector<float> constraint_manager2D::rhs(const kit::stack_vector<float
                 const std::size_t idx = i * cols + index1;
 
                 const float to_substract =
-                    djcb[idx] * stchanges[index2] + jcb[idx] * stchanges[index2 + 3] * inv_masses[index1];
+                    djcb[idx] * state_derivative[index2] + jcb[idx] * state_derivative[index2 + 3] * inv_masses[index1];
                 b[i] -= to_substract;
             }
         const float anti_drift = (m_constraints[i]->stiffness() * m_constraints[i]->constraint_value() +
@@ -204,7 +204,7 @@ kit::stack_vector<float> constraint_manager2D::lu_decomposition(const kit::stack
 
 void constraint_manager2D::load_constraint_accels(const kit::stack_vector<float> &jcb,
                                                   const kit::stack_vector<float> &lambda,
-                                                  std::vector<float> &stchanges) const
+                                                  std::vector<float> &state_derivative) const
 {
     KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
@@ -213,7 +213,7 @@ void constraint_manager2D::load_constraint_accels(const kit::stack_vector<float>
             for (std::size_t k = 0; k < rows; k++)
             {
                 const std::size_t idx1 = 6 * i + j + 3, idx2 = k * cols + 3 * i + j;
-                stchanges[idx1] += jcb[idx2] * lambda[k];
+                state_derivative[idx1] += jcb[idx2] * lambda[k];
             }
 }
 } // namespace ppx

@@ -46,7 +46,7 @@ class collision_manager2D final : kit::non_copyable, public kit::toggleable
     collision_manager2D(world2D &parent, std::size_t allocations);
 
     void add_body_intervals(const body2D::const_ptr &body);
-    void solve_and_load_collisions(std::vector<float> &stchanges);
+    void solve_and_load_collisions(std::vector<float> &state_derivative);
     void validate();
     void flush_collisions();
 
@@ -108,14 +108,14 @@ class collision_manager2D final : kit::non_copyable, public kit::toggleable
     void try_enter_or_stay_callback(const body2D &body1, const body2D &body2, const collision2D &c) const;
     void try_exit_callback(const body2D &body1, const body2D &body2) const;
 
-    void broad_and_narrow_fase(std::vector<float> &stchanges);
-    void narrow_fase(std::vector<float> &stchanges);
+    void broad_and_narrow_fase(std::vector<float> &state_derivative);
+    void narrow_fase(std::vector<float> &state_derivative);
 
-    void brute_force(std::vector<float> &stchanges);
-    void sort_and_sweep(std::vector<float> &stchanges);
-    void quad_tree(std::vector<float> &stchanges);
+    void brute_force(std::vector<float> &state_derivative);
+    void sort_and_sweep(std::vector<float> &state_derivative);
+    void quad_tree(std::vector<float> &state_derivative);
 
-    void solve(const collision2D &c, std::vector<float> &stchanges) const;
+    void solve(const collision2D &c, std::vector<float> &state_derivative) const;
     std::array<float, 6> forces_upon_collision(const collision2D &c) const;
 };
 } // namespace ppx
