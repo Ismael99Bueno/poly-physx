@@ -8,7 +8,7 @@
 namespace ppx
 {
 world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations)
-    : collisions(*this, 2 * allocations), integrator(table), m_compeller(*this, allocations)
+    : collisions(*this, 2 * allocations), integrator(table), m_constraint_manager(*this, allocations)
 {
     m_bodies.reserve(allocations);
     integrator.state.reserve(6 * allocations);
@@ -81,7 +81,7 @@ void world2D::load_velocities_and_added_forces(std::vector<float> &stchanges) co
 void world2D::validate()
 {
     collisions.validate();
-    m_compeller.validate(events.on_constraint_removal);
+    m_constraint_manager.validate(events.on_constraint_removal);
     for (const auto &bhv : m_behaviours)
         bhv->validate();
     for (auto it = m_springs.begin(); it != m_springs.end();)
@@ -271,15 +271,15 @@ bool world2D::remove_spring(kit::uuid id)
 
 bool world2D::remove_constraint(std::size_t index)
 {
-    return m_compeller.remove_constraint(index, events.on_constraint_removal);
+    return m_constraint_manager.remove_constraint(index, events.on_constraint_removal);
 }
 bool world2D::remove_constraint(const constraint2D *ctr)
 {
-    return m_compeller.remove_constraint(ctr, events.on_constraint_removal);
+    return m_constraint_manager.remove_constraint(ctr, events.on_constraint_removal);
 }
 bool world2D::remove_constraint(kit::uuid id)
 {
-    return m_compeller.remove_constraint(id, events.on_constraint_removal);
+    return m_constraint_manager.remove_constraint(id, events.on_constraint_removal);
 }
 
 void world2D::clear_bodies()
@@ -301,13 +301,13 @@ void world2D::clear_springs()
 }
 void world2D::clear_constraints()
 {
-    m_compeller.clear_constraints(events.on_constraint_removal);
+    m_constraint_manager.clear_constraints(events.on_constraint_removal);
 }
 void world2D::clear()
 {
     m_behaviours.clear();
     m_springs.clear();
-    m_compeller.clear_constraints(events.on_constraint_removal);
+    m_constraint_manager.clear_constraints(events.on_constraint_removal);
     clear_bodies();
 }
 
@@ -348,7 +348,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     const kit::stack_vector<float> inv_masses = effective_inverse_masses();
 
     collisions.solve_and_load_collisions(stchanges);
-    m_compeller.solve_and_load_constraints(stchanges, inv_masses);
+    m_constraint_manager.solve_and_load_constraints(stchanges, inv_masses);
     for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
         stchanges[6 * i + 3] *= inv_masses[3 * i];
@@ -399,13 +399,13 @@ spring2D::ptr world2D::spring_from_id(const kit::uuid id)
 
 const constraint2D *world2D::constraint_from_id(const kit::uuid id) const
 {
-    const auto index = index_from_id(id, m_compeller.constraints());
-    return index ? m_compeller.constraints()[index.value()].get() : nullptr;
+    const auto index = index_from_id(id, m_constraint_manager.constraints());
+    return index ? m_constraint_manager.constraints()[index.value()].get() : nullptr;
 }
 constraint2D *world2D::constraint_from_id(const kit::uuid id)
 {
-    const auto index = index_from_id(id, m_compeller.constraints());
-    return index ? m_compeller.constraints()[index.value()].get() : nullptr;
+    const auto index = index_from_id(id, m_constraint_manager.constraints());
+    return index ? m_constraint_manager.constraints()[index.value()].get() : nullptr;
 }
 
 template <> behaviour2D *world2D::behaviour_from_name(const std::string &name) const
@@ -460,8 +460,8 @@ std::vector<const constraint2D *> world2D::constraints_from_ids(const std::vecto
     if (ids.empty())
         return constraints;
 
-    constraints.reserve(m_compeller.constraints().size());
-    for (const auto &ctr : m_compeller.constraints())
+    constraints.reserve(m_constraint_manager.constraints().size());
+    for (const auto &ctr : m_constraint_manager.constraints())
     {
         if (ctr->size() != ids.size())
             continue;
@@ -489,8 +489,8 @@ std::vector<constraint2D *> world2D::constraints_from_ids(const std::vector<kit:
     if (ids.empty())
         return constraints;
 
-    constraints.reserve(m_compeller.constraints().size());
-    for (const auto &ctr : m_compeller.constraints())
+    constraints.reserve(m_constraint_manager.constraints().size());
+    for (const auto &ctr : m_constraint_manager.constraints())
     {
         if (ctr->size() != ids.size())
             continue;
@@ -514,7 +514,7 @@ const std::vector<kit::scope<behaviour2D>> &world2D::behaviours() const
 }
 const std::vector<kit::scope<constraint2D>> &world2D::constraints() const
 {
-    return m_compeller.constraints();
+    return m_constraint_manager.constraints();
 }
 
 const std::vector<spring2D> &world2D::springs() const
@@ -597,7 +597,7 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     YAML::Node node;
     for (const ppx::body2D &body : world.bodies())
         node["Bodies"].push_back(body);
-    node["Collider"] = world.collisions;
+    node["Collision manager"] = world.collisions;
 
     for (const ppx::spring2D &sp : world.springs())
         node["Springs"].push_back(sp);
@@ -628,7 +628,7 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
         for (const YAML::Node &n : node["Bodies"])
             world.add_body(n.as<ppx::body2D>());
 
-    node["Collider"].as<ppx::collider2D>(world.collisions);
+    node["Collision manager"].as<ppx::collision_manager2D>(world.collisions);
 
     if (node["Springs"])
         for (const YAML::Node &n : node["Springs"])

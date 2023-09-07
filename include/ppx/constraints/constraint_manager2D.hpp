@@ -1,5 +1,5 @@
-#ifndef PPX_COMPELLER2D_HPP
-#define PPX_COMPELLER2D_HPP
+#ifndef PPX_CONSTRAINT_MANAGER2D_HPP
+#define PPX_CONSTRAINT_MANAGER2D_HPP
 
 #include "ppx/body2D.hpp"
 #include "ppx/events/world_events.hpp"
@@ -15,10 +15,10 @@ namespace ppx
 {
 class world2D;
 
-class compeller2D final : kit::non_copyable
+class constraint_manager2D final : kit::non_copyable
 {
   public:
-    compeller2D(const world2D &parent, std::size_t allocations);
+    constraint_manager2D(const world2D &parent, std::size_t allocations);
 
     template <typename T, class... ConstraintArgs>
     T *add_constraint(const kit::event<constraint2D *> &event_callback, ConstraintArgs &&...args)

@@ -1,5 +1,5 @@
-#ifndef PPX_COLLIDER_HPP
-#define PPX_COLLIDER_HPP
+#ifndef PPX_COLLISION_MANAGER2D_HPP
+#define PPX_COLLISION_MANAGER2D_HPP
 
 #include "ppx/body2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"
@@ -24,15 +24,15 @@ struct collision2D
     glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
 };
 
-class collider2D final : kit::non_copyable, public kit::toggleable
+class collision_manager2D final : kit::non_copyable, public kit::toggleable
 {
   public:
 #ifdef KIT_USE_YAML_CPP
-    class serializer : public kit::serializer<collider2D>
+    class serializer : public kit::serializer<collision_manager2D>
     {
       public:
-        YAML::Node encode(const collider2D &tb) const override;
-        bool decode(const YAML::Node &node, collider2D &tb) const override;
+        YAML::Node encode(const collision_manager2D &tb) const override;
+        bool decode(const YAML::Node &node, collision_manager2D &tb) const override;
     };
 #endif
 
@@ -43,7 +43,7 @@ class collider2D final : kit::non_copyable, public kit::toggleable
         QUAD_TREE = 2
     };
 
-    collider2D(world2D &parent, std::size_t allocations);
+    collision_manager2D(world2D &parent, std::size_t allocations);
 
     void add_body_intervals(const body2D::const_ptr &body);
     void solve_and_load_collisions(std::vector<float> &stchanges);

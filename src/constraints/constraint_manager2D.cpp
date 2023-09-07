@@ -1,16 +1,16 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/constraints/compeller2D.hpp"
+#include "ppx/constraints/constraint_manager2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
 namespace ppx
 {
-compeller2D::compeller2D(const world2D &parent, const std::size_t allocations) : m_parent(parent)
+constraint_manager2D::constraint_manager2D(const world2D &parent, const std::size_t allocations) : m_parent(parent)
 {
     m_constraints.reserve(allocations);
 }
 
-bool compeller2D::remove_constraint(std::size_t index, const kit::event<const constraint2D &> &event_callback)
+bool constraint_manager2D::remove_constraint(std::size_t index, const kit::event<const constraint2D &> &event_callback)
 {
     if (index >= m_constraints.size())
     {
@@ -22,7 +22,8 @@ bool compeller2D::remove_constraint(std::size_t index, const kit::event<const co
     m_constraints.erase(m_constraints.begin() + (long)index);
     return true;
 }
-bool compeller2D::remove_constraint(const constraint2D *ctr, const kit::event<const constraint2D &> &event_callback)
+bool constraint_manager2D::remove_constraint(const constraint2D *ctr,
+                                             const kit::event<const constraint2D &> &event_callback)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if (it->get() == ctr)
@@ -33,7 +34,7 @@ bool compeller2D::remove_constraint(const constraint2D *ctr, const kit::event<co
         }
     return false;
 }
-bool compeller2D::remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback)
+bool constraint_manager2D::remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if ((*it)->id == id)
@@ -45,14 +46,14 @@ bool compeller2D::remove_constraint(kit::uuid id, const kit::event<const constra
     return false;
 }
 
-void compeller2D::clear_constraints(const kit::event<const constraint2D &> &event_callback)
+void constraint_manager2D::clear_constraints(const kit::event<const constraint2D &> &event_callback)
 {
     for (const auto &ctr : m_constraints)
         event_callback(*ctr);
     m_constraints.clear();
 }
 
-void compeller2D::validate(const kit::event<const constraint2D &> &event_callback)
+void constraint_manager2D::validate(const kit::event<const constraint2D &> &event_callback)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end();)
         if (!(*it)->valid())
@@ -64,8 +65,8 @@ void compeller2D::validate(const kit::event<const constraint2D &> &event_callbac
             ++it;
 }
 
-void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges,
-                                             const kit::stack_vector<float> &inv_masses) const
+void constraint_manager2D::solve_and_load_constraints(std::vector<float> &stchanges,
+                                                      const kit::stack_vector<float> &inv_masses) const
 {
     KIT_PERF_FUNCTION()
     if (m_constraints.empty())
@@ -77,12 +78,13 @@ void compeller2D::solve_and_load_constraints(std::vector<float> &stchanges,
     load_constraint_accels(jcb, lambda, stchanges);
 }
 
-const std::vector<kit::scope<constraint2D>> &compeller2D::constraints() const
+const std::vector<kit::scope<constraint2D>> &constraint_manager2D::constraints() const
 {
     return m_constraints;
 }
 
-kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_gradient_fun &constraint_gradients) const
+kit::stack_vector<float> constraint_manager2D::constraint_matrix(
+    const constraint_gradient_fun &constraint_gradients) const
 {
     KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
@@ -99,17 +101,17 @@ kit::stack_vector<float> compeller2D::constraint_matrix(const constraint_gradien
     return cmatrix;
 }
 
-kit::stack_vector<float> compeller2D::jacobian() const
+kit::stack_vector<float> constraint_manager2D::jacobian() const
 {
     return constraint_matrix(&constraint2D::constraint_gradients);
 }
-kit::stack_vector<float> compeller2D::jacobian_derivative() const
+kit::stack_vector<float> constraint_manager2D::jacobian_derivative() const
 {
     return constraint_matrix(&constraint2D::constraint_derivative_gradients);
 }
 
-kit::stack_vector<float> compeller2D::lhs(const kit::stack_vector<float> &jcb,
-                                          const kit::stack_vector<float> &inv_masses) const
+kit::stack_vector<float> constraint_manager2D::lhs(const kit::stack_vector<float> &jcb,
+                                                   const kit::stack_vector<float> &inv_masses) const
 {
     KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
@@ -129,9 +131,10 @@ kit::stack_vector<float> compeller2D::lhs(const kit::stack_vector<float> &jcb,
     return A;
 }
 
-kit::stack_vector<float> compeller2D::rhs(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &djcb,
-                                          const std::vector<float> &stchanges,
-                                          const kit::stack_vector<float> &inv_masses) const
+kit::stack_vector<float> constraint_manager2D::rhs(const kit::stack_vector<float> &jcb,
+                                                   const kit::stack_vector<float> &djcb,
+                                                   const std::vector<float> &stchanges,
+                                                   const kit::stack_vector<float> &inv_masses) const
 {
     KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();
@@ -156,8 +159,8 @@ kit::stack_vector<float> compeller2D::rhs(const kit::stack_vector<float> &jcb, c
     return b;
 }
 
-kit::stack_vector<float> compeller2D::lu_decomposition(const kit::stack_vector<float> &A,
-                                                       const kit::stack_vector<float> &b) const
+kit::stack_vector<float> constraint_manager2D::lu_decomposition(const kit::stack_vector<float> &A,
+                                                                const kit::stack_vector<float> &b) const
 {
     KIT_PERF_FUNCTION()
     const std::size_t size = m_constraints.size();
@@ -199,8 +202,9 @@ kit::stack_vector<float> compeller2D::lu_decomposition(const kit::stack_vector<f
     return sol;
 }
 
-void compeller2D::load_constraint_accels(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &lambda,
-                                         std::vector<float> &stchanges) const
+void constraint_manager2D::load_constraint_accels(const kit::stack_vector<float> &jcb,
+                                                  const kit::stack_vector<float> &lambda,
+                                                  std::vector<float> &stchanges) const
 {
     KIT_PERF_FUNCTION()
     const std::size_t rows = m_constraints.size(), cols = 3 * m_parent.size();

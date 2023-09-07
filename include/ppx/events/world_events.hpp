@@ -1,5 +1,5 @@
-#ifndef PPX_ENGINE_EVENTS_HPP
-#define PPX_ENGINE_EVENTS_HPP
+#ifndef PPX_WORLD_EVENTS_HPP
+#define PPX_WORLD_EVENTS_HPP
 
 #include "ppx/body2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"

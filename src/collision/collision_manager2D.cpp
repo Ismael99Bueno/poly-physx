@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/collider2D.hpp"
+#include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/world2D.hpp"
 
 #include "geo/intersection.hpp"
@@ -22,7 +22,7 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-collider2D::collider2D(world2D &parent, const std::size_t allocations)
+collision_manager2D::collision_manager2D(world2D &parent, const std::size_t allocations)
     : m_parent(parent), m_quad_tree({-10.f, -10.f}, {10.f, 10.f})
 {
     m_intervals.reserve(allocations);
@@ -33,36 +33,37 @@ collider2D::collider2D(world2D &parent, const std::size_t allocations)
 #endif
 }
 
-collider2D::interval::interval(const body2D::const_ptr &body, const end end_type) : m_body(body), m_end(end_type)
+collision_manager2D::interval::interval(const body2D::const_ptr &body, const end end_type)
+    : m_body(body), m_end(end_type)
 {
 }
 
-const body2D *collider2D::interval::body() const
+const body2D *collision_manager2D::interval::body() const
 {
     return m_body.raw();
 }
-float collider2D::interval::value() const
+float collision_manager2D::interval::value() const
 {
     const geo::aabb2D &bbox = m_body->shape().bounding_box();
     return (m_end == end::LOWER) ? bbox.min().x : bbox.max().x;
 }
 
-collider2D::interval::end collider2D::interval::type() const
+collision_manager2D::interval::end collision_manager2D::interval::type() const
 {
     return m_end;
 }
-bool collider2D::interval::valid() const
+bool collision_manager2D::interval::valid() const
 {
     return (bool)m_body;
 }
 
-void collider2D::add_body_intervals(const body2D::const_ptr &body)
+void collision_manager2D::add_body_intervals(const body2D::const_ptr &body)
 {
     m_intervals.emplace_back(body, interval::end::LOWER);
     m_intervals.emplace_back(body, interval::end::HIGHER);
 }
 
-void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
+void collision_manager2D::solve_and_load_collisions(std::vector<float> &stchanges)
 {
     if (m_collision_pairs.empty())
         broad_and_narrow_fase(stchanges);
@@ -70,7 +71,7 @@ void collider2D::solve_and_load_collisions(std::vector<float> &stchanges)
         narrow_fase(stchanges);
 }
 
-void collider2D::broad_and_narrow_fase(std::vector<float> &stchanges)
+void collision_manager2D::broad_and_narrow_fase(std::vector<float> &stchanges)
 {
     KIT_PERF_FUNCTION()
     if (!enabled)
@@ -117,7 +118,7 @@ static void for_each_mt(const C<T> &vec, Func func)
 }
 #endif
 
-void collider2D::narrow_fase(std::vector<float> &stchanges)
+void collision_manager2D::narrow_fase(std::vector<float> &stchanges)
 {
 #ifdef PPX_MULTITHREADED
     const auto exec = [this, &stchanges](const std::size_t thread_idx, const colpair &cp) {
@@ -136,7 +137,7 @@ void collider2D::narrow_fase(std::vector<float> &stchanges)
 #endif
 }
 
-void collider2D::update_quad_tree()
+void collision_manager2D::update_quad_tree()
 {
     m_quad_tree.clear();
     geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
@@ -148,7 +149,7 @@ void collider2D::update_quad_tree()
         m_quad_tree.insert(&body);
 }
 
-void collider2D::validate()
+void collision_manager2D::validate()
 {
     for (auto it = m_intervals.begin(); it != m_intervals.end();)
         if (!it->valid())
@@ -156,7 +157,7 @@ void collider2D::validate()
         else
             ++it;
 }
-void collider2D::flush_collisions()
+void collision_manager2D::flush_collisions()
 {
     m_collision_pairs.clear();
 #ifdef PPX_MULTITHREADED
@@ -165,43 +166,43 @@ void collider2D::flush_collisions()
 #endif
 }
 
-float collider2D::stiffness() const
+float collision_manager2D::stiffness() const
 {
     return m_stiffness;
 }
-float collider2D::dampening() const
+float collision_manager2D::dampening() const
 {
     return m_dampening;
 }
 
-void collider2D::stiffness(float stiffness)
+void collision_manager2D::stiffness(float stiffness)
 {
     m_stiffness = stiffness;
 }
-void collider2D::dampening(float dampening)
+void collision_manager2D::dampening(float dampening)
 {
     m_dampening = dampening;
 }
 
-collider2D::detection collider2D::detection_method() const
+collision_manager2D::detection collision_manager2D::detection_method() const
 {
     return m_coldet_method;
 }
-void collider2D::detection_method(detection coldet)
+void collision_manager2D::detection_method(detection coldet)
 {
     m_coldet_method = coldet;
 }
 
-const quad_tree2D &collider2D::quad_tree() const
+const quad_tree2D &collision_manager2D::quad_tree() const
 {
     return m_quad_tree;
 }
-quad_tree2D &collider2D::quad_tree()
+quad_tree2D &collision_manager2D::quad_tree()
 {
     return m_quad_tree;
 }
 
-void collider2D::sort_intervals()
+void collision_manager2D::sort_intervals()
 {
     const auto cmp = [](const interval &itrv1, const interval &itrv2) { return itrv1.value() < itrv2.value(); };
     std::sort(m_intervals.begin(), m_intervals.end(), cmp);
@@ -216,7 +217,7 @@ static bool are_both_circles(const body2D &body1, const body2D &body2)
     return body1.type() == body2D::shape_type::CIRCLE && body2.type() == body2D::shape_type::CIRCLE;
 }
 
-bool collider2D::narrow_detection_mix(const body2D &body1, const body2D &body2, collision2D *c) const
+bool collision_manager2D::narrow_detection_mix(const body2D &body1, const body2D &body2, collision2D *c) const
 {
     const geo::shape2D &sh1 = body1.shape(), &sh2 = body2.shape();
     if (!geo::may_intersect(sh1, sh2))
@@ -236,7 +237,7 @@ bool collider2D::narrow_detection_mix(const body2D &body1, const body2D &body2, 
     return true;
 }
 
-bool collider2D::narrow_detection_circle(const body2D &body1, const body2D &body2, collision2D *c) const
+bool collision_manager2D::narrow_detection_circle(const body2D &body1, const body2D &body2, collision2D *c) const
 {
     const geo::circle &c1 = body1.shape<geo::circle>(), &c2 = body2.shape<geo::circle>();
     if (!geo::intersect(c1, c2))
@@ -247,31 +248,32 @@ bool collider2D::narrow_detection_circle(const body2D &body1, const body2D &body
     return true;
 }
 
-bool collider2D::narrow_detection(const body2D &body1, const body2D &body2, collision2D *c) const
+bool collision_manager2D::narrow_detection(const body2D &body1, const body2D &body2, collision2D *c) const
 {
     if (are_both_circles(body1, body2))
         return narrow_detection_circle(body1, body2, c);
     return narrow_detection_mix(body1, body2, c);
 }
-bool collider2D::full_detection(const body2D &body1, const body2D &body2, collision2D *c) const
+bool collision_manager2D::full_detection(const body2D &body1, const body2D &body2, collision2D *c) const
 {
     if (!broad_detection(body1, body2))
         return false;
     return narrow_detection(body1, body2, c);
 }
 
-void collider2D::try_enter_or_stay_callback(const body2D &body1, const body2D &body2, const collision2D &c) const
+void collision_manager2D::try_enter_or_stay_callback(const body2D &body1, const body2D &body2,
+                                                     const collision2D &c) const
 {
     body1.events().try_enter_or_stay(c);
     body2.events().try_enter_or_stay({c.incoming, c.current, c.touch2, c.touch1, -c.normal});
 }
-void collider2D::try_exit_callback(const body2D &body1, const body2D &body2) const
+void collision_manager2D::try_exit_callback(const body2D &body1, const body2D &body2) const
 {
     body1.events().try_exit(m_parent[body2.index]);
     body2.events().try_exit(m_parent[body1.index]);
 }
 
-void collider2D::brute_force(std::vector<float> &stchanges)
+void collision_manager2D::brute_force(std::vector<float> &stchanges)
 {
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
@@ -325,7 +327,7 @@ void collider2D::brute_force(std::vector<float> &stchanges)
 #endif
 }
 
-void collider2D::sort_and_sweep(std::vector<float> &stchanges)
+void collision_manager2D::sort_and_sweep(std::vector<float> &stchanges)
 {
     KIT_PERF_FUNCTION()
 #ifdef DEBUG
@@ -366,7 +368,7 @@ void collider2D::sort_and_sweep(std::vector<float> &stchanges)
               checks, collisions, checks - collisions, 100.f * (float)m_parent.size() / (float)checks)
 }
 
-void collider2D::quad_tree(std::vector<float> &stchanges)
+void collision_manager2D::quad_tree(std::vector<float> &stchanges)
 {
     KIT_PERF_FUNCTION()
     update_quad_tree();
@@ -426,7 +428,7 @@ void collider2D::quad_tree(std::vector<float> &stchanges)
 #endif
 }
 
-void collider2D::solve(const collision2D &c, std::vector<float> &stchanges) const
+void collision_manager2D::solve(const collision2D &c, std::vector<float> &stchanges) const
 {
     KIT_PERF_FUNCTION()
     const std::array<float, 6> forces = forces_upon_collision(c);
@@ -439,7 +441,7 @@ void collider2D::solve(const collision2D &c, std::vector<float> &stchanges) cons
     }
 }
 
-std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) const
+std::array<float, 6> collision_manager2D::forces_upon_collision(const collision2D &c) const
 {
     KIT_PERF_FUNCTION()
     const glm::vec2 rel1 = c.touch1 - c.current->transform().position,
@@ -452,7 +454,7 @@ std::array<float, 6> collider2D::forces_upon_collision(const collision2D &c) con
 }
 
 #ifdef KIT_USE_YAML_CPP
-YAML::Node collider2D::serializer::encode(const collider2D &cld) const
+YAML::Node collision_manager2D::serializer::encode(const collision_manager2D &cld) const
 {
     YAML::Node node;
 
@@ -468,7 +470,7 @@ YAML::Node collider2D::serializer::encode(const collider2D &cld) const
     node["Enabled"] = cld.enabled;
     return node;
 }
-bool collider2D::serializer::decode(const YAML::Node &node, collider2D &cld) const
+bool collision_manager2D::serializer::decode(const YAML::Node &node, collision_manager2D &cld) const
 {
     if (!node.IsMap() || node.size() != 5)
         return false;
@@ -481,7 +483,7 @@ bool collider2D::serializer::decode(const YAML::Node &node, collider2D &cld) con
 
     cld.stiffness(node["Stiffness"].as<float>());
     cld.dampening(node["Dampening"].as<float>());
-    cld.detection_method((ppx::collider2D::detection)node["Collision detection"].as<int>());
+    cld.detection_method((ppx::collision_manager2D::detection)node["Collision detection"].as<int>());
     cld.enabled = node["Enabled"].as<bool>();
 
     return true;

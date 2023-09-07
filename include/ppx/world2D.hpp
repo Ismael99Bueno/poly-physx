@@ -1,9 +1,9 @@
-#ifndef PPX_ENGINE2D_HPP
-#define PPX_ENGINE2D_HPP
+#ifndef PPX_WORLD2D_HPP
+#define PPX_WORLD2D_HPP
 
 #include "rk/integrator.hpp"
-#include "ppx/constraints/compeller2D.hpp"
-#include "ppx/collision/collider2D.hpp"
+#include "ppx/constraints/constraint_manager2D.hpp"
+#include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/events/world_events.hpp"
 #include "kit/container/container_view.hpp"
@@ -26,7 +26,7 @@ class world2D final : kit::non_copyable
 
     world2D(const rk::butcher_tableau &table = rk::butcher_tableau::rk4, std::size_t allocations = 100);
 
-    collider2D collisions;
+    collision_manager2D collisions;
     rk::integrator integrator;
     world_events events;
 
@@ -85,7 +85,8 @@ class world2D final : kit::non_copyable
 
     template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
     {
-        T *ptr = m_compeller.add_constraint<T>(events.on_constraint_addition, std::forward<ConstraintArgs>(args)...);
+        T *ptr = m_constraint_manager.add_constraint<T>(events.on_constraint_addition,
+                                                        std::forward<ConstraintArgs>(args)...);
         return ptr;
     }
 
@@ -153,7 +154,7 @@ class world2D final : kit::non_copyable
 
   private:
     std::vector<body2D> m_bodies;
-    compeller2D m_compeller;
+    constraint_manager2D m_constraint_manager;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
     std::vector<spring2D> m_springs;
 
