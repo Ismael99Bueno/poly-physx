@@ -22,6 +22,7 @@ static bool broad_collision_check(const body2D &body1, const body2D &body2)
 
 const std::vector<collision2D> &collision_detection2D::cached_collisions()
 {
+    KIT_PERF_FUNCTION()
     return m_collisions.empty() ? detect_collisions() : m_collisions;
 }
 void collision_detection2D::flush_collisions()
