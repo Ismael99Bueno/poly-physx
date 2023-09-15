@@ -1,9 +1,8 @@
 #ifndef PPX_COLLISION_MANAGER2D_HPP
 #define PPX_COLLISION_MANAGER2D_HPP
 
-#include "ppx/body2D.hpp"
-#include "ppx/constraints/constraint2D.hpp"
 #include "ppx/collision/quad_tree2D.hpp"
+#include "ppx/collision/collision_detection2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/interface/serialization.hpp"
@@ -11,18 +10,8 @@
 #include <vector>
 #include <utility>
 
-#ifndef PPX_THREAD_COUNT
-#define PPX_THREAD_COUNT 8
-#endif
-
 namespace ppx
 {
-class world2D;
-struct collision2D
-{
-    body2D::ptr current, incoming;
-    glm::vec2 touch1{0.f}, touch2{0.f}, normal{0.f};
-};
 
 class collision_manager2D final : kit::non_copyable, public kit::toggleable
 {
@@ -94,7 +83,8 @@ class collision_manager2D final : kit::non_copyable, public kit::toggleable
 #endif
 
     quad_tree2D m_quad_tree;
-    float m_stiffness = 5000.f, m_dampening = 10.f;
+    float m_stiffness = 5000.f;
+    float m_dampening = 10.f;
     detection m_coldet_method = detection::QUAD_TREE;
 
     void sort_intervals();
@@ -105,7 +95,7 @@ class collision_manager2D final : kit::non_copyable, public kit::toggleable
     bool narrow_detection_circle(const body2D &body1, const body2D &body2, collision2D *c) const;
     bool full_detection(const body2D &body1, const body2D &body2, collision2D *c) const;
 
-    void try_enter_or_stay_callback(const body2D &body1, const body2D &body2, const collision2D &c) const;
+    void try_enter_or_stay_callback(const collision2D &c) const;
     void try_exit_callback(const body2D &body1, const body2D &body2) const;
 
     void broad_and_narrow_fase(std::vector<float> &state_derivative);
