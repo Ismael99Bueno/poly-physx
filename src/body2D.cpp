@@ -188,15 +188,6 @@ void body2D::rotate(const float dangle)
     st[idx + 2] += dangle;
 }
 
-const body_events &body2D::events() const
-{
-    return m_events;
-}
-body_events &body2D::events()
-{
-    return m_events;
-}
-
 const kit::transform2D &body2D::transform() const
 {
     if (m_shape.index() == 0)

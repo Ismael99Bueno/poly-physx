@@ -18,10 +18,10 @@ void body_events::try_enter_or_stay(const collision2D &c) const
     else
         on_collision_enter(c);
 }
-void body_events::try_exit(const body2D::ptr &incoming) const
+void body_events::try_exit(const body2D::ptr &current, const body2D::ptr &outcoming) const
 {
-    if (on_collision_stay.callbacks().empty() || m_collided_ids.find(incoming->id) == m_collided_ids.end())
+    if (on_collision_stay.callbacks().empty() || m_collided_ids.find(outcoming->id) == m_collided_ids.end())
         return;
-    on_collision_exit(incoming);
+    on_collision_exit(current, outcoming);
 }
 } // namespace ppx

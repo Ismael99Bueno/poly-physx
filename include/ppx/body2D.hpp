@@ -58,6 +58,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     explicit body2D(const specs &spc);
 
     bool kinematic;
+    body_events events;
 
     float kinetic_energy() const;
 
@@ -86,9 +87,6 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
-    const body_events &events() const;
-    body_events &events();
-
     const kit::transform2D &transform() const;
 
     const glm::vec2 &velocity() const;
@@ -109,7 +107,6 @@ class body2D : public kit::identifiable<>, public kit::indexable
     std::variant<geo::polygon, geo::circle> m_shape;
     rk::state *m_state = nullptr;
     glm::vec2 m_vel{0.f}, m_added_force{0.f};
-    body_events m_events;
     float m_angular_velocity;
     float m_added_torque = 0.f;
     float m_mass;
