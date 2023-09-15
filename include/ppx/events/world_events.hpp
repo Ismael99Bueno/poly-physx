@@ -4,7 +4,7 @@
 #include "ppx/body2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/joints/spring2D.hpp"
-#include "kit/utility/event.hpp"
+#include "kit/event_handling/event.hpp"
 #include "ppx/behaviours/force2D.hpp"
 #include "ppx/behaviours/interaction2D.hpp"
 #include <memory>

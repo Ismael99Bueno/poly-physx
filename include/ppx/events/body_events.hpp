@@ -1,7 +1,7 @@
 #ifndef PPX_BODY_EVENTS_HPP
 #define PPX_BODY_EVENTS_HPP
 
-#include "kit/utility/event.hpp"
+#include "kit/event_handling/event.hpp"
 #include "kit/utility/uuid.hpp"
 #include "kit/memory/track_ptr.hpp"
 #include <vector>
