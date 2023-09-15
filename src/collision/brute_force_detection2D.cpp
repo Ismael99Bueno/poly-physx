@@ -10,10 +10,6 @@
 #undef PPX_MULTITHREADED
 #endif
 
-#ifdef PPX_MULTITHREADED
-#include <execution>
-#endif
-
 namespace ppx
 {
 const std::vector<collision2D> &brute_force_detection2D::detect_collisions()
@@ -43,6 +39,7 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
             else
                 try_exit_callback(body1, body2);
         }
+    // DEBUG COLLISION COUNT CHECK GOES HERE
 }
 const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
 {
