@@ -43,8 +43,8 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
 }
 const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
 {
-    const auto exec = [this](const std::size_t thread_idx, const body2D &body1) {
-        const auto &bodies = m_parent.bodies().unwrap();
+    const auto &bodies = m_parent.bodies().unwrap();
+    const auto exec = [this, &bodies](const std::size_t thread_idx, const body2D &body1) {
         for (std::size_t j = 0; j < m_parent.size(); j++)
         {
             collision2D colis;
@@ -58,5 +58,6 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
                 try_exit_callback(body1, body2);
         }
     };
+    kit::const_for_each_mt<PPX_THREAD_COUNT, body2D>(bodies, exec);
 }
 } // namespace ppx
