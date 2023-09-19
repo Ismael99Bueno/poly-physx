@@ -47,6 +47,7 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_st(
                     try_exit_callback(body1, body2);
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
+    return m_collisions;
 }
 const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_mt(
     const std::vector<const quad_tree2D::partition *> &partitions)
@@ -68,6 +69,9 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_mt(
             }
     };
     kit::const_for_each_mt<PPX_THREAD_COUNT, const quad_tree2D::partition *>(partitions, exec);
+    for (const auto &pairs : m_mt_collisions)
+        m_collisions.insert(m_collisions.begin(), pairs.begin(), pairs.end());
+    return m_collisions;
 }
 
 void quad_tree_detection2D::update_quad_tree()

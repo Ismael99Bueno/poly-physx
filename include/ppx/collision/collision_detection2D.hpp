@@ -23,6 +23,7 @@ class collision_detection2D
 {
   public:
     collision_detection2D(world2D &parent);
+    virtual ~collision_detection2D() = default;
 
     virtual const std::vector<collision2D> &detect_collisions() = 0;
     const std::vector<collision2D> &cached_collisions();

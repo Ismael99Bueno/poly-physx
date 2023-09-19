@@ -40,6 +40,7 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
                 try_exit_callback(body1, body2);
         }
     // DEBUG COLLISION COUNT CHECK GOES HERE
+    return m_collisions;
 }
 const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
 {
@@ -59,5 +60,8 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
         }
     };
     kit::const_for_each_mt<PPX_THREAD_COUNT, body2D>(bodies, exec);
+    for (const auto &pairs : m_mt_collisions)
+        m_collisions.insert(m_collisions.begin(), pairs.begin(), pairs.end());
+    return m_collisions;
 }
 } // namespace ppx

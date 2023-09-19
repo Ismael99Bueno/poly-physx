@@ -23,21 +23,21 @@ void quad_tree2D::insert(const body2D *body)
     if (!geo::intersect(m_aabb, body->shape().bounding_box()))
         return;
     if (full() && !rock_bottom())
-        partition();
+        subdivide();
     if (m_partitioned)
         insert_to_children(body);
     else
         m_bodies.push_back(body);
 }
 
-void quad_tree2D::partitions(std::vector<const std::vector<const body2D *> *> &partitions) const
+void quad_tree2D::collect_partitions(std::vector<const partition *> &partitions) const
 {
     KIT_PERF_FUNCTION()
     if (!m_partitioned)
         partitions.push_back(&m_bodies);
     else
         for (const auto &q : m_children)
-            q->partitions(partitions);
+            q->collect_partitions(partitions);
 }
 
 void quad_tree2D::clear()
@@ -73,7 +73,7 @@ void quad_tree2D::reset_children()
         quad_tree2D(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y), m_max_bodies, m_depth + 1);
 }
 
-void quad_tree2D::partition()
+void quad_tree2D::subdivide()
 {
     if (m_has_children)
         reset_children();
@@ -124,7 +124,7 @@ bool quad_tree2D::partitioned() const
 {
     return m_partitioned;
 }
-const std::vector<const body2D *> &quad_tree2D::bodies() const
+const quad_tree2D::partition &quad_tree2D::bodies() const
 {
     return m_bodies;
 }

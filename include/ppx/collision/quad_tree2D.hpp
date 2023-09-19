@@ -12,8 +12,9 @@ class quad_tree2D final
 {
   public:
     quad_tree2D(const glm::vec2 &min, const glm::vec2 &max, std::size_t max_bodies = 12, std::uint32_t depth = 0);
+    using partition = std::vector<const body2D *>;
 
-    void partitions(std::vector<const std::vector<const body2D *> *> &partitions) const;
+    void collect_partitions(std::vector<const partition *> &partitions) const;
     void insert(const body2D *body);
     void clear();
 
@@ -24,7 +25,7 @@ class quad_tree2D final
     void max_bodies(std::size_t max_bodies);
 
     bool partitioned() const;
-    const std::vector<const body2D *> &bodies() const;
+    const partition &bodies() const;
 
     const std::array<kit::scope<quad_tree2D>, 4> &children() const;
     const quad_tree2D &child(std::size_t index) const;
@@ -42,7 +43,7 @@ class quad_tree2D final
     std::size_t m_max_bodies;
     std::uint32_t m_depth;
     bool m_partitioned = false, m_has_children = false;
-    std::vector<const body2D *> m_bodies;
+    partition m_bodies;
 
     static std::uint32_t s_max_depth;
     static float s_min_size;
@@ -51,7 +52,7 @@ class quad_tree2D final
     bool rock_bottom() const;
     void create_children();
     void reset_children();
-    void partition();
+    void subdivide();
     void insert_to_children(const body2D *body);
 
     quad_tree2D(quad_tree2D &&) = default;
