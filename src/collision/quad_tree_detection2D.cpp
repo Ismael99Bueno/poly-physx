@@ -70,7 +70,7 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_mt(
     };
     kit::const_for_each_mt<PPX_THREAD_COUNT, const quad_tree2D::partition *>(partitions, exec);
     for (const auto &pairs : m_mt_collisions)
-        m_collisions.insert(m_collisions.begin(), pairs.begin(), pairs.end());
+        m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
     return m_collisions;
 }
 

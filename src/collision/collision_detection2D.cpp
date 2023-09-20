@@ -36,11 +36,13 @@ const std::vector<collision2D> &collision_detection2D::cached_collisions()
 
 #ifdef PPX_MULTITHREADED
     kit::for_each_mt<PPX_THREAD_COUNT, collision2D>(m_collisions, [this](std::size_t thread_index, collision2D &colis) {
-        narrow_collision_check(*colis.current, *colis.incoming, &colis);
+        if (!narrow_collision_check(*colis.current, *colis.incoming, &colis))
+            colis.valid = false;
     });
 #else
     for (collision2D &colis : m_collisions)
-        narrow_collision_check(*colis.current, *colis.incoming, &colis);
+        if (!narrow_collision_check(*colis.current, *colis.incoming, &colis))
+            colis.valid = false;
 #endif
     return m_collisions;
 }

@@ -18,6 +18,8 @@ struct collision2D
     glm::vec2 touch1{0.f};
     glm::vec2 touch2{0.f};
     glm::vec2 normal{0.f};
+
+    bool valid = true;
 };
 class collision_detection2D
 {

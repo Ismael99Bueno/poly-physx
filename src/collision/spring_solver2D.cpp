@@ -27,11 +27,13 @@ void spring_solver2D::solve(const std::vector<collision2D> &collisions, std::vec
 #ifdef PPX_MULTITHREADED
     kit::const_for_each_mt<PPX_THREAD_COUNT, collision2D>(
         collisions, [this, &state_derivative](const std::size_t thread_index, const collision2D &colis) {
-            solve(colis, state_derivative);
+            if (colis.valid)
+                solve(colis, state_derivative);
         });
 #else
     for (const collision2D &colis : collisions)
-        solve(colis, state_derivative);
+        if (colis.valid)
+            solve(colis, state_derivative);
 #endif
 }
 
