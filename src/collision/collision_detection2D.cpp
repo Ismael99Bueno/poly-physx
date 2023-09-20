@@ -4,6 +4,14 @@
 
 #include "geo/intersection.hpp"
 
+#include "kit/utility/multithreading.hpp"
+
+#if defined(PPX_MULTITHREADED) && defined(KIT_PROFILE)
+#pragma message(                                                                                                       \
+        "Multithreading for PPX will be disabled because the thread unsafe profiling features of cpp-kit are enabled")
+#undef PPX_MULTITHREADED
+#endif
+
 namespace ppx
 {
 collision_detection2D::collision_detection2D(world2D &parent) : m_parent(parent)
@@ -23,7 +31,18 @@ static bool broad_collision_check(const body2D &body1, const body2D &body2)
 const std::vector<collision2D> &collision_detection2D::cached_collisions()
 {
     KIT_PERF_FUNCTION()
-    return m_collisions.empty() ? detect_collisions() : m_collisions;
+    if (m_collisions.empty())
+        return detect_collisions();
+
+#ifdef PPX_MULTITHREADED
+    kit::for_each_mt<PPX_THREAD_COUNT, collision2D>(m_collisions, [this](std::size_t thread_index, collision2D &colis) {
+        narrow_collision_check(*colis.current, *colis.incoming, &colis);
+    });
+#else
+    for (collision2D &colis : m_collisions)
+        narrow_collision_check(*colis.current, *colis.incoming, &colis);
+#endif
+    return m_collisions;
 }
 void collision_detection2D::flush_collisions()
 {
@@ -41,7 +60,7 @@ bool collision_detection2D::narrow_collision_check(const body2D &body1, const bo
     return mixed_narrow_collision_check(body1, body2, colis);
 }
 
-bool collision_detection2D::are_colliding(const body2D &body1, const body2D &body2, collision2D *colis) const
+bool collision_detection2D::gather_collision_data(const body2D &body1, const body2D &body2, collision2D *colis) const
 {
     if (broad_collision_check(body1, body2))
         return narrow_collision_check(body1, body2, colis);

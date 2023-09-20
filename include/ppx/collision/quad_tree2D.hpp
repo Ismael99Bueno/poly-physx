@@ -14,15 +14,11 @@ class quad_tree2D final
     quad_tree2D(const glm::vec2 &min, const glm::vec2 &max, std::size_t max_bodies = 12, std::uint32_t depth = 0);
     using partition = std::vector<const body2D *>;
 
+    geo::aabb2D aabb;
+
     void collect_partitions(std::vector<const partition *> &partitions) const;
     void insert(const body2D *body);
     void clear();
-
-    const geo::aabb2D &aabb() const;
-    void aabb(const geo::aabb2D &aabb);
-
-    std::size_t max_bodies() const;
-    void max_bodies(std::size_t max_bodies);
 
     bool partitioned() const;
     const partition &bodies() const;
@@ -31,22 +27,16 @@ class quad_tree2D final
     const quad_tree2D &child(std::size_t index) const;
     const quad_tree2D &operator[](std::size_t index) const;
 
-    static std::uint32_t max_depth();
-    static void max_depth(std::uint32_t max_depth);
-
-    static float min_size();
-    static void min_size(float min_size);
+    inline static std::size_t max_bodies = 12;
+    inline static std::uint32_t max_depth = 12;
+    inline static float min_size = 14.f;
 
   private:
     std::array<kit::scope<quad_tree2D>, 4> m_children = {nullptr, nullptr, nullptr, nullptr}; // TL, TR, BL, BR
-    geo::aabb2D m_aabb;
-    std::size_t m_max_bodies;
+
     std::uint32_t m_depth;
     bool m_partitioned = false, m_has_children = false;
     partition m_bodies;
-
-    static std::uint32_t s_max_depth;
-    static float s_min_size;
 
     bool full() const;
     bool rock_bottom() const;

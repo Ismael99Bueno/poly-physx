@@ -8,8 +8,10 @@ namespace ppx
 class spring_solver2D : public collision_solver2D
 {
   public:
-    float stiffness = 5000.f;
-    float dampening = 10.f;
+    spring_solver2D(float stiffness = 5000.f, float dampening = 10.f);
+
+    float stiffness;
+    float dampening;
 
     void solve(const std::vector<collision2D> &collisions, std::vector<float> &state_derivative) const override;
     void solve(const collision2D &colis, std::vector<float> &state_derivative) const;

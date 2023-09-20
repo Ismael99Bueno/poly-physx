@@ -5,22 +5,20 @@
 
 namespace ppx
 {
-std::uint32_t quad_tree2D::s_max_depth = 12;
-float quad_tree2D::s_min_size = 14.f;
 
 quad_tree2D::quad_tree2D(const glm::vec2 &min, const glm::vec2 &max, const std::size_t max_bodies,
                          const std::uint32_t depth)
-    : m_aabb(min, max), m_max_bodies(max_bodies), m_depth(depth)
+    : aabb(min, max), m_depth(depth)
 {
     m_bodies.reserve(4 * max_bodies);
 }
 
 void quad_tree2D::insert(const body2D *body)
 {
-    KIT_ASSERT_CRITICAL(m_bodies.size() <= m_max_bodies || rock_bottom(),
+    KIT_ASSERT_CRITICAL(m_bodies.size() <= max_bodies || rock_bottom(),
                         "Quad tree contains more bodies than allowed! - Contained bodies: {0}, maximum bodies: {1}",
-                        m_bodies.size(), m_max_bodies)
-    if (!geo::intersect(m_aabb, body->shape().bounding_box()))
+                        m_bodies.size(), max_bodies)
+    if (!geo::intersect(aabb, body->shape().bounding_box()))
         return;
     if (full() && !rock_bottom())
         subdivide();
@@ -50,27 +48,27 @@ void quad_tree2D::create_children()
 {
     m_has_children = true;
     m_partitioned = true;
-    const glm::vec2 &mm = m_aabb.min(), &mx = m_aabb.max();
+    const glm::vec2 &mm = aabb.min(), &mx = aabb.max();
     const glm::vec2 mid_point = 0.5f * (mm + mx), hdim = 0.5f * (mx - mm);
     m_children[0] = kit::make_scope<quad_tree2D>(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y),
-                                                 m_max_bodies, m_depth + 1);
-    m_children[1] = kit::make_scope<quad_tree2D>(mid_point, mx, m_max_bodies, m_depth + 1);
-    m_children[2] = kit::make_scope<quad_tree2D>(mm, mid_point, m_max_bodies, m_depth + 1);
+                                                 max_bodies, m_depth + 1);
+    m_children[1] = kit::make_scope<quad_tree2D>(mid_point, mx, max_bodies, m_depth + 1);
+    m_children[2] = kit::make_scope<quad_tree2D>(mm, mid_point, max_bodies, m_depth + 1);
     m_children[3] = kit::make_scope<quad_tree2D>(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y),
-                                                 m_max_bodies, m_depth + 1);
+                                                 max_bodies, m_depth + 1);
 }
 
 void quad_tree2D::reset_children()
 {
     m_partitioned = true;
-    const glm::vec2 &mm = m_aabb.min(), &mx = m_aabb.max();
+    const glm::vec2 &mm = aabb.min(), &mx = aabb.max();
     const glm::vec2 mid_point = 0.5f * (mm + mx), hdim = 0.5f * (mx - mm);
     *(m_children[0]) =
-        quad_tree2D(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y), m_max_bodies, m_depth + 1);
-    *(m_children[1]) = quad_tree2D(mid_point, mx, m_max_bodies, m_depth + 1);
-    *(m_children[2]) = quad_tree2D(mm, mid_point, m_max_bodies, m_depth + 1);
+        quad_tree2D(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y), max_bodies, m_depth + 1);
+    *(m_children[1]) = quad_tree2D(mid_point, mx, max_bodies, m_depth + 1);
+    *(m_children[2]) = quad_tree2D(mm, mid_point, max_bodies, m_depth + 1);
     *(m_children[3]) =
-        quad_tree2D(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y), m_max_bodies, m_depth + 1);
+        quad_tree2D(glm::vec2(mm.x + hdim.x, mm.y), glm::vec2(mx.x, mx.y - hdim.y), max_bodies, m_depth + 1);
 }
 
 void quad_tree2D::subdivide()
@@ -92,32 +90,14 @@ void quad_tree2D::insert_to_children(const body2D *body)
 
 bool quad_tree2D::full() const
 {
-    return m_bodies.size() >= m_max_bodies;
+    return m_bodies.size() >= max_bodies;
 }
 bool quad_tree2D::rock_bottom() const
 {
-    if (m_depth >= s_max_depth)
+    if (m_depth >= max_depth)
         return true;
-    const glm::vec2 diff = m_aabb.max() - m_aabb.min();
-    return diff.x * diff.y < s_min_size * s_min_size;
-}
-
-const geo::aabb2D &quad_tree2D::aabb() const
-{
-    return m_aabb;
-}
-void quad_tree2D::aabb(const geo::aabb2D &aabb)
-{
-    m_aabb = aabb;
-}
-
-std::size_t quad_tree2D::max_bodies() const
-{
-    return m_max_bodies;
-}
-void quad_tree2D::max_bodies(const std::size_t max_bodies)
-{
-    m_max_bodies = max_bodies;
+    const glm::vec2 diff = aabb.max() - aabb.min();
+    return diff.x * diff.y < min_size * min_size;
 }
 
 bool quad_tree2D::partitioned() const
@@ -144,21 +124,4 @@ const quad_tree2D &quad_tree2D::operator[](std::size_t index) const
     return child(index);
 }
 
-std::uint32_t quad_tree2D::max_depth()
-{
-    return s_max_depth;
-}
-void quad_tree2D::max_depth(std::uint32_t max_depth)
-{
-    s_max_depth = max_depth;
-}
-
-float quad_tree2D::min_size()
-{
-    return s_min_size;
-}
-void quad_tree2D::min_size(float min_size)
-{
-    s_min_size = min_size;
-}
 } // namespace ppx

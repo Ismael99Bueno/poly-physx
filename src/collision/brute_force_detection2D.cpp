@@ -31,7 +31,7 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
             collision2D colis;
             const body2D &body1 = bodies[i];
             const body2D &body2 = bodies[j];
-            if (are_colliding(body1, body2, &colis))
+            if (gather_collision_data(body1, body2, &colis))
             {
                 try_enter_or_stay_callback(colis);
                 m_collisions.push_back(colis);
@@ -50,7 +50,7 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
         {
             collision2D colis;
             const body2D &body2 = bodies[j];
-            if (are_colliding(body1, body2, &colis))
+            if (gather_collision_data(body1, body2, &colis))
             {
                 try_enter_or_stay_callback(colis);
                 m_mt_collisions[thread_idx].push_back(colis);

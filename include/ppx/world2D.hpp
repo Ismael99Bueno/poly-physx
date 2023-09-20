@@ -4,10 +4,13 @@
 #include "rk/integrator.hpp"
 #include "ppx/constraints/constraint_manager2D.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
+#include "ppx/collision/collision_detection2D.hpp"
+#include "ppx/collision/collision_solver2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/events/world_events.hpp"
 #include "kit/container/container_view.hpp"
 #include "kit/interface/non_copyable.hpp"
+#include "kit/utility/utils.hpp"
 
 namespace ppx
 {
@@ -26,9 +29,9 @@ class world2D final : kit::non_copyable
 
     world2D(const rk::butcher_tableau &table = rk::butcher_tableau::rk4, std::size_t allocations = 100);
 
-    collision_manager2D collisions;
     rk::integrator integrator;
     world_events events;
+    bool enable_collisions = true;
 
     bool raw_forward(float timestep);
     bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
@@ -152,11 +155,46 @@ class world2D final : kit::non_copyable
     std::size_t size() const;
     float elapsed() const;
 
+    template <typename T = collision_detection2D> const T *collision_detection() const
+    {
+        return kit::const_get_casted_raw_ptr<T>(m_collision_detection);
+    }
+    template <typename T = collision_detection2D> T *collision_detection()
+    {
+        return kit::get_casted_raw_ptr<T>(m_collision_detection);
+    }
+    template <typename T = collision_solver2D> const T *collision_solver() const
+    {
+        return kit::const_get_casted_raw_ptr<T>(m_collision_solver);
+    }
+    template <typename T = collision_solver2D> T *collision_solver()
+    {
+        return kit::get_casted_raw_ptr<T>(m_collision_solver);
+    }
+
+    template <typename T, class... ColDetArgs> T *set_collision_detection(ColDetArgs &&...args)
+    {
+        auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
+        T *ptr = coldet.get();
+        m_collision_detection = std::move(coldet);
+        return ptr;
+    }
+    template <typename T, class... ColSolvArgs> T *set_collision_solver(ColSolvArgs &&...args)
+    {
+        auto coldet = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
+        T *ptr = coldet.get();
+        m_collision_solver = std::move(coldet);
+        return ptr;
+    }
+
   private:
     std::vector<body2D> m_bodies;
     constraint_manager2D m_constraint_manager;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
     std::vector<spring2D> m_springs;
+
+    kit::scope<collision_detection2D> m_collision_detection;
+    kit::scope<collision_solver2D> m_collision_solver;
 
     float m_elapsed = 0.f;
 

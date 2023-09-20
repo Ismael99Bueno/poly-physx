@@ -42,7 +42,7 @@ const std::vector<collision2D> &sort_sweep_detection2D::detect_collisions()
             {
                 collision2D c;
                 const body2D &body1 = *body, &body2 = *edg.body;
-                if (are_colliding(body1, body2, &c))
+                if (gather_collision_data(body1, body2, &c))
                 {
                     try_enter_or_stay_callback(c);
                     m_collisions.push_back(c);
@@ -54,6 +54,7 @@ const std::vector<collision2D> &sort_sweep_detection2D::detect_collisions()
         }
         else
             eligible.erase(edg.body.raw());
+    return m_collisions;
 }
 
 void sort_sweep_detection2D::sort_edges()

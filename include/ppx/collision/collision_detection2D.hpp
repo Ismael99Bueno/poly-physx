@@ -36,7 +36,7 @@ class collision_detection2D
 #endif
     world2D &m_parent;
 
-    bool are_colliding(const body2D &body1, const body2D &body2, collision2D *colis) const;
+    bool gather_collision_data(const body2D &body1, const body2D &body2, collision2D *colis) const;
     bool narrow_collision_check(const body2D &body1, const body2D &body2, collision2D *colis) const;
 
     bool mixed_narrow_collision_check(const body2D &body1, const body2D &body2, collision2D *colis) const;

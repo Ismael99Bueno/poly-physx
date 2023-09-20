@@ -144,7 +144,7 @@ void collision_manager2D::update_quad_tree()
     for (const body2D &body : m_parent.bodies())
         aabb += body.shape().bounding_box();
 
-    m_quad_tree.aabb(aabb);
+    m_quad_tree.aabb = aabb;
     for (const body2D &body : m_parent.bodies())
         m_quad_tree.insert(&body);
 }
@@ -459,10 +459,10 @@ YAML::Node collision_manager2D::serializer::encode(const collision_manager2D &cl
     YAML::Node node;
 
     YAML::Node qt = node["Quad tree"];
-    qt["Dimensions"] = cld.quad_tree().aabb();
-    qt["Max bodies"] = cld.quad_tree().max_bodies();
-    qt["Max depth"] = ppx::quad_tree2D::max_depth();
-    qt["Min size"] = ppx::quad_tree2D::min_size();
+    qt["Dimensions"] = cld.quad_tree().aabb;
+    qt["Max bodies"] = cld.quad_tree().max_bodies;
+    qt["Max depth"] = ppx::quad_tree2D::max_depth;
+    qt["Min size"] = ppx::quad_tree2D::min_size;
 
     node["Stiffness"] = cld.stiffness();
     node["Dampening"] = cld.dampening();
@@ -476,10 +476,10 @@ bool collision_manager2D::serializer::decode(const YAML::Node &node, collision_m
         return false;
 
     const YAML::Node &qt = node["Quad tree"];
-    cld.quad_tree().aabb(qt["Dimensions"].as<geo::aabb2D>());
-    cld.quad_tree().max_bodies(qt["Max bodies"].as<std::size_t>());
-    ppx::quad_tree2D::max_depth(qt["Max depth"].as<std::uint32_t>());
-    ppx::quad_tree2D::min_size(qt["Min size"].as<float>());
+    cld.quad_tree().aabb = qt["Dimensions"].as<geo::aabb2D>();
+    cld.quad_tree().max_bodies = qt["Max bodies"].as<std::size_t>();
+    ppx::quad_tree2D::max_depth = qt["Max depth"].as<std::uint32_t>();
+    ppx::quad_tree2D::min_size = qt["Min size"].as<float>();
 
     cld.stiffness(node["Stiffness"].as<float>());
     cld.dampening(node["Dampening"].as<float>());

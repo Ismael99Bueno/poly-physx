@@ -38,7 +38,7 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_st(
                 collision2D colis;
                 const body2D &body1 = *(*partition)[i];
                 const body2D &body2 = *(*partition)[j];
-                if (are_colliding(body1, body2, &colis))
+                if (gather_collision_data(body1, body2, &colis))
                 {
                     try_enter_or_stay_callback(colis);
                     m_collisions.push_back(colis);
@@ -59,7 +59,7 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_mt(
                 collision2D colis;
                 const body2D &body1 = *(*partition)[i];
                 const body2D &body2 = *(*partition)[j];
-                if (are_colliding(body1, body2, &colis))
+                if (gather_collision_data(body1, body2, &colis))
                 {
                     try_enter_or_stay_callback(colis);
                     m_mt_collisions[thread_idx].push_back(colis);
@@ -81,7 +81,7 @@ void quad_tree_detection2D::update_quad_tree()
     for (const body2D &body : m_parent.bodies())
         aabb += body.shape().bounding_box();
 
-    m_quad_tree.aabb(aabb);
+    m_quad_tree.aabb = aabb;
     for (const body2D &body : m_parent.bodies())
         m_quad_tree.insert(&body);
 }

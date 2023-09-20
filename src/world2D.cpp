@@ -3,15 +3,20 @@
 #include "geo/intersection.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
+#include "ppx/collision/quad_tree_detection2D.hpp"
+#include "ppx/collision/spring_solver2D.hpp"
 #include <cstring>
 
 namespace ppx
 {
 world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations)
-    : collisions(*this, 2 * allocations), integrator(table), m_constraint_manager(*this, allocations)
+    : integrator(table), m_constraint_manager(*this, allocations)
 {
     m_bodies.reserve(allocations);
     integrator.state.reserve(6 * allocations);
+
+    set_collision_detection<quad_tree_detection2D>(*this, glm::vec2(-10.f), glm::vec2(10.f));
+    set_collision_solver<spring_solver2D>();
 }
 
 void world2D::retrieve(const std::vector<float> &vars_buffer)
@@ -31,7 +36,7 @@ bool world2D::raw_forward(const float timestep)
     const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
     reset_bodies();
     retrieve();
-    collisions.flush_collisions();
+    m_collision_detection->flush_collisions();
     return valid;
 }
 bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
@@ -39,7 +44,7 @@ bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiteratio
     const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
     reset_bodies();
     retrieve();
-    collisions.flush_collisions();
+    m_collision_detection->flush_collisions();
     return valid;
 }
 bool world2D::embedded_forward(float &timestep)
@@ -47,7 +52,7 @@ bool world2D::embedded_forward(float &timestep)
     const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
     reset_bodies();
     retrieve();
-    collisions.flush_collisions();
+    m_collision_detection->flush_collisions();
     return valid;
 }
 
@@ -80,7 +85,6 @@ void world2D::load_velocities_and_added_forces(std::vector<float> &state_derivat
 
 void world2D::validate()
 {
-    collisions.validate();
     m_constraint_manager.validate(events.on_constraint_removal);
     for (const auto &bhv : m_behaviours)
         bhv->validate();
@@ -154,7 +158,6 @@ body2D::ptr world2D::process_body_addition(body2D &body)
     state.append({transform.position.x, transform.position.y, transform.rotation, velocity.x, velocity.y,
                   body.angular_velocity()});
     body.retrieve();
-    collisions.add_body_intervals(e_ptr);
 
     KIT_INFO("Added body with index {0} and id {1}.", body.index, (std::uint64_t)body.id)
 #ifdef DEBUG
@@ -347,7 +350,12 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     load_interactions_and_externals(state_derivative);
     const kit::stack_vector<float> inv_masses = effective_inverse_masses();
 
-    collisions.solve_and_load_collisions(state_derivative);
+    if (enable_collisions)
+    {
+        const auto &collisions = m_collision_detection->cached_collisions();
+        m_collision_solver->solve(collisions, state_derivative);
+    }
+
     m_constraint_manager.solve_and_load_constraints(state_derivative, inv_masses);
     for (std::size_t i = 0; i < m_bodies.size(); i++)
     {
@@ -597,7 +605,6 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     YAML::Node node;
     for (const ppx::body2D &body : world.bodies())
         node["Bodies"].push_back(body);
-    node["Collision manager"] = world.collisions;
 
     for (const ppx::spring2D &sp : world.springs())
         node["Springs"].push_back(sp);
@@ -627,8 +634,6 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     if (node["Bodies"])
         for (const YAML::Node &n : node["Bodies"])
             world.add_body(n.as<ppx::body2D>());
-
-    node["Collision manager"].as<ppx::collision_manager2D>(world.collisions);
 
     if (node["Springs"])
         for (const YAML::Node &n : node["Springs"])

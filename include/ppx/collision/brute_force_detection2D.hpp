@@ -8,6 +8,7 @@ namespace ppx
 class brute_force_detection2D : public collision_detection2D
 {
   public:
+    using collision_detection2D::collision_detection2D;
     const std::vector<collision2D> &detect_collisions() override;
 
   private:
