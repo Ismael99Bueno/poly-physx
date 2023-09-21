@@ -17,11 +17,6 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-spring_solver2D::spring_solver2D(const float stiffness, const float dampening)
-    : stiffness(stiffness), dampening(dampening)
-{
-}
-
 void spring_solver2D::solve(const std::vector<collision2D> &collisions, std::vector<float> &state_derivative) const
 {
 #ifdef PPX_MULTITHREADED

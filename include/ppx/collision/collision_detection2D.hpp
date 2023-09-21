@@ -24,7 +24,6 @@ struct collision2D
 class collision_detection2D
 {
   public:
-    collision_detection2D(world2D &parent);
     virtual ~collision_detection2D() = default;
 
     virtual const std::vector<collision2D> &detect_collisions() = 0;
@@ -36,7 +35,7 @@ class collision_detection2D
 #ifdef PPX_MULTITHREADED
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
 #endif
-    world2D &m_parent;
+    world2D *m_parent = nullptr;
 
     bool gather_collision_data(const body2D &body1, const body2D &body2, collision2D *colis) const;
     bool narrow_collision_check(const body2D &body1, const body2D &body2, collision2D *colis) const;
@@ -46,6 +45,13 @@ class collision_detection2D
 
     void try_enter_or_stay_callback(const collision2D &c) const;
     void try_exit_callback(const body2D &body1, const body2D &body2) const;
+
+  private:
+    virtual void on_attach()
+    {
+    }
+
+    friend class world2D;
 };
 } // namespace ppx
 

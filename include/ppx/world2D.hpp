@@ -3,7 +3,6 @@
 
 #include "rk/integrator.hpp"
 #include "ppx/constraints/constraint_manager2D.hpp"
-#include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/collision/collision_detection2D.hpp"
 #include "ppx/collision/collision_solver2D.hpp"
 #include "ppx/joints/spring2D.hpp"
@@ -177,6 +176,8 @@ class world2D final : kit::non_copyable
         auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_detection = std::move(coldet);
+        m_collision_detection->m_parent = this;
+        m_collision_detection->on_attach();
         return ptr;
     }
     template <typename T, class... ColSolvArgs> T *set_collision_solver(ColSolvArgs &&...args)
@@ -184,6 +185,8 @@ class world2D final : kit::non_copyable
         auto coldet = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_solver = std::move(coldet);
+        m_collision_solver->m_parent = this;
+        m_collision_detection->on_attach();
         return ptr;
     }
 

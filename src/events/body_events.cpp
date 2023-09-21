@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/events/body_events.hpp"
-#include "ppx/collision/collision_manager2D.hpp"
+#include "ppx/collision/collision_detection2D.hpp"
 
 namespace ppx
 {

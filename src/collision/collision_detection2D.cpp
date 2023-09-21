@@ -14,9 +14,6 @@
 
 namespace ppx
 {
-collision_detection2D::collision_detection2D(world2D &parent) : m_parent(parent)
-{
-}
 
 static bool are_both_circles(const body2D &body1, const body2D &body2)
 {
@@ -77,7 +74,7 @@ bool collision_detection2D::circle_narrow_collision_check(const body2D &body1, c
         return false;
     const glm::vec2 mtv = geo::mtv(c1, c2);
     const auto &[contact1, contact2] = geo::contact_points(c1, c2);
-    *colis = {m_parent[body1.index], m_parent[body2.index], contact1, contact2, mtv};
+    *colis = {(*m_parent)[body1.index], (*m_parent)[body2.index], contact1, contact2, mtv};
     return true;
 }
 
@@ -97,7 +94,7 @@ bool collision_detection2D::mixed_narrow_collision_check(const body2D &body1, co
         return false;
 
     const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv.value());
-    *colis = {m_parent[body1.index], m_parent[body2.index], contact1, contact2, mtv.value()};
+    *colis = {(*m_parent)[body1.index], (*m_parent)[body2.index], contact1, contact2, mtv.value()};
 
     return true;
 }
@@ -109,8 +106,8 @@ void collision_detection2D::try_enter_or_stay_callback(const collision2D &c) con
 }
 void collision_detection2D::try_exit_callback(const body2D &body1, const body2D &body2) const
 {
-    body1.events.try_exit(m_parent[body1.index], m_parent[body2.index]);
-    body2.events.try_exit(m_parent[body2.index], m_parent[body1.index]);
+    body1.events.try_exit((*m_parent)[body1.index], (*m_parent)[body2.index]);
+    body2.events.try_exit((*m_parent)[body2.index], (*m_parent)[body1.index]);
 }
 
 } // namespace ppx

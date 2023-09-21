@@ -31,7 +31,6 @@ class sort_sweep_detection2D : public collision_detection2D, kit::non_copyable
         }
     };
 
-    sort_sweep_detection2D(world2D &parent);
     ~sort_sweep_detection2D();
 
     const std::vector<collision2D> &detect_collisions() override;
@@ -41,6 +40,7 @@ class sort_sweep_detection2D : public collision_detection2D, kit::non_copyable
     kit::callback<const body2D::ptr &> m_add_edge;
     kit::callback<std::size_t> m_remove_edge;
 
+    void on_attach() override;
     void sort_edges();
 };
 } // namespace ppx

@@ -24,7 +24,7 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions()
 
 const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
 {
-    const auto &bodies = m_parent.bodies().unwrap();
+    const auto &bodies = m_parent->bodies().unwrap();
     for (std::size_t i = 0; i < bodies.size(); i++)
         for (std::size_t j = i + 1; j < bodies.size(); j++)
         {
@@ -44,9 +44,9 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
 }
 const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
 {
-    const auto &bodies = m_parent.bodies().unwrap();
+    const auto &bodies = m_parent->bodies().unwrap();
     const auto exec = [this, &bodies](const std::size_t thread_idx, const body2D &body1) {
-        for (std::size_t j = 0; j < m_parent.size(); j++)
+        for (std::size_t j = 0; j < m_parent->size(); j++)
         {
             collision2D colis;
             const body2D &body2 = bodies[j];

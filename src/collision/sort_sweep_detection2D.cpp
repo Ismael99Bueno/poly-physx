@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-sort_sweep_detection2D::sort_sweep_detection2D(world2D &parent) : collision_detection2D(parent)
+void sort_sweep_detection2D::on_attach()
 {
     m_add_edge = kit::callback<const body2D::ptr &>([this](const body2D::ptr &body) {
         m_edges.emplace_back(body, edge::end_side::LEFT);
@@ -18,14 +18,17 @@ sort_sweep_detection2D::sort_sweep_detection2D(world2D &parent) : collision_dete
                 ++it;
     });
 
-    parent.events.on_body_addition += m_add_edge;
-    parent.events.on_late_body_removal += m_remove_edge;
+    m_parent->events.on_body_addition += m_add_edge;
+    m_parent->events.on_late_body_removal += m_remove_edge;
+
+    for (std::size_t i = 0; i < m_parent->size(); i++)
+        m_add_edge((*m_parent)[i]);
 }
 
 sort_sweep_detection2D::~sort_sweep_detection2D()
 {
-    m_parent.events.on_body_addition -= m_add_edge;
-    m_parent.events.on_late_body_removal -= m_remove_edge;
+    m_parent->events.on_body_addition -= m_add_edge;
+    m_parent->events.on_late_body_removal -= m_remove_edge;
 }
 
 const std::vector<collision2D> &sort_sweep_detection2D::detect_collisions()

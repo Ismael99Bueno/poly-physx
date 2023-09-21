@@ -15,7 +15,7 @@ world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations
     m_bodies.reserve(allocations);
     integrator.state.reserve(6 * allocations);
 
-    set_collision_detection<quad_tree_detection2D>(*this, glm::vec2(-10.f), glm::vec2(10.f));
+    set_collision_detection<quad_tree_detection2D>();
     set_collision_solver<spring_solver2D>();
 }
 

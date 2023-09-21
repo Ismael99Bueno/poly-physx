@@ -9,16 +9,10 @@ namespace ppx
 class quad_tree_detection2D : public collision_detection2D
 {
   public:
-    template <class... QuadTreeArgs>
-    quad_tree_detection2D(world2D &parent, QuadTreeArgs &&...args)
-        : collision_detection2D(parent), m_quad_tree(std::forward<QuadTreeArgs>(args)...)
-    {
-    }
-
     const std::vector<collision2D> &detect_collisions() override;
 
   private:
-    quad_tree2D m_quad_tree;
+    quad_tree2D m_quad_tree{{-10.f, -10.f}, {10.f, 10.f}};
 
     const std::vector<collision2D> &detect_collisions_st(const std::vector<const quad_tree2D::partition *> &partitions);
     const std::vector<collision2D> &detect_collisions_mt(const std::vector<const quad_tree2D::partition *> &partitions);
