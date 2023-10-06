@@ -674,7 +674,8 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
         for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
         {
             const auto bhv = world.behaviour_from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
-            node["Behaviours"][bhv->id].as<ppx::behaviour2D>(*bhv);
+            if (bhv && node["Behaviours"][bhv->id])
+                node["Behaviours"][bhv->id].as<ppx::behaviour2D>(*bhv);
         }
 
     world.m_elapsed = node["Elapsed"].as<float>();

@@ -73,6 +73,8 @@ const std::vector<body2D::const_ptr> &behaviour2D::bodies() const
 YAML::Node behaviour2D::encode() const
 {
     YAML::Node node;
+    node["Enabled"] = enabled;
+
     for (const auto &body : m_included)
         node["Bodies"].push_back(body->index);
     node["Bodies"].SetStyle(YAML::EmitterStyle::Flow);
@@ -80,9 +82,11 @@ YAML::Node behaviour2D::encode() const
 }
 bool behaviour2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 1)
+    if (!node.IsMap() || node.size() < 2)
         return false;
     clear();
+
+    enabled = node["Enabled"].as<bool>();
     for (const YAML::Node &n : node["Bodies"])
         include((*m_parent)[n.as<std::size_t>()]);
     return true;
