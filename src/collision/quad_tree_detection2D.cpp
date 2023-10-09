@@ -85,4 +85,9 @@ void quad_tree_detection2D::update_quad_tree()
     for (const body2D &body : m_parent->bodies())
         m_quad_tree.insert(&body);
 }
+
+const quad_tree2D &quad_tree_detection2D::quad_tree() const
+{
+    return m_quad_tree;
+}
 } // namespace ppx

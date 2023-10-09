@@ -11,6 +11,8 @@ class quad_tree_detection2D : public collision_detection2D
   public:
     const std::vector<collision2D> &detect_collisions() override;
 
+    const quad_tree2D &quad_tree() const;
+
   private:
     quad_tree2D m_quad_tree{{-10.f, -10.f}, {10.f, 10.f}};
 
