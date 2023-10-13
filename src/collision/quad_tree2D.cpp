@@ -30,7 +30,6 @@ void quad_tree2D::insert(const body2D *body)
 
 void quad_tree2D::collect_partitions(std::vector<const partition *> &partitions) const
 {
-    KIT_PERF_FUNCTION()
     if (!m_partitioned)
         partitions.push_back(&m_bodies);
     else

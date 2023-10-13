@@ -19,6 +19,7 @@ static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
 
 void spring_solver2D::solve(const std::vector<collision2D> &collisions, std::vector<float> &state_derivative) const
 {
+    KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
     kit::const_for_each_mt<PPX_THREAD_COUNT, collision2D>(
         collisions, [this, &state_derivative](const std::size_t thread_index, const collision2D &colis) {
@@ -34,7 +35,6 @@ void spring_solver2D::solve(const std::vector<collision2D> &collisions, std::vec
 
 void spring_solver2D::solve(const collision2D &colis, std::vector<float> &state_derivative) const
 {
-    KIT_PERF_FUNCTION()
     const std::array<float, 6> forces = forces_upon_collision(colis);
     for (std::size_t i = 0; i < 3; i++)
     {
