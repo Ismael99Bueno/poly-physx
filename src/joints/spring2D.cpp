@@ -1,12 +1,9 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/joints/spring2D.hpp"
+#include "kit/utility/utils.hpp"
 
 namespace ppx
 {
-static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
-{
-    return v1.x * v2.y - v1.y * v2.x;
-}
 spring2D::spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const float stiffness, const float dampening,
                    const float length)
     : joint2D(body1, body2), m_stiffness(stiffness), m_dampening(dampening), m_length(length)
@@ -47,7 +44,7 @@ glm::vec4 spring2D::with_anchors_force() const
                     vlen = m_length * direction;
 
     const glm::vec2 force = m_stiffness * (relpos - vlen) + m_dampening * relvel;
-    const float torque1 = cross(rot_anchor1, force), torque2 = cross(force, rot_anchor2);
+    const float torque1 = kit::cross2D(rot_anchor1, force), torque2 = kit::cross2D(force, rot_anchor2);
     return {force, torque1, torque2};
 }
 

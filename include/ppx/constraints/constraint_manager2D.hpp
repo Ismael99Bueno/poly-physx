@@ -18,7 +18,7 @@ class world2D;
 class constraint_manager2D final : kit::non_copyable
 {
   public:
-    constraint_manager2D(const world2D &parent, std::size_t allocations);
+    constraint_manager2D(std::size_t allocations);
 
     template <typename T, class... ConstraintArgs>
     T *add_constraint(const kit::event<constraint2D *> &event_callback, ConstraintArgs &&...args)
@@ -46,24 +46,7 @@ class constraint_manager2D final : kit::non_copyable
     const std::vector<kit::scope<constraint2D>> &constraints() const;
 
   private:
-    const world2D &m_parent;
     std::vector<kit::scope<constraint2D>> m_constraints;
-
-    using constraint_gradient_fun = std::function<std::vector<constraint2D::body_gradient>(const constraint2D &)>;
-    kit::stack_vector<float> constraint_matrix(const constraint_gradient_fun &constraint_grad) const;
-    kit::stack_vector<float> jacobian() const;
-    kit::stack_vector<float> jacobian_derivative() const;
-
-    kit::stack_vector<float> lhs(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &inv_masses) const;
-
-    kit::stack_vector<float> rhs(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &djcb,
-                                 const std::vector<float> &state_derivative,
-                                 const kit::stack_vector<float> &inv_masses) const;
-
-    kit::stack_vector<float> lu_decomposition(const kit::stack_vector<float> &A,
-                                              const kit::stack_vector<float> &b) const;
-    void load_constraint_accels(const kit::stack_vector<float> &jcb, const kit::stack_vector<float> &lambda,
-                                std::vector<float> &state_derivative) const;
 };
 } // namespace ppx
 

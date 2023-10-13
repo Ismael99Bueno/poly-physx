@@ -1,48 +1,63 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/constraint2D.hpp"
+#include "kit/utility/utils.hpp"
 
 namespace ppx
 {
-constraint2D::constraint2D(const char *name, const float stiffness, const float dampening)
-    : nameable(name), m_stiffness(stiffness), m_dampening(dampening)
+
+constraint2D::constraint2D(const char *name) : nameable(name)
 {
 }
 
-float constraint2D::stiffness() const
+bool constraint2D::contais(const body2D &body) const
 {
-    return m_stiffness;
-}
-float constraint2D::dampening() const
-{
-    return m_dampening;
+    return contains(body.id);
 }
 
-void constraint2D::stiffness(float stiffness)
+void constraint2D::aggregate_impulse(body2D &body, const glm::vec2 &impulse)
 {
-    m_stiffness = stiffness;
+    if (!body.kinematic)
+        return;
+    body.boost(body.inverse_mass() * impulse);
 }
-void constraint2D::dampening(float dampening)
+void constraint2D::aggregate_impulse(body2D &body, const glm::vec2 &impulse, const glm::vec2 &anchor)
 {
-    m_dampening = dampening;
+    if (!body.kinematic)
+        return;
+    body.boost(body.inverse_mass() * impulse);
+    body.spin(body.inverse_inertia() * kit::cross2D(anchor, impulse));
 }
+
+void constraint2D::apply_impulse(const body2D &body, const glm::vec2 &impulse, std::vector<float> &state_derivative)
+{
+    if (!body.kinematic)
+        return;
+    const glm::vec2 dv = body.inverse_mass() * impulse;
+    state_derivative[6 * body.index] += dv.x;
+    state_derivative[6 * body.index + 1] += dv.y;
+}
+void constraint2D::apply_impulse(const body2D &body, const glm::vec2 &impulse, const glm::vec2 &anchor,
+                                 std::vector<float> &state_derivative)
+{
+    if (!body.kinematic)
+        return;
+    apply_impulse(body, impulse, state_derivative);
+    state_derivative[6 * body.index + 2] += body.inverse_inertia() * kit::cross2D(anchor, impulse);
+}
+
 #ifdef KIT_USE_YAML_CPP
 YAML::Node constraint2D::encode() const
 {
     YAML::Node node;
     node["UUID"] = (std::uint64_t)id;
-    node["Stiffness"] = m_stiffness;
-    node["Dampening"] = m_dampening;
 
     return node;
 }
 bool constraint2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 3)
+    if (!node.IsMap() || node.size() < 1)
         return false;
     id = kit::uuid(node["UUID"].as<std::uint64_t>());
-    m_stiffness = node["Stiffness"].as<float>();
-    m_dampening = node["Dampening"].as<float>();
-
     return true;
 }
 #endif

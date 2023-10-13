@@ -11,22 +11,18 @@ class revolute_joint2D : public constraint2D, public joint2D
   public:
     struct specs : joint2D::specs
     {
-        float stiffness = 500.f, dampening = 30.f;
         static specs from_revolute_joint(const revolute_joint2D &rj);
     };
-    revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, float stiffness = 500.f,
-                     float dampening = 30.f);
+    revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2);
     revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
-                     const glm::vec2 &anchor2, float stiffness = 500.f, float dampening = 30.f);
+                     const glm::vec2 &anchor2);
     revolute_joint2D(const specs &spc);
 
     float constraint_value() const override;
     float constraint_derivative() const override;
 
     bool valid() const override;
-    std::size_t size() const override;
-    const body2D::ptr &body(std::size_t index) const override;
-    void body(std::size_t index, const body2D::ptr &body) override;
+    bool contains(kit::uuid id) const override;
 
     float length() const;
 
@@ -37,15 +33,21 @@ class revolute_joint2D : public constraint2D, public joint2D
 
   private:
     float m_length;
-
-    std::vector<body_gradient> constraint_gradients() const override;
-    std::vector<body_gradient> constraint_derivative_gradients() const override;
+    float m_accumulated_impulse1 = 0.f;
+    float m_accumulated_impulse2 = 0.f;
 
     float without_anchors_constraint() const;
     float without_anchors_constraint_derivative() const;
 
     float with_anchors_constraint() const;
     float with_anchors_constraint_derivative() const;
+
+    std::pair<float, float> compute_impulses() const;
+
+    bool any_kinematic() const override;
+    void warmup() override;
+    void solve() override;
+    void finalize(std::vector<float> &state_derivative) override;
 };
 } // namespace ppx
 #endif

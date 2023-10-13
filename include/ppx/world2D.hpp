@@ -32,6 +32,7 @@ class world2D final : kit::non_copyable
     world_events events;
     bool enable_collisions = true;
 
+    bool locked_state() const;
     bool raw_forward(float timestep);
     bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
     bool embedded_forward(float &timestep);
@@ -200,6 +201,7 @@ class world2D final : kit::non_copyable
     kit::scope<collision_solver2D> m_collision_solver;
 
     float m_elapsed = 0.f;
+    bool m_locked_state = false;
 
     body2D::ptr process_body_addition(body2D &body);
 

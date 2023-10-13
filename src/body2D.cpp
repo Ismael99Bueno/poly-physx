@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/body2D.hpp"
+#include "ppx/world2D.hpp"
 #include "ppx/behaviours/force2D.hpp"
 #include "ppx/behaviours/interaction2D.hpp"
 
@@ -10,7 +11,7 @@ body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float
     : kinematic(kinematic),
       m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(),
                            geo::polygon::box(5.f))),
-      m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
+      m_velocity(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
       m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge)
 {
 }
@@ -19,7 +20,7 @@ body2D::body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position
                const bool kinematic)
     : kinematic(kinematic),
       m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(), vertices)),
-      m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
+      m_velocity(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
       m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge)
 {
 }
@@ -27,12 +28,12 @@ body2D::body2D(const float radius, const glm::vec2 &position, const glm::vec2 &v
                const float angular_velocity, const float mass, const float charge, const bool kinematic)
     : kinematic(kinematic),
       m_shape(geo::circle(kit::transform2D::builder().position(position).rotation(rotation).build(), radius)),
-      m_vel(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
+      m_velocity(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
       m_inertia(m_mass * shape<geo::circle>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge)
 {
 }
 body2D::body2D(const specs &spc)
-    : kinematic(spc.kinematic), m_vel(spc.velocity), m_angular_velocity(spc.angular_velocity), m_mass(spc.mass),
+    : kinematic(spc.kinematic), m_velocity(spc.velocity), m_angular_velocity(spc.angular_velocity), m_mass(spc.mass),
       m_inv_mass(1.f / m_mass), m_charge(spc.charge)
 {
     if (spc.shape == shape_type::POLYGON)
@@ -59,20 +60,20 @@ void body2D::retrieve(const std::vector<float> &vars_buffer)
     sh.rotation(vars_buffer[idx + 2]);
     sh.end_update();
 
-    m_vel = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
+    m_velocity = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
     m_angular_velocity = vars_buffer[idx + 5];
 }
 
 void body2D::retrieve()
 {
-    KIT_ASSERT_CRITICAL(m_state, "Trying to retrieve body data from a stateless body (the body is not tied to an "
-                                 "world -> its internal state is null)")
-    retrieve(m_state->vars());
+    KIT_ASSERT_CRITICAL(m_parent, "Trying to retrieve body data from a parentless body (the body is not tied to an "
+                                  "world -> its internal parent is null)")
+    retrieve(m_parent->integrator.state.vars());
 }
 
 float body2D::kinetic_energy() const
 {
-    return 0.5f * (m_mass * glm::length2(m_vel) + m_angular_velocity * m_angular_velocity * shape().inertia());
+    return 0.5f * (m_mass * glm::length2(m_velocity) + m_angular_velocity * m_angular_velocity * shape().inertia());
 }
 
 void body2D::add_force(const glm::vec2 &force)
@@ -169,10 +170,10 @@ float body2D::inverse_inertia() const
 void body2D::translate(const glm::vec2 &dpos)
 {
     mutable_shape().translate(dpos);
-    if (!m_state)
+    if (!m_parent || m_parent->locked_state())
         return;
 
-    rk::state &st = *m_state;
+    rk::state &st = m_parent->integrator.state;
     const std::size_t idx = 6 * index;
     st[idx + 0] += dpos.x;
     st[idx + 1] += dpos.y;
@@ -180,12 +181,21 @@ void body2D::translate(const glm::vec2 &dpos)
 void body2D::rotate(const float dangle)
 {
     mutable_shape().rotate(dangle);
-    if (!m_state)
+    if (!m_parent || m_parent->locked_state())
         return;
 
-    rk::state &st = *m_state;
+    rk::state &st = m_parent->integrator.state;
     const std::size_t idx = 6 * index;
     st[idx + 2] += dangle;
+}
+
+void body2D::boost(const glm::vec2 &dvel)
+{
+    velocity(m_velocity + dvel);
+}
+void body2D::spin(const float dangvel)
+{
+    angular_velocity(m_angular_velocity + dangvel);
 }
 
 const kit::transform2D &body2D::transform() const
@@ -197,11 +207,11 @@ const kit::transform2D &body2D::transform() const
 
 const glm::vec2 &body2D::velocity() const
 {
-    return m_vel;
+    return m_velocity;
 }
 glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
 {
-    return m_vel + m_angular_velocity * glm::vec2(-at.y, at.x);
+    return m_velocity + m_angular_velocity * glm::vec2(-at.y, at.x);
 }
 
 float body2D::angular_velocity() const
@@ -225,21 +235,21 @@ float body2D::charge() const
 void body2D::position(const glm::vec2 &position)
 {
     mutable_shape().centroid(position);
-    if (!m_state)
+    if (!m_parent || m_parent->locked_state())
         return;
 
-    rk::state &st = *m_state;
+    rk::state &st = m_parent->integrator.state;
     const std::size_t idx = 6 * index;
     st[idx + 0] = position.x;
     st[idx + 1] = position.y;
 }
 void body2D::velocity(const glm::vec2 &velocity)
 {
-    m_vel = velocity;
-    if (!m_state)
+    m_velocity = velocity;
+    if (!m_parent || m_parent->locked_state())
         return;
 
-    rk::state &st = *m_state;
+    rk::state &st = m_parent->integrator.state;
     const std::size_t idx = 6 * index;
     st[idx + 3] = velocity.x;
     st[idx + 4] = velocity.y;
@@ -248,20 +258,20 @@ void body2D::velocity(const glm::vec2 &velocity)
 void body2D::rotation(const float rotation)
 {
     mutable_shape().rotation(rotation);
-    if (!m_state)
+    if (!m_parent || m_parent->locked_state())
         return;
 
-    rk::state &st = *m_state;
+    rk::state &st = m_parent->integrator.state;
     const std::size_t idx = 6 * index;
     st[idx + 2] = rotation;
 }
 void body2D::angular_velocity(const float angular_velocity)
 {
     m_angular_velocity = angular_velocity;
-    if (!m_state)
+    if (!m_parent || m_parent->locked_state())
         return;
 
-    rk::state &st = *m_state;
+    rk::state &st = m_parent->integrator.state;
     const std::size_t idx = 6 * index;
     st[idx + 5] = angular_velocity;
 }

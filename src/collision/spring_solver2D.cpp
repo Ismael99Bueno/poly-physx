@@ -3,6 +3,7 @@
 #include "kit/profile/perf.hpp"
 
 #include "kit/utility/multithreading.hpp"
+#include "kit/utility/utils.hpp"
 
 #if defined(PPX_MULTITHREADED) && defined(KIT_PROFILE)
 #pragma message(                                                                                                       \
@@ -12,11 +13,6 @@
 
 namespace ppx
 {
-static float cross(const glm::vec2 &v1, const glm::vec2 &v2)
-{
-    return v1.x * v2.y - v1.y * v2.x;
-}
-
 void spring_solver2D::solve(const std::vector<collision2D> &collisions, std::vector<float> &state_derivative) const
 {
     KIT_PERF_FUNCTION()
@@ -53,7 +49,7 @@ std::array<float, 6> spring_solver2D::forces_upon_collision(const collision2D &c
     const glm::vec2 vel1 = colis.current->velocity_at(rel1), vel2 = colis.incoming->velocity_at(rel2);
     const glm::vec2 force = stiffness * (colis.touch2 - colis.touch1) + dampening * (vel2 - vel1);
 
-    const float torque1 = cross(rel1, force), torque2 = cross(force, rel2);
+    const float torque1 = kit::cross2D(rel1, force), torque2 = kit::cross2D(force, rel2);
     return {force.x, force.y, torque1, -force.x, -force.y, torque2};
 }
 } // namespace ppx

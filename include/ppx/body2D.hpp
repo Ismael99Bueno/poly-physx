@@ -13,6 +13,7 @@
 
 namespace ppx
 {
+class world2D;
 class body2D : public kit::identifiable<>, public kit::indexable
 {
   public:
@@ -87,6 +88,9 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
+    void boost(const glm::vec2 &dvel);
+    void spin(float dangvel);
+
     const kit::transform2D &transform() const;
 
     const glm::vec2 &velocity() const;
@@ -105,8 +109,9 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
   private:
     std::variant<geo::polygon, geo::circle> m_shape;
-    rk::state *m_state = nullptr;
-    glm::vec2 m_vel{0.f}, m_added_force{0.f};
+    world2D *m_parent = nullptr;
+    glm::vec2 m_velocity{0.f};
+    glm::vec2 m_added_force{0.f};
     float m_angular_velocity;
     float m_added_torque = 0.f;
     float m_mass;

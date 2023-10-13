@@ -14,7 +14,6 @@ class joint2D : public kit::serializable
         body2D::ptr body1 = nullptr, body2 = nullptr;
         glm::vec2 anchor1{0.f}, anchor2{0.f};
         bool has_anchors = true;
-        static specs from_joint(const joint2D &joint);
     };
 
     joint2D(const body2D::ptr &body1, const body2D::ptr &body2);

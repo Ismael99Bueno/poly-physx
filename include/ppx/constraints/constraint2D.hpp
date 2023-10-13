@@ -9,36 +9,37 @@ namespace ppx
 class constraint2D : public kit::identifiable<>, public kit::serializable, public kit::nameable
 {
   public:
-    constraint2D(const char *name, float stiffness = 500.f, float dampening = 30.f);
+    constraint2D(const char *name);
     virtual ~constraint2D() = default;
-
-    float stiffness() const;
-    float dampening() const;
-
-    void stiffness(float stiffness);
-    void dampening(float dampening);
 
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const override;
     virtual bool decode(const YAML::Node &node) override;
 #endif
 
-    virtual bool valid() const = 0;
-
     virtual float constraint_value() const = 0;
     virtual float constraint_derivative() const = 0;
 
-    virtual std::size_t size() const = 0;
-    virtual const body2D::ptr &body(std::size_t index) const = 0;
-    virtual void body(std::size_t index, const body2D::ptr &body) = 0;
+    virtual bool contains(kit::uuid id) const = 0;
+    bool contais(const body2D &body) const;
 
-    using body_gradient = std::pair<const body2D *, std::array<float, 3>>;
-    virtual std::vector<body_gradient> constraint_gradients() const = 0;
-    virtual std::vector<body_gradient> constraint_derivative_gradients() const = 0;
+  protected:
+    static void aggregate_impulse(body2D &body, const glm::vec2 &impulse);
+    static void aggregate_impulse(body2D &body, const glm::vec2 &impulse, const glm::vec2 &anchor);
+
+    static void apply_impulse(const body2D &body, const glm::vec2 &impulse, std::vector<float> &state_derivative);
+    static void apply_impulse(const body2D &body, const glm::vec2 &impulse, const glm::vec2 &anchor,
+                              std::vector<float> &state_derivative);
 
   private:
-    float m_stiffness;
-    float m_dampening;
+    virtual bool valid() const = 0;
+    virtual bool any_kinematic() const = 0;
+
+    virtual void warmup() = 0;
+    virtual void solve() = 0;
+    virtual void finalize(std::vector<float> &state_derivative) = 0;
+
+    friend class constraint_manager2D;
 };
 } // namespace ppx
 

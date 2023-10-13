@@ -10,7 +10,7 @@
 namespace ppx
 {
 world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations)
-    : integrator(table), m_constraint_manager(*this, allocations)
+    : integrator(table), m_constraint_manager(allocations)
 {
     m_bodies.reserve(allocations);
     integrator.state.reserve(6 * allocations);
@@ -31,29 +31,40 @@ void world2D::retrieve()
     retrieve(integrator.state.vars());
 }
 
+bool world2D::locked_state() const
+{
+    return m_locked_state;
+}
+
 bool world2D::raw_forward(const float timestep)
 {
+    m_locked_state = true;
     const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
     reset_bodies();
     retrieve();
     m_collision_detection->flush_collisions();
+    m_locked_state = false;
     return valid;
 }
 bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
 {
+    m_locked_state = true;
     const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
     reset_bodies();
     retrieve();
     m_collision_detection->flush_collisions();
     return valid;
+    m_locked_state = false;
 }
 bool world2D::embedded_forward(float &timestep)
 {
+    m_locked_state = true;
     const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
     reset_bodies();
     retrieve();
     m_collision_detection->flush_collisions();
     return valid;
+    m_locked_state = false;
 }
 
 static void load_force(std::vector<float> &state_derivative, const glm::vec3 &force, std::size_t index)
@@ -147,7 +158,7 @@ void world2D::reset_bodies()
 body2D::ptr world2D::process_body_addition(body2D &body)
 {
     rk::state &state = integrator.state;
-    body.m_state = &state;
+    body.m_parent = this;
 
     body.index = m_bodies.size() - 1;
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
@@ -459,10 +470,8 @@ std::vector<body2D::ptr> world2D::operator[](const geo::aabb2D &aabb)
 
 std::vector<const constraint2D *> world2D::constraints_from_ids(const std::vector<kit::uuid> &ids) const
 {
-#ifdef DEBUG
     KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
                      "IDs list must not contain duplicates!")
-#endif
 
     std::vector<const constraint2D *> constraints;
     if (ids.empty())
@@ -471,12 +480,9 @@ std::vector<const constraint2D *> world2D::constraints_from_ids(const std::vecto
     constraints.reserve(m_constraint_manager.constraints().size());
     for (const auto &ctr : m_constraint_manager.constraints())
     {
-        if (ctr->size() != ids.size())
-            continue;
-
         bool found_match = true;
-        for (std::size_t i = 0; i < ctr->size(); i++)
-            if (std::find(ids.begin(), ids.end(), ctr->body(i)->id) == ids.end())
+        for (kit::uuid id : ids)
+            if (!ctr->contains(id))
             {
                 found_match = false;
                 break;
@@ -488,10 +494,8 @@ std::vector<const constraint2D *> world2D::constraints_from_ids(const std::vecto
 }
 std::vector<constraint2D *> world2D::constraints_from_ids(const std::vector<kit::uuid> &ids)
 {
-#ifdef DEBUG
     KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
                      "IDs list must not contain duplicates!")
-#endif
 
     std::vector<constraint2D *> constraints;
     if (ids.empty())
@@ -500,12 +504,9 @@ std::vector<constraint2D *> world2D::constraints_from_ids(const std::vector<kit:
     constraints.reserve(m_constraint_manager.constraints().size());
     for (const auto &ctr : m_constraint_manager.constraints())
     {
-        if (ctr->size() != ids.size())
-            continue;
-
         bool found_match = true;
-        for (std::size_t i = 0; i < ctr->size(); i++)
-            if (std::find(ids.begin(), ids.end(), ctr->body(i)->id) == ids.end())
+        for (kit::uuid id : ids)
+            if (!ctr->contains(id))
             {
                 found_match = false;
                 break;

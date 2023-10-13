@@ -87,11 +87,6 @@ bool joint2D::has_anchors() const
     return m_has_anchors;
 }
 
-joint2D::specs joint2D::specs::from_joint(const joint2D &joint)
-{
-    return {joint.body1(), joint.body2(), joint.rotated_anchor1(), joint.rotated_anchor2(), joint.has_anchors()};
-}
-
 #ifdef KIT_USE_YAML_CPP
 YAML::Node joint2D::encode() const
 {
@@ -107,8 +102,6 @@ YAML::Node joint2D::encode() const
 }
 bool joint2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 4)
-        return false;
     return true;
 }
 #endif
