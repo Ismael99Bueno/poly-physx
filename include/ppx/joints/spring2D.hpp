@@ -37,6 +37,8 @@ class spring2D : public joint2D, public kit::identifiable<>, public kit::indexab
     float potential_energy() const;
     float energy() const;
 
+    void apply_force_to_bodies();
+
 #ifdef KIT_USE_YAML_CPP
     YAML::Node encode() const override;
     bool decode(const YAML::Node &node) override;
@@ -44,9 +46,6 @@ class spring2D : public joint2D, public kit::identifiable<>, public kit::indexab
 
   private:
     float m_stiffness, m_dampening, m_length;
-
-    glm::vec4 without_anchors_force() const;
-    glm::vec4 with_anchors_force() const;
 };
 
 } // namespace ppx

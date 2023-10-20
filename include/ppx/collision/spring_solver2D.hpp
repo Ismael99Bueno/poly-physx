@@ -11,8 +11,8 @@ class spring_solver2D : public collision_solver2D
     static inline float stiffness = 5000.f;
     static inline float dampening = 10.f;
 
-    void solve(const std::vector<collision2D> &collisions, std::vector<float> &state_derivative) const override;
-    void solve(const collision2D &colis, std::vector<float> &state_derivative) const;
+    void solve(const std::vector<collision2D> &collisions) const override;
+    void solve_and_apply_collision_forces(const collision2D &colis) const;
 
   private:
     std::array<float, 6> forces_upon_collision(const collision2D &colis) const;

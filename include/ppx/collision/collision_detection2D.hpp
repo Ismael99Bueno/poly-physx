@@ -28,14 +28,14 @@ class collision_detection2D
 
     virtual const std::vector<collision2D> &detect_collisions() = 0;
     const std::vector<collision2D> &cached_collisions();
-    void flush_collisions();
+    void clear_cached_collisions();
 
   protected:
     std::vector<collision2D> m_collisions;
 #ifdef PPX_MULTITHREADED
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
 #endif
-    world2D *m_parent = nullptr;
+    world2D *m_world = nullptr;
 
     bool gather_collision_data(const body2D &body1, const body2D &body2, collision2D *colis) const;
     bool narrow_collision_check(const body2D &body1, const body2D &body2, collision2D *colis) const;

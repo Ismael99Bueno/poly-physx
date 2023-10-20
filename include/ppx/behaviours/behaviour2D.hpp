@@ -22,7 +22,7 @@ class behaviour2D : kit::non_copyable,
 
     void validate();
 
-    void include(const body2D::const_ptr &body);
+    void include(const body2D::ptr &body);
     void exclude(const body2D &body);
     bool contains(const body2D &body) const;
 
@@ -38,7 +38,9 @@ class behaviour2D : kit::non_copyable,
     void clear();
     std::size_t size() const;
 
-    const std::vector<body2D::const_ptr> &bodies() const;
+    void apply_force_to_bodies();
+
+    const std::vector<body2D::ptr> &bodies() const;
 
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const;
@@ -46,10 +48,10 @@ class behaviour2D : kit::non_copyable,
 #endif
 
   protected:
-    std::vector<body2D::const_ptr> m_included;
+    std::vector<body2D::ptr> m_included;
 
   private:
-    const world2D *m_parent = nullptr;
+    world2D *m_world = nullptr;
     friend class world2D;
 };
 

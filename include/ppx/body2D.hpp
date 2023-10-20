@@ -13,7 +13,6 @@
 
 namespace ppx
 {
-class world2D;
 class body2D : public kit::identifiable<>, public kit::indexable
 {
   public:
@@ -66,13 +65,17 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void add_force(const glm::vec2 &force);
     void add_torque(float torque);
 
+    void apply_simulation_force(const glm::vec2 &force);
+    void apply_simulation_torque(float torque);
+
+    const glm::vec2 &force() const;
     const glm::vec2 &added_force() const;
+
+    float torque() const;
     float added_torque() const;
 
     const geo::shape2D &shape() const;
-
     template <typename T> const T &shape() const;
-
     template <typename T> const T *shape_if() const;
 
     void shape(const std::vector<glm::vec2> &vertices);
@@ -82,8 +85,17 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     shape_type type() const;
 
-    float inertia() const;
-    float inverse_inertia() const;
+    float effective_mass() const;
+    float effective_inverse_mass() const;
+
+    float effective_inertia() const;
+    float effective_inverse_inertia() const;
+
+    float real_mass() const;
+    float real_inverse_mass() const;
+
+    float real_inertia() const;
+    float real_inverse_inertia() const;
 
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
@@ -93,11 +105,12 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     const kit::transform2D &transform() const;
 
+    const glm::vec2 &position() const;
     const glm::vec2 &velocity() const;
     glm::vec2 velocity_at(const glm::vec2 &at) const;
+
+    float rotation() const;
     float angular_velocity() const;
-    float mass() const;
-    float inverse_mass() const;
     float charge() const;
 
     void position(const glm::vec2 &position);
@@ -109,10 +122,11 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
   private:
     std::variant<geo::polygon, geo::circle> m_shape;
-    world2D *m_parent = nullptr;
     glm::vec2 m_velocity{0.f};
+    glm::vec2 m_force{0.f};
     glm::vec2 m_added_force{0.f};
     float m_angular_velocity;
+    float m_torque = 0.f;
     float m_added_torque = 0.f;
     float m_mass;
     float m_inv_mass;
@@ -121,8 +135,10 @@ class body2D : public kit::identifiable<>, public kit::indexable
     float m_charge;
 
     geo::shape2D &mutable_shape();
-    void retrieve(const std::vector<float> &vars_buffer);
-    void retrieve();
+    void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
+
+    void reset_added_forces();
+    void reset_simulation_forces();
 
     template <typename T> void compute_inertia(const T &shape);
 

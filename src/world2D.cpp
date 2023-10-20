@@ -10,7 +10,7 @@
 namespace ppx
 {
 world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations)
-    : integrator(table), m_constraint_manager(allocations)
+    : integrator(table), m_constraint_manager(*this, allocations)
 {
     m_bodies.reserve(allocations);
     integrator.state.reserve(6 * allocations);
@@ -19,79 +19,112 @@ world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations
     set_collision_solver<spring_solver2D>();
 }
 
-void world2D::retrieve(const std::vector<float> &vars_buffer)
+void world2D::send_data_to_state_variables()
+{
+    for (const body2D &body : m_bodies)
+    {
+        const std::size_t index = 6 * body.index;
+        rk::state &st = integrator.state;
+
+        const glm::vec2 &position = body.position();
+        const glm::vec2 &velocity = body.velocity();
+        const float rotation = body.rotation();
+        const float angular_velocity = body.angular_velocity();
+
+        st[index] = position.x;
+        st[index + 1] = position.y;
+        st[index + 2] = rotation;
+        st[index + 3] = velocity.x;
+        st[index + 4] = velocity.y;
+        st[index + 5] = angular_velocity;
+    }
+}
+
+void world2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()
     for (std::size_t i = 0; i < m_bodies.size(); i++)
-        m_bodies[i].retrieve(vars_buffer);
+        m_bodies[i].retrieve_data_from_state_variables(vars_buffer);
 }
-
-void world2D::retrieve()
+void world2D::retrieve_data_from_state_variables()
 {
-    retrieve(integrator.state.vars());
-}
-
-bool world2D::locked_state() const
-{
-    return m_locked_state;
+    retrieve_data_from_state_variables(integrator.state.vars());
 }
 
 bool world2D::raw_forward(const float timestep)
 {
-    m_locked_state = true;
+    m_timestep_ratio = m_current_timestep / timestep;
+    m_current_timestep = timestep;
+
+    send_data_to_state_variables();
     const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
-    reset_bodies();
-    retrieve();
-    m_collision_detection->flush_collisions();
-    m_locked_state = false;
+    reset_bodies_added_forces();
+
+    retrieve_data_from_state_variables();
+    m_collision_detection->clear_cached_collisions();
     return valid;
 }
 bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
 {
-    m_locked_state = true;
+    m_timestep_ratio = m_current_timestep / timestep;
+    m_current_timestep = timestep;
+
+    send_data_to_state_variables();
     const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
-    reset_bodies();
-    retrieve();
-    m_collision_detection->flush_collisions();
+    reset_bodies_added_forces();
+
+    retrieve_data_from_state_variables();
+    m_collision_detection->clear_cached_collisions();
     return valid;
-    m_locked_state = false;
 }
 bool world2D::embedded_forward(float &timestep)
 {
-    m_locked_state = true;
+    m_timestep_ratio = m_current_timestep / timestep;
+    m_current_timestep = timestep;
+
+    send_data_to_state_variables();
     const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
-    reset_bodies();
-    retrieve();
-    m_collision_detection->flush_collisions();
+    reset_bodies_added_forces();
+
+    retrieve_data_from_state_variables();
+    m_collision_detection->clear_cached_collisions();
     return valid;
-    m_locked_state = false;
 }
 
-static void load_force(std::vector<float> &state_derivative, const glm::vec3 &force, std::size_t index)
+float world2D::current_timestep() const
 {
-    state_derivative[index + 3] += force.x;
-    state_derivative[index + 4] += force.y;
-    state_derivative[index + 5] += force.z;
+    return m_current_timestep;
+}
+float world2D::timestep_ratio() const
+{
+    return m_timestep_ratio;
 }
 
-void world2D::load_velocities_and_added_forces(std::vector<float> &state_derivative) const
+std::vector<float> world2D::create_state_derivative() const
 {
     KIT_PERF_FUNCTION()
-    for (std::size_t i = 0; i < m_bodies.size(); i++)
+    std::vector<float> state_derivative(6 * m_bodies.size(), 0.f);
+
+    for (const body2D &body : m_bodies)
     {
-        const std::size_t index = 6 * i;
-        const glm::vec2 &velocity = m_bodies[i].velocity();
-        const float angular_velocity = m_bodies[i].angular_velocity();
+        const std::size_t index = 6 * body.index;
+
+        const glm::vec2 &velocity = body.velocity();
+        const float angular_velocity = body.angular_velocity();
         state_derivative[index] = velocity.x;
         state_derivative[index + 1] = velocity.y;
         state_derivative[index + 2] = angular_velocity;
-        if (m_bodies[i].kinematic)
+
+        if (body.kinematic)
         {
-            const glm::vec2 &force = m_bodies[i].added_force();
-            const float torque = m_bodies[i].added_torque();
-            load_force(state_derivative, glm::vec3(force, torque), index);
+            const glm::vec2 &accel = body.force() * body.effective_inverse_mass();
+            const float angaccel = body.torque() * body.effective_inverse_inertia();
+            state_derivative[index + 3] = accel.x;
+            state_derivative[index + 4] = accel.y;
+            state_derivative[index + 5] = angaccel;
         }
     }
+    return state_derivative;
 }
 
 void world2D::validate()
@@ -109,56 +142,37 @@ void world2D::validate()
             ++it;
 }
 
-void world2D::load_interactions_and_externals(std::vector<float> &state_derivative) const
+void world2D::apply_world_behaviours_and_springs()
 {
     KIT_PERF_FUNCTION()
     for (const auto &bhv : m_behaviours)
         if (bhv->enabled)
-            for (const auto &body : bhv->bodies())
-            {
-                if (!body->kinematic)
-                    continue;
-                const glm::vec3 force = bhv->force(*body);
-                load_force(state_derivative, force, 6 * body->index);
-            }
-    for (const spring2D &s : m_springs)
-    {
-        const std::size_t index1 = 6 * s.body1()->index, index2 = 6 * s.body2()->index;
-        const glm::vec4 force = s.force();
-        if (s.body1()->kinematic)
-            load_force(state_derivative, glm::vec3(force), index1);
-        if (s.body2()->kinematic)
-            load_force(state_derivative, glm::vec3(-glm::vec2(force), force.w), index2);
-    }
+            bhv->apply_force_to_bodies();
+    for (spring2D &sp : m_springs)
+        sp.apply_force_to_bodies();
 }
-
-kit::stack_vector<float> world2D::effective_inverse_masses() const
-{
-    KIT_PERF_FUNCTION()
-    kit::stack_vector<float> inv_masses;
-    inv_masses.reserve(3 * m_bodies.size());
-    for (std::size_t i = 0; i < m_bodies.size(); i++)
-    {
-        const float inv_mass = m_bodies[i].kinematic ? m_bodies[i].inverse_mass() : 0.f,
-                    inv_inertia = m_bodies[i].kinematic ? m_bodies[i].inverse_inertia() : 0.f;
-        inv_masses.insert(inv_masses.end(), {inv_mass, inv_mass, inv_inertia});
-    }
-    return inv_masses;
-}
-
-void world2D::reset_bodies()
+void world2D::apply_added_forces()
 {
     for (body2D &body : m_bodies)
     {
-        body.m_added_force = glm::vec2(0.f);
-        body.m_added_torque = 0.f;
+        body.apply_simulation_force(body.added_force());
+        body.apply_simulation_torque(body.added_torque());
     }
+}
+
+void world2D::reset_bodies_added_forces()
+{
+    for (body2D &body : m_bodies)
+        body.reset_added_forces();
+}
+void world2D::reset_bodies_simulation_forces()
+{
+    for (body2D &body : m_bodies)
+        body.reset_simulation_forces();
 }
 
 body2D::ptr world2D::process_body_addition(body2D &body)
 {
-    rk::state &state = integrator.state;
-    body.m_parent = this;
 
     body.index = m_bodies.size() - 1;
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
@@ -166,9 +180,10 @@ body2D::ptr world2D::process_body_addition(body2D &body)
     const kit::transform2D &transform = body.transform();
     const glm::vec2 &velocity = body.velocity();
 
+    rk::state &state = integrator.state;
     state.append({transform.position.x, transform.position.y, transform.rotation, velocity.x, velocity.y,
                   body.angular_velocity()});
-    body.retrieve();
+    body.retrieve_data_from_state_variables(state.vars());
 
     KIT_INFO("Added body with index {0} and id {1}.", body.index, (std::uint64_t)body.id)
 #ifdef DEBUG
@@ -354,27 +369,20 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         vars.size() == 6 * m_bodies.size(),
         "State vector size must be exactly 6 times greater than the body array size - vars: {0}, body array: {1}",
         vars.size(), m_bodies.size())
-    std::vector<float> state_derivative(vars.size(), 0.f);
 
-    retrieve(vars);
-    load_velocities_and_added_forces(state_derivative);
-    load_interactions_and_externals(state_derivative);
-    const kit::stack_vector<float> inv_masses = effective_inverse_masses();
+    reset_bodies_simulation_forces();
+    retrieve_data_from_state_variables(vars);
+    apply_world_behaviours_and_springs();
+    apply_added_forces();
 
     if (enable_collisions)
     {
         const auto &collisions = m_collision_detection->cached_collisions();
-        m_collision_solver->solve(collisions, state_derivative);
+        m_collision_solver->solve(collisions);
     }
 
-    m_constraint_manager.solve_and_load_constraints(state_derivative, inv_masses);
-    for (std::size_t i = 0; i < m_bodies.size(); i++)
-    {
-        state_derivative[6 * i + 3] *= inv_masses[3 * i];
-        state_derivative[6 * i + 4] *= inv_masses[3 * i + 1];
-        state_derivative[6 * i + 5] *= inv_masses[3 * i + 2];
-    }
-    return state_derivative;
+    m_constraint_manager.solve_constraints();
+    return create_state_derivative();
 }
 
 template <typename T> static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<T> &vec)

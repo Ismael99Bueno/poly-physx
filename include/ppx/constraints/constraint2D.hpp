@@ -6,6 +6,7 @@
 
 namespace ppx
 {
+class world2D;
 class constraint2D : public kit::identifiable<>, public kit::serializable, public kit::nameable
 {
   public:
@@ -24,20 +25,13 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     bool contais(const body2D &body) const;
 
   protected:
-    static void aggregate_impulse(body2D &body, const glm::vec2 &impulse);
-    static void aggregate_impulse(body2D &body, const glm::vec2 &impulse, const glm::vec2 &anchor);
-
-    static void apply_impulse(const body2D &body, const glm::vec2 &impulse, std::vector<float> &state_derivative);
-    static void apply_impulse(const body2D &body, const glm::vec2 &impulse, const glm::vec2 &anchor,
-                              std::vector<float> &state_derivative);
+    world2D *m_world = nullptr;
 
   private:
     virtual bool valid() const = 0;
-    virtual bool any_kinematic() const = 0;
 
     virtual void warmup() = 0;
     virtual void solve() = 0;
-    virtual void finalize(std::vector<float> &state_derivative) = 0;
 
     friend class constraint_manager2D;
 };

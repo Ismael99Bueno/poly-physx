@@ -36,18 +36,12 @@ class revolute_joint2D : public constraint2D, public joint2D
     float m_accumulated_impulse1 = 0.f;
     float m_accumulated_impulse2 = 0.f;
 
-    float without_anchors_constraint() const;
-    float without_anchors_constraint_derivative() const;
-
-    float with_anchors_constraint() const;
-    float with_anchors_constraint_derivative() const;
-
+    std::tuple<glm::vec2, glm::vec2, glm::vec2> compute_anchors_and_direction() const;
     std::pair<float, float> compute_impulses() const;
+    void apply_impulses(float imp1, float imp2);
 
-    bool any_kinematic() const override;
     void warmup() override;
     void solve() override;
-    void finalize(std::vector<float> &state_derivative) override;
 };
 } // namespace ppx
 #endif

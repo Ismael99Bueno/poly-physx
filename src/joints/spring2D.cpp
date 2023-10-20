@@ -22,22 +22,8 @@ spring2D::spring2D(const specs &spc)
 
 glm::vec4 spring2D::force() const
 {
-    return m_has_anchors ? with_anchors_force() : without_anchors_force();
-}
-
-glm::vec4 spring2D::without_anchors_force() const
-{
-    const glm::vec2 relpos = m_body2->transform().position - m_body1->transform().position,
-                    direction = glm::normalize(relpos),
-                    relvel = direction * glm::dot(m_body2->velocity() - m_body1->velocity(), direction),
-                    vlen = m_length * direction;
-    return {m_stiffness * (relpos - vlen) + m_dampening * relvel, 0.f, 0.f};
-}
-
-glm::vec4 spring2D::with_anchors_force() const
-{
     const glm::vec2 rot_anchor1 = rotated_anchor1(), rot_anchor2 = rotated_anchor2();
-    const glm::vec2 p1 = m_body1->transform().position + rot_anchor1, p2 = m_body2->transform().position + rot_anchor2;
+    const glm::vec2 p1 = m_body1->position() + rot_anchor1, p2 = m_body2->position() + rot_anchor2;
     const glm::vec2 relpos = p2 - p1, direction = glm::normalize(relpos),
                     relvel = direction *
                              glm::dot(m_body2->velocity_at(rot_anchor2) - m_body1->velocity_at(rot_anchor1), direction),
@@ -81,8 +67,7 @@ float spring2D::kinetic_energy() const
 }
 float spring2D::potential_energy() const
 {
-    const glm::vec2 p1 = m_body1->transform().position + rotated_anchor1(),
-                    p2 = m_body2->transform().position + rotated_anchor2();
+    const glm::vec2 p1 = m_body1->position() + rotated_anchor1(), p2 = m_body2->position() + rotated_anchor2();
     const float dist = glm::distance(p1, p2) - m_length;
     return 0.5f * m_stiffness * dist * dist;
 }
@@ -90,9 +75,20 @@ float spring2D::energy() const
 {
     return kinetic_energy() + potential_energy();
 }
+
+void spring2D::apply_force_to_bodies()
+{
+    const glm::vec4 f = force();
+    m_body1->apply_simulation_force(glm::vec2(f));
+    m_body2->apply_simulation_force(-glm::vec2(f));
+
+    m_body1->apply_simulation_torque(f.z);
+    m_body2->apply_simulation_torque(f.w);
+}
+
 spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
 {
-    return {{sp.body1(), sp.body2(), sp.rotated_anchor1(), sp.rotated_anchor2(), sp.has_anchors()},
+    return {{sp.body1(), sp.body2(), sp.rotated_anchor1(), sp.rotated_anchor2()},
             sp.stiffness(),
             sp.dampening(),
             sp.length()};

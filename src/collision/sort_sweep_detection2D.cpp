@@ -18,17 +18,17 @@ void sort_sweep_detection2D::on_attach()
                 ++it;
     });
 
-    m_parent->events.on_body_addition += m_add_edge;
-    m_parent->events.on_late_body_removal += m_remove_edge;
+    m_world->events.on_body_addition += m_add_edge;
+    m_world->events.on_late_body_removal += m_remove_edge;
 
-    for (std::size_t i = 0; i < m_parent->size(); i++)
-        m_add_edge((*m_parent)[i]);
+    for (std::size_t i = 0; i < m_world->size(); i++)
+        m_add_edge((*m_world)[i]);
 }
 
 sort_sweep_detection2D::~sort_sweep_detection2D()
 {
-    m_parent->events.on_body_addition -= m_add_edge;
-    m_parent->events.on_late_body_removal -= m_remove_edge;
+    m_world->events.on_body_addition -= m_add_edge;
+    m_world->events.on_late_body_removal -= m_remove_edge;
 }
 
 const std::vector<collision2D> &sort_sweep_detection2D::detect_collisions()

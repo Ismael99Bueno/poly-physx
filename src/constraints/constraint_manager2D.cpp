@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-constraint_manager2D::constraint_manager2D(const std::size_t allocations)
+constraint_manager2D::constraint_manager2D(world2D &world, const std::size_t allocations) : m_world(world)
 {
     m_constraints.reserve(allocations);
 }
@@ -65,8 +65,7 @@ void constraint_manager2D::validate(const kit::event<const constraint2D &> &even
             ++it;
 }
 
-void constraint_manager2D::solve_and_load_constraints(std::vector<float> &state_derivative,
-                                                      const kit::stack_vector<float> &inv_masses) const
+void constraint_manager2D::solve_constraints() const
 {
     KIT_PERF_FUNCTION()
     if (m_constraints.empty())
@@ -74,13 +73,10 @@ void constraint_manager2D::solve_and_load_constraints(std::vector<float> &state_
     for (const auto &ctr : m_constraints)
         ctr->warmup();
 
-    const std::size_t iters = 15;
+    const std::size_t iters = 1;
     for (std::size_t i = 0; i < iters; i++)
         for (const auto &ctr : m_constraints)
             ctr->solve();
-
-    for (const auto &ctr : m_constraints)
-        ctr->finalize(state_derivative);
 }
 
 const std::vector<kit::scope<constraint2D>> &constraint_manager2D::constraints() const

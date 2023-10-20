@@ -14,11 +14,10 @@
 namespace ppx
 {
 class world2D;
-
 class constraint_manager2D final : kit::non_copyable
 {
   public:
-    constraint_manager2D(std::size_t allocations);
+    constraint_manager2D(world2D &world, std::size_t allocations);
 
     template <typename T, class... ConstraintArgs>
     T *add_constraint(const kit::event<constraint2D *> &event_callback, ConstraintArgs &&...args)
@@ -28,6 +27,7 @@ class constraint_manager2D final : kit::non_copyable
         T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));
+        ptr->m_world = &m_world;
         event_callback(ptr);
         return ptr;
     }
@@ -37,15 +37,14 @@ class constraint_manager2D final : kit::non_copyable
     bool remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback);
 
     void clear_constraints(const kit::event<const constraint2D &> &event_callback);
-
     void validate(const kit::event<const constraint2D &> &event_callback);
 
-    void solve_and_load_constraints(std::vector<float> &state_derivative,
-                                    const kit::stack_vector<float> &inv_masses) const;
+    void solve_constraints() const;
 
     const std::vector<kit::scope<constraint2D>> &constraints() const;
 
   private:
+    world2D &m_world;
     std::vector<kit::scope<constraint2D>> m_constraints;
 };
 } // namespace ppx

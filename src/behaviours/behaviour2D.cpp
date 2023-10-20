@@ -18,7 +18,7 @@ void behaviour2D::validate()
             ++it;
 }
 
-void behaviour2D::include(const body2D::const_ptr &body)
+void behaviour2D::include(const body2D::ptr &body)
 {
     m_included.push_back(body);
 }
@@ -33,7 +33,7 @@ void behaviour2D::exclude(const body2D &body)
 }
 bool behaviour2D::contains(const body2D &body) const
 {
-    for (const body2D::const_ptr &bdptr : m_included)
+    for (const body2D::ptr &bdptr : m_included)
         if (*bdptr == body)
             return true;
     return false;
@@ -64,7 +64,19 @@ std::size_t behaviour2D::size() const
     return m_included.size();
 }
 
-const std::vector<body2D::const_ptr> &behaviour2D::bodies() const
+void behaviour2D::apply_force_to_bodies()
+{
+    for (const auto &body : m_included)
+    {
+        if (!body->kinematic)
+            continue;
+        const glm::vec3 f = force(*body);
+        body->apply_simulation_force(glm::vec2(f));
+        body->apply_simulation_torque(f.z);
+    }
+}
+
+const std::vector<body2D::ptr> &behaviour2D::bodies() const
 {
     return m_included;
 }
@@ -82,13 +94,13 @@ YAML::Node behaviour2D::encode() const
 }
 bool behaviour2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 2)
+    if (!node.IsMap() || node.size() < 2 || !m_world)
         return false;
     clear();
 
     enabled = node["Enabled"].as<bool>();
     for (const YAML::Node &n : node["Bodies"])
-        include((*m_parent)[n.as<std::size_t>()]);
+        include((*m_world)[n.as<std::size_t>()]);
     return true;
 }
 #endif

@@ -32,10 +32,12 @@ class world2D final : kit::non_copyable
     world_events events;
     bool enable_collisions = true;
 
-    bool locked_state() const;
     bool raw_forward(float timestep);
     bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
     bool embedded_forward(float &timestep);
+
+    float current_timestep() const;
+    float timestep_ratio() const;
 
     template <class... BodyArgs> body2D::ptr add_body(BodyArgs &&...args)
     {
@@ -63,7 +65,7 @@ class world2D final : kit::non_copyable
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
-        m_behaviours.back()->m_parent = this;
+        m_behaviours.back()->m_world = this;
         events.on_behaviour_addition(ptr);
         return ptr;
     }
@@ -88,9 +90,8 @@ class world2D final : kit::non_copyable
 
     template <typename T, class... ConstraintArgs> T *add_constraint(ConstraintArgs &&...args)
     {
-        T *ptr = m_constraint_manager.add_constraint<T>(events.on_constraint_addition,
-                                                        std::forward<ConstraintArgs>(args)...);
-        return ptr;
+        return m_constraint_manager.add_constraint<T>(events.on_constraint_addition,
+                                                      std::forward<ConstraintArgs>(args)...);
     }
 
     bool remove_constraint(std::size_t index);
@@ -177,7 +178,7 @@ class world2D final : kit::non_copyable
         auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_detection = std::move(coldet);
-        m_collision_detection->m_parent = this;
+        m_collision_detection->m_world = this;
         m_collision_detection->on_attach();
         return ptr;
     }
@@ -186,7 +187,7 @@ class world2D final : kit::non_copyable
         auto coldet = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_solver = std::move(coldet);
-        m_collision_solver->m_parent = this;
+        m_collision_solver->m_world = this;
         m_collision_detection->on_attach();
         return ptr;
     }
@@ -201,18 +202,22 @@ class world2D final : kit::non_copyable
     kit::scope<collision_solver2D> m_collision_solver;
 
     float m_elapsed = 0.f;
-    bool m_locked_state = false;
+    float m_current_timestep = 0.f;
+    float m_timestep_ratio = 1.f;
 
     body2D::ptr process_body_addition(body2D &body);
 
-    void load_velocities_and_added_forces(std::vector<float> &state_derivative) const;
-    void load_interactions_and_externals(std::vector<float> &state_derivative) const;
+    std::vector<float> create_state_derivative() const;
+    void apply_world_behaviours_and_springs();
+    void apply_added_forces();
 
-    kit::stack_vector<float> effective_inverse_masses() const;
+    void send_data_to_state_variables();
+    void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
+    void retrieve_data_from_state_variables();
 
-    void reset_bodies();
-    void retrieve(const std::vector<float> &vars_buffer);
-    void retrieve();
+    void reset_bodies_added_forces();
+    void reset_bodies_simulation_forces();
+
     void validate();
 };
 

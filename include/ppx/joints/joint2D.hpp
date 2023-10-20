@@ -13,11 +13,10 @@ class joint2D : public kit::serializable
     {
         body2D::ptr body1 = nullptr, body2 = nullptr;
         glm::vec2 anchor1{0.f}, anchor2{0.f};
-        bool has_anchors = true;
     };
 
-    joint2D(const body2D::ptr &body1, const body2D::ptr &body2);
-    joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1, const glm::vec2 &anchor2);
+    joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
+            const glm::vec2 &anchor2 = glm::vec2(0.f));
     joint2D(const specs &spc);
     virtual ~joint2D() = default;
 
@@ -38,8 +37,6 @@ class joint2D : public kit::serializable
     void anchor1(const glm::vec2 &anchor1);
     void anchor2(const glm::vec2 &anchor2);
 
-    bool has_anchors() const;
-
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const override;
     virtual bool decode(const YAML::Node &node) override;
@@ -49,7 +46,6 @@ class joint2D : public kit::serializable
     body2D::ptr m_body1 = nullptr, m_body2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
     float m_angle1, m_angle2;
-    bool m_has_anchors;
 };
 } // namespace ppx
 

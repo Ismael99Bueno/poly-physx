@@ -50,7 +50,7 @@ body2D::body2D(const specs &spc)
     }
 }
 
-void body2D::retrieve(const std::vector<float> &vars_buffer)
+void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
 {
     const std::size_t idx = 6 * index;
     geo::shape2D &sh = mutable_shape();
@@ -64,11 +64,15 @@ void body2D::retrieve(const std::vector<float> &vars_buffer)
     m_angular_velocity = vars_buffer[idx + 5];
 }
 
-void body2D::retrieve()
+void body2D::reset_added_forces()
 {
-    KIT_ASSERT_CRITICAL(m_parent, "Trying to retrieve body data from a parentless body (the body is not tied to an "
-                                  "world -> its internal parent is null)")
-    retrieve(m_parent->integrator.state.vars());
+    m_added_force = glm::vec2(0.f);
+    m_added_torque = 0.f;
+}
+void body2D::reset_simulation_forces()
+{
+    m_force = glm::vec2(0.f);
+    m_torque = 0.f;
 }
 
 float body2D::kinetic_energy() const
@@ -83,6 +87,24 @@ void body2D::add_force(const glm::vec2 &force)
 void body2D::add_torque(const float torque)
 {
     m_added_torque += torque;
+}
+
+void body2D::apply_simulation_force(const glm::vec2 &force)
+{
+    m_force += force;
+}
+void body2D::apply_simulation_torque(const float torque)
+{
+    m_torque += torque;
+}
+
+const glm::vec2 &body2D::force() const
+{
+    return m_force;
+}
+float body2D::torque() const
+{
+    return m_torque;
 }
 
 const glm::vec2 &body2D::added_force() const
@@ -158,11 +180,38 @@ body2D::shape_type body2D::type() const
     return m_shape.index() == 0 ? shape_type::POLYGON : shape_type::CIRCLE;
 }
 
-float body2D::inertia() const
+float body2D::effective_mass() const
+{
+    return kinematic ? m_mass : FLT_MAX;
+}
+float body2D::effective_inverse_mass() const
+{
+    return kinematic ? m_inv_mass : 0.f;
+}
+
+float body2D::effective_inertia() const
+{
+    return kinematic ? m_inertia : FLT_MAX;
+}
+float body2D::effective_inverse_inertia() const
+{
+    return kinematic ? m_inv_inertia : 0.f;
+}
+
+float body2D::real_mass() const
+{
+    return m_mass;
+}
+float body2D::real_inverse_mass() const
+{
+    return m_inv_mass;
+}
+
+float body2D::real_inertia() const
 {
     return m_inertia;
 }
-float body2D::inverse_inertia() const
+float body2D::real_inverse_inertia() const
 {
     return m_inv_inertia;
 }
@@ -170,23 +219,10 @@ float body2D::inverse_inertia() const
 void body2D::translate(const glm::vec2 &dpos)
 {
     mutable_shape().translate(dpos);
-    if (!m_parent || m_parent->locked_state())
-        return;
-
-    rk::state &st = m_parent->integrator.state;
-    const std::size_t idx = 6 * index;
-    st[idx + 0] += dpos.x;
-    st[idx + 1] += dpos.y;
 }
 void body2D::rotate(const float dangle)
 {
     mutable_shape().rotate(dangle);
-    if (!m_parent || m_parent->locked_state())
-        return;
-
-    rk::state &st = m_parent->integrator.state;
-    const std::size_t idx = 6 * index;
-    st[idx + 2] += dangle;
 }
 
 void body2D::boost(const glm::vec2 &dvel)
@@ -205,6 +241,10 @@ const kit::transform2D &body2D::transform() const
     return std::get<geo::circle>(m_shape).transform();
 }
 
+const glm::vec2 &body2D::position() const
+{
+    return transform().position;
+}
 const glm::vec2 &body2D::velocity() const
 {
     return m_velocity;
@@ -214,19 +254,15 @@ glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
     return m_velocity + m_angular_velocity * glm::vec2(-at.y, at.x);
 }
 
+float body2D::rotation() const
+{
+    return transform().rotation;
+}
 float body2D::angular_velocity() const
 {
     return m_angular_velocity;
 }
 
-float body2D::mass() const
-{
-    return m_mass;
-}
-float body2D::inverse_mass() const
-{
-    return m_inv_mass;
-}
 float body2D::charge() const
 {
     return m_charge;
@@ -235,45 +271,19 @@ float body2D::charge() const
 void body2D::position(const glm::vec2 &position)
 {
     mutable_shape().centroid(position);
-    if (!m_parent || m_parent->locked_state())
-        return;
-
-    rk::state &st = m_parent->integrator.state;
-    const std::size_t idx = 6 * index;
-    st[idx + 0] = position.x;
-    st[idx + 1] = position.y;
 }
 void body2D::velocity(const glm::vec2 &velocity)
 {
     m_velocity = velocity;
-    if (!m_parent || m_parent->locked_state())
-        return;
-
-    rk::state &st = m_parent->integrator.state;
-    const std::size_t idx = 6 * index;
-    st[idx + 3] = velocity.x;
-    st[idx + 4] = velocity.y;
 }
 
 void body2D::rotation(const float rotation)
 {
     mutable_shape().rotation(rotation);
-    if (!m_parent || m_parent->locked_state())
-        return;
-
-    rk::state &st = m_parent->integrator.state;
-    const std::size_t idx = 6 * index;
-    st[idx + 2] = rotation;
 }
 void body2D::angular_velocity(const float angular_velocity)
 {
     m_angular_velocity = angular_velocity;
-    if (!m_parent || m_parent->locked_state())
-        return;
-
-    rk::state &st = m_parent->integrator.state;
-    const std::size_t idx = 6 * index;
-    st[idx + 5] = angular_velocity;
 }
 
 void body2D::mass(const float mass)
@@ -292,7 +302,7 @@ body2D::specs body2D::specs::from_body(const body2D &body)
     {
         const kit::transform2D &transform = poly->transform();
         return {transform.position, body.velocity(), transform.rotation, body.angular_velocity(),
-                body.mass(),        body.charge(),   poly->locals(),     0.f,
+                body.real_mass(),   body.charge(),   poly->locals(),     0.f,
                 body.kinematic,     body.type()};
     }
 
@@ -302,7 +312,7 @@ body2D::specs body2D::specs::from_body(const body2D &body)
             body.velocity(),
             transform.rotation,
             body.angular_velocity(),
-            body.mass(),
+            body.real_mass(),
             body.charge(),
             {},
             circle.radius,
@@ -319,7 +329,7 @@ YAML::Node body2D::serializer::encode(const body2D &body) const
     node["Shape"] = body.shape();
     node["Velocity"] = body.velocity();
     node["Angular velocity"] = body.angular_velocity();
-    node["Mass"] = body.mass();
+    node["Mass"] = body.real_mass();
     node["Charge"] = body.charge();
     node["Kinematic"] = body.kinematic;
     return node;

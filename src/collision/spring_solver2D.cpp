@@ -13,39 +13,46 @@
 
 namespace ppx
 {
-void spring_solver2D::solve(const std::vector<collision2D> &collisions, std::vector<float> &state_derivative) const
+void spring_solver2D::solve(const std::vector<collision2D> &collisions) const
 {
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
     kit::const_for_each_mt<PPX_THREAD_COUNT, collision2D>(
-        collisions, [this, &state_derivative](const std::size_t thread_index, const collision2D &colis) {
+        collisions, [this](const std::size_t thread_index, const collision2D &colis) {
             if (colis.valid)
-                solve(colis, state_derivative);
+                solve_and_apply_collision_forces(colis);
         });
 #else
     for (const collision2D &colis : collisions)
         if (colis.valid)
-            solve(colis, state_derivative);
+            solve_and_apply_collision_forces(colis);
 #endif
 }
 
-void spring_solver2D::solve(const collision2D &colis, std::vector<float> &state_derivative) const
+void spring_solver2D::solve_and_apply_collision_forces(const collision2D &colis) const
 {
-    const std::array<float, 6> forces = forces_upon_collision(colis);
-    for (std::size_t i = 0; i < 3; i++)
+    KIT_PERF_FUNCTION()
+    const glm::vec2 rel1 = colis.touch1 - colis.current->position(), rel2 = colis.touch2 - colis.incoming->position();
+    const glm::vec2 vel1 = colis.current->velocity_at(rel1), vel2 = colis.incoming->velocity_at(rel2);
+    const glm::vec2 force = stiffness * (colis.touch2 - colis.touch1) + dampening * (vel2 - vel1);
+
+    const float torque1 = kit::cross2D(rel1, force), torque2 = kit::cross2D(force, rel2);
+    if (colis.current->kinematic)
     {
-        if (colis.current->kinematic)
-            state_derivative[colis.current->index * 6 + i + 3] += forces[i];
-        if (colis.incoming->kinematic)
-            state_derivative[colis.incoming->index * 6 + i + 3] += forces[i + 3];
+        colis.current->apply_simulation_force(force);
+        colis.current->apply_simulation_torque(torque1);
+    }
+    if (colis.incoming->kinematic)
+    {
+        colis.incoming->apply_simulation_force(-force);
+        colis.incoming->apply_simulation_torque(torque2);
     }
 }
 
 std::array<float, 6> spring_solver2D::forces_upon_collision(const collision2D &colis) const
 {
     KIT_PERF_FUNCTION()
-    const glm::vec2 rel1 = colis.touch1 - colis.current->transform().position,
-                    rel2 = colis.touch2 - colis.incoming->transform().position;
+    const glm::vec2 rel1 = colis.touch1 - colis.current->position(), rel2 = colis.touch2 - colis.incoming->position();
     const glm::vec2 vel1 = colis.current->velocity_at(rel1), vel2 = colis.incoming->velocity_at(rel2);
     const glm::vec2 force = stiffness * (colis.touch2 - colis.touch1) + dampening * (vel2 - vel1);
 

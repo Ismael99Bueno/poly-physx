@@ -10,10 +10,10 @@ class collision_solver2D
 {
   public:
     virtual ~collision_solver2D() = default;
-    virtual void solve(const std::vector<collision2D> &collisions, std::vector<float> &state_derivative) const = 0;
+    virtual void solve(const std::vector<collision2D> &collisions) const = 0;
 
   protected:
-    world2D *m_parent = nullptr;
+    world2D *m_world = nullptr;
 
   private:
     virtual void on_attach()
