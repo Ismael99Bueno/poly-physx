@@ -290,6 +290,7 @@ void body2D::mass(const float mass)
 {
     m_mass = mass;
     m_inv_mass = 1.f / mass;
+    compute_inertia(shape());
 }
 void body2D::charge(const float charge)
 {

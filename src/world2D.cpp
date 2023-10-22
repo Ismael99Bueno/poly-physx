@@ -155,8 +155,8 @@ void world2D::apply_added_forces()
 {
     for (body2D &body : m_bodies)
     {
-        body.apply_simulation_force(body.added_force());
-        body.apply_simulation_torque(body.added_torque());
+        body.apply_simulation_force(body.added_force() + body.persistent_force);
+        body.apply_simulation_torque(body.added_torque() + body.persistent_torque);
     }
 }
 

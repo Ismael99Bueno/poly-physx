@@ -57,6 +57,8 @@ class body2D : public kit::identifiable<>, public kit::indexable
            float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
     explicit body2D(const specs &spc);
 
+    glm::vec2 persistent_force{0.f};
+    float persistent_torque{0.f};
     bool kinematic;
     body_events events;
 
