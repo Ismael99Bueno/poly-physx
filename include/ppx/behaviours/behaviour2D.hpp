@@ -38,8 +38,6 @@ class behaviour2D : kit::non_copyable,
     void clear();
     std::size_t size() const;
 
-    void apply_force_to_bodies();
-
     const std::vector<body2D::ptr> &bodies() const;
 
 #ifdef KIT_USE_YAML_CPP
@@ -52,6 +50,9 @@ class behaviour2D : kit::non_copyable,
 
   private:
     world2D *m_world = nullptr;
+
+    void apply_force_to_bodies();
+
     friend class world2D;
 };
 

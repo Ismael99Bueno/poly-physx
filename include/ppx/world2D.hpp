@@ -78,8 +78,11 @@ class world2D final : kit::non_copyable
     {
         spring2D &sp = m_springs.emplace_back(std::forward<SpringArgs>(args)...);
         sp.index = m_springs.size() - 1;
+        sp.m_world = this;
 
         const spring2D::ptr sp_ptr = {&m_springs, sp.index};
+
+        KIT_ASSERT_ERROR(sp.joint.valid(), "The spring joint must be valid to be able to add it into the simulation")
         events.on_spring_addition(sp_ptr);
         return sp_ptr;
     }

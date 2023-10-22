@@ -133,7 +133,7 @@ void world2D::validate()
     for (const auto &bhv : m_behaviours)
         bhv->validate();
     for (auto it = m_springs.begin(); it != m_springs.end();)
-        if (!it->valid())
+        if (!it->joint.valid())
         {
             events.on_spring_removal(*it);
             it = m_springs.erase(it);
@@ -549,7 +549,8 @@ std::vector<spring2D::const_ptr> world2D::springs_from_ids(const kit::uuid id1, 
     springs.reserve(m_springs.size());
 
     for (const spring2D &sp : m_springs)
-        if ((sp.body1().id == id1 && sp.body2().id == id2) || (sp.body1().id == id2 && sp.body2().id == id1))
+        if ((sp.joint.body1().id == id1 && sp.joint.body2().id == id2) ||
+            (sp.joint.body1().id == id2 && sp.joint.body2().id == id1))
             springs.emplace_back(&m_springs, sp.index);
     return springs;
 }
@@ -569,7 +570,8 @@ std::vector<spring2D::ptr> world2D::springs_from_ids(const kit::uuid id1, const 
     springs.reserve(m_springs.size());
 
     for (const spring2D &sp : m_springs)
-        if ((sp.body1().id == id1 && sp.body2().id == id2) || (sp.body1().id == id2 && sp.body2().id == id1))
+        if ((sp.joint.body1().id == id1 && sp.joint.body2().id == id2) ||
+            (sp.joint.body1().id == id2 && sp.joint.body2().id == id1))
             springs.emplace_back(&m_springs, sp.index);
     return springs;
 }
@@ -647,36 +649,20 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     if (node["Springs"])
         for (const YAML::Node &n : node["Springs"])
         {
-            const std::size_t idx1 = n["Index1"].as<std::size_t>(), idx2 = n["Index2"].as<std::size_t>();
-            if (n["Anchor1"])
-            {
-                const ppx::spring2D::ptr sp = world.add_spring(world[idx1], world[idx2], n["Anchor1"].as<glm::vec2>(),
-                                                               n["Anchor2"].as<glm::vec2>());
-                n.as<ppx::spring2D>(*sp);
-                continue;
-            }
-            const ppx::spring2D::ptr sp = world.add_spring(world[idx1], world[idx2]);
-            n.as<ppx::spring2D>(*sp);
+            spring2D sp;
+            sp.m_world = &world;
+            n.as<spring2D>(sp);
+            world.add_spring(sp);
         }
 
     if (node["Constraints"])
         for (const YAML::Node &n : node["Constraints"])
             if (n["Revolute"])
             {
-                const YAML::Node jointnode = n["Revolute"]["Joint2D"];
-                const std::size_t idx1 = jointnode["Index1"].as<std::size_t>(),
-                                  idx2 = jointnode["Index2"].as<std::size_t>();
-                if (jointnode["Anchor1"])
-                {
-                    const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(
-                        world[idx1], world[idx2], jointnode["Anchor1"].as<glm::vec2>(),
-                        jointnode["Anchor2"].as<glm::vec2>());
-
-                    n["Revolute"].as<ppx::revolute_joint2D>(*revjoint);
-                    continue;
-                }
-                const auto revjoint = world.add_constraint<ppx::revolute_joint2D>(world[idx1], world[idx2]);
-                n["Revolute"].as<ppx::revolute_joint2D>(*revjoint);
+                revolute_joint2D rj;
+                rj.m_world = &world;
+                n["Revolute"].as<revolute_joint2D>(rj);
+                world.add_constraint<revolute_joint2D>(rj);
             }
 
     if (node["Behaviours"])

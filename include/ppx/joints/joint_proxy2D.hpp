@@ -6,7 +6,8 @@
 
 namespace ppx
 {
-class joint2D : public kit::serializable
+class world2D;
+class joint_proxy2D
 {
   public:
     struct specs
@@ -15,12 +16,13 @@ class joint2D : public kit::serializable
         glm::vec2 anchor1{0.f}, anchor2{0.f};
     };
 
-    joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
-            const glm::vec2 &anchor2 = glm::vec2(0.f));
-    joint2D(const specs &spc);
-    virtual ~joint2D() = default;
+    joint_proxy2D() = default;
+    joint_proxy2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
+                  const glm::vec2 &anchor2 = glm::vec2(0.f));
+    joint_proxy2D(const specs &spc);
+    virtual ~joint_proxy2D() = default;
 
-    virtual bool valid() const;
+    bool valid() const;
 
     const body2D::ptr &body1() const;
     const body2D::ptr &body2() const;
@@ -38,14 +40,14 @@ class joint2D : public kit::serializable
     void anchor2(const glm::vec2 &anchor2);
 
 #ifdef KIT_USE_YAML_CPP
-    virtual YAML::Node encode() const override;
-    virtual bool decode(const YAML::Node &node) override;
+    YAML::Node encode() const;
+    bool decode(const YAML::Node &node, world2D &world);
 #endif
 
-  protected:
+  private:
     body2D::ptr m_body1 = nullptr, m_body2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
-    float m_angle1, m_angle2;
+    float m_angle1 = 0.f, m_angle2 = 0.f;
 };
 } // namespace ppx
 

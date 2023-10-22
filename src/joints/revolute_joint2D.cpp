@@ -5,39 +5,38 @@
 
 namespace ppx
 {
-revolute_joint2D::revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2)
-    : constraint2D("Revolute"), joint2D(body1, body2), m_length(glm::distance(body1->position(), body2->position()))
+revolute_joint2D::revolute_joint2D() : constraint2D("Revolute")
 {
 }
-
 revolute_joint2D::revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2)
-    : constraint2D("Revolute"), joint2D(body1, body2, anchor1, anchor2),
-      m_length(glm::distance(body1->position() + anchor1, body2->position() + anchor2))
+    : constraint2D("Revolute"), length(glm::distance(body1->position() + anchor1, body2->position() + anchor2))
 {
 }
 revolute_joint2D::revolute_joint2D(const specs &spc)
-    : constraint2D("Revolute"), joint2D(spc),
-      m_length(glm::distance(spc.body1->position() + spc.anchor1, spc.body2->position() + spc.anchor2))
+    : constraint2D("Revolute"), joint(spc.joint), length(glm::distance(spc.joint.body1->position() + spc.joint.anchor1,
+                                                                       spc.joint.body2->position() + spc.joint.anchor2))
 {
 }
 
 float revolute_joint2D::constraint_value() const
 {
-    const glm::vec2 p1 = rotated_anchor1() + m_body1->position(), p2 = rotated_anchor2() + m_body2->position();
-    return glm::distance(p1, p2) - m_length;
+    const glm::vec2 p1 = joint.rotated_anchor1() + joint.body1()->position(),
+                    p2 = joint.rotated_anchor2() + joint.body2()->position();
+    return glm::distance(p1, p2) - length;
 }
 float revolute_joint2D::constraint_derivative() const
 {
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
-    return glm::dot(dir, m_body1->velocity_at(rot_anchor1) - m_body2->velocity_at(rot_anchor2));
+    return glm::dot(dir, joint.body1()->velocity_at(rot_anchor1) - joint.body2()->velocity_at(rot_anchor2));
 }
 
 std::tuple<glm::vec2, glm::vec2, glm::vec2> revolute_joint2D::compute_anchors_and_direction() const
 {
-    const glm::vec2 rot_anchor1 = rotated_anchor1();
-    const glm::vec2 rot_anchor2 = rotated_anchor2();
-    const glm::vec2 dir = glm::normalize(rot_anchor1 - rot_anchor2 + m_body1->position() - m_body2->position());
+    const glm::vec2 rot_anchor1 = joint.rotated_anchor1();
+    const glm::vec2 rot_anchor2 = joint.rotated_anchor2();
+    const glm::vec2 dir =
+        glm::normalize(rot_anchor1 - rot_anchor2 + joint.body1()->position() - joint.body2()->position());
     return {rot_anchor1, rot_anchor2, dir};
 }
 
@@ -57,9 +56,9 @@ std::pair<float, float> revolute_joint2D::compute_impulses() const
     const float angular = glm::length2(rot_anchor1) - dot1 * dot1 + glm::length2(rot_anchor2) - dot2 * dot2;
 
     const float imp1 =
-        -cdot / (2.f * m_body1->effective_inverse_mass() + angular * m_body1->effective_inverse_inertia());
+        -cdot / (2.f * joint.body1()->effective_inverse_mass() + angular * joint.body1()->effective_inverse_inertia());
     const float imp2 =
-        -cdot / (2.f * m_body2->effective_inverse_mass() + angular * m_body2->effective_inverse_inertia());
+        -cdot / (2.f * joint.body2()->effective_inverse_mass() + angular * joint.body2()->effective_inverse_inertia());
     return {imp1, imp2};
 }
 
@@ -68,15 +67,15 @@ void revolute_joint2D::apply_impulses(const float imp1, const float imp2)
 {
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
 
-    if (m_body1->kinematic)
+    if (joint.body1()->kinematic)
     {
-        m_body1->boost(m_body1->effective_inverse_mass() * imp1 * dir);
-        m_body1->spin(m_body1->effective_inverse_inertia() * kit::cross2D(rot_anchor1, imp1 * dir));
+        joint.body1()->boost(joint.body1()->effective_inverse_mass() * imp1 * dir);
+        joint.body1()->spin(joint.body1()->effective_inverse_inertia() * kit::cross2D(rot_anchor1, imp1 * dir));
     }
-    if (m_body2->kinematic)
+    if (joint.body2()->kinematic)
     {
-        m_body2->boost(-m_body2->effective_inverse_mass() * imp2 * dir);
-        m_body2->spin(m_body2->effective_inverse_inertia() * kit::cross2D(rot_anchor2, -imp2 * dir));
+        joint.body2()->boost(-joint.body2()->effective_inverse_mass() * imp2 * dir);
+        joint.body2()->spin(joint.body2()->effective_inverse_inertia() * kit::cross2D(rot_anchor2, -imp2 * dir));
     }
 }
 
@@ -97,43 +96,41 @@ void revolute_joint2D::solve()
 
 bool revolute_joint2D::valid() const
 {
-    return joint2D::valid();
+    return joint.valid();
 }
 bool revolute_joint2D::contains(const kit::uuid id) const
 {
-    return m_body1->id == id || m_body2->id == id;
-}
-float revolute_joint2D::length() const
-{
-    return m_length;
+    return joint.body1()->id == id || joint.body2()->id == id;
 }
 
 revolute_joint2D::specs revolute_joint2D::specs::from_revolute_joint(const revolute_joint2D &rj)
 {
-    return {rj.body1(), rj.body2(), rj.rotated_anchor1(), rj.rotated_anchor2()};
+    return {{rj.joint.body1(), rj.joint.body2(), rj.joint.rotated_anchor1(), rj.joint.rotated_anchor2()}};
 }
 
 #ifdef KIT_USE_YAML_CPP
 YAML::Node revolute_joint2D::encode() const
 {
-    const YAML::Node node1 = joint2D::encode();
+    const YAML::Node node1 = joint.encode();
     const YAML::Node node2 = constraint2D::encode();
 
     YAML::Node node;
     node["Joint2D"] = node1;
     node["Constraint2D"] = node2;
+    node["Length"] = length;
 
     return node;
 }
 bool revolute_joint2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() != 2)
+    if (!node.IsMap() || node.size() != 3)
         return false;
 
-    if (!joint2D::decode(node["Joint2D"]))
+    if (!joint.decode(node["Joint2D"], *m_world))
         return false;
     if (!constraint2D::decode(node["Constraint2D"]))
         return false;
+    length = node["Length"].as<float>();
     return true;
 }
 #endif
