@@ -21,6 +21,7 @@ world2D::world2D(const rk::butcher_tableau &table, const std::size_t allocations
 
 void world2D::send_data_to_state_variables()
 {
+    KIT_PERF_FUNCTION()
     for (const body2D &body : m_bodies)
     {
         const std::size_t index = 6 * body.index;
@@ -153,6 +154,7 @@ void world2D::apply_world_behaviours_and_springs()
 }
 void world2D::apply_added_forces()
 {
+    KIT_PERF_FUNCTION()
     for (body2D &body : m_bodies)
     {
         body.apply_simulation_force(body.added_force() + body.persistent_force);
@@ -162,18 +164,19 @@ void world2D::apply_added_forces()
 
 void world2D::reset_bodies_added_forces()
 {
+    KIT_PERF_FUNCTION()
     for (body2D &body : m_bodies)
         body.reset_added_forces();
 }
 void world2D::reset_bodies_simulation_forces()
 {
+    KIT_PERF_FUNCTION()
     for (body2D &body : m_bodies)
         body.reset_simulation_forces();
 }
 
 body2D::ptr world2D::process_body_addition(body2D &body)
 {
-
     body.index = m_bodies.size() - 1;
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
 
