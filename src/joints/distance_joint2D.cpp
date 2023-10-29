@@ -1,37 +1,37 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/joints/revolute_joint2D.hpp"
+#include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
 namespace ppx
 {
-revolute_joint2D::revolute_joint2D() : constraint2D("Revolute")
+distance_joint2D::distance_joint2D() : constraint2D("Distance")
 {
 }
-revolute_joint2D::revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
+distance_joint2D::distance_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2)
-    : constraint2D("Revolute"), length(glm::distance(body1->position() + anchor1, body2->position() + anchor2))
+    : constraint2D("Distance"), length(glm::distance(body1->position() + anchor1, body2->position() + anchor2))
 {
 }
-revolute_joint2D::revolute_joint2D(const specs &spc)
-    : constraint2D("Revolute"), joint(spc.joint), length(glm::distance(spc.joint.body1->position() + spc.joint.anchor1,
+distance_joint2D::distance_joint2D(const specs &spc)
+    : constraint2D("Distance"), joint(spc.joint), length(glm::distance(spc.joint.body1->position() + spc.joint.anchor1,
                                                                        spc.joint.body2->position() + spc.joint.anchor2))
 {
 }
 
-float revolute_joint2D::constraint_value() const
+float distance_joint2D::constraint_value() const
 {
     const glm::vec2 p1 = joint.rotated_anchor1() + joint.body1()->position(),
                     p2 = joint.rotated_anchor2() + joint.body2()->position();
     return glm::distance(p1, p2) - length;
 }
-float revolute_joint2D::constraint_derivative() const
+float distance_joint2D::constraint_derivative() const
 {
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
     return glm::dot(dir, joint.body1()->velocity_at(rot_anchor1) - joint.body2()->velocity_at(rot_anchor2));
 }
 
-std::tuple<glm::vec2, glm::vec2, glm::vec2> revolute_joint2D::compute_anchors_and_direction() const
+std::tuple<glm::vec2, glm::vec2, glm::vec2> distance_joint2D::compute_anchors_and_direction() const
 {
     const glm::vec2 rot_anchor1 = joint.rotated_anchor1();
     const glm::vec2 rot_anchor2 = joint.rotated_anchor2();
@@ -40,7 +40,7 @@ std::tuple<glm::vec2, glm::vec2, glm::vec2> revolute_joint2D::compute_anchors_an
     return {rot_anchor1, rot_anchor2, dir};
 }
 
-std::pair<float, float> revolute_joint2D::compute_impulses() const
+std::pair<float, float> distance_joint2D::compute_impulses() const
 {
     const float stiffness = 10.f;
     const float dampening = 1.f;
@@ -63,7 +63,7 @@ std::pair<float, float> revolute_joint2D::compute_impulses() const
 }
 
 // CHANGE TO ONLY ONE IMP FLOAT
-void revolute_joint2D::apply_impulses(const float imp1, const float imp2)
+void distance_joint2D::apply_impulses(const float imp1, const float imp2)
 {
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
 
@@ -79,13 +79,13 @@ void revolute_joint2D::apply_impulses(const float imp1, const float imp2)
     }
 }
 
-void revolute_joint2D::warmup()
+void distance_joint2D::warmup()
 {
     if (kit::approaches_zero(m_accumulated_impulse1) && kit::approaches_zero(m_accumulated_impulse2))
         return;
     apply_impulses(m_accumulated_impulse1, m_accumulated_impulse2);
 }
-void revolute_joint2D::solve()
+void distance_joint2D::solve()
 {
     const auto [imp1, imp2] = compute_impulses();
     m_accumulated_impulse1 += imp1;
@@ -94,22 +94,22 @@ void revolute_joint2D::solve()
     apply_impulses(imp1, imp2);
 }
 
-bool revolute_joint2D::valid() const
+bool distance_joint2D::valid() const
 {
     return joint.valid();
 }
-bool revolute_joint2D::contains(const kit::uuid id) const
+bool distance_joint2D::contains(const kit::uuid id) const
 {
     return joint.body1()->id == id || joint.body2()->id == id;
 }
 
-revolute_joint2D::specs revolute_joint2D::specs::from_revolute_joint(const revolute_joint2D &rj)
+distance_joint2D::specs distance_joint2D::specs::from_distance_joint(const distance_joint2D &dj)
 {
-    return {{rj.joint.body1(), rj.joint.body2(), rj.joint.rotated_anchor1(), rj.joint.rotated_anchor2()}};
+    return {{dj.joint.body1(), dj.joint.body2(), dj.joint.rotated_anchor1(), dj.joint.rotated_anchor2()}};
 }
 
 #ifdef KIT_USE_YAML_CPP
-YAML::Node revolute_joint2D::encode() const
+YAML::Node distance_joint2D::encode() const
 {
     const YAML::Node node1 = joint.encode();
     const YAML::Node node2 = constraint2D::encode();
@@ -121,7 +121,7 @@ YAML::Node revolute_joint2D::encode() const
 
     return node;
 }
-bool revolute_joint2D::decode(const YAML::Node &node)
+bool distance_joint2D::decode(const YAML::Node &node)
 {
     if (!node.IsMap() || node.size() != 3)
         return false;

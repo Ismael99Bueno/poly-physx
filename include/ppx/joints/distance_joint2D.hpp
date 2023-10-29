@@ -1,23 +1,23 @@
-#ifndef PPX_REVOLUTE_JOINT2D_HPP
-#define PPX_REVOLUTE_JOINT2D_HPP
+#ifndef PPX_DISTANCE_JOINT2D_HPP
+#define PPX_DISTANCE_JOINT2D_HPP
 
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/joints/joint_proxy2D.hpp"
 
 namespace ppx
 {
-class revolute_joint2D : public constraint2D
+class distance_joint2D : public constraint2D
 {
   public:
     struct specs
     {
         joint_proxy2D::specs joint;
-        static specs from_revolute_joint(const revolute_joint2D &rj);
+        static specs from_distance_joint(const distance_joint2D &dj);
     };
-    revolute_joint2D();
-    revolute_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
+    distance_joint2D();
+    distance_joint2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
                      const glm::vec2 &anchor2 = glm::vec2(0.f));
-    revolute_joint2D(const specs &spc);
+    distance_joint2D(const specs &spc);
 
     joint_proxy2D joint;
     float length = 0.f;

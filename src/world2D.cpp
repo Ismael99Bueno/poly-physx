@@ -2,7 +2,7 @@
 #include "ppx/world2D.hpp"
 #include "geo/intersection.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
-#include "ppx/joints/revolute_joint2D.hpp"
+#include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/collision/quad_tree_detection2D.hpp"
 #include "ppx/collision/spring_solver2D.hpp"
 #include <cstring>
@@ -670,12 +670,12 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
 
     if (node["Constraints"])
         for (const YAML::Node &n : node["Constraints"])
-            if (n["Revolute"])
+            if (n["Distance"])
             {
-                revolute_joint2D rj;
-                rj.m_world = &world;
-                n["Revolute"].as<revolute_joint2D>(rj);
-                world.add_constraint<revolute_joint2D>(rj);
+                distance_joint2D dj;
+                dj.m_world = &world;
+                n["Distance"].as<distance_joint2D>(dj);
+                world.add_constraint<distance_joint2D>(dj);
             }
 
     if (node["Behaviours"])
