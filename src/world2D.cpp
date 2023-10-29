@@ -136,8 +136,10 @@ void world2D::validate()
     for (auto it = m_springs.begin(); it != m_springs.end();)
         if (!it->joint.valid())
         {
-            events.on_spring_removal(*it);
+            events.on_early_spring_removal(*it);
+            std::size_t index = it->index;
             it = m_springs.erase(it);
+            events.on_late_spring_removal(std::move(index));
         }
         else
             ++it;
@@ -280,13 +282,14 @@ bool world2D::remove_spring(std::size_t index)
         KIT_WARN("Spring index exceeds array bounds. Aborting... - index: {0}, size: {1}", index, m_springs.size())
         return false;
     }
-    events.on_spring_removal(m_springs[index]);
+    events.on_early_spring_removal(m_springs[index]);
     if (index != m_springs.size() - 1)
     {
         m_springs[index] = m_springs.back();
         m_springs[index].index = index;
     }
     m_springs.pop_back();
+    events.on_late_spring_removal(std::move(index));
     return true;
 }
 bool world2D::remove_spring(const spring2D &sp)
@@ -327,9 +330,16 @@ void world2D::clear_behaviours()
 }
 void world2D::clear_springs()
 {
+    std::vector<std::size_t> indices;
+    indices.reserve(m_springs.size());
     for (const spring2D &sp : m_springs)
-        events.on_spring_removal(sp);
+    {
+        events.on_early_spring_removal(sp);
+        indices.push_back(sp.index);
+    }
     m_springs.clear();
+    for (std::size_t idx : indices)
+        events.on_late_spring_removal(std::move(idx));
 }
 void world2D::clear_constraints()
 {

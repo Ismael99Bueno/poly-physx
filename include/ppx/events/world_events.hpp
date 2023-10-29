@@ -19,7 +19,8 @@ class world_events final : kit::non_copyable
     kit::event<const body2D &> on_early_body_removal;
     kit::event<std::size_t> on_late_body_removal;
     kit::event<const spring2D::ptr &> on_spring_addition;
-    kit::event<const spring2D &> on_spring_removal;
+    kit::event<const spring2D &> on_early_spring_removal;
+    kit::event<std::size_t> on_late_spring_removal;
     kit::event<constraint2D *> on_constraint_addition;
     kit::event<const constraint2D &> on_constraint_removal;
     kit::event<behaviour2D *> on_behaviour_addition;
