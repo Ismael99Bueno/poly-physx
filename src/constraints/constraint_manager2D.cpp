@@ -73,7 +73,7 @@ void constraint_manager2D::solve_constraints() const
     for (const auto &ctr : m_constraints)
         ctr->warmup();
 
-    const std::size_t iters = 1;
+    const std::size_t iters = 10;
     for (std::size_t i = 0; i < iters; i++)
         for (const auto &ctr : m_constraints)
             ctr->solve();

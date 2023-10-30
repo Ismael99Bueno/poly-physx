@@ -34,12 +34,11 @@ class distance_joint2D : public constraint2D
 #endif
 
   private:
-    float m_accumulated_impulse1 = 0.f;
-    float m_accumulated_impulse2 = 0.f;
+    float m_accumulated_impulse = 0.f;
 
     std::tuple<glm::vec2, glm::vec2, glm::vec2> compute_anchors_and_direction() const;
-    std::pair<float, float> compute_impulses() const;
-    void apply_impulses(float imp1, float imp2);
+    float compute_impulse() const;
+    void apply_impulse(float imp);
 
     void warmup() override;
     void solve() override;

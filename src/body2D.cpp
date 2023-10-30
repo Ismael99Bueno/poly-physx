@@ -251,7 +251,7 @@ const glm::vec2 &body2D::velocity() const
 }
 glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
 {
-    return m_velocity + m_angular_velocity * glm::vec2(-at.y, at.x);
+    return m_velocity + m_angular_velocity * glm::vec2(-at.y, at.x); // v + cross(w, at)
 }
 
 float body2D::rotation() const
