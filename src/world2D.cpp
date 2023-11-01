@@ -109,21 +109,17 @@ std::vector<float> world2D::create_state_derivative() const
     for (const body2D &body : m_bodies)
     {
         const std::size_t index = 6 * body.index;
-
         const glm::vec2 &velocity = body.velocity();
         const float angular_velocity = body.angular_velocity();
         state_derivative[index] = velocity.x;
         state_derivative[index + 1] = velocity.y;
         state_derivative[index + 2] = angular_velocity;
 
-        if (body.kinematic)
-        {
-            const glm::vec2 &accel = body.force() * body.effective_inverse_mass();
-            const float angaccel = body.torque() * body.effective_inverse_inertia();
-            state_derivative[index + 3] = accel.x;
-            state_derivative[index + 4] = accel.y;
-            state_derivative[index + 5] = angaccel;
-        }
+        const glm::vec2 &accel = body.force() * body.effective_inverse_mass();
+        const float angaccel = body.torque() * body.effective_inverse_inertia();
+        state_derivative[index + 3] = accel.x;
+        state_derivative[index + 4] = accel.y;
+        state_derivative[index + 5] = angaccel;
     }
     return state_derivative;
 }

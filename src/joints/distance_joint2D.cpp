@@ -61,16 +61,11 @@ void distance_joint2D::apply_impulse(const float imp)
     const glm::vec2 imp1 = imp * dir;
     const glm::vec2 imp2 = -imp1;
 
-    if (joint.body1()->kinematic) // REMOVE THIS
-    {
-        joint.body1()->boost(joint.body1()->effective_inverse_mass() * imp1);
-        joint.body1()->spin(joint.body1()->effective_inverse_inertia() * kit::cross2D(rot_anchor1, imp1));
-    }
-    if (joint.body2()->kinematic)
-    {
-        joint.body2()->boost(joint.body2()->effective_inverse_mass() * imp2);
-        joint.body2()->spin(joint.body2()->effective_inverse_inertia() * kit::cross2D(rot_anchor2, imp2));
-    }
+    joint.body1()->boost(joint.body1()->effective_inverse_mass() * imp1);
+    joint.body1()->spin(joint.body1()->effective_inverse_inertia() * kit::cross2D(rot_anchor1, imp1));
+
+    joint.body2()->boost(joint.body2()->effective_inverse_mass() * imp2);
+    joint.body2()->spin(joint.body2()->effective_inverse_inertia() * kit::cross2D(rot_anchor2, imp2));
 }
 
 void distance_joint2D::warmup()

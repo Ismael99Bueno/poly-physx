@@ -37,16 +37,11 @@ void spring_solver2D::solve_and_apply_collision_forces(const collision2D &colis)
     const glm::vec2 force = stiffness * (colis.touch2 - colis.touch1) + dampening * (vel2 - vel1);
 
     const float torque1 = kit::cross2D(rel1, force), torque2 = kit::cross2D(force, rel2);
-    if (colis.current->kinematic)
-    {
-        colis.current->apply_simulation_force(force);
-        colis.current->apply_simulation_torque(torque1);
-    }
-    if (colis.incoming->kinematic)
-    {
-        colis.incoming->apply_simulation_force(-force);
-        colis.incoming->apply_simulation_torque(torque2);
-    }
+    colis.current->apply_simulation_force(force);
+    colis.current->apply_simulation_torque(torque1);
+
+    colis.incoming->apply_simulation_force(-force);
+    colis.incoming->apply_simulation_torque(torque2);
 }
 
 std::array<float, 6> spring_solver2D::forces_upon_collision(const collision2D &colis) const
