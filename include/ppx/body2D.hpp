@@ -87,17 +87,17 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     shape_type type() const;
 
-    float effective_mass() const;
-    float effective_inverse_mass() const;
+    float mass() const;
+    float inv_mass() const;
 
-    float effective_inertia() const;
-    float effective_inverse_inertia() const;
+    float inertia() const;
+    float inv_inertia() const;
 
     float real_mass() const;
-    float real_inverse_mass() const;
+    float real_inv_mass() const;
 
     float real_inertia() const;
-    float real_inverse_inertia() const;
+    float real_inv_inertia() const;
 
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);

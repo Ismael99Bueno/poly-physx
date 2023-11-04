@@ -10,7 +10,7 @@ constraint2D::constraint2D(const char *name) : nameable(name)
 {
 }
 
-bool constraint2D::contais(const body2D &body) const
+bool constraint2D::contains(const body2D &body) const
 {
     return contains(body.id);
 }

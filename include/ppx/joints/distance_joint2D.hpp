@@ -23,7 +23,8 @@ class distance_joint2D : public constraint2D
     float length = 0.f;
 
     float constraint_value() const override;
-    float constraint_derivative() const override;
+    float constraint_velocity() const override;
+    float constraint_acceleration() const override;
 
     bool valid() const override;
     bool contains(kit::uuid id) const override;
@@ -34,11 +35,11 @@ class distance_joint2D : public constraint2D
 #endif
 
   private:
-    float m_accumulated_impulse = 0.f;
+    float m_accumulated_lambda = 0.f;
 
     std::tuple<glm::vec2, glm::vec2, glm::vec2> compute_anchors_and_direction() const;
-    float compute_impulse() const;
-    void apply_impulse(float imp);
+    float compute_lambda() const;
+    void apply_lambda(float lambda);
 
     void warmup() override;
     void solve() override;

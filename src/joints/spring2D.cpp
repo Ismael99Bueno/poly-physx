@@ -20,12 +20,14 @@ spring2D::spring2D(const specs &spc)
 
 glm::vec4 spring2D::force() const
 {
+    const body2D::ptr &body1 = joint.body1();
+    const body2D::ptr &body2 = joint.body2();
+
     const glm::vec2 rot_anchor1 = joint.rotated_anchor1(), rot_anchor2 = joint.rotated_anchor2();
-    const glm::vec2 p1 = joint.body1()->position() + rot_anchor1, p2 = joint.body2()->position() + rot_anchor2;
+    const glm::vec2 p1 = body1->position() + rot_anchor1, p2 = body2->position() + rot_anchor2;
     const glm::vec2 relpos = p2 - p1, direction = glm::normalize(relpos),
                     relvel = direction *
-                             glm::dot(joint.body2()->velocity_at(rot_anchor2) - joint.body1()->velocity_at(rot_anchor1),
-                                      direction),
+                             glm::dot(body2->velocity_at(rot_anchor2) - body1->velocity_at(rot_anchor1), direction),
                     vlen = length * direction;
 
     const glm::vec2 force = stiffness * (relpos - vlen) + dampening * relvel;
@@ -51,12 +53,15 @@ float spring2D::energy() const
 
 void spring2D::apply_force_to_bodies()
 {
-    const glm::vec4 f = force();
-    joint.body1()->apply_simulation_force(glm::vec2(f));
-    joint.body2()->apply_simulation_force(-glm::vec2(f));
+    const body2D::ptr &body1 = joint.body1();
+    const body2D::ptr &body2 = joint.body2();
 
-    joint.body1()->apply_simulation_torque(f.z);
-    joint.body2()->apply_simulation_torque(f.w);
+    const glm::vec4 f = force();
+    body1->apply_simulation_force(glm::vec2(f));
+    body2->apply_simulation_force(-glm::vec2(f));
+
+    body1->apply_simulation_torque(f.z);
+    body2->apply_simulation_torque(f.w);
 }
 
 spring2D::specs spring2D::specs::from_spring(const spring2D &sp)

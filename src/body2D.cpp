@@ -180,20 +180,20 @@ body2D::shape_type body2D::type() const
     return m_shape.index() == 0 ? shape_type::POLYGON : shape_type::CIRCLE;
 }
 
-float body2D::effective_mass() const
+float body2D::mass() const
 {
     return kinematic ? m_mass : FLT_MAX;
 }
-float body2D::effective_inverse_mass() const
+float body2D::inv_mass() const
 {
     return kinematic ? m_inv_mass : 0.f;
 }
 
-float body2D::effective_inertia() const
+float body2D::inertia() const
 {
     return kinematic ? m_inertia : FLT_MAX;
 }
-float body2D::effective_inverse_inertia() const
+float body2D::inv_inertia() const
 {
     return kinematic ? m_inv_inertia : 0.f;
 }
@@ -202,7 +202,7 @@ float body2D::real_mass() const
 {
     return m_mass;
 }
-float body2D::real_inverse_mass() const
+float body2D::real_inv_mass() const
 {
     return m_inv_mass;
 }
@@ -211,7 +211,7 @@ float body2D::real_inertia() const
 {
     return m_inertia;
 }
-float body2D::real_inverse_inertia() const
+float body2D::real_inv_inertia() const
 {
     return m_inv_inertia;
 }

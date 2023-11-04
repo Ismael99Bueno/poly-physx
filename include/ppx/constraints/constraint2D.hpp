@@ -19,10 +19,11 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 #endif
 
     virtual float constraint_value() const = 0;
-    virtual float constraint_derivative() const = 0;
+    virtual float constraint_velocity() const = 0;
+    virtual float constraint_acceleration() const = 0;
 
     virtual bool contains(kit::uuid id) const = 0;
-    bool contais(const body2D &body) const;
+    bool contains(const body2D &body) const;
 
   protected:
     world2D *m_world = nullptr;
