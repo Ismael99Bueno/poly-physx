@@ -122,6 +122,10 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void mass(float mass);
     void charge(float charge);
 
+    void reset_added_forces();
+    void reset_simulation_forces();
+    void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
+
   private:
     std::variant<geo::polygon, geo::circle> m_shape;
     glm::vec2 m_velocity{0.f};
@@ -137,14 +141,8 @@ class body2D : public kit::identifiable<>, public kit::indexable
     float m_charge;
 
     geo::shape2D &mutable_shape();
-    void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
-
-    void reset_added_forces();
-    void reset_simulation_forces();
 
     template <typename T> void compute_inertia(const T &shape);
-
-    friend class world2D;
 };
 } // namespace ppx
 #endif
