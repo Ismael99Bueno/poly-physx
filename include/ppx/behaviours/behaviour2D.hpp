@@ -22,9 +22,30 @@ class behaviour2D : kit::non_copyable,
 
     void validate();
 
-    void include(const body2D::ptr &body);
-    void exclude(const body2D &body);
+    void add(const body2D::ptr &body);
+    void remove(const body2D &body);
     bool contains(const body2D &body) const;
+
+    auto begin() const
+    {
+        return m_bodies.begin();
+    }
+    auto end() const
+    {
+        return m_bodies.end();
+    }
+
+    auto begin()
+    {
+        return m_bodies.begin();
+    }
+    auto end()
+    {
+        return m_bodies.end();
+    }
+
+    const body2D::const_ptr &operator[](std::size_t index) const;
+    const body2D::ptr &operator[](std::size_t index);
 
     virtual glm::vec3 force(const body2D &body) const = 0;
 
@@ -46,14 +67,14 @@ class behaviour2D : kit::non_copyable,
 #endif
 
   protected:
-    std::vector<body2D::ptr> m_included;
+    std::vector<body2D::ptr> m_bodies;
 
   private:
     world2D *m_world = nullptr;
 
     void apply_force_to_bodies();
 
-    friend class world2D;
+    friend class behaviour_manager2D;
 };
 
 } // namespace ppx
