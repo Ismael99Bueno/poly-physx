@@ -44,12 +44,10 @@ class spring2D : public kit::identifiable<>, public kit::indexable
     float potential_energy() const;
     float energy() const;
 
-  private:
-    world2D *m_world = nullptr;
-
     void apply_force_to_bodies();
 
-    friend class world2D;
+  private:
+    world2D *m_world = nullptr;
 };
 
 } // namespace ppx
