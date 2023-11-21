@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/collision_detection2D.hpp"
+#include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/world2D.hpp"
 
 #include "geo/intersection.hpp"
@@ -70,7 +70,7 @@ bool collision_detection2D::circle_narrow_collision_check(const body2D &body1, c
                                                           collision2D *colis) const
 {
     const geo::circle &c1 = body1.shape<geo::circle>(), &c2 = body2.shape<geo::circle>();
-    if (!geo::intersect(c1, c2))
+    if (!geo::intersects(c1, c2))
         return false;
     const glm::vec2 mtv = geo::mtv(c1, c2);
     const auto &[contact1, contact2] = geo::contact_points(c1, c2);
