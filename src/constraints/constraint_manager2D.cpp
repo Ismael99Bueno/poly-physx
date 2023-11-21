@@ -5,12 +5,11 @@
 
 namespace ppx
 {
-constraint_manager2D::constraint_manager2D(world2D &world, const std::size_t allocations) : m_world(world)
+constraint_manager2D::constraint_manager2D(world2D &world) : m_world(world)
 {
-    m_constraints.reserve(allocations);
 }
 
-bool constraint_manager2D::remove_constraint(std::size_t index, const kit::event<const constraint2D &> &event_callback)
+bool constraint_manager2D::remove(std::size_t index)
 {
     if (index >= m_constraints.size())
     {
@@ -18,54 +17,131 @@ bool constraint_manager2D::remove_constraint(std::size_t index, const kit::event
                  m_constraints.size())
         return false;
     }
-    event_callback(*m_constraints[index]);
+    m_world.events.on_constraint_removal(*m_constraints[index]);
     m_constraints.erase(m_constraints.begin() + (long)index);
     return true;
 }
-bool constraint_manager2D::remove_constraint(const constraint2D *ctr,
-                                             const kit::event<const constraint2D &> &event_callback)
+bool constraint_manager2D::remove(const constraint2D *ctr)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if (it->get() == ctr)
         {
-            event_callback(*ctr);
+            m_world.events.on_constraint_removal(*ctr);
             m_constraints.erase(it);
             return true;
         }
     return false;
 }
-bool constraint_manager2D::remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback)
+
+const constraint2D &constraint_manager2D::operator[](std::size_t index) const
+{
+    return *m_constraints[index];
+}
+constraint2D &constraint_manager2D::operator[](std::size_t index)
+{
+    return *m_constraints[index];
+}
+
+static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<kit::scope<constraint2D>> &vec)
+{
+    for (std::size_t i = 0; i < vec.size(); i++)
+        if (vec[i]->id == id)
+            return i;
+    return {};
+}
+
+const constraint2D *constraint_manager2D::from_id(const kit::uuid id) const
+{
+    const auto index = index_from_id(id, m_constraints);
+    return index ? m_constraints[index.value()].get() : nullptr;
+}
+constraint2D *constraint_manager2D::from_id(const kit::uuid id)
+{
+    const auto index = index_from_id(id, m_constraints);
+    return index ? m_constraints[index.value()].get() : nullptr;
+}
+
+std::vector<const constraint2D *> constraint_manager2D::from_ids(const std::vector<kit::uuid> &ids) const
+{
+    KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
+                     "IDs list must not contain duplicates!")
+
+    std::vector<const constraint2D *> constraints;
+    if (ids.empty())
+        return constraints;
+
+    constraints.reserve(m_constraints.size());
+    for (const auto &ctr : m_constraints)
+    {
+        bool found_match = true;
+        for (kit::uuid id : ids)
+            if (!ctr->contains(id))
+            {
+                found_match = false;
+                break;
+            }
+        if (found_match)
+            constraints.push_back(ctr.get());
+    }
+    return constraints;
+}
+std::vector<constraint2D *> constraint_manager2D::from_ids(const std::vector<kit::uuid> &ids)
+{
+    KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
+                     "IDs list must not contain duplicates!")
+
+    std::vector<constraint2D *> constraints;
+    if (ids.empty())
+        return constraints;
+
+    constraints.reserve(m_constraints.size());
+    for (const auto &ctr : m_constraints)
+    {
+        bool found_match = true;
+        for (kit::uuid id : ids)
+            if (!ctr->contains(id))
+            {
+                found_match = false;
+                break;
+            }
+        if (found_match)
+            constraints.push_back(ctr.get());
+    }
+    return constraints;
+}
+
+bool constraint_manager2D::remove(kit::uuid id)
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if ((*it)->id == id)
         {
-            event_callback(**it);
+            m_world.events.on_constraint_removal(**it);
             m_constraints.erase(it);
             return true;
         }
     return false;
 }
 
-void constraint_manager2D::clear_constraints(const kit::event<const constraint2D &> &event_callback)
+void constraint_manager2D::clear()
 {
     for (const auto &ctr : m_constraints)
-        event_callback(*ctr);
+        m_world.events.on_constraint_removal(*ctr);
     m_constraints.clear();
 }
 
-void constraint_manager2D::validate(const kit::event<const constraint2D &> &event_callback)
+void constraint_manager2D::validate()
 {
     for (auto it = m_constraints.begin(); it != m_constraints.end();)
         if (!(*it)->valid())
         {
-            event_callback(**it);
+            m_world.events.on_constraint_removal(**it);
             it = m_constraints.erase(it);
         }
         else
             ++it;
 }
 
-void constraint_manager2D::solve_constraints() const
+void constraint_manager2D::solve() const
 {
     KIT_PERF_FUNCTION()
     if (m_constraints.empty())

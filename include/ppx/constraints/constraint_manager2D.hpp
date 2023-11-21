@@ -17,10 +17,9 @@ class world2D;
 class constraint_manager2D final : kit::non_copyable
 {
   public:
-    constraint_manager2D(world2D &world, std::size_t allocations);
+    constraint_manager2D(world2D &world);
 
-    template <typename T, class... ConstraintArgs>
-    T *add_constraint(const kit::event<constraint2D *> &event_callback, ConstraintArgs &&...args)
+    template <typename T, class... ConstraintArgs> T *add(ConstraintArgs &&...args)
     {
         static_assert(std::is_base_of_v<constraint2D, T>, "Constraint must inherit from constraint2D!");
         auto ctr = kit::make_scope<T>(std::forward<ConstraintArgs>(args)...);
@@ -30,18 +29,46 @@ class constraint_manager2D final : kit::non_copyable
         ptr->m_world = &m_world;
 
         KIT_ASSERT_ERROR(ptr->valid(), "The constraint must be valid before it can be added into the simulation")
-        event_callback(ptr);
+        m_world.events.on_constraint_addition(ptr);
         return ptr;
     }
 
-    bool remove_constraint(std::size_t index, const kit::event<const constraint2D &> &event_callback);
-    bool remove_constraint(const constraint2D *ctr, const kit::event<const constraint2D &> &event_callback);
-    bool remove_constraint(kit::uuid id, const kit::event<const constraint2D &> &event_callback);
+    bool remove(std::size_t index);
+    bool remove(const constraint2D *ctr);
+    bool remove(kit::uuid id);
 
-    void clear_constraints(const kit::event<const constraint2D &> &event_callback);
-    void validate(const kit::event<const constraint2D &> &event_callback);
+    auto begin() const
+    {
+        return m_constraints.begin();
+    }
+    auto end() const
+    {
+        return m_constraints.end();
+    }
 
-    void solve_constraints() const;
+    auto begin()
+    {
+        return m_constraints.begin();
+    }
+    auto end()
+    {
+        return m_constraints.end();
+    }
+
+    const constraint2D &operator[](std::size_t index) const;
+    constraint2D &operator[](std::size_t index);
+
+    const constraint2D *from_id(kit::uuid id) const;
+    constraint2D *from_id(kit::uuid id);
+
+    std::vector<const constraint2D *> from_ids(const std::vector<kit::uuid> &ids) const;
+    std::vector<constraint2D *> from_ids(const std::vector<kit::uuid> &ids);
+
+    std::size_t size() const;
+    void clear();
+    void validate();
+
+    void solve() const;
 
     const std::vector<kit::scope<constraint2D>> &constraints() const;
 
