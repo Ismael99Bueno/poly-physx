@@ -42,7 +42,7 @@ class collision_detection2D
     {
     }
 
-    friend class world2D;
+    friend class collision_manager2D;
 };
 } // namespace ppx
 

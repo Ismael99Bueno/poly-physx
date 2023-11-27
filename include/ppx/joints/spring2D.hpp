@@ -48,6 +48,7 @@ class spring2D : public kit::identifiable<>, public kit::indexable
 
   private:
     world2D *m_world = nullptr;
+    friend class spring_manager2D;
 };
 
 } // namespace ppx

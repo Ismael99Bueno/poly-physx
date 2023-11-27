@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/sort_sweep_detection2D.hpp"
+#include "ppx/collision/detection/sort_sweep_detection2D.hpp"
 #include "ppx/world2D.hpp"
 
 namespace ppx
@@ -21,8 +21,8 @@ void sort_sweep_detection2D::on_attach()
     m_world->events.on_body_addition += m_add_edge;
     m_world->events.on_late_body_removal += m_remove_edge;
 
-    for (std::size_t i = 0; i < m_world->size(); i++)
-        m_add_edge((*m_world)[i]);
+    for (std::size_t i = 0; i < m_world->bodies.size(); i++)
+        m_add_edge(m_world->bodies.ptr(i));
 }
 
 sort_sweep_detection2D::~sort_sweep_detection2D()

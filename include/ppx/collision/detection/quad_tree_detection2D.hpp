@@ -2,7 +2,7 @@
 #define PPX_QUAD_TREE_DETECTION2D_HPP
 
 #include "ppx/collision/detection/collision_detection2D.hpp"
-#include "ppx/collision/quad_tree2D.hpp"
+#include "ppx/collision/detection/quad_tree2D.hpp"
 
 namespace ppx
 {

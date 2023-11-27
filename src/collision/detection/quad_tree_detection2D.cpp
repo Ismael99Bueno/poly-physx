@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/quad_tree_detection2D.hpp"
+#include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/profile/perf.hpp"
 #include "kit/utility/multithreading.hpp"
@@ -78,11 +78,11 @@ void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();
     geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
-    for (const body2D &body : m_world->bodies())
+    for (const body2D &body : m_world->bodies)
         aabb += body.shape().bounding_box();
 
     m_quad_tree.aabb = aabb;
-    for (const body2D &body : m_world->bodies())
+    for (const body2D &body : m_world->bodies)
         m_quad_tree.insert(&body);
 }
 

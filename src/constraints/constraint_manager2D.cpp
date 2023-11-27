@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-constraint_manager2D::constraint_manager2D(world2D &world) : m_world(world)
+constraint_manager2D::constraint_manager2D(world2D &world) : m_world(world), m_events(world.events)
 {
 }
 
@@ -139,6 +139,11 @@ void constraint_manager2D::validate()
         }
         else
             ++it;
+}
+
+std::size_t constraint_manager2D::size() const
+{
+    return m_constraints.size();
 }
 
 void constraint_manager2D::solve() const

@@ -43,8 +43,6 @@ class distance_joint2D : public constraint2D
 
     void warmup() override;
     void solve() override;
-
-    friend class world2D;
 };
 } // namespace ppx
 #endif

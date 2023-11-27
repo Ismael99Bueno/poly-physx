@@ -2,13 +2,13 @@
 #define PPX_COLLISION_MANAGER2D_HPP
 
 #include "kit/memory/scope.hpp"
+#include "kit/utility/utils.hpp"
+#include "ppx/collision/detection/quad_tree_detection2D.hpp"
+#include "ppx/collision/solvers/spring_solver2D.hpp"
 
 namespace ppx
 {
 class world2D;
-class collision_detection2D;
-class collision_solver2D;
-
 class collision_manager2D
 {
   public:
@@ -35,6 +35,8 @@ class collision_manager2D
 
     template <typename T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
     {
+        static_assert(std::is_base_of_v<collision_detection2D, T>,
+                      "Detection method must inherit from collision_detection2D");
         auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_detection = std::move(coldet);
@@ -44,6 +46,8 @@ class collision_manager2D
     }
     template <typename T, class... ColSolvArgs> T *set_solver(ColSolvArgs &&...args)
     {
+        static_assert(std::is_base_of_v<collision_solver2D, T>,
+                      "Collision solver must inherit from collision_solver2D");
         auto coldet = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_solver = std::move(coldet);

@@ -46,7 +46,7 @@ float behaviour2D::kinetic_energy() const
     return ke;
 }
 
-const body2D::const_ptr &behaviour2D::operator[](std::size_t index) const
+body2D::const_ptr behaviour2D::operator[](std::size_t index) const
 {
     return m_bodies[index];
 }
@@ -107,7 +107,7 @@ bool behaviour2D::decode(const YAML::Node &node)
 
     enabled = node["Enabled"].as<bool>();
     for (const YAML::Node &n : node["Bodies"])
-        add((*m_world)[n.as<std::size_t>()]);
+        add(m_world->bodies.ptr(n.as<std::size_t>()));
     return true;
 }
 #endif

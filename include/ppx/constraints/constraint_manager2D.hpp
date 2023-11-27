@@ -1,7 +1,6 @@
 #ifndef PPX_CONSTRAINT_MANAGER2D_HPP
 #define PPX_CONSTRAINT_MANAGER2D_HPP
 
-#include "ppx/body2D.hpp"
 #include "ppx/events/world_events.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/container/stack_vector.hpp"
@@ -29,7 +28,7 @@ class constraint_manager2D final : kit::non_copyable
         ptr->m_world = &m_world;
 
         KIT_ASSERT_ERROR(ptr->valid(), "The constraint must be valid before it can be added into the simulation")
-        m_world.events.on_constraint_addition(ptr);
+        m_events.on_constraint_addition(ptr);
         return ptr;
     }
 
@@ -74,6 +73,7 @@ class constraint_manager2D final : kit::non_copyable
 
   private:
     world2D &m_world;
+    world_events &m_events;
     std::vector<kit::scope<constraint2D>> m_constraints;
 };
 } // namespace ppx

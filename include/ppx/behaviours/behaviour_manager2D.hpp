@@ -3,14 +3,14 @@
 
 #include "kit/memory/scope.hpp"
 #include "kit/interface/non_copyable.hpp"
+#include "ppx/events/world_events.hpp"
+#include "ppx/behaviours/behaviour2D.hpp"
 
 #include <vector>
 
 namespace ppx
 {
 class world2D;
-class behaviour2D;
-
 class behaviour_manager2D : kit::non_copyable
 {
   public:
@@ -33,7 +33,7 @@ class behaviour_manager2D : kit::non_copyable
 
         m_behaviours.push_back(std::move(bhv));
         m_behaviours.back()->m_world = &m_world;
-        events.on_behaviour_addition(ptr);
+        m_events.on_behaviour_addition(ptr);
         return ptr;
     }
 
@@ -76,6 +76,7 @@ class behaviour_manager2D : kit::non_copyable
 
   private:
     world2D &m_world;
+    world_events &m_events;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
 };
 } // namespace ppx

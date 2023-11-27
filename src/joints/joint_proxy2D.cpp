@@ -91,8 +91,8 @@ bool joint_proxy2D::decode(const YAML::Node &node, world2D &world)
     const glm::vec2 a1 = node["Anchor1"].as<glm::vec2>();
     const glm::vec2 a2 = node["Anchor2"].as<glm::vec2>();
 
-    m_body1 = world[index1];
-    m_body2 = world[index2];
+    m_body1 = world.bodies.ptr(index1);
+    m_body2 = world.bodies.ptr(index2);
 
     anchor1(a1);
     anchor2(a2);

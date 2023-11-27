@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/quad_tree2D.hpp"
+#include "ppx/collision/detection/quad_tree2D.hpp"
 #include "geo/intersection.hpp"
 #include "kit/profile/perf.hpp"
 
@@ -18,7 +18,7 @@ void quad_tree2D::insert(const body2D *body)
     KIT_ASSERT_CRITICAL(m_bodies.size() <= max_bodies || rock_bottom(),
                         "Quad tree contains more bodies than allowed! - Contained bodies: {0}, maximum bodies: {1}",
                         m_bodies.size(), max_bodies)
-    if (!geo::intersect(aabb, body->shape().bounding_box()))
+    if (!geo::intersects(aabb, body->shape().bounding_box()))
         return;
     if (full() && !rock_bottom())
         subdivide();

@@ -11,7 +11,6 @@ class constraint_solver2D : public collision_solver2D
     void solve(const std::vector<collision2D> &collisions) const override;
 
     constraint_manager2D *m_manager = nullptr;
-    friend class world2D;
 };
 } // namespace ppx
 

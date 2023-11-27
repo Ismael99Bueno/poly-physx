@@ -1,7 +1,5 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
-#include "ppx/collision/detection/quad_tree_detection2D.hpp"
-#include "ppx/collision/detection/spring_solver2D.hpp"
 
 namespace ppx
 {

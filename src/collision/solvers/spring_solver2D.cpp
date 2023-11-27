@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/spring_solver2D.hpp"
+#include "ppx/collision/solvers/spring_solver2D.hpp"
 #include "kit/profile/perf.hpp"
 
 #include "kit/utility/multithreading.hpp"
@@ -29,9 +29,9 @@ float spring_solver2D::rigidity()
 }
 float spring_solver2D::restitution()
 {
-    KIT_ASSERT_ERROR(restitution_coeff >= 0.f && restitution_coeff < 1.f,
-                     "Restitution coefficient must lie between [0, 1)")
-    return map_zero_one_zero_inf(restitution_coeff, 2.f);
+    KIT_ASSERT_ERROR(restitution_coeff > 0.f && restitution_coeff <= 1.f,
+                     "Restitution coefficient must lie between (0, 1]")
+    return map_one_zero_zero_inf(restitution_coeff, 2.f);
 }
 float spring_solver2D::friction()
 {

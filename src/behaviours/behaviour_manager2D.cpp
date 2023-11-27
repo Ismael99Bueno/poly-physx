@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-behaviour_manager2D::behaviour_manager2D(world2D &world) : m_world(world)
+behaviour_manager2D::behaviour_manager2D(world2D &world) : m_world(world), m_events(world.events)
 {
 }
 
