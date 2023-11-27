@@ -5,6 +5,7 @@
 
 namespace ppx
 {
+class world2D;
 class spring2D : public kit::identifiable<>, public kit::indexable
 {
   public:
@@ -37,6 +38,10 @@ class spring2D : public kit::identifiable<>, public kit::indexable
     float stiffness;
     float dampening;
     float length;
+    world2D *world = nullptr;
+
+    const_ptr as_ptr() const;
+    ptr as_ptr();
 
     glm::vec4 force() const;
 
@@ -47,7 +52,6 @@ class spring2D : public kit::identifiable<>, public kit::indexable
     void apply_force_to_bodies();
 
   private:
-    world2D *m_world = nullptr;
     friend class spring_manager2D;
 };
 

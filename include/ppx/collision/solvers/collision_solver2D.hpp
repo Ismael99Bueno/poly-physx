@@ -15,9 +15,9 @@ class collision_solver2D
     static inline float restitution_coeff = 0.4f;
     static inline float friction_coeff = 0.6f;
 
-  protected:
-    world2D *m_world = nullptr;
+    world2D *world = nullptr;
 
+  protected:
   private:
     virtual void on_attach()
     {

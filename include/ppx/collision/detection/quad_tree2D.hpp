@@ -12,12 +12,12 @@ class quad_tree2D final
 {
   public:
     quad_tree2D(const glm::vec2 &min, const glm::vec2 &max, std::size_t max_bodies = 12, std::uint32_t depth = 0);
-    using partition = std::vector<const body2D *>;
+    using partition = std::vector<body2D *>;
 
     geo::aabb2D aabb;
 
     void collect_partitions(std::vector<const partition *> &partitions) const;
-    void insert(const body2D *body);
+    void insert(body2D *body);
     void clear();
 
     bool partitioned() const;
@@ -43,7 +43,7 @@ class quad_tree2D final
     void create_children();
     void reset_children();
     void subdivide();
-    void insert_to_children(const body2D *body);
+    void insert_to_children(body2D *body);
 
     quad_tree2D(quad_tree2D &&) = default;
     quad_tree2D &operator=(quad_tree2D &&) = default;

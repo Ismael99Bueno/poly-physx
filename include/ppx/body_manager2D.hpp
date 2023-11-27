@@ -64,6 +64,7 @@ class body_manager2D
 
     std::size_t size() const;
     void clear();
+    void validate();
 
   private:
     world2D &m_world;

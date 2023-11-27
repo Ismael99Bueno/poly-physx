@@ -21,28 +21,26 @@ class collision_detection2D
     const std::vector<collision2D> &cached_collisions();
     void clear_cached_collisions();
 
+    world2D *world = nullptr;
+
+    virtual void on_attach()
+    {
+    }
+
   protected:
     std::vector<collision2D> m_collisions;
 #ifdef PPX_MULTITHREADED
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
 #endif
-    world2D *m_world = nullptr;
 
-    bool gather_collision_data(const body2D &body1, const body2D &body2, collision2D *colis) const;
-    bool narrow_collision_check(const body2D &body1, const body2D &body2, collision2D *colis) const;
+    bool gather_collision_data(body2D &body1, body2D &body2, collision2D *colis) const;
+    bool narrow_collision_check(body2D &body1, body2D &body2, collision2D *colis) const;
 
-    bool mixed_narrow_collision_check(const body2D &body1, const body2D &body2, collision2D *colis) const;
-    bool circle_narrow_collision_check(const body2D &body1, const body2D &body2, collision2D *colis) const;
+    bool mixed_narrow_collision_check(body2D &body1, body2D &body2, collision2D *colis) const;
+    bool circle_narrow_collision_check(body2D &body1, body2D &body2, collision2D *colis) const;
 
     void try_enter_or_stay_callback(const collision2D &c) const;
-    void try_exit_callback(const body2D &body1, const body2D &body2) const;
-
-  private:
-    virtual void on_attach()
-    {
-    }
-
-    friend class collision_manager2D;
+    void try_exit_callback(body2D &body1, body2D &body2) const;
 };
 } // namespace ppx
 

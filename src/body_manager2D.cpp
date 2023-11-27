@@ -117,6 +117,7 @@ body2D::ptr body_manager2D::operator[](const glm::vec2 &point)
 body2D::ptr body_manager2D::process_addition(body2D &body)
 {
     body.index = m_bodies.size() - 1;
+    body.world = &m_world;
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
 
     const kit::transform2D &transform = body.transform();
@@ -175,6 +176,16 @@ bool body_manager2D::remove(kit::uuid id)
         if (body.id == id)
             return remove(body.index);
     return false;
+}
+
+void body_manager2D::validate()
+{
+    std::size_t index = 0;
+    for (auto it = m_bodies.begin(); it != m_bodies.end(); index++, ++it)
+    {
+        it->world = &m_world;
+        it->index = index;
+    }
 }
 
 void body_manager2D::send_data_to_state(rk::state &state)

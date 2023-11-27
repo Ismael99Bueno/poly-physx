@@ -13,6 +13,8 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     constraint2D(const char *name);
     virtual ~constraint2D() = default;
 
+    world2D *world = nullptr;
+
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const override;
     virtual bool decode(const YAML::Node &node) override;
@@ -26,8 +28,6 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     bool contains(const body2D &body) const;
 
   protected:
-    world2D *m_world = nullptr;
-
   private:
     virtual bool valid() const = 0;
 

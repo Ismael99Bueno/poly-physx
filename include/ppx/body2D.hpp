@@ -13,6 +13,7 @@
 
 namespace ppx
 {
+class world2D;
 class body2D : public kit::identifiable<>, public kit::indexable
 {
   public:
@@ -61,6 +62,11 @@ class body2D : public kit::identifiable<>, public kit::indexable
     float persistent_torque{0.f};
     bool kinematic;
     body_events events;
+
+    world2D *world = nullptr;
+
+    const_ptr as_ptr() const;
+    ptr as_ptr();
 
     float kinetic_energy() const;
 

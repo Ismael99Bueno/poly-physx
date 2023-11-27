@@ -10,8 +10,9 @@ spring_manager2D::spring_manager2D(world2D &world) : m_world(world)
 
 spring2D::ptr spring_manager2D::process_addition(spring2D &sp)
 {
+    sp.world = &m_world;
     sp.index = m_springs.size() - 1;
-    sp.m_world = &m_world;
+    sp.world = &m_world;
 
     const spring2D::ptr sp_ptr = {&m_springs, sp.index};
 
@@ -118,6 +119,11 @@ bool spring_manager2D::remove(kit::uuid id)
     return false;
 }
 
+std::size_t spring_manager2D::size() const
+{
+    return m_springs.size();
+}
+
 void spring_manager2D::clear()
 {
     for (std::size_t i = m_springs.size() - 1; i < m_springs.size(); i--)
@@ -133,15 +139,19 @@ void spring_manager2D::apply_forces()
 
 void spring_manager2D::validate()
 {
-    for (auto it = m_springs.begin(); it != m_springs.end();)
+    std::size_t index = 0;
+    for (auto it = m_springs.begin(); it != m_springs.end(); index++)
         if (!it->joint.valid())
         {
             m_world.events.on_early_spring_removal(*it);
-            std::size_t index = it->index;
             it = m_springs.erase(it);
             m_world.events.on_late_spring_removal(std::move(index));
         }
         else
+        {
+            it->world = &m_world;
+            it->index = index;
             ++it;
+        }
 }
 } // namespace ppx

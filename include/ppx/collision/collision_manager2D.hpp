@@ -40,7 +40,7 @@ class collision_manager2D
         auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_detection = std::move(coldet);
-        m_collision_detection->m_world = &m_world;
+        m_collision_detection->world = &m_world;
         m_collision_detection->on_attach();
         return ptr;
     }
@@ -51,7 +51,7 @@ class collision_manager2D
         auto coldet = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
         T *ptr = coldet.get();
         m_collision_solver = std::move(coldet);
-        m_collision_solver->m_world = &m_world;
+        m_collision_solver->world = &m_world;
         m_collision_detection->on_attach();
         return ptr;
     }

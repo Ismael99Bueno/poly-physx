@@ -102,7 +102,7 @@ void distance_joint2D::warmup()
 {
     if (kit::approaches_zero(m_accumulated_lambda))
         return;
-    m_accumulated_lambda *= m_world->timestep_ratio();
+    m_accumulated_lambda *= world->timestep_ratio();
     apply_lambda(m_accumulated_lambda);
 }
 void distance_joint2D::solve()
@@ -144,7 +144,7 @@ bool distance_joint2D::decode(const YAML::Node &node)
     if (!node.IsMap() || node.size() != 3)
         return false;
 
-    if (!joint.decode(node["Joint2D"], *m_world))
+    if (!joint.decode(node["Joint2D"], *world))
         return false;
     if (!constraint2D::decode(node["Constraint2D"]))
         return false;

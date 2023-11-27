@@ -36,8 +36,8 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_st(
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
                 collision2D colis;
-                const body2D &body1 = *(*partition)[i];
-                const body2D &body2 = *(*partition)[j];
+                body2D &body1 = *(*partition)[i];
+                body2D &body2 = *(*partition)[j];
                 if (gather_collision_data(body1, body2, &colis))
                 {
                     try_enter_or_stay_callback(colis);
@@ -57,8 +57,8 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_mt(
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
                 collision2D colis;
-                const body2D &body1 = *(*partition)[i];
-                const body2D &body2 = *(*partition)[j];
+                body2D &body1 = *(*partition)[i];
+                body2D &body2 = *(*partition)[j];
                 if (gather_collision_data(body1, body2, &colis))
                 {
                     try_enter_or_stay_callback(colis);
@@ -78,11 +78,11 @@ void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();
     geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
-    for (const body2D &body : m_world->bodies)
+    for (const body2D &body : world->bodies)
         aabb += body.shape().bounding_box();
 
     m_quad_tree.aabb = aabb;
-    for (const body2D &body : m_world->bodies)
+    for (body2D &body : world->bodies)
         m_quad_tree.insert(&body);
 }
 

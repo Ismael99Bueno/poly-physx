@@ -87,6 +87,7 @@ std::vector<float> world2D::create_state_derivative() const
 
 void world2D::validate()
 {
+    bodies.validate();
     constraints.validate();
     behaviours.validate();
     springs.validate();
@@ -180,7 +181,7 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
         for (const YAML::Node &n : node["Springs"])
         {
             spring2D sp;
-            sp.m_world = &world;
+            sp.world = &world;
             n.as<spring2D>(sp);
             world.springs.add(sp);
         }
@@ -190,7 +191,7 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
             if (n["Distance"])
             {
                 distance_joint2D dj;
-                dj.m_world = &world;
+                dj.world = &world;
                 n["Distance"].as<distance_joint2D>(dj);
                 world.constraints.add<distance_joint2D>(dj);
             }

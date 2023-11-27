@@ -18,10 +18,10 @@ class sort_sweep_detection2D : public collision_detection2D, kit::non_copyable
             RIGHT
         };
 
-        edge(const body2D::const_ptr &body, end_side end) : body(body), end(end)
+        edge(const body2D::ptr &body, end_side end) : body(body), end(end)
         {
         }
-        body2D::const_ptr body;
+        body2D::ptr body;
         end_side end;
 
         float value() const

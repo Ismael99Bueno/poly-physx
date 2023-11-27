@@ -75,6 +75,15 @@ void body2D::reset_simulation_forces()
     m_torque = 0.f;
 }
 
+body2D::const_ptr body2D::as_ptr() const
+{
+    return world->bodies.ptr(index);
+}
+body2D::ptr body2D::as_ptr()
+{
+    return world->bodies.ptr(index);
+}
+
 float body2D::kinetic_energy() const
 {
     return 0.5f * (m_mass * glm::length2(m_velocity) + m_angular_velocity * m_angular_velocity * shape().inertia());

@@ -83,11 +83,6 @@ void behaviour2D::apply_force_to_bodies()
     }
 }
 
-const std::vector<body2D::ptr> &behaviour2D::bodies() const
-{
-    return m_bodies;
-}
-
 #ifdef KIT_USE_YAML_CPP
 YAML::Node behaviour2D::encode() const
 {
@@ -101,13 +96,13 @@ YAML::Node behaviour2D::encode() const
 }
 bool behaviour2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 2 || !m_world)
+    if (!node.IsMap() || node.size() < 2 || !world)
         return false;
     clear();
 
     enabled = node["Enabled"].as<bool>();
     for (const YAML::Node &n : node["Bodies"])
-        add(m_world->bodies.ptr(n.as<std::size_t>()));
+        add(world->bodies.ptr(n.as<std::size_t>()));
     return true;
 }
 #endif

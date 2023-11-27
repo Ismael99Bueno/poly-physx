@@ -32,7 +32,7 @@ class behaviour_manager2D : kit::non_copyable
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
-        m_behaviours.back()->m_world = &m_world;
+        m_behaviours.back()->world = &m_world;
         m_events.on_behaviour_addition(ptr);
         return ptr;
     }

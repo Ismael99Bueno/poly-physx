@@ -20,6 +20,8 @@ class behaviour2D : kit::non_copyable,
     behaviour2D(const std::string &name, std::size_t allocations = 50);
     virtual ~behaviour2D() = default;
 
+    world2D *world = nullptr;
+
     void validate();
 
     void add(const body2D::ptr &body);
@@ -47,6 +49,8 @@ class behaviour2D : kit::non_copyable,
     body2D::const_ptr operator[](std::size_t index) const;
     const body2D::ptr &operator[](std::size_t index);
 
+    void apply_force_to_bodies();
+
     virtual glm::vec3 force(const body2D &body) const = 0;
 
     float kinetic_energy() const;
@@ -59,8 +63,6 @@ class behaviour2D : kit::non_copyable,
     void clear();
     std::size_t size() const;
 
-    const std::vector<body2D::ptr> &bodies() const;
-
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
@@ -68,13 +70,6 @@ class behaviour2D : kit::non_copyable,
 
   protected:
     std::vector<body2D::ptr> m_bodies;
-
-  private:
-    world2D *m_world = nullptr;
-
-    void apply_force_to_bodies();
-
-    friend class behaviour_manager2D;
 };
 
 } // namespace ppx

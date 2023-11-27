@@ -25,7 +25,7 @@ class constraint_manager2D final : kit::non_copyable
         T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));
-        ptr->m_world = &m_world;
+        ptr->world = &m_world;
 
         KIT_ASSERT_ERROR(ptr->valid(), "The constraint must be valid before it can be added into the simulation")
         m_events.on_constraint_addition(ptr);

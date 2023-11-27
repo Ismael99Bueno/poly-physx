@@ -138,7 +138,10 @@ void constraint_manager2D::validate()
             it = m_constraints.erase(it);
         }
         else
+        {
+            (*it)->world = &m_world;
             ++it;
+        }
 }
 
 std::size_t constraint_manager2D::size() const

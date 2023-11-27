@@ -76,7 +76,7 @@ void contact_constraint2D::warmup()
 {
     if (kit::approaches_zero(m_accumulated_lambda))
         return;
-    m_accumulated_lambda *= m_world->timestep_ratio();
+    m_accumulated_lambda *= world->timestep_ratio();
     apply_lambda(m_accumulated_lambda);
 }
 void contact_constraint2D::solve()

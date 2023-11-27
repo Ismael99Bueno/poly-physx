@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/joints/spring2D.hpp"
+#include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
 namespace ppx
@@ -16,6 +17,15 @@ spring2D::spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm
 spring2D::spring2D(const specs &spc)
     : joint(spc.joint), stiffness(spc.stiffness), dampening(spc.dampening), length(spc.length)
 {
+}
+
+spring2D::const_ptr spring2D::as_ptr() const
+{
+    return world->springs.ptr(index);
+}
+spring2D::ptr spring2D::as_ptr()
+{
+    return world->springs.ptr(index);
 }
 
 glm::vec4 spring2D::force() const
@@ -84,7 +94,7 @@ YAML::Node spring2D::serializer::encode(const spring2D &sp) const
 }
 bool spring2D::serializer::decode(const YAML::Node &node, spring2D &sp) const
 {
-    if (!sp.joint.decode(node, *sp.m_world))
+    if (!sp.joint.decode(node, *sp.world))
         return false;
     sp.id = kit::uuid(node["UUID"].as<std::uint64_t>());
     sp.stiffness = node["Stiffness"].as<float>();

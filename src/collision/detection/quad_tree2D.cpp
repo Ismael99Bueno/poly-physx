@@ -13,7 +13,7 @@ quad_tree2D::quad_tree2D(const glm::vec2 &min, const glm::vec2 &max, const std::
     m_bodies.reserve(4 * max_bodies);
 }
 
-void quad_tree2D::insert(const body2D *body)
+void quad_tree2D::insert(body2D *body)
 {
     KIT_ASSERT_CRITICAL(m_bodies.size() <= max_bodies || rock_bottom(),
                         "Quad tree contains more bodies than allowed! - Contained bodies: {0}, maximum bodies: {1}",
@@ -76,12 +76,12 @@ void quad_tree2D::subdivide()
         reset_children();
     else
         create_children();
-    for (const body2D *body : m_bodies)
+    for (body2D *body : m_bodies)
         insert_to_children(body);
     m_bodies.clear();
 }
 
-void quad_tree2D::insert_to_children(const body2D *body)
+void quad_tree2D::insert_to_children(body2D *body)
 {
     for (const auto &q : m_children)
         q->insert(body);
