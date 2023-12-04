@@ -24,6 +24,7 @@ bool world2D::raw_forward(const float timestep)
 
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     collision.detection()->clear_cached_collisions();
+    constraints.reset_delegated_collisions();
     return valid;
 }
 bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
@@ -37,6 +38,7 @@ bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiteratio
 
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     collision.detection()->clear_cached_collisions();
+    constraints.reset_delegated_collisions();
     return valid;
 }
 bool world2D::embedded_forward(float &timestep)
@@ -50,6 +52,7 @@ bool world2D::embedded_forward(float &timestep)
 
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     collision.detection()->clear_cached_collisions();
+    constraints.reset_delegated_collisions();
     return valid;
 }
 

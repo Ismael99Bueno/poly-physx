@@ -2,6 +2,7 @@
 #define PPX_CONSTRAINT_MANAGER2D_HPP
 
 #include "ppx/events/world_events.hpp"
+#include "ppx/constraints/contact_constraint2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/container/stack_vector.hpp"
 #include "kit/memory/scope.hpp"
@@ -63,18 +64,22 @@ class constraint_manager2D final : kit::non_copyable
     std::vector<const constraint2D *> from_ids(const std::vector<kit::uuid> &ids) const;
     std::vector<constraint2D *> from_ids(const std::vector<kit::uuid> &ids);
 
+    void delegate_collisions(const std::vector<collision2D> *collisions);
+    void reset_delegated_collisions();
+
     std::size_t size() const;
     void clear();
     void validate();
 
-    void solve() const;
-
-    const std::vector<kit::scope<constraint2D>> &constraints() const;
+    void solve();
 
   private:
     world2D &m_world;
     world_events &m_events;
     std::vector<kit::scope<constraint2D>> m_constraints;
+
+    const std::vector<collision2D> *m_collisions;
+    std::vector<contact_constraint2D> m_contacts;
 };
 } // namespace ppx
 

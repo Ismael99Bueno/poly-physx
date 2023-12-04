@@ -149,23 +149,39 @@ std::size_t constraint_manager2D::size() const
     return m_constraints.size();
 }
 
-void constraint_manager2D::solve() const
+void constraint_manager2D::delegate_collisions(const std::vector<collision2D> *collisions)
+{
+    m_collisions = collisions;
+}
+void constraint_manager2D::reset_delegated_collisions()
+{
+    m_collisions = nullptr;
+}
+
+void constraint_manager2D::solve()
 {
     KIT_PERF_FUNCTION()
-    if (m_constraints.empty())
+    if (m_constraints.empty() && !m_collisions)
         return;
     for (const auto &ctr : m_constraints)
         ctr->warmup();
 
+    if (m_collisions)
+    {
+        m_contacts.clear();
+        for (const collision2D &collision : *m_collisions)
+            m_contacts.emplace_back(collision);
+    }
+
     const std::size_t iters = 10;
     for (std::size_t i = 0; i < iters; i++)
+    {
         for (const auto &ctr : m_constraints)
             ctr->solve();
-}
-
-const std::vector<kit::scope<constraint2D>> &constraint_manager2D::constraints() const
-{
-    return m_constraints;
+        if (m_collisions)
+            for (contact_constraint2D &contact : m_contacts)
+                contact.solve();
+    }
 }
 
 } // namespace ppx
