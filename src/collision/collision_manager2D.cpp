@@ -11,7 +11,7 @@ collision_manager2D::collision_manager2D(world2D &world) : m_world(world)
 
 void collision_manager2D::solve()
 {
-    const auto &collisions = m_collision_detection->cached_collisions();
+    const auto &collisions = m_collision_detection->detect_collisions_cached();
     m_collision_solver->solve(collisions);
 }
 } // namespace ppx

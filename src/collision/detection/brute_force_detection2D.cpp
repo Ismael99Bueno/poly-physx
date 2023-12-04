@@ -12,17 +12,17 @@
 
 namespace ppx
 {
-const std::vector<collision2D> &brute_force_detection2D::detect_collisions()
+void brute_force_detection2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
-    return detect_collisions_mt();
+    detect_collisions_mt();
 #else
-    return detect_collisions_st();
+    detect_collisions_st();
 #endif
 }
 
-const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
+void brute_force_detection2D::detect_collisions_st()
 {
     for (std::size_t i = 0; i < world->bodies.size(); i++)
         for (std::size_t j = i + 1; j < world->bodies.size(); j++)
@@ -39,9 +39,8 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_st()
                 try_exit_callback(body1, body2);
         }
     // DEBUG COLLISION COUNT CHECK GOES HERE
-    return m_collisions;
 }
-const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
+void brute_force_detection2D::detect_collisions_mt()
 {
     const auto exec = [this](const std::size_t thread_idx, body2D &body1) {
         for (std::size_t j = 0; j < world->bodies.size(); j++)
@@ -60,6 +59,5 @@ const std::vector<collision2D> &brute_force_detection2D::detect_collisions_mt()
     kit::for_each_mt<PPX_THREAD_COUNT, body2D>(world->bodies, exec);
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.begin(), pairs.begin(), pairs.end());
-    return m_collisions;
 }
 } // namespace ppx

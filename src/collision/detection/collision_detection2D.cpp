@@ -25,11 +25,15 @@ static bool broad_collision_check(body2D &body1, body2D &body2)
     return body1 != body2 && (body1.kinematic || body2.kinematic) && geo::may_intersect(body1.shape(), body2.shape());
 }
 
-const std::vector<collision2D> &collision_detection2D::cached_collisions()
+const std::vector<collision2D> &collision_detection2D::detect_collisions_cached()
 {
     KIT_PERF_FUNCTION()
     if (m_collisions.empty())
-        return detect_collisions();
+    {
+        detect_collisions();
+        m_collision_count = m_collisions.size();
+        return m_collisions;
+    }
 
 #ifdef PPX_MULTITHREADED
     kit::for_each_mt<PPX_THREAD_COUNT, collision2D>(m_collisions, [this](std::size_t thread_index, collision2D &colis) {
@@ -50,6 +54,11 @@ void collision_detection2D::clear_cached_collisions()
     for (auto &collisions : m_mt_collisions)
         collisions.clear();
 #endif
+}
+
+std::size_t collision_detection2D::last_collision_count() const
+{
+    return m_collision_count;
 }
 
 bool collision_detection2D::narrow_collision_check(body2D &body1, body2D &body2, collision2D *colis) const

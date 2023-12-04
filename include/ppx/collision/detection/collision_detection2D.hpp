@@ -17,11 +17,12 @@ class collision_detection2D
   public:
     virtual ~collision_detection2D() = default;
 
-    virtual const std::vector<collision2D> &detect_collisions() = 0;
-    const std::vector<collision2D> &cached_collisions();
+    world2D *world = nullptr;
+
+    const std::vector<collision2D> &detect_collisions_cached();
     void clear_cached_collisions();
 
-    world2D *world = nullptr;
+    std::size_t last_collision_count() const;
 
     virtual void on_attach()
     {
@@ -41,6 +42,11 @@ class collision_detection2D
 
     void try_enter_or_stay_callback(const collision2D &c) const;
     void try_exit_callback(body2D &body1, body2D &body2) const;
+
+  private:
+    virtual void detect_collisions() = 0;
+
+    std::size_t m_collision_count = 0;
 };
 } // namespace ppx
 

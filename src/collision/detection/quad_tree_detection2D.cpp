@@ -12,7 +12,7 @@
 
 namespace ppx
 {
-const std::vector<collision2D> &quad_tree_detection2D::detect_collisions()
+void quad_tree_detection2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
     update_quad_tree();
@@ -22,14 +22,13 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions()
     m_quad_tree.collect_partitions(partitions);
 
 #ifdef PPX_MULTITHREADED
-    return detect_collisions_mt(partitions);
+    detect_collisions_mt(partitions);
 #else
-    return detect_collisions_st(partitions);
+    detect_collisions_st(partitions);
 #endif
 }
 
-const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_st(
-    const std::vector<const quad_tree2D::partition *> &partitions)
+void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tree2D::partition *> &partitions)
 {
     for (const quad_tree2D::partition *partition : partitions)
         for (std::size_t i = 0; i < partition->size(); i++)
@@ -47,10 +46,8 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_st(
                     try_exit_callback(body1, body2);
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
-    return m_collisions;
 }
-const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_mt(
-    const std::vector<const quad_tree2D::partition *> &partitions)
+void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tree2D::partition *> &partitions)
 {
     const auto exec = [this](const std::size_t thread_idx, const quad_tree2D::partition *partition) {
         for (std::size_t i = 0; i < partition->size(); i++)
@@ -71,7 +68,6 @@ const std::vector<collision2D> &quad_tree_detection2D::detect_collisions_mt(
     kit::const_for_each_mt<PPX_THREAD_COUNT, const quad_tree2D::partition *>(partitions, exec);
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
-    return m_collisions;
 }
 
 void quad_tree_detection2D::update_quad_tree()

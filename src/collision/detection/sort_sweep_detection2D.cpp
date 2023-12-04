@@ -31,7 +31,7 @@ sort_sweep_detection2D::~sort_sweep_detection2D()
     world->events.on_late_body_removal -= m_remove_edge;
 }
 
-const std::vector<collision2D> &sort_sweep_detection2D::detect_collisions()
+void sort_sweep_detection2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
     std::unordered_set<body2D *> eligible;
@@ -57,7 +57,6 @@ const std::vector<collision2D> &sort_sweep_detection2D::detect_collisions()
         }
         else
             eligible.erase(edg.body.raw());
-    return m_collisions;
 }
 
 void sort_sweep_detection2D::sort_edges()
