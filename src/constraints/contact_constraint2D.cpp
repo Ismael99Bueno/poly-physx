@@ -59,7 +59,7 @@ float contact_constraint2D::compute_lambda() const
 
     const float inv_mass = body1->inv_mass() + body2->inv_mass() + body1->inv_inertia() * cross1 * cross1 +
                            body2->inv_inertia() * cross2 * cross2;
-    return -cacc / inv_mass;
+    return -cvel / inv_mass;
 }
 
 void contact_constraint2D::apply_lambda(const float lambda)
@@ -67,11 +67,11 @@ void contact_constraint2D::apply_lambda(const float lambda)
     const glm::vec2 f1 = lambda * m_normal;
     const glm::vec2 f2 = -f1;
 
-    m_collision.current->apply_simulation_force(f1);
-    m_collision.current->apply_simulation_torque(kit::cross2D(m_anchor1, f1));
+    m_collision.current->boost(f1 * m_collision.current->inv_mass());
+    m_collision.current->spin(kit::cross2D(m_anchor1, f1) * m_collision.current->inv_inertia());
 
-    m_collision.incoming->apply_simulation_force(f2);
-    m_collision.incoming->apply_simulation_torque(kit::cross2D(m_anchor2, f2));
+    m_collision.incoming->boost(f2 * m_collision.incoming->inv_mass());
+    m_collision.incoming->spin(kit::cross2D(m_anchor2, f2) * m_collision.incoming->inv_inertia());
 }
 
 void contact_constraint2D::warmup()
