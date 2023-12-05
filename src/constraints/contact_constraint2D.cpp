@@ -43,13 +43,14 @@ float contact_constraint2D::constraint_acceleration() const
 
 float contact_constraint2D::compute_lambda() const
 {
-    const float c = constraint_value();
-    const float cvel = constraint_velocity();
-
     static constexpr float stiffness = 1200.f;
     static constexpr float dampening = 10.f;
+    const float ts = world->current_timestep();
 
-    const float cacc = constraint_acceleration() + c * stiffness + cvel * dampening;
+    const float c = constraint_value();
+    const float cvel = constraint_velocity() * (1.f + ts * dampening) + c * ts * stiffness;
+
+    // const float cacc = constraint_acceleration() + c * stiffness + cvel * dampening;
 
     const float cross1 = kit::cross2D(m_anchor1, m_normal);
     const float cross2 = kit::cross2D(m_anchor2, m_normal);
@@ -59,6 +60,7 @@ float contact_constraint2D::compute_lambda() const
 
     const float inv_mass = body1->inv_mass() + body2->inv_mass() + body1->inv_inertia() * cross1 * cross1 +
                            body2->inv_inertia() * cross2 * cross2;
+
     return -cvel / inv_mass;
 }
 

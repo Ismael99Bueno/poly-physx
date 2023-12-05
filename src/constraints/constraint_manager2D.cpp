@@ -170,7 +170,7 @@ void constraint_manager2D::solve()
     {
         m_contacts.clear();
         for (const collision2D &collision : *m_collisions)
-            m_contacts.emplace_back(collision);
+            m_contacts.emplace_back(collision).world = &m_world;
     }
 
     const std::size_t iters = 10;
