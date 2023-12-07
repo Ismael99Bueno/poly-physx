@@ -31,7 +31,6 @@ const std::vector<collision2D> &collision_detection2D::detect_collisions_cached(
     if (m_collisions.empty())
     {
         detect_collisions();
-        m_collision_count = m_collisions.size();
         return m_collisions;
     }
 
@@ -56,9 +55,9 @@ void collision_detection2D::clear_cached_collisions()
 #endif
 }
 
-std::size_t collision_detection2D::last_collision_count() const
+const std::vector<collision2D> &collision_detection2D::collisions() const
 {
-    return m_collision_count;
+    return m_collisions;
 }
 
 bool collision_detection2D::narrow_collision_check(body2D &body1, body2D &body2, collision2D *colis) const

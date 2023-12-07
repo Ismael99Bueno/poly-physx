@@ -9,9 +9,19 @@ collision_manager2D::collision_manager2D(world2D &world) : m_world(world)
     set_solver<spring_solver2D>();
 }
 
+const collision2D &collision_manager2D::operator[](const std::size_t index) const
+{
+    return m_collision_detection->collisions()[index];
+}
+
 void collision_manager2D::solve()
 {
     const auto &collisions = m_collision_detection->detect_collisions_cached();
     m_collision_solver->solve(collisions);
+}
+
+std::size_t collision_manager2D::size() const
+{
+    return m_collision_detection->collisions().size();
 }
 } // namespace ppx

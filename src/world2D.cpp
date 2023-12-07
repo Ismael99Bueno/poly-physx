@@ -9,7 +9,7 @@
 namespace ppx
 {
 world2D::world2D(const rk::butcher_tableau &table)
-    : integrator(table), bodies(*this), springs(*this), behaviours(*this), collision(*this), constraints(*this)
+    : integrator(table), bodies(*this), springs(*this), behaviours(*this), collisions(*this), constraints(*this)
 {
 }
 
@@ -18,13 +18,14 @@ bool world2D::raw_forward(const float timestep)
     m_timestep_ratio = m_current_timestep / timestep;
     m_current_timestep = timestep;
 
+    collisions.detection()->clear_cached_collisions();
+    constraints.reset_delegated_collisions();
+
     bodies.send_data_to_state(integrator.state);
     const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
     bodies.reset_added_forces();
 
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
-    collision.detection()->clear_cached_collisions();
-    constraints.reset_delegated_collisions();
     return valid;
 }
 bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
@@ -32,13 +33,14 @@ bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiteratio
     m_timestep_ratio = m_current_timestep / timestep;
     m_current_timestep = timestep;
 
+    collisions.detection()->clear_cached_collisions();
+    constraints.reset_delegated_collisions();
+
     bodies.send_data_to_state(integrator.state);
     const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
     bodies.reset_added_forces();
 
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
-    collision.detection()->clear_cached_collisions();
-    constraints.reset_delegated_collisions();
     return valid;
 }
 bool world2D::embedded_forward(float &timestep)
@@ -46,12 +48,13 @@ bool world2D::embedded_forward(float &timestep)
     m_timestep_ratio = m_current_timestep / timestep;
     m_current_timestep = timestep;
 
+    collisions.detection()->clear_cached_collisions();
+    constraints.reset_delegated_collisions();
+
     bodies.send_data_to_state(integrator.state);
     const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
     bodies.reset_added_forces();
 
-    bodies.retrieve_data_from_state_variables(integrator.state.vars());
-    collision.detection()->clear_cached_collisions();
     constraints.reset_delegated_collisions();
     return valid;
 }
@@ -133,8 +136,8 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     behaviours.apply_forces();
     springs.apply_forces();
 
-    if (collision.enabled)
-        collision.solve();
+    if (collisions.enabled)
+        collisions.solve();
 
     constraints.solve();
     return create_state_derivative();

@@ -32,7 +32,7 @@ class world2D final : kit::non_copyable
     body_manager2D bodies;
     spring_manager2D springs;
     behaviour_manager2D behaviours;
-    collision_manager2D collision;
+    collision_manager2D collisions;
     constraint_manager2D constraints;
     world_events events;
 

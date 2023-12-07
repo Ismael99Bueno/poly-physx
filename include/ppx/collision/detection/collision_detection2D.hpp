@@ -22,7 +22,7 @@ class collision_detection2D
     const std::vector<collision2D> &detect_collisions_cached();
     void clear_cached_collisions();
 
-    std::size_t last_collision_count() const;
+    const std::vector<collision2D> &collisions() const;
 
     virtual void on_attach()
     {
@@ -45,8 +45,6 @@ class collision_detection2D
 
   private:
     virtual void detect_collisions() = 0;
-
-    std::size_t m_collision_count = 0;
 };
 } // namespace ppx
 

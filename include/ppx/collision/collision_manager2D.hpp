@@ -33,6 +33,17 @@ class collision_manager2D
         return kit::get_casted_raw_ptr<T>(m_collision_solver);
     }
 
+    auto begin() const
+    {
+        return m_collision_detection->collisions().begin();
+    }
+    auto end() const
+    {
+        return m_collision_detection->collisions().end();
+    }
+
+    const collision2D &operator[](std::size_t index) const;
+
     template <typename T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
     {
         static_assert(std::is_base_of_v<collision_detection2D, T>,
@@ -57,6 +68,7 @@ class collision_manager2D
     }
 
     void solve();
+    std::size_t size() const;
 
   private:
     world2D &m_world;
