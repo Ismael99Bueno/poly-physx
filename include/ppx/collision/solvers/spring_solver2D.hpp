@@ -16,6 +16,9 @@ class spring_solver2D : public collision_solver2D
 
   private:
     void solve(const std::vector<collision2D> &collisions) const override;
+
+    std::tuple<glm::vec2, float, float> compute_collision_forces(const collision2D &colis,
+                                                                 std::size_t manifold_index) const;
     void solve_and_apply_collision_forces(const collision2D &colis) const;
 };
 } // namespace ppx

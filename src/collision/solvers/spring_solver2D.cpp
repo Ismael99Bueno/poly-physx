@@ -55,14 +55,14 @@ void spring_solver2D::solve(const std::vector<collision2D> &collisions) const
 #endif
 }
 
-void spring_solver2D::solve_and_apply_collision_forces(const collision2D &colis) const
+std::tuple<glm::vec2, float, float> spring_solver2D::compute_collision_forces(const collision2D &colis,
+                                                                              std::size_t manifold_index) const
 {
-    KIT_PERF_FUNCTION()
-    const glm::vec2 rel1 = colis.touch1 - colis.current->position();
-    const glm::vec2 rel2 = colis.touch2 - colis.incoming->position();
+    const glm::vec2 rel1 = colis.touch1(manifold_index) - colis.current->position();
+    const glm::vec2 rel2 = colis.touch2(manifold_index) - colis.incoming->position();
 
     const glm::vec2 relvel = (colis.incoming->velocity_at(rel2) - colis.current->velocity_at(rel1));
-    const glm::vec2 reltouch = colis.touch2 - colis.touch1;
+    const glm::vec2 reltouch = colis.touch2(manifold_index) - colis.touch1(manifold_index);
 
     const glm::vec2 normal_dir = glm::normalize(colis.normal);
 
@@ -70,12 +70,32 @@ void spring_solver2D::solve_and_apply_collision_forces(const collision2D &colis)
     const glm::vec2 tangent_vel = relvel - orth_vel;
 
     const glm::vec2 force = reltouch * rigidity() + orth_vel * restitution() + tangent_vel * friction();
-
     const float torque1 = kit::cross2D(rel1, force), torque2 = kit::cross2D(force, rel2);
-    colis.current->apply_simulation_force(force);
-    colis.current->apply_simulation_torque(torque1);
+    return {force, torque1, torque2};
+}
 
-    colis.incoming->apply_simulation_force(-force);
-    colis.incoming->apply_simulation_torque(torque2);
+void spring_solver2D::solve_and_apply_collision_forces(const collision2D &colis) const
+{
+    KIT_PERF_FUNCTION()
+
+    if (colis.size == 1)
+    {
+        const auto [force, torque1, torque2] = compute_collision_forces(colis, 0);
+        colis.current->apply_simulation_force(force);
+        colis.current->apply_simulation_torque(torque1);
+
+        colis.incoming->apply_simulation_force(-force);
+        colis.incoming->apply_simulation_torque(torque2);
+    }
+    else
+    {
+        const auto [force1, torque11, torque12] = compute_collision_forces(colis, 0);
+        const auto [force2, torque21, torque22] = compute_collision_forces(colis, 0);
+        colis.current->apply_simulation_force(0.5f * (force1 + force2));
+        colis.current->apply_simulation_torque(0.5f * (torque11 + torque21));
+
+        colis.incoming->apply_simulation_force(-0.5f * (force1 + force2));
+        colis.incoming->apply_simulation_torque(0.5f * (torque12 + torque22));
+    }
 }
 } // namespace ppx

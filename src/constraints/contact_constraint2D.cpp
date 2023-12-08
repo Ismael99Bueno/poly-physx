@@ -5,15 +5,17 @@
 
 namespace ppx
 {
-contact_constraint2D::contact_constraint2D(const collision2D &collision)
-    : constraint2D("Contact"), m_collision(collision), m_anchor1(collision.touch1 - collision.current->position()),
-      m_anchor2(collision.touch2 - collision.incoming->position()), m_normal(glm::normalize(collision.normal))
+contact_constraint2D::contact_constraint2D(const collision2D &collision, const std::size_t manifold_index)
+    : constraint2D("Contact"), m_collision(collision),
+      m_anchor1(collision.touch1(manifold_index) - collision.current->position()),
+      m_anchor2(collision.touch2(manifold_index) - collision.incoming->position()),
+      m_normal(glm::normalize(collision.normal)), m_index(manifold_index)
 {
 }
 
 float contact_constraint2D::constraint_value() const
 {
-    return glm::dot(m_collision.touch1 - m_collision.touch2, m_normal);
+    return glm::dot(m_collision.touch1(m_index) - m_collision.touch2(m_index), m_normal);
 }
 float contact_constraint2D::constraint_velocity() const
 {
@@ -37,7 +39,8 @@ float contact_constraint2D::constraint_acceleration() const
     const float cross = kit::cross2D(m_normal, body1->velocity() - body2->velocity());
 
     const float lin_term = glm::dot(m_normal, lin_term1 - lin_term2);
-    const float ang_term = cross * cross / glm::max(1.f, glm::distance(m_collision.touch1, m_collision.touch2));
+    const float ang_term =
+        cross * cross / glm::max(1.f, glm::distance(m_collision.touch1(m_index), m_collision.touch2(m_index)));
     return lin_term + ang_term;
 }
 

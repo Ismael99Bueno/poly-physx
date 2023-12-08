@@ -80,8 +80,7 @@ bool collision_detection2D::circle_narrow_collision_check(body2D &body1, body2D 
     if (!geo::intersects(c1, c2))
         return false;
     const glm::vec2 mtv = geo::mtv(c1, c2);
-    const auto &[contact1, contact2] = geo::contact_points(c1, c2);
-    *colis = {body1.as_ptr(), body2.as_ptr(), contact1, contact2, mtv};
+    *colis = {body1.as_ptr(), body2.as_ptr(), mtv, {geo::contact_point(c1, c2)}};
     return true;
 }
 
@@ -99,8 +98,7 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
     if (!mtv)
         return false;
 
-    const auto &[contact1, contact2] = geo::contact_points(sh1, sh2, mtv.value());
-    *colis = {body1.as_ptr(), body2.as_ptr(), contact1, contact2, mtv.value()};
+    *colis = {body1.as_ptr(), body2.as_ptr(), mtv.value(), {geo::contact_point(sh1, sh2, mtv.value())}};
 
     return true;
 }
@@ -108,7 +106,7 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
 void collision_detection2D::try_enter_or_stay_callback(const collision2D &c) const
 {
     c.current->events.try_enter_or_stay(c);
-    c.incoming->events.try_enter_or_stay({c.incoming, c.current, c.touch2, c.touch1, -c.normal});
+    c.incoming->events.try_enter_or_stay({c.incoming, c.current, -c.normal, {c.touch2(0), c.touch2(1)}, c.size});
 }
 void collision_detection2D::try_exit_callback(body2D &body1, body2D &body2) const
 {
