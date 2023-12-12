@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class constraint_solver2D : public collision_solver2D
+class constraint_driven_solver2D : public collision_solver2D
 {
     void solve(const std::vector<collision2D> &collisions) const override;
 };

@@ -4,7 +4,7 @@
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
-#include "ppx/collision/solvers/spring_solver2D.hpp"
+#include "ppx/collision/solvers/spring_driven_solver2D.hpp"
 
 namespace ppx
 {

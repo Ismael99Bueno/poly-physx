@@ -6,7 +6,7 @@ namespace ppx
 collision_manager2D::collision_manager2D(world2D &world) : m_world(world)
 {
     set_detection<quad_tree_detection2D>();
-    set_solver<spring_solver2D>();
+    set_solver<spring_driven_solver2D>();
 }
 
 const collision2D &collision_manager2D::operator[](const std::size_t index) const

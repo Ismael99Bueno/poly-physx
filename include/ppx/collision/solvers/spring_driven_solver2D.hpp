@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class spring_solver2D : public collision_solver2D
+class spring_driven_solver2D : public collision_solver2D
 {
   public:
     static inline float rigidity_coeff = 0.985f;
