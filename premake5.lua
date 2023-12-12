@@ -29,7 +29,7 @@ files {
 
 includedirs {
    "include",
-   "%{wks.location}/shapes-2D/include",
+   "%{wks.location}/geometry/include",
    "%{wks.location}/rk-integrator/include",
    "%{wks.location}/cpp-kit/include",
    "%{wks.location}/vendor/yaml-cpp/include",

@@ -75,7 +75,7 @@ def main() -> None:
 
     add_dependencies(
         [
-            "shapes-2D",
+            "geometry",
             "rk-integrator",
             "debug-tools",
             "profile-tools",
