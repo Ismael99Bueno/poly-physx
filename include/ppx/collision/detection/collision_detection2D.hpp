@@ -10,6 +10,28 @@
 
 namespace ppx
 {
+struct two_id_hash
+{
+    kit::uuid id1;
+    kit::uuid id2;
+
+    bool operator==(const two_id_hash &other) const
+    {
+        return id1 == other.id1 && id2 == other.id2;
+    }
+};
+} // namespace ppx
+
+namespace std
+{
+template <> struct hash<ppx::two_id_hash>
+{
+    size_t operator()(const ppx::two_id_hash &id) const;
+};
+} // namespace std
+
+namespace ppx
+{
 class world2D;
 
 class collision_detection2D
@@ -18,9 +40,11 @@ class collision_detection2D
     virtual ~collision_detection2D() = default;
 
     world2D *world = nullptr;
+    static inline bool multi_contact_manifold = true;
 
     const std::vector<collision2D> &detect_collisions_cached();
     void clear_cached_collisions();
+    void query_last_contact_points();
 
     const std::vector<collision2D> &collisions() const;
 
@@ -45,7 +69,10 @@ class collision_detection2D
 
   private:
     virtual void detect_collisions() = 0;
+
+    std::unordered_map<two_id_hash, contact_point_query> m_last_contacts;
 };
+
 } // namespace ppx
 
 #endif

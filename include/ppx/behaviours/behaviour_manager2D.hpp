@@ -79,6 +79,8 @@ class behaviour_manager2D : kit::non_copyable
     world_events &m_events;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
 };
+
+template <> behaviour2D *behaviour_manager2D::from_name(const std::string &name) const;
 } // namespace ppx
 
 #endif

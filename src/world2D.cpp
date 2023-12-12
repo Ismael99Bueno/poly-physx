@@ -15,35 +15,27 @@ world2D::world2D(const rk::butcher_tableau &table)
 
 bool world2D::raw_forward(const float timestep)
 {
-    m_timestep_ratio = m_current_timestep / timestep;
-    m_current_timestep = timestep;
-
-    collisions.detection()->clear_cached_collisions();
-    constraints.reset_delegated_collisions();
-
-    bodies.send_data_to_state(integrator.state);
+    pre_step_preparation(timestep);
     const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
-    bodies.reset_added_forces();
-
-    bodies.retrieve_data_from_state_variables(integrator.state.vars());
+    post_step_setup();
     return valid;
 }
 bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
 {
-    m_timestep_ratio = m_current_timestep / timestep;
-    m_current_timestep = timestep;
-
-    collisions.detection()->clear_cached_collisions();
-    constraints.reset_delegated_collisions();
-
-    bodies.send_data_to_state(integrator.state);
+    pre_step_preparation(timestep);
     const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
-    bodies.reset_added_forces();
-
-    bodies.retrieve_data_from_state_variables(integrator.state.vars());
+    post_step_setup();
     return valid;
 }
 bool world2D::embedded_forward(float &timestep)
+{
+    pre_step_preparation(timestep);
+    const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
+    post_step_setup();
+    return valid;
+}
+
+void world2D::pre_step_preparation(const float timestep)
 {
     m_timestep_ratio = m_current_timestep / timestep;
     m_current_timestep = timestep;
@@ -52,11 +44,13 @@ bool world2D::embedded_forward(float &timestep)
     constraints.reset_delegated_collisions();
 
     bodies.send_data_to_state(integrator.state);
-    const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
+}
+void world2D::post_step_setup()
+{
     bodies.reset_added_forces();
-
-    constraints.reset_delegated_collisions();
-    return valid;
+    bodies.retrieve_data_from_state_variables(integrator.state.vars());
+    if (collision_detection2D::multi_contact_manifold)
+        collisions.detection()->query_last_contact_points();
 }
 
 float world2D::current_timestep() const
@@ -151,10 +145,10 @@ float world2D::elapsed() const
 YAML::Node world2D::serializer::encode(const world2D &world) const
 {
     YAML::Node node;
-    for (const ppx::body2D &body : world.bodies)
+    for (const body2D &body : world.bodies)
         node["Bodies"].push_back(body);
 
-    for (const ppx::spring2D &sp : world.springs)
+    for (const spring2D &sp : world.springs)
         node["Springs"].push_back(sp);
     for (const auto &ctr : world.constraints)
     {
@@ -181,7 +175,7 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
 
     if (node["Bodies"])
         for (const YAML::Node &n : node["Bodies"])
-            world.bodies.add(n.as<ppx::body2D>());
+            world.bodies.add(n.as<body2D>());
 
     if (node["Springs"])
         for (const YAML::Node &n : node["Springs"])
@@ -205,9 +199,9 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     if (node["Behaviours"])
         for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
         {
-            const auto bhv = world.behaviours.from_name<ppx::behaviour2D>(it->first.as<std::string>().c_str());
+            const auto bhv = world.behaviours.from_name<behaviour2D>(it->first.as<std::string>());
             if (bhv)
-                it->second.as<ppx::behaviour2D>(*bhv);
+                it->second.as<behaviour2D>(*bhv);
         }
 
     world.m_elapsed = node["Elapsed"].as<float>();

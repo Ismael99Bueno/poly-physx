@@ -78,24 +78,24 @@ void spring_solver2D::solve_and_apply_collision_forces(const collision2D &colis)
 {
     KIT_PERF_FUNCTION()
 
-    if (colis.size == 1)
+    glm::vec2 force{0.f};
+    float torque1 = 0.f;
+    float torque2 = 0.f;
+    for (std::size_t i = 0; i < colis.size; i++)
     {
-        const auto [force, torque1, torque2] = compute_collision_forces(colis, 0);
-        colis.current->apply_simulation_force(force);
-        colis.current->apply_simulation_torque(torque1);
-
-        colis.incoming->apply_simulation_force(-force);
-        colis.incoming->apply_simulation_torque(torque2);
+        const auto [f, t1, t2] = compute_collision_forces(colis, i);
+        force += f;
+        torque1 += t1;
+        torque2 += t2;
     }
-    else
-    {
-        const auto [force1, torque11, torque12] = compute_collision_forces(colis, 0);
-        const auto [force2, torque21, torque22] = compute_collision_forces(colis, 0);
-        colis.current->apply_simulation_force(0.5f * (force1 + force2));
-        colis.current->apply_simulation_torque(0.5f * (torque11 + torque21));
+    force /= colis.size;
+    torque1 /= colis.size;
+    torque2 /= colis.size;
 
-        colis.incoming->apply_simulation_force(-0.5f * (force1 + force2));
-        colis.incoming->apply_simulation_torque(0.5f * (torque12 + torque22));
-    }
+    colis.current->apply_simulation_force(force);
+    colis.current->apply_simulation_torque(torque1);
+
+    colis.incoming->apply_simulation_force(-force);
+    colis.incoming->apply_simulation_torque(torque2);
 }
 } // namespace ppx

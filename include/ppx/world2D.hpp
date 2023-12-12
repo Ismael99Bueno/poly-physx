@@ -57,6 +57,9 @@ class world2D final : kit::non_copyable
     float m_current_timestep = 0.f;
     float m_timestep_ratio = 1.f;
 
+    void pre_step_preparation(float timestep);
+    void post_step_setup();
+
     std::vector<float> create_state_derivative() const;
 };
 

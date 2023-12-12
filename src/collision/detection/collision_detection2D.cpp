@@ -55,6 +55,29 @@ void collision_detection2D::clear_cached_collisions()
 #endif
 }
 
+void collision_detection2D::query_last_contact_points()
+{
+    for (collision2D &col : m_collisions)
+    {
+        const two_id_hash hash = {col.current->id, col.incoming->id};
+        if (m_last_contacts.find(hash) != m_last_contacts.end())
+        {
+            contact_point_query &cpq = m_last_contacts.at(hash);
+            for (std::size_t i = 0; i < cpq.size; i++)
+                col.add_contact_point(cpq.contacts[i]);
+            cpq.add_contact_point(col.manifold[0]);
+            cpq.lifetime = contact_point_query::MAX_LIFETIME;
+        }
+        else
+            m_last_contacts.emplace(std::make_pair(hash, contact_point_query(col.manifold[0])));
+    }
+    for (auto it = m_last_contacts.begin(); it != m_last_contacts.end();)
+        if (it->second.lifetime-- == 0)
+            it = m_last_contacts.erase(it);
+        else
+            ++it;
+}
+
 const std::vector<collision2D> &collision_detection2D::collisions() const
 {
     return m_collisions;
@@ -106,7 +129,7 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
 void collision_detection2D::try_enter_or_stay_callback(const collision2D &c) const
 {
     c.current->events.try_enter_or_stay(c);
-    c.incoming->events.try_enter_or_stay({c.incoming, c.current, -c.normal, {c.touch2(0), c.touch2(1)}, c.size});
+    c.incoming->events.try_enter_or_stay(c.reciprocal());
 }
 void collision_detection2D::try_exit_callback(body2D &body1, body2D &body2) const
 {
@@ -115,3 +138,11 @@ void collision_detection2D::try_exit_callback(body2D &body1, body2D &body2) cons
 }
 
 } // namespace ppx
+
+std::size_t std::hash<ppx::two_id_hash>::operator()(const ppx::two_id_hash &key) const
+{
+    const std::uint64_t a = (std::uint64_t)key.id1;
+    const std::uint64_t b = (std::uint64_t)key.id2;
+    return std::hash<uint64_t>()(a >= b ? a * a + a + b : b * b + b + a);
+
+} // namespace std
