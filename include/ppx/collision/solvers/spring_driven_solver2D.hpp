@@ -1,5 +1,5 @@
-#ifndef PPX_SPRING_SOLVER2D_HPP
-#define PPX_SPRING_SOLVER2D_HPP
+#ifndef PPX_SPRING_DRIVEN_SOLVER2D_HPP
+#define PPX_SPRING_DRIVEN_SOLVER2D_HPP
 
 #include "ppx/collision/solvers/collision_solver2D.hpp"
 

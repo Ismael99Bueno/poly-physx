@@ -1,5 +1,5 @@
-#ifndef PPX_CONSTRAINT_SOLVER2D_HPP
-#define PPX_CONSTRAINT_SOLVER2D_HPP
+#ifndef PPX_CONSTRAINT_DRIVEN_SOLVER2D_HPP
+#define PPX_CONSTRAINT_DRIVEN_SOLVER2D_HPP
 
 #include "ppx/collision/solvers/collision_solver2D.hpp"
 
