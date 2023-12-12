@@ -113,15 +113,15 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
     if (!geo::may_intersect(sh1, sh2))
         return false;
 
-    auto simplex = geo::gjk(sh1, sh2);
-    if (!simplex)
+    const geo::gjk_result gres = geo::gjk(sh1, sh2);
+    if (!gres.intersect)
         return false;
 
-    auto mtv = geo::epa(sh1, sh2, simplex.value());
-    if (!mtv)
+    const geo::epa_result epres = geo::epa(sh1, sh2, gres.simplex);
+    if (!epres.valid)
         return false;
 
-    *colis = {body1.as_ptr(), body2.as_ptr(), mtv.value(), {geo::contact_point(sh1, sh2, mtv.value())}};
+    *colis = {body1.as_ptr(), body2.as_ptr(), epres.mtv, {geo::contact_point(sh1, sh2, epres.mtv)}};
 
     return true;
 }
