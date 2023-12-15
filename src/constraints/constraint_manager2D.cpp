@@ -50,28 +50,30 @@ static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::v
     return {};
 }
 
-const constraint2D *constraint_manager2D::from_id(const kit::uuid id) const
+const constraint2D *constraint_manager2D::operator[](const kit::uuid id) const
 {
     const auto index = index_from_id(id, m_constraints);
     return index ? m_constraints[index.value()].get() : nullptr;
 }
-constraint2D *constraint_manager2D::from_id(const kit::uuid id)
+constraint2D *constraint_manager2D::operator[](const kit::uuid id)
 {
     const auto index = index_from_id(id, m_constraints);
     return index ? m_constraints[index.value()].get() : nullptr;
 }
 
-std::vector<const constraint2D *> constraint_manager2D::from_ids(const std::vector<kit::uuid> &ids) const
+template <typename T>
+static std::vector<T> from_ids(const std::vector<kit::uuid> &ids,
+                               const std::vector<kit::scope<constraint2D>> &constraints)
 {
     KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
                      "IDs list must not contain duplicates!")
 
-    std::vector<const constraint2D *> constraints;
+    std::vector<T> found_ctrs;
     if (ids.empty())
-        return constraints;
+        return found_ctrs;
 
-    constraints.reserve(m_constraints.size());
-    for (const auto &ctr : m_constraints)
+    found_ctrs.reserve(constraints.size());
+    for (const auto &ctr : constraints)
     {
         bool found_match = true;
         for (kit::uuid id : ids)
@@ -81,33 +83,18 @@ std::vector<const constraint2D *> constraint_manager2D::from_ids(const std::vect
                 break;
             }
         if (found_match)
-            constraints.push_back(ctr.get());
+            found_ctrs.push_back(ctr.get());
     }
-    return constraints;
+    return found_ctrs;
 }
-std::vector<constraint2D *> constraint_manager2D::from_ids(const std::vector<kit::uuid> &ids)
+
+std::vector<const constraint2D *> constraint_manager2D::operator[](const std::vector<kit::uuid> &ids) const
 {
-    KIT_ASSERT_ERROR(std::unordered_set<kit::uuid>(ids.begin(), ids.end()).size() == ids.size(),
-                     "IDs list must not contain duplicates!")
-
-    std::vector<constraint2D *> constraints;
-    if (ids.empty())
-        return constraints;
-
-    constraints.reserve(m_constraints.size());
-    for (const auto &ctr : m_constraints)
-    {
-        bool found_match = true;
-        for (kit::uuid id : ids)
-            if (!ctr->contains(id))
-            {
-                found_match = false;
-                break;
-            }
-        if (found_match)
-            constraints.push_back(ctr.get());
-    }
-    return constraints;
+    return from_ids<const constraint2D *>(ids, m_constraints);
+}
+std::vector<constraint2D *> constraint_manager2D::operator[](const std::vector<kit::uuid> &ids)
+{
+    return from_ids<constraint2D *>(ids, m_constraints);
 }
 
 bool constraint_manager2D::remove(kit::uuid id)

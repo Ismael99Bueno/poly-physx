@@ -48,8 +48,8 @@ class body_manager2D
     body2D::const_ptr operator[](const glm::vec2 &point) const;
     body2D::ptr operator[](const glm::vec2 &point);
 
-    body2D::const_ptr from_id(kit::uuid id) const;
-    body2D::ptr from_id(kit::uuid id);
+    body2D::const_ptr operator[](kit::uuid id) const;
+    body2D::ptr operator[](kit::uuid id);
 
     bool remove(std::size_t index);
     bool remove(const body2D &body);

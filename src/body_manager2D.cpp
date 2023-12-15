@@ -40,12 +40,12 @@ static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::v
     return {};
 }
 
-body2D::const_ptr body_manager2D::from_id(const kit::uuid id) const
+body2D::const_ptr body_manager2D::operator[](const kit::uuid id) const
 {
     const auto index = index_from_id(id, m_bodies);
     return index ? ptr(index.value()) : nullptr;
 }
-body2D::ptr body_manager2D::from_id(const kit::uuid id)
+body2D::ptr body_manager2D::operator[](const kit::uuid id)
 {
     const auto index = index_from_id(id, m_bodies);
     return index ? ptr(index.value()) : nullptr;

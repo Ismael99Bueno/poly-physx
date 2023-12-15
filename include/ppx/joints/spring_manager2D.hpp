@@ -40,14 +40,14 @@ class spring_manager2D
     const spring2D &operator[](std::size_t index) const;
     spring2D &operator[](std::size_t index);
 
-    spring2D::const_ptr ptr(std::size_t index) const;
-    spring2D::ptr ptr(std::size_t index);
-
-    spring2D::const_ptr from_id(kit::uuid id) const;
-    spring2D::ptr from_id(kit::uuid id);
+    spring2D::const_ptr operator[](kit::uuid id) const;
+    spring2D::ptr operator[](kit::uuid id);
 
     std::vector<spring2D::const_ptr> from_ids(kit::uuid id1, kit::uuid id2) const;
     std::vector<spring2D::ptr> from_ids(kit::uuid id1, kit::uuid id2);
+
+    spring2D::const_ptr ptr(std::size_t index) const;
+    spring2D::ptr ptr(std::size_t index);
 
     bool remove(std::size_t index);
     bool remove(const spring2D &body);

@@ -58,11 +58,11 @@ class constraint_manager2D final : kit::non_copyable
     const constraint2D &operator[](std::size_t index) const;
     constraint2D &operator[](std::size_t index);
 
-    const constraint2D *from_id(kit::uuid id) const;
-    constraint2D *from_id(kit::uuid id);
+    const constraint2D *operator[](kit::uuid id) const;
+    constraint2D *operator[](kit::uuid id);
 
-    std::vector<const constraint2D *> from_ids(const std::vector<kit::uuid> &ids) const;
-    std::vector<constraint2D *> from_ids(const std::vector<kit::uuid> &ids);
+    std::vector<const constraint2D *> operator[](const std::vector<kit::uuid> &ids) const;
+    std::vector<constraint2D *> operator[](const std::vector<kit::uuid> &ids);
 
     void delegate_collisions(const std::vector<collision2D> *collisions);
     void reset_delegated_collisions();

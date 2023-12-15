@@ -55,12 +55,12 @@ static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::v
     return {};
 }
 
-spring2D::const_ptr spring_manager2D::from_id(const kit::uuid id) const
+spring2D::const_ptr spring_manager2D::operator[](const kit::uuid id) const
 {
     const auto index = index_from_id(id, m_springs);
     return index ? ptr(index.value()) : nullptr;
 }
-spring2D::ptr spring_manager2D::from_id(const kit::uuid id)
+spring2D::ptr spring_manager2D::operator[](const kit::uuid id)
 {
     const auto index = index_from_id(id, m_springs);
     return index ? ptr(index.value()) : nullptr;
