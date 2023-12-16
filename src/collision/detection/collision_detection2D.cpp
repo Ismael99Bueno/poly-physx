@@ -102,8 +102,11 @@ bool collision_detection2D::circle_narrow_collision_check(body2D &body1, body2D 
     const geo::circle &c1 = body1.shape<geo::circle>(), &c2 = body2.shape<geo::circle>();
     if (!geo::intersects(c1, c2))
         return false;
-    const glm::vec2 mtv = geo::mtv(c1, c2);
-    *colis = {body1.as_ptr(), body2.as_ptr(), mtv, {geo::contact_point(c1, c2)}};
+    const geo::mtv_result mres = geo::mtv(c1, c2);
+    if (!mres.valid)
+        return false;
+
+    *colis = {body1.as_ptr(), body2.as_ptr(), mres.mtv, {geo::contact_point(c1, c2)}};
     return true;
 }
 
@@ -117,11 +120,11 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
     if (!gres.intersect)
         return false;
 
-    const geo::epa_result epres = geo::epa(sh1, sh2, gres.simplex);
-    if (!epres.valid)
+    const geo::mtv_result mres = geo::epa(sh1, sh2, gres.simplex);
+    if (!mres.valid)
         return false;
 
-    *colis = {body1.as_ptr(), body2.as_ptr(), epres.mtv, {geo::contact_point(sh1, sh2, epres.mtv)}};
+    *colis = {body1.as_ptr(), body2.as_ptr(), mres.mtv, {geo::contact_point(sh1, sh2, mres.mtv)}};
 
     return true;
 }

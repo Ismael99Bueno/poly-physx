@@ -5,6 +5,9 @@
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/collision/solvers/collision_solver2D.hpp"
 #include <cstring>
+#ifdef DEBUG
+#include "kit/missing/fenv.h"
+#endif
 
 namespace ppx
 {
@@ -37,7 +40,11 @@ bool world2D::embedded_forward(float &timestep)
 
 void world2D::pre_step_preparation(const float timestep)
 {
-    m_timestep_ratio = m_current_timestep / timestep;
+#ifdef DEBUG
+    feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#endif
+
+    m_timestep_ratio = kit::approaches_zero(timestep) ? 1.f : m_current_timestep / timestep;
     m_current_timestep = timestep;
 
     collisions.detection()->clear_cached_collisions();
@@ -51,6 +58,10 @@ void world2D::post_step_setup()
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     if (collision_detection2D::multi_contact_manifold)
         collisions.detection()->query_last_contact_points();
+
+#ifdef DEBUG
+    fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#endif
 }
 
 float world2D::current_timestep() const
