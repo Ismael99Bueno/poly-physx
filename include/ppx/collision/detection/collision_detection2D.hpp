@@ -40,7 +40,7 @@ class collision_detection2D
     virtual ~collision_detection2D() = default;
 
     world2D *world = nullptr;
-    static inline bool multi_contact_manifold = true;
+    static inline bool build_contact_manifold_over_time = false;
 
     const std::vector<collision2D> &detect_collisions_cached();
     void clear_cached_collisions();

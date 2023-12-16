@@ -56,7 +56,7 @@ void world2D::post_step_setup()
 {
     bodies.reset_added_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
-    if (collision_detection2D::multi_contact_manifold)
+    if (collision_detection2D::build_contact_manifold_over_time)
         collisions.detection()->query_last_contact_points();
 
 #ifdef DEBUG
