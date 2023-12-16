@@ -2,8 +2,10 @@
 #include "ppx/world2D.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
-#include "ppx/collision/detection/collision_detection2D.hpp"
-#include "ppx/collision/solvers/collision_solver2D.hpp"
+
+#include "ppx/collision/detection/quad_tree_detection2D.hpp"
+#include "ppx/collision/solvers/spring_driven_solver2D.hpp"
+
 #include <cstring>
 #ifdef DEBUG
 #include "kit/missing/fenv.h"
@@ -156,6 +158,24 @@ float world2D::elapsed() const
 YAML::Node world2D::serializer::encode(const world2D &world) const
 {
     YAML::Node node;
+    node["Integrator"] = world.integrator;
+    node["Elapsed"] = world.elapsed();
+
+    YAML::Node nc = node["Collision"];
+    nc["Detection method"] = (int)world.collisions.detection_method();
+    nc["Collision solver"] = (int)world.collisions.solver_method();
+    nc["Manifold over time"] = collision_detection2D::build_contact_manifold_over_time;
+
+    YAML::Node nqt = nc["Quad tree"];
+    nqt["Max bodies"] = quad_tree2D::max_bodies;
+    nqt["Max depth"] = quad_tree2D::max_depth;
+    nqt["Min size"] = quad_tree2D::min_size;
+
+    YAML::Node nspslv = nc["Spring solver"];
+    nspslv["Rigidity"] = spring_driven_solver2D::rigidity_coeff;
+    nspslv["Restitution"] = collision_solver2D::restitution_coeff;
+    nspslv["Friction"] = collision_solver2D::friction_coeff;
+
     for (const body2D &body : world.bodies)
         node["Bodies"].push_back(body);
 
@@ -170,9 +190,6 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
 
     for (const auto &bhv : world.behaviours)
         node["Behaviours"][bhv->id] = *bhv;
-
-    node["Integrator"] = world.integrator;
-    node["Elapsed"] = world.elapsed();
     return node;
 }
 bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
@@ -183,6 +200,24 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     world.bodies.clear();
     world.integrator = node["Integrator"].as<rk::integrator>();
     world.integrator.state.clear();
+
+    world.m_elapsed = node["Elapsed"].as<float>();
+
+    const YAML::Node nc = node["Collision"];
+    collision_detection2D::build_contact_manifold_over_time = nc["Manifold over time"].as<bool>();
+
+    const YAML::Node nqt = nc["Quad tree"];
+    quad_tree2D::max_bodies = nqt["Max bodies"].as<std::size_t>();
+    quad_tree2D::max_depth = nqt["Max depth"].as<std::uint32_t>();
+    quad_tree2D::min_size = nqt["Min size"].as<float>();
+
+    const YAML::Node nspslv = nc["Spring solver"];
+    spring_driven_solver2D::rigidity_coeff = nspslv["Rigidity"].as<float>();
+    collision_solver2D::restitution_coeff = nspslv["Restitution"].as<float>();
+    collision_solver2D::friction_coeff = nspslv["Friction"].as<float>();
+
+    world.collisions.detection((collision_manager2D::detection_type)nc["Detection method"].as<int>());
+    world.collisions.solver((collision_manager2D::solver_type)nc["Collision solver"].as<int>());
 
     if (node["Bodies"])
         for (const YAML::Node &n : node["Bodies"])
@@ -215,7 +250,6 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
                 it->second.as<behaviour2D>(*bhv);
         }
 
-    world.m_elapsed = node["Elapsed"].as<float>();
     return true;
 }
 #endif
