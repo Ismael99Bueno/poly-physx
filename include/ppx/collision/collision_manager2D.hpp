@@ -93,7 +93,7 @@ class collision_manager2D
         T *ptr = coldet.get();
         m_collision_solver = std::move(coldet);
         m_collision_solver->world = &m_world;
-        m_collision_detection->on_attach();
+        m_collision_solver->on_attach();
         if constexpr (std::is_same_v<T, spring_driven_solver2D>)
             m_solv_type = solver_type::SPRING_DRIVEN;
         else if constexpr (std::is_same_v<T, constraint_driven_solver2D>)
