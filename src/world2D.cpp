@@ -4,7 +4,7 @@
 #include "ppx/joints/distance_joint2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
-#include "ppx/collision/solvers/spring_driven_solver2D.hpp"
+#include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 
 #include <cstring>
 #ifdef DEBUG
@@ -163,7 +163,7 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
 
     YAML::Node nc = node["Collision"];
     nc["Detection method"] = (int)world.collisions.detection_method();
-    nc["Collision solver"] = (int)world.collisions.solver_method();
+    nc["Resolution method"] = (int)world.collisions.resolution_method();
     nc["Manifold over time"] = collision_detection2D::build_contact_manifold_over_time;
 
     YAML::Node nqt = nc["Quad tree"];
@@ -171,10 +171,10 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     nqt["Max depth"] = quad_tree2D::max_depth;
     nqt["Min size"] = quad_tree2D::min_size;
 
-    YAML::Node nspslv = nc["Spring solver"];
-    nspslv["Rigidity"] = spring_driven_solver2D::rigidity_coeff;
-    nspslv["Restitution"] = collision_solver2D::restitution_coeff;
-    nspslv["Friction"] = collision_solver2D::friction_coeff;
+    YAML::Node nspslv = nc["Spring resolution"];
+    nspslv["Rigidity"] = spring_driven_resolution2D::rigidity_coeff;
+    nspslv["Restitution"] = collision_resolution2D::restitution_coeff;
+    nspslv["Friction"] = collision_resolution2D::friction_coeff;
 
     for (const body2D &body : world.bodies)
         node["Bodies"].push_back(body);
@@ -211,13 +211,13 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     quad_tree2D::max_depth = nqt["Max depth"].as<std::uint32_t>();
     quad_tree2D::min_size = nqt["Min size"].as<float>();
 
-    const YAML::Node nspslv = nc["Spring solver"];
-    spring_driven_solver2D::rigidity_coeff = nspslv["Rigidity"].as<float>();
-    collision_solver2D::restitution_coeff = nspslv["Restitution"].as<float>();
-    collision_solver2D::friction_coeff = nspslv["Friction"].as<float>();
+    const YAML::Node nspslv = nc["Spring resolution"];
+    spring_driven_resolution2D::rigidity_coeff = nspslv["Rigidity"].as<float>();
+    collision_resolution2D::restitution_coeff = nspslv["Restitution"].as<float>();
+    collision_resolution2D::friction_coeff = nspslv["Friction"].as<float>();
 
     world.collisions.detection((collision_manager2D::detection_type)nc["Detection method"].as<int>());
-    world.collisions.solver((collision_manager2D::solver_type)nc["Collision solver"].as<int>());
+    world.collisions.resolution((collision_manager2D::resolution_type)nc["Resolution method"].as<int>());
 
     if (node["Bodies"])
         for (const YAML::Node &n : node["Bodies"])

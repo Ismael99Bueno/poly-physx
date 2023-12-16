@@ -4,7 +4,7 @@
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
-#include "ppx/collision/solvers/collision_solver2D.hpp"
+#include "ppx/collision/resolution/collision_resolution2D.hpp"
 
 namespace ppx
 {
@@ -12,8 +12,8 @@ class quad_tree_detection2D;
 class brute_force_detection2D;
 class sort_sweep_detection2D;
 
-class spring_driven_solver2D;
-class constraint_driven_solver2D;
+class spring_driven_resolution2D;
+class constraint_driven_resolution2D;
 
 class world2D;
 class collision_manager2D
@@ -26,7 +26,7 @@ class collision_manager2D
         SORT_AND_SWEEP = 2,
         CUSTOM = 3
     };
-    enum class solver_type
+    enum class resolution_type
     {
         SPRING_DRIVEN = 0,
         CONSTRAINT_DRIVEN = 1,
@@ -45,13 +45,13 @@ class collision_manager2D
     {
         return kit::get_casted_raw_ptr<T>(m_collision_detection);
     }
-    template <typename T = collision_solver2D> const T *solver() const
+    template <typename T = collision_resolution2D> const T *resolution() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_collision_solver);
+        return kit::const_get_casted_raw_ptr<T>(m_collision_resolution);
     }
-    template <typename T = collision_solver2D> T *solver()
+    template <typename T = collision_resolution2D> T *resolution()
     {
-        return kit::get_casted_raw_ptr<T>(m_collision_solver);
+        return kit::get_casted_raw_ptr<T>(m_collision_resolution);
     }
 
     auto begin() const
@@ -85,21 +85,21 @@ class collision_manager2D
             m_det_type = detection_type::CUSTOM;
         return ptr;
     }
-    template <typename T, class... ColSolvArgs> T *set_solver(ColSolvArgs &&...args)
+    template <typename T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
     {
-        static_assert(std::is_base_of_v<collision_solver2D, T>,
-                      "Collision solver must inherit from collision_solver2D");
+        static_assert(std::is_base_of_v<collision_resolution2D, T>,
+                      "Resolution method must inherit from collision_resolution2D");
         auto coldet = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
         T *ptr = coldet.get();
-        m_collision_solver = std::move(coldet);
-        m_collision_solver->world = &m_world;
-        m_collision_solver->on_attach();
-        if constexpr (std::is_same_v<T, spring_driven_solver2D>)
-            m_solv_type = solver_type::SPRING_DRIVEN;
-        else if constexpr (std::is_same_v<T, constraint_driven_solver2D>)
-            m_solv_type = solver_type::CONSTRAINT_DRIVEN;
+        m_collision_resolution = std::move(coldet);
+        m_collision_resolution->world = &m_world;
+        m_collision_resolution->on_attach();
+        if constexpr (std::is_same_v<T, spring_driven_resolution2D>)
+            m_res_type = resolution_type::SPRING_DRIVEN;
+        else if constexpr (std::is_same_v<T, constraint_driven_resolution2D>)
+            m_res_type = resolution_type::CONSTRAINT_DRIVEN;
         else
-            m_solv_type = solver_type::CUSTOM;
+            m_res_type = resolution_type::CUSTOM;
         return ptr;
     }
 
@@ -107,19 +107,19 @@ class collision_manager2D
     std::size_t size() const;
 
     detection_type detection_method() const;
-    solver_type solver_method() const;
+    resolution_type resolution_method() const;
 
     collision_detection2D *detection(detection_type det_type);
-    collision_solver2D *solver(solver_type solv_type);
+    collision_resolution2D *resolution(resolution_type solv_type);
 
   private:
     world2D &m_world;
 
     kit::scope<collision_detection2D> m_collision_detection;
-    kit::scope<collision_solver2D> m_collision_solver;
+    kit::scope<collision_resolution2D> m_collision_resolution;
 
     detection_type m_det_type;
-    solver_type m_solv_type;
+    resolution_type m_res_type;
 };
 } // namespace ppx
 

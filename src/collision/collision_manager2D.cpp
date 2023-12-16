@@ -5,15 +5,15 @@
 #include "ppx/collision/detection/sort_sweep_detection2D.hpp"
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
 
-#include "ppx/collision/solvers/spring_driven_solver2D.hpp"
-#include "ppx/collision/solvers/constraint_driven_solver2D.hpp"
+#include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
 
 namespace ppx
 {
 collision_manager2D::collision_manager2D(world2D &world) : m_world(world)
 {
     set_detection<quad_tree_detection2D>();
-    set_solver<spring_driven_solver2D>();
+    set_resolution<spring_driven_resolution2D>();
 }
 
 const collision2D &collision_manager2D::operator[](const std::size_t index) const
@@ -24,7 +24,7 @@ const collision2D &collision_manager2D::operator[](const std::size_t index) cons
 void collision_manager2D::solve()
 {
     const auto &collisions = m_collision_detection->detect_collisions_cached();
-    m_collision_solver->solve(collisions);
+    m_collision_resolution->solve(collisions);
 }
 
 std::size_t collision_manager2D::size() const
@@ -36,9 +36,9 @@ collision_manager2D::detection_type collision_manager2D::detection_method() cons
 {
     return m_det_type;
 }
-collision_manager2D::solver_type collision_manager2D::solver_method() const
+collision_manager2D::resolution_type collision_manager2D::resolution_method() const
 {
-    return m_solv_type;
+    return m_res_type;
 }
 
 collision_detection2D *collision_manager2D::detection(const detection_type det_type)
@@ -55,15 +55,15 @@ collision_detection2D *collision_manager2D::detection(const detection_type det_t
         return nullptr;
     }
 }
-collision_solver2D *collision_manager2D::solver(const solver_type solv_type)
+collision_resolution2D *collision_manager2D::resolution(const resolution_type solv_type)
 {
     switch (solv_type)
     {
-    case solver_type::SPRING_DRIVEN:
-        return dynamic_cast<collision_solver2D *>(set_solver<spring_driven_solver2D>());
-    case solver_type::CONSTRAINT_DRIVEN:
-        return dynamic_cast<collision_solver2D *>(set_solver<constraint_driven_solver2D>());
-    case solver_type::CUSTOM:
+    case resolution_type::SPRING_DRIVEN:
+        return dynamic_cast<collision_resolution2D *>(set_resolution<spring_driven_resolution2D>());
+    case resolution_type::CONSTRAINT_DRIVEN:
+        return dynamic_cast<collision_resolution2D *>(set_resolution<constraint_driven_resolution2D>());
+    case resolution_type::CUSTOM:
         return nullptr;
     }
 }

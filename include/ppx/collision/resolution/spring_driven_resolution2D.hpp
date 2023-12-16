@@ -1,11 +1,11 @@
-#ifndef PPX_SPRING_DRIVEN_SOLVER2D_HPP
-#define PPX_SPRING_DRIVEN_SOLVER2D_HPP
+#ifndef PPX_SPRING_driven_resolution2D_HPP
+#define PPX_SPRING_driven_resolution2D_HPP
 
-#include "ppx/collision/solvers/collision_solver2D.hpp"
+#include "ppx/collision/resolution/collision_resolution2D.hpp"
 
 namespace ppx
 {
-class spring_driven_solver2D : public collision_solver2D
+class spring_driven_resolution2D : public collision_resolution2D
 {
   public:
     static inline float rigidity_coeff = 0.985f;

@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/solvers/spring_driven_solver2D.hpp"
+#include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 #include "kit/profile/perf.hpp"
 
 #include "kit/utility/multithreading.hpp"
@@ -22,24 +22,24 @@ static float map_one_zero_zero_inf(const float x, const float slope)
     return slope * logf((2 - x) / x);
 }
 
-float spring_driven_solver2D::rigidity()
+float spring_driven_resolution2D::rigidity()
 {
     KIT_ASSERT_ERROR(rigidity_coeff >= 0.f && rigidity_coeff < 1.f, "Rigidity coefficient must lie between [0, 1)")
     return map_zero_one_zero_inf(rigidity_coeff, 200.f);
 }
-float spring_driven_solver2D::restitution()
+float spring_driven_resolution2D::restitution()
 {
     KIT_ASSERT_ERROR(restitution_coeff > 0.f && restitution_coeff <= 1.f,
                      "Restitution coefficient must lie between (0, 1]")
     return map_one_zero_zero_inf(restitution_coeff, 2.f);
 }
-float spring_driven_solver2D::friction()
+float spring_driven_resolution2D::friction()
 {
     KIT_ASSERT_ERROR(friction_coeff >= 0.f && friction_coeff < 1.f, "Friction coefficient must lie between [0, 1)")
     return map_zero_one_zero_inf(friction_coeff, 2.f);
 }
 
-void spring_driven_solver2D::solve(const std::vector<collision2D> &collisions) const
+void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
 {
     KIT_PERF_FUNCTION()
 #ifdef PPX_MULTITHREADED
@@ -55,8 +55,8 @@ void spring_driven_solver2D::solve(const std::vector<collision2D> &collisions) c
 #endif
 }
 
-std::tuple<glm::vec2, float, float> spring_driven_solver2D::compute_collision_forces(const collision2D &colis,
-                                                                                     std::size_t manifold_index) const
+std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collision_forces(
+    const collision2D &colis, std::size_t manifold_index) const
 {
     const glm::vec2 rel1 = colis.touch1(manifold_index) - colis.current->position();
     const glm::vec2 rel2 = colis.touch2(manifold_index) - colis.incoming->position();
@@ -74,7 +74,7 @@ std::tuple<glm::vec2, float, float> spring_driven_solver2D::compute_collision_fo
     return {force, torque1, torque2};
 }
 
-void spring_driven_solver2D::solve_and_apply_collision_forces(const collision2D &colis) const
+void spring_driven_resolution2D::solve_and_apply_collision_forces(const collision2D &colis) const
 {
     KIT_PERF_FUNCTION()
 
