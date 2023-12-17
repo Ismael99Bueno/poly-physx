@@ -47,7 +47,7 @@ void quad_tree2D::create_children()
 {
     m_has_children = true;
     m_partitioned = true;
-    const glm::vec2 &mm = aabb.min(), &mx = aabb.max();
+    const glm::vec2 &mm = aabb.min, &mx = aabb.max;
     const glm::vec2 mid_point = 0.5f * (mm + mx), hdim = 0.5f * (mx - mm);
     m_children[0] = kit::make_scope<quad_tree2D>(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y),
                                                  max_bodies, m_depth + 1);
@@ -60,7 +60,7 @@ void quad_tree2D::create_children()
 void quad_tree2D::reset_children()
 {
     m_partitioned = true;
-    const glm::vec2 &mm = aabb.min(), &mx = aabb.max();
+    const glm::vec2 &mm = aabb.min, &mx = aabb.max;
     const glm::vec2 mid_point = 0.5f * (mm + mx), hdim = 0.5f * (mx - mm);
     *(m_children[0]) =
         quad_tree2D(glm::vec2(mm.x, mm.y + hdim.y), glm::vec2(mx.x - hdim.x, mx.y), max_bodies, m_depth + 1);
@@ -95,8 +95,8 @@ bool quad_tree2D::rock_bottom() const
 {
     if (m_depth >= max_depth)
         return true;
-    const glm::vec2 diff = aabb.max() - aabb.min();
-    return diff.x * diff.y < min_size * min_size;
+    const glm::vec2 dim = aabb.dimension();
+    return dim.x * dim.y < min_size * min_size;
 }
 
 bool quad_tree2D::partitioned() const

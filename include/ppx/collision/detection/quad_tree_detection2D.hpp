@@ -10,6 +10,7 @@ class quad_tree_detection2D : public collision_detection2D
 {
   public:
     const quad_tree2D &quad_tree() const;
+    inline static bool force_square_shape = false;
 
   private:
     quad_tree2D m_quad_tree{{-10.f, -10.f}, {10.f, 10.f}};

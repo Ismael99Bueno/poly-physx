@@ -27,7 +27,7 @@ class sort_sweep_detection2D : public collision_detection2D, kit::non_copyable
         float value() const
         {
             const geo::aabb2D &bbox = body->shape().bounding_box();
-            return end == end_side::LEFT ? bbox.min().x : bbox.max().x;
+            return end == end_side::LEFT ? bbox.min.x : bbox.max.x;
         }
     };
 

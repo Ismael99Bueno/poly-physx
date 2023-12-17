@@ -77,6 +77,21 @@ void quad_tree_detection2D::update_quad_tree()
     for (const body2D &body : world->bodies)
         aabb += body.shape().bounding_box();
 
+    if (force_square_shape)
+    {
+        const glm::vec2 dim = aabb.dimension();
+        if (dim.x > dim.y)
+        {
+            aabb.min.y -= 0.5f * (dim.x - dim.y);
+            aabb.max.y += 0.5f * (dim.x - dim.y);
+        }
+        else
+        {
+            aabb.min.x -= 0.5f * (dim.y - dim.x);
+            aabb.max.x += 0.5f * (dim.y - dim.x);
+        }
+    }
+
     m_quad_tree.aabb = aabb;
     for (body2D &body : world->bodies)
         m_quad_tree.insert(&body);

@@ -167,6 +167,7 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     nc["Manifold over time"] = collision_detection2D::build_contact_manifold_over_time;
 
     YAML::Node nqt = nc["Quad tree"];
+    nqt["Force square"] = quad_tree_detection2D::force_square_shape;
     nqt["Max bodies"] = quad_tree2D::max_bodies;
     nqt["Max depth"] = quad_tree2D::max_depth;
     nqt["Min size"] = quad_tree2D::min_size;
@@ -207,6 +208,7 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     collision_detection2D::build_contact_manifold_over_time = nc["Manifold over time"].as<bool>();
 
     const YAML::Node nqt = nc["Quad tree"];
+    quad_tree_detection2D::force_square_shape = nqt["Force square"].as<bool>();
     quad_tree2D::max_bodies = nqt["Max bodies"].as<std::size_t>();
     quad_tree2D::max_depth = nqt["Max depth"].as<std::uint32_t>();
     quad_tree2D::min_size = nqt["Min size"].as<float>();
