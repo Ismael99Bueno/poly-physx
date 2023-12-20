@@ -17,7 +17,7 @@ void quad_tree_detection2D::detect_collisions()
     KIT_PERF_FUNCTION()
     update_quad_tree();
 
-    std::vector<const quad_tree2D::partition *> partitions;
+    std::vector<const quad_tree::partition *> partitions;
     partitions.reserve(20);
     m_quad_tree.collect_partitions(partitions);
 
@@ -28,9 +28,9 @@ void quad_tree_detection2D::detect_collisions()
 #endif
 }
 
-void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tree2D::partition *> &partitions)
+void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tree::partition *> &partitions)
 {
-    for (const quad_tree2D::partition *partition : partitions)
+    for (const quad_tree::partition *partition : partitions)
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
@@ -47,9 +47,9 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tr
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
-void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tree2D::partition *> &partitions)
+void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tree::partition *> &partitions)
 {
-    const auto exec = [this](const std::size_t thread_idx, const quad_tree2D::partition *partition) {
+    const auto exec = [this](const std::size_t thread_idx, const quad_tree::partition *partition) {
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
@@ -65,7 +65,7 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
                     try_exit_callback(body1, body2);
             }
     };
-    kit::const_for_each_mt<PPX_THREAD_COUNT, const quad_tree2D::partition *>(partitions, exec);
+    kit::const_for_each_mt<PPX_THREAD_COUNT, const quad_tree::partition *>(partitions, exec);
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
@@ -97,7 +97,7 @@ void quad_tree_detection2D::update_quad_tree()
         m_quad_tree.insert(&body);
 }
 
-const quad_tree2D &quad_tree_detection2D::quad_tree() const
+const quad_tree &quad_tree_detection2D::qtree() const
 {
     return m_quad_tree;
 }
