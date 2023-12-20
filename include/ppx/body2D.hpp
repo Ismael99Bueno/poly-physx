@@ -32,7 +32,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
         float angular_velocity = 0.f;
         float mass = 1.f;
         float charge = 1.f;
-        std::vector<glm::vec2> vertices = geo::polygon::box(5.f);
+        std::vector<glm::vec2> vertices = geo::polygon::square(5.f);
         float radius = 2.5f;
         bool kinematic = true;
         shape_type shape = shape_type::POLYGON;

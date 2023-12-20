@@ -10,7 +10,7 @@ body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float
                const float mass, const float charge, const bool kinematic)
     : kinematic(kinematic),
       m_shape(geo::polygon(kit::transform2D::builder().position(position).rotation(rotation).build(),
-                           geo::polygon::box(5.f))),
+                           geo::polygon::square(5.f))),
       m_velocity(velocity), m_angular_velocity(angular_velocity), m_mass(mass), m_inv_mass(1.f / m_mass),
       m_inertia(m_mass * shape<geo::polygon>().inertia()), m_inv_inertia(1.f / m_inertia), m_charge(charge)
 {
