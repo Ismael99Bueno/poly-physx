@@ -19,41 +19,13 @@ float contact_constraint2D::constraint_value() const
 }
 float contact_constraint2D::constraint_velocity() const
 {
-    return glm::dot(m_normal,
-                    m_collision.current->velocity_at(m_anchor1) - m_collision.incoming->velocity_at(m_anchor2));
-}
-float contact_constraint2D::constraint_acceleration() const
-{
-    const body2D::ptr &body1 = m_collision.current;
-    const body2D::ptr &body2 = m_collision.incoming;
-
-    const glm::vec2 orth_anchor1 = glm::vec2(-m_anchor1.y, m_anchor1.x);
-    const glm::vec2 orth_anchor2 = glm::vec2(-m_anchor2.y, m_anchor2.x);
-
-    const glm::vec2 lin_term1 = body1->inv_mass() * body1->force() +
-                                body1->inv_inertia() * body1->torque() * orth_anchor1 -
-                                m_anchor1 * body1->angular_velocity * body1->angular_velocity;
-    const glm::vec2 lin_term2 = body2->inv_mass() * body2->force() +
-                                body2->inv_inertia() * body2->torque() * orth_anchor2 -
-                                m_anchor2 * body2->angular_velocity * body2->angular_velocity;
-    const float cross = kit::cross2D(m_normal, body1->velocity - body2->velocity);
-
-    const float lin_term = glm::dot(m_normal, lin_term1 - lin_term2);
-    const float ang_term =
-        cross * cross / glm::max(1.f, glm::distance(m_collision.touch1(m_index), m_collision.touch2(m_index)));
-    return lin_term + ang_term;
+    return glm::dot(m_normal, m_collision.current->constraint_velocity_at(m_anchor1) -
+                                  m_collision.incoming->constraint_velocity_at(m_anchor2));
 }
 
 float contact_constraint2D::compute_lambda() const
 {
-    static constexpr float stiffness = 1200.f;
-    static constexpr float dampening = 10.f;
-    const float ts = world->current_timestep();
-
-    const float c = constraint_value();
-    const float cvel = constraint_velocity() * (1.f + ts * dampening) + c * ts * stiffness;
-
-    // const float cacc = constraint_acceleration() + c * stiffness + cvel * dampening;
+    const float cvel = constraint_velocity();
 
     const float cross1 = kit::cross2D(m_anchor1, m_normal);
     const float cross2 = kit::cross2D(m_anchor2, m_normal);
@@ -64,19 +36,31 @@ float contact_constraint2D::compute_lambda() const
     const float inv_mass = body1->inv_mass() + body2->inv_mass() + body1->inv_inertia() * cross1 * cross1 +
                            body2->inv_inertia() * cross2 * cross2;
 
+    if (world->constraints.position_corrections)
+    {
+        const float c = constraint_value();
+        static constexpr float stiffness = 100.f;
+        return -(cvel + c * stiffness * world->current_timestep()) / inv_mass;
+    }
     return -cvel / inv_mass;
 }
 
 void contact_constraint2D::apply_lambda(const float lambda)
 {
-    const glm::vec2 f1 = lambda * m_normal;
-    const glm::vec2 f2 = -f1;
+    const glm::vec2 imp1 = lambda * m_normal;
+    const glm::vec2 imp2 = -imp1;
 
-    m_collision.current->velocity += f1 * m_collision.current->inv_mass();
-    m_collision.current->angular_velocity += kit::cross2D(m_anchor1, f1) * m_collision.current->inv_inertia();
+    const body2D::ptr &body1 = m_collision.current;
+    const body2D::ptr &body2 = m_collision.incoming;
 
-    m_collision.incoming->velocity += f2 * m_collision.incoming->inv_mass();
-    m_collision.incoming->angular_velocity += kit::cross2D(m_anchor2, f2) * m_collision.incoming->inv_inertia();
+    body1->constraint_velocity += body1->inv_mass() * imp1;
+    body2->constraint_velocity += body2->inv_mass() * imp2;
+
+    body1->constraint_angular_velocity += body1->inv_inertia() * kit::cross2D(m_anchor1, imp1);
+    body2->constraint_angular_velocity += body2->inv_inertia() * kit::cross2D(m_anchor2, imp2);
+
+    body1->apply_simulation_force_at(imp1 / world->current_timestep(), m_anchor1);
+    body2->apply_simulation_force_at(imp2 / world->current_timestep(), m_anchor2);
 }
 
 void contact_constraint2D::warmup()

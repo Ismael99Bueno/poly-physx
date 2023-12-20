@@ -12,7 +12,6 @@ class contact_constraint2D : public constraint2D
 
     float constraint_value() const override;
     float constraint_velocity() const override;
-    float constraint_acceleration() const override;
 
     bool contains(kit::uuid id) const override;
     bool valid() const override;
