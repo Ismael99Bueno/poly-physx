@@ -11,9 +11,6 @@ class collision_resolution2D
     virtual ~collision_resolution2D() = default;
     virtual void solve(const std::vector<collision2D> &collisions) const = 0;
 
-    static inline float restitution_coeff = 0.4f;
-    static inline float friction_coeff = 0.6f;
-
     world2D *world = nullptr;
 
   protected:

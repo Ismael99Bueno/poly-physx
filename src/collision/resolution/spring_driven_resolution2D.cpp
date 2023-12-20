@@ -13,32 +13,6 @@
 
 namespace ppx
 {
-static float map_zero_one_zero_inf(const float x, const float slope)
-{
-    return slope * logf((1 + x) / (1 - x));
-}
-static float map_one_zero_zero_inf(const float x, const float slope)
-{
-    return slope * logf((2 - x) / x);
-}
-
-float spring_driven_resolution2D::rigidity()
-{
-    KIT_ASSERT_ERROR(rigidity_coeff >= 0.f && rigidity_coeff < 1.f, "Rigidity coefficient must lie between [0, 1)")
-    return map_zero_one_zero_inf(rigidity_coeff, 200.f);
-}
-float spring_driven_resolution2D::restitution()
-{
-    KIT_ASSERT_ERROR(restitution_coeff > 0.f && restitution_coeff <= 1.f,
-                     "Restitution coefficient must lie between (0, 1]")
-    return map_one_zero_zero_inf(restitution_coeff, 2.f);
-}
-float spring_driven_resolution2D::friction()
-{
-    KIT_ASSERT_ERROR(friction_coeff >= 0.f && friction_coeff < 1.f, "Friction coefficient must lie between [0, 1)")
-    return map_zero_one_zero_inf(friction_coeff, 2.f);
-}
-
 void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
 {
     KIT_PERF_FUNCTION()
@@ -66,10 +40,10 @@ std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collisio
 
     const glm::vec2 normal_dir = glm::normalize(colis.normal);
 
-    const glm::vec2 orth_vel = glm::dot(normal_dir, relvel) * normal_dir;
-    const glm::vec2 tangent_vel = relvel - orth_vel;
+    const glm::vec2 normal_vel = glm::dot(normal_dir, relvel) * normal_dir;
+    const glm::vec2 tangent_vel = relvel - normal_vel;
 
-    const glm::vec2 force = reltouch * rigidity() + orth_vel * restitution() + tangent_vel * friction();
+    const glm::vec2 force = reltouch * rigidity + normal_vel * normal_damping + tangent_vel * tangent_damping;
     const float torque1 = kit::cross2D(rel1, force), torque2 = kit::cross2D(force, rel2);
     return {force, torque1, torque2};
 }

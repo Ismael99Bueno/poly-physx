@@ -18,7 +18,7 @@ class constraint_manager2D final : kit::non_copyable
   public:
     constraint_manager2D(world2D &world);
 
-    std::size_t iterations = 10;
+    std::uint32_t iterations = 10;
     bool warmup = true;
     bool position_corrections = true;
 

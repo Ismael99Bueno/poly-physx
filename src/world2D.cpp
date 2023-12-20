@@ -5,6 +5,7 @@
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
 
 #include <cstring>
 #ifdef DEBUG
@@ -172,10 +173,14 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     nqt["Max depth"] = quad_tree::max_depth;
     nqt["Min size"] = quad_tree::min_size;
 
-    YAML::Node nspslv = nc["Spring resolution"];
-    nspslv["Rigidity"] = spring_driven_resolution2D::rigidity_coeff;
-    nspslv["Restitution"] = collision_resolution2D::restitution_coeff;
-    nspslv["Friction"] = collision_resolution2D::friction_coeff;
+    YAML::Node nsprng = nc["Spring driven"];
+    nsprng["Rigidity"] = spring_driven_resolution2D::rigidity;
+    nsprng["Normal damping"] = spring_driven_resolution2D::normal_damping;
+    nsprng["Tangent damping"] = spring_driven_resolution2D::tangent_damping;
+
+    YAML::Node nctr = nc["Constraint driven"];
+    nctr["Friction"] = constraint_driven_resolution2D::friction;
+    nctr["Restitution"] = constraint_driven_resolution2D::restitution;
 
     for (const body2D &body : world.bodies)
         node["Bodies"].push_back(body);
@@ -213,10 +218,14 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
     quad_tree::min_size = nqt["Min size"].as<float>();
 
-    const YAML::Node nspslv = nc["Spring resolution"];
-    spring_driven_resolution2D::rigidity_coeff = nspslv["Rigidity"].as<float>();
-    collision_resolution2D::restitution_coeff = nspslv["Restitution"].as<float>();
-    collision_resolution2D::friction_coeff = nspslv["Friction"].as<float>();
+    const YAML::Node nsprng = nc["Spring driven"];
+    spring_driven_resolution2D::rigidity = nsprng["Rigidity"].as<float>();
+    spring_driven_resolution2D::normal_damping = nsprng["Normal damping"].as<float>();
+    spring_driven_resolution2D::tangent_damping = nsprng["Tangent damping"].as<float>();
+
+    const YAML::Node nctr = nc["Constraint driven"];
+    constraint_driven_resolution2D::friction = nctr["Friction"].as<float>();
+    constraint_driven_resolution2D::restitution = nctr["Restitution"].as<float>();
 
     world.collisions.detection((collision_manager2D::detection_type)nc["Detection method"].as<int>());
     world.collisions.resolution((collision_manager2D::resolution_type)nc["Resolution method"].as<int>());

@@ -23,19 +23,18 @@ class spring2D : public kit::identifiable<>, public kit::indexable
     struct specs
     {
         joint_proxy2D::specs joint;
-        float stiffness = 1.f, dampening = 0.f, length = 0.f;
+        float stiffness = 1.f, damping = 0.f, length = 0.f;
         static specs from_spring(const spring2D &sp);
     };
 
-    spring2D(float stiffness = 1.f, float dampening = 0.f, float length = 0.f);
+    spring2D(float stiffness = 1.f, float damping = 0.f, float length = 0.f);
     spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
-             const glm::vec2 &anchor2 = glm::vec2(0.f), float stiffness = 1.f, float dampening = 0.f,
-             float length = 0.f);
+             const glm::vec2 &anchor2 = glm::vec2(0.f), float stiffness = 1.f, float damping = 0.f, float length = 0.f);
     spring2D(const specs &spc);
 
     joint_proxy2D joint;
     float stiffness;
-    float dampening;
+    float damping;
     float length;
     world2D *world = nullptr;
 

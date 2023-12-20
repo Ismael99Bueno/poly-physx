@@ -5,17 +5,17 @@
 
 namespace ppx
 {
-spring2D::spring2D(const float stiffness, const float dampening, const float length)
-    : stiffness(stiffness), dampening(dampening), length(length)
+spring2D::spring2D(const float stiffness, const float damping, const float length)
+    : stiffness(stiffness), damping(damping), length(length)
 {
 }
 spring2D::spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
-                   const glm::vec2 &anchor2, const float stiffness, const float dampening, const float length)
-    : joint(body1, body2, anchor1, anchor2), stiffness(stiffness), dampening(dampening), length(length)
+                   const glm::vec2 &anchor2, const float stiffness, const float damping, const float length)
+    : joint(body1, body2, anchor1, anchor2), stiffness(stiffness), damping(damping), length(length)
 {
 }
 spring2D::spring2D(const specs &spc)
-    : joint(spc.joint), stiffness(spc.stiffness), dampening(spc.dampening), length(spc.length)
+    : joint(spc.joint), stiffness(spc.stiffness), damping(spc.damping), length(spc.length)
 {
 }
 
@@ -40,7 +40,7 @@ glm::vec4 spring2D::force() const
                              glm::dot(body2->velocity_at(rot_anchor2) - body1->velocity_at(rot_anchor1), direction),
                     vlen = length * direction;
 
-    const glm::vec2 force = stiffness * (relpos - vlen) + dampening * relvel;
+    const glm::vec2 force = stiffness * (relpos - vlen) + damping * relvel;
     const float torque1 = kit::cross2D(rot_anchor1, force), torque2 = kit::cross2D(force, rot_anchor2);
     return {force, torque1, torque2};
 }
@@ -78,7 +78,7 @@ spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
 {
     return {{sp.joint.body1(), sp.joint.body2(), sp.joint.rotated_anchor1(), sp.joint.rotated_anchor2()},
             sp.stiffness,
-            sp.dampening,
+            sp.damping,
             sp.length};
 }
 
@@ -88,7 +88,7 @@ YAML::Node spring2D::serializer::encode(const spring2D &sp) const
     YAML::Node node = sp.joint.encode();
     node["UUID"] = (std::uint64_t)sp.id;
     node["Stiffness"] = sp.stiffness;
-    node["Dampening"] = sp.dampening;
+    node["Damping"] = sp.damping;
     node["Length"] = sp.length;
     return node;
 }
@@ -98,7 +98,7 @@ bool spring2D::serializer::decode(const YAML::Node &node, spring2D &sp) const
         return false;
     sp.id = kit::uuid(node["UUID"].as<std::uint64_t>());
     sp.stiffness = node["Stiffness"].as<float>();
-    sp.dampening = node["Dampening"].as<float>();
+    sp.damping = node["Damping"].as<float>();
     sp.length = node["Length"].as<float>();
     return true;
 }
