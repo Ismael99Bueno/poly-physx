@@ -1,5 +1,4 @@
-#ifndef PPX_FORCE2D_HPP
-#define PPX_FORCE2D_HPP
+#pragma once
 
 #include "ppx/behaviours/behaviour2D.hpp"
 
@@ -18,5 +17,3 @@ class force2D : public behaviour2D
     float potential_energy() const override;
 };
 } // namespace ppx
-
-#endif

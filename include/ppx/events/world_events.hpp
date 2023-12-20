@@ -1,5 +1,4 @@
-#ifndef PPX_WORLD_EVENTS_HPP
-#define PPX_WORLD_EVENTS_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"
@@ -28,5 +27,3 @@ class world_events final : kit::non_copyable
 };
 
 } // namespace ppx
-
-#endif

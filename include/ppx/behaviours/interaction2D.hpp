@@ -1,5 +1,4 @@
-#ifndef PPX_INTERACTION2D_HPP
-#define PPX_INTERACTION2D_HPP
+#pragma once
 
 #include "ppx/behaviours/behaviour2D.hpp"
 
@@ -28,4 +27,3 @@ class interaction2D : public behaviour2D
     mutable body2D m_unit;
 };
 } // namespace ppx
-#endif

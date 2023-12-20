@@ -1,5 +1,4 @@
-#ifndef PPX_COLLISION_HPP
-#define PPX_COLLISION_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 
@@ -40,5 +39,3 @@ struct contact_point_query
     void add_contact_point(const glm::vec2 &contact);
 };
 } // namespace ppx
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PPX_SORT_SWEEP_DETECTION2D_HPP
-#define PPX_SORT_SWEEP_DETECTION2D_HPP
+#pragma once
 
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "kit/interface/non_copyable.hpp"
@@ -43,5 +42,3 @@ class sort_sweep_detection2D : public collision_detection2D, kit::non_copyable
     void sort_edges();
 };
 } // namespace ppx
-
-#endif

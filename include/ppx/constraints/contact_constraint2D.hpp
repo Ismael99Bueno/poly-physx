@@ -1,5 +1,4 @@
-#ifndef PPX_CONTACT_CONSTRAINT_HPP
-#define PPX_CONTACT_CONSTRAINT_HPP
+#pragma once
 
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/collision/collision2D.hpp"
@@ -35,5 +34,3 @@ class contact_constraint2D : public constraint2D
     float compute_lambda() const;
 };
 } // namespace ppx
-
-#endif

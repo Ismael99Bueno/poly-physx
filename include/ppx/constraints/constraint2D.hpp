@@ -1,5 +1,4 @@
-#ifndef PPX_CONSTRAINT2D_HPP
-#define PPX_CONSTRAINT2D_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 #include "kit/interface/nameable.hpp"
@@ -37,5 +36,3 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
     friend class constraint_manager2D;
 };
 } // namespace ppx
-
-#endif

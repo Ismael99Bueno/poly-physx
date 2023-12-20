@@ -1,5 +1,4 @@
-#ifndef PPX_BODY2D_HPP
-#define PPX_BODY2D_HPP
+#pragma once
 
 #include "geo/aabb2D.hpp"
 #include "geo/polygon.hpp"
@@ -141,4 +140,3 @@ class body2D : public kit::identifiable<>, public kit::indexable
     template <typename T> void compute_inertia(const T &shape);
 };
 } // namespace ppx
-#endif

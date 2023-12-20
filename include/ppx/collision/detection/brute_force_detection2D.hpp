@@ -1,5 +1,4 @@
-#ifndef PPX_BRUTE_FORCE_DETECTION2D_HPP
-#define PPX_BRUTE_FORCE_DETECTION2D_HPP
+#pragma once
 
 #include "ppx/collision/detection/collision_detection2D.hpp"
 
@@ -17,5 +16,3 @@ class brute_force_detection2D : public collision_detection2D
     void detect_collisions_mt();
 };
 } // namespace ppx
-
-#endif

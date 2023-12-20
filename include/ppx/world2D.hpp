@@ -1,5 +1,4 @@
-#ifndef PPX_WORLD2D_HPP
-#define PPX_WORLD2D_HPP
+#pragma once
 
 #include "rk/integrator.hpp"
 #include "ppx/body_manager2D.hpp"
@@ -64,5 +63,3 @@ class world2D final : kit::non_copyable
 };
 
 } // namespace ppx
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PPX_SPRING_driven_resolution2D_HPP
-#define PPX_SPRING_driven_resolution2D_HPP
+#pragma once
 
 #include "ppx/collision/resolution/collision_resolution2D.hpp"
 
@@ -22,5 +21,3 @@ class spring_driven_resolution2D : public collision_resolution2D
     void solve_and_apply_collision_forces(const collision2D &colis) const;
 };
 } // namespace ppx
-
-#endif

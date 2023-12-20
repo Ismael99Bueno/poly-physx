@@ -1,5 +1,4 @@
-#ifndef PPX_BEHAVIOUR2D_HPP
-#define PPX_BEHAVIOUR2D_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 #include "kit/interface/non_copyable.hpp"
@@ -73,5 +72,3 @@ class behaviour2D : kit::non_copyable,
 };
 
 } // namespace ppx
-
-#endif

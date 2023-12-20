@@ -1,5 +1,4 @@
-#ifndef PPX_COLLISION_MANAGER2D_HPP
-#define PPX_COLLISION_MANAGER2D_HPP
+#pragma once
 
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
@@ -122,5 +121,3 @@ class collision_manager2D
     resolution_type m_res_type;
 };
 } // namespace ppx
-
-#endif

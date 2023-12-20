@@ -1,5 +1,4 @@
-#ifndef PPX_QUAD_TREE_HPP
-#define PPX_QUAD_TREE_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 #include "kit/memory/scope.hpp"
@@ -49,5 +48,3 @@ class quad_tree final
     quad_tree &operator=(quad_tree &&) = default;
 };
 } // namespace ppx
-
-#endif

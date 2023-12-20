@@ -1,5 +1,4 @@
-#ifndef PPX_DISTANCE_JOINT2D_HPP
-#define PPX_DISTANCE_JOINT2D_HPP
+#pragma once
 
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/joints/joint_proxy2D.hpp"
@@ -45,4 +44,3 @@ class distance_joint2D : public constraint2D
     void solve() override;
 };
 } // namespace ppx
-#endif

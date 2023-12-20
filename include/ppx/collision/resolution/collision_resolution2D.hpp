@@ -1,5 +1,4 @@
-#ifndef PPX_COLLISION_resolution2D_HPP
-#define PPX_COLLISION_resolution2D_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
@@ -26,5 +25,3 @@ class collision_resolution2D
     friend class collision_manager2D;
 };
 } // namespace ppx
-
-#endif

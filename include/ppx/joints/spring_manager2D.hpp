@@ -1,5 +1,4 @@
-#ifndef PPX_SPRING_MANAGER2D_HPP
-#define PPX_SPRING_MANAGER2D_HPP
+#pragma once
 
 #include "ppx/joints/spring2D.hpp"
 
@@ -66,5 +65,3 @@ class spring_manager2D
     spring2D::ptr process_addition(spring2D &sp);
 };
 } // namespace ppx
-
-#endif

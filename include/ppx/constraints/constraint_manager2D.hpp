@@ -1,5 +1,4 @@
-#ifndef PPX_CONSTRAINT_MANAGER2D_HPP
-#define PPX_CONSTRAINT_MANAGER2D_HPP
+#pragma once
 
 #include "ppx/events/world_events.hpp"
 #include "ppx/constraints/contact_constraint2D.hpp"
@@ -82,5 +81,3 @@ class constraint_manager2D final : kit::non_copyable
     std::vector<contact_constraint2D> m_contacts;
 };
 } // namespace ppx
-
-#endif

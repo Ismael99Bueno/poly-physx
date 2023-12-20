@@ -1,5 +1,4 @@
-#ifndef PPX_QUAD_TREE_DETECTION2D_HPP
-#define PPX_QUAD_TREE_DETECTION2D_HPP
+#pragma once
 
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/collision/detection/quad_tree.hpp"
@@ -22,5 +21,3 @@ class quad_tree_detection2D : public collision_detection2D
     void update_quad_tree();
 };
 } // namespace ppx
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PPX_PPX_PCH_HPP
-#define PPX_PPX_PCH_HPP
+#pragma once
 
 #include <vector>
 #include <utility>
@@ -31,5 +30,3 @@
 #include <random>
 #include <optional>
 #include "kit/debug/log.hpp"
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PPX_JOINT2D_HPP
-#define PPX_JOINT2D_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 #include "kit/interface/serialization.hpp"
@@ -50,5 +49,3 @@ class joint_proxy2D
     float m_angle1 = 0.f, m_angle2 = 0.f;
 };
 } // namespace ppx
-
-#endif

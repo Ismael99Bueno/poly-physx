@@ -1,5 +1,4 @@
-#ifndef PPX_SPRING2D_HPP
-#define PPX_SPRING2D_HPP
+#pragma once
 
 #include "ppx/joints/joint_proxy2D.hpp"
 
@@ -56,5 +55,3 @@ class spring2D : public kit::identifiable<>, public kit::indexable
 };
 
 } // namespace ppx
-
-#endif

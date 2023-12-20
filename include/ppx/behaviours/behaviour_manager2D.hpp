@@ -1,5 +1,4 @@
-#ifndef PPX_BEHAVIOUR_MANAGER2D_HPP
-#define PPX_BEHAVIOUR_MANAGER2D_HPP
+#pragma once
 
 #include "kit/memory/scope.hpp"
 #include "kit/interface/non_copyable.hpp"
@@ -82,5 +81,3 @@ class behaviour_manager2D : kit::non_copyable
 
 template <> behaviour2D *behaviour_manager2D::from_name(const std::string &name) const;
 } // namespace ppx
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PPX_BODY_MANAGER2D_HPP
-#define PPX_BODY_MANAGER2D_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 
@@ -73,5 +72,3 @@ class body_manager2D
     body2D::ptr process_addition(body2D &body);
 };
 } // namespace ppx
-
-#endif

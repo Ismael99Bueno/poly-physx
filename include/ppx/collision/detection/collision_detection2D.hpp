@@ -1,5 +1,4 @@
-#ifndef PPX_COLLISION_DETECTION2D_HPP
-#define PPX_COLLISION_DETECTION2D_HPP
+#pragma once
 
 #include "ppx/body2D.hpp"
 #include "ppx/collision/collision2D.hpp"
@@ -74,5 +73,3 @@ class collision_detection2D
 };
 
 } // namespace ppx
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PPX_BODY_EVENTS_HPP
-#define PPX_BODY_EVENTS_HPP
+#pragma once
 
 #include "kit/event_handling/event.hpp"
 #include "kit/utility/uuid.hpp"
@@ -31,5 +30,3 @@ class body_events final
     friend class body2D;
 };
 } // namespace ppx
-
-#endif
