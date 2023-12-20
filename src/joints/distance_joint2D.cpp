@@ -41,11 +41,11 @@ float distance_joint2D::constraint_acceleration() const
 
     const glm::vec2 lin_term1 = body1->inv_mass() * body1->force() +
                                 body1->inv_inertia() * body1->torque() * orth_anchor1 -
-                                rot_anchor1 * body1->angular_velocity() * body1->angular_velocity();
+                                rot_anchor1 * body1->angular_velocity * body1->angular_velocity;
     const glm::vec2 lin_term2 = body2->inv_mass() * body2->force() +
                                 body2->inv_inertia() * body2->torque() * orth_anchor2 -
-                                rot_anchor2 * body2->angular_velocity() * body2->angular_velocity();
-    const float cross = kit::cross2D(dir, body1->velocity() - body2->velocity());
+                                rot_anchor2 * body2->angular_velocity * body2->angular_velocity;
+    const float cross = kit::cross2D(dir, body1->velocity - body2->velocity);
     return glm::dot(dir, lin_term1 - lin_term2) +
            cross * cross / glm::distance(body1->position() + rot_anchor1, body2->position() + rot_anchor2);
 }
@@ -91,11 +91,8 @@ void distance_joint2D::apply_lambda(const float lambda)
     const body2D::ptr &body1 = joint.body1();
     const body2D::ptr &body2 = joint.body2();
 
-    body1->apply_simulation_force(f1);
-    body1->apply_simulation_torque(kit::cross2D(rot_anchor1, f1));
-
-    body2->apply_simulation_force(f2);
-    body2->apply_simulation_torque(kit::cross2D(rot_anchor2, f2));
+    body1->apply_simulation_force_at(f1, rot_anchor1);
+    body2->apply_simulation_force_at(f2, rot_anchor2);
 }
 
 void distance_joint2D::warmup()

@@ -32,11 +32,11 @@ float contact_constraint2D::constraint_acceleration() const
 
     const glm::vec2 lin_term1 = body1->inv_mass() * body1->force() +
                                 body1->inv_inertia() * body1->torque() * orth_anchor1 -
-                                m_anchor1 * body1->angular_velocity() * body1->angular_velocity();
+                                m_anchor1 * body1->angular_velocity * body1->angular_velocity;
     const glm::vec2 lin_term2 = body2->inv_mass() * body2->force() +
                                 body2->inv_inertia() * body2->torque() * orth_anchor2 -
-                                m_anchor2 * body2->angular_velocity() * body2->angular_velocity();
-    const float cross = kit::cross2D(m_normal, body1->velocity() - body2->velocity());
+                                m_anchor2 * body2->angular_velocity * body2->angular_velocity;
+    const float cross = kit::cross2D(m_normal, body1->velocity - body2->velocity);
 
     const float lin_term = glm::dot(m_normal, lin_term1 - lin_term2);
     const float ang_term =
@@ -72,11 +72,11 @@ void contact_constraint2D::apply_lambda(const float lambda)
     const glm::vec2 f1 = lambda * m_normal;
     const glm::vec2 f2 = -f1;
 
-    m_collision.current->boost(f1 * m_collision.current->inv_mass());
-    m_collision.current->spin(kit::cross2D(m_anchor1, f1) * m_collision.current->inv_inertia());
+    m_collision.current->velocity += f1 * m_collision.current->inv_mass();
+    m_collision.current->angular_velocity += kit::cross2D(m_anchor1, f1) * m_collision.current->inv_inertia();
 
-    m_collision.incoming->boost(f2 * m_collision.incoming->inv_mass());
-    m_collision.incoming->spin(kit::cross2D(m_anchor2, f2) * m_collision.incoming->inv_inertia());
+    m_collision.incoming->velocity += f2 * m_collision.incoming->inv_mass();
+    m_collision.incoming->angular_velocity += kit::cross2D(m_anchor2, f2) * m_collision.incoming->inv_inertia();
 }
 
 void contact_constraint2D::warmup()

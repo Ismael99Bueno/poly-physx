@@ -55,8 +55,8 @@ class body_manager2D
     bool remove(const body2D &body);
     bool remove(kit::uuid id);
 
-    void apply_added_forces();
-    void reset_added_forces();
+    void apply_impulse_and_persistent_forces();
+    void reset_impulse_forces();
     void reset_simulation_forces();
 
     void send_data_to_state(rk::state &state);

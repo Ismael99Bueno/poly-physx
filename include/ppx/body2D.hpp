@@ -58,8 +58,16 @@ class body2D : public kit::identifiable<>, public kit::indexable
            float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
     explicit body2D(const specs &spc);
 
+    glm::vec2 impulse_force{0.f};
     glm::vec2 persistent_force{0.f};
-    float persistent_torque{0.f};
+
+    float impulse_torque = 0.f;
+    float persistent_torque = 0.f;
+
+    glm::vec2 velocity;
+    float angular_velocity;
+    float charge;
+
     bool kinematic;
     body_events events;
 
@@ -70,17 +78,14 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     float kinetic_energy() const;
 
-    void add_force(const glm::vec2 &force);
-    void add_torque(float torque);
+    void add_force_at(const glm::vec2 &force, const glm::vec2 &at);
 
     void apply_simulation_force(const glm::vec2 &force);
+    void apply_simulation_force_at(const glm::vec2 &force, const glm::vec2 &at);
     void apply_simulation_torque(float torque);
 
     const glm::vec2 &force() const;
-    const glm::vec2 &added_force() const;
-
     float torque() const;
-    float added_torque() const;
 
     const geo::shape2D &shape() const;
     template <typename T> const T &shape() const;
@@ -108,43 +113,28 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
-    void boost(const glm::vec2 &dvel);
-    void spin(float dangvel);
-
     const kit::transform2D &transform() const;
 
     const glm::vec2 &position() const;
-    const glm::vec2 &velocity() const;
+    float rotation() const;
+
     glm::vec2 velocity_at(const glm::vec2 &at) const;
 
-    float rotation() const;
-    float angular_velocity() const;
-    float charge() const;
-
     void position(const glm::vec2 &position);
-    void velocity(const glm::vec2 &velocity);
     void rotation(float rotation);
-    void angular_velocity(float angular_velocity);
     void mass(float mass);
-    void charge(float charge);
 
-    void reset_added_forces();
     void reset_simulation_forces();
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
   private:
     std::variant<geo::polygon, geo::circle> m_shape;
-    glm::vec2 m_velocity{0.f};
     glm::vec2 m_force{0.f};
-    glm::vec2 m_added_force{0.f};
-    float m_angular_velocity;
     float m_torque = 0.f;
-    float m_added_torque = 0.f;
     float m_mass;
     float m_inv_mass;
     float m_inertia;
     float m_inv_inertia;
-    float m_charge;
 
     geo::shape2D &mutable_shape();
 

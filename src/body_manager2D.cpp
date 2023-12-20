@@ -9,21 +9,24 @@ body_manager2D::body_manager2D(world2D &world) : m_world(world)
 {
 }
 
-void body_manager2D::apply_added_forces()
+void body_manager2D::apply_impulse_and_persistent_forces()
 {
     KIT_PERF_FUNCTION()
     for (body2D &body : m_bodies)
     {
-        body.apply_simulation_force(body.added_force() + body.persistent_force);
-        body.apply_simulation_torque(body.added_torque() + body.persistent_torque);
+        body.apply_simulation_force(body.impulse_force + body.persistent_force);
+        body.apply_simulation_torque(body.impulse_torque + body.persistent_torque);
     }
 }
 
-void body_manager2D::reset_added_forces()
+void body_manager2D::reset_impulse_forces()
 {
     KIT_PERF_FUNCTION()
     for (body2D &body : m_bodies)
-        body.reset_added_forces();
+    {
+        body.impulse_force = glm::vec2(0.f);
+        body.impulse_torque = 0.f;
+    }
 }
 void body_manager2D::reset_simulation_forces()
 {
@@ -121,11 +124,10 @@ body2D::ptr body_manager2D::process_addition(body2D &body)
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
 
     const kit::transform2D &transform = body.transform();
-    const glm::vec2 &velocity = body.velocity();
 
     rk::state &state = m_world.integrator.state;
-    state.append({transform.position.x, transform.position.y, transform.rotation, velocity.x, velocity.y,
-                  body.angular_velocity()});
+    state.append({transform.position.x, transform.position.y, transform.rotation, body.velocity.x, body.velocity.y,
+                  body.angular_velocity});
     body.retrieve_data_from_state_variables(state.vars());
 
     KIT_INFO("Added body with index {0} and id {1}.", body.index, (std::uint64_t)body.id)
@@ -194,18 +196,14 @@ void body_manager2D::send_data_to_state(rk::state &state)
     for (const body2D &body : m_bodies)
     {
         const std::size_t index = 6 * body.index;
-
         const glm::vec2 &position = body.position();
-        const glm::vec2 &velocity = body.velocity();
-        const float rotation = body.rotation();
-        const float angular_velocity = body.angular_velocity();
 
         state[index] = position.x;
         state[index + 1] = position.y;
-        state[index + 2] = rotation;
-        state[index + 3] = velocity.x;
-        state[index + 4] = velocity.y;
-        state[index + 5] = angular_velocity;
+        state[index + 2] = body.rotation();
+        state[index + 3] = body.velocity.x;
+        state[index + 4] = body.velocity.y;
+        state[index + 5] = body.angular_velocity;
     }
 }
 

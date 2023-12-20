@@ -56,7 +56,7 @@ void world2D::pre_step_preparation(const float timestep)
 }
 void world2D::post_step_setup()
 {
-    bodies.reset_added_forces();
+    bodies.reset_impulse_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     if (collision_detection2D::build_contact_manifold_over_time)
         collisions.detection()->query_last_contact_points();
@@ -83,8 +83,8 @@ std::vector<float> world2D::create_state_derivative() const
     for (const body2D &body : bodies)
     {
         const std::size_t index = 6 * body.index;
-        const glm::vec2 &velocity = body.velocity();
-        const float angular_velocity = body.angular_velocity();
+        const glm::vec2 &velocity = body.velocity;
+        const float angular_velocity = body.angular_velocity;
         state_derivative[index] = velocity.x;
         state_derivative[index + 1] = velocity.y;
         state_derivative[index + 2] = angular_velocity;
@@ -139,7 +139,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     bodies.reset_simulation_forces();
     bodies.retrieve_data_from_state_variables(vars);
 
-    bodies.apply_added_forces();
+    bodies.apply_impulse_and_persistent_forces();
     behaviours.apply_forces();
     springs.apply_forces();
 
