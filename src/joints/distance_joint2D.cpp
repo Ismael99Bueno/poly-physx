@@ -58,7 +58,7 @@ float distance_joint2D::compute_lambda() const
     if (world->constraints.position_corrections)
     {
         const float c = constraint_value();
-        static constexpr float stiffness = 100.f;
+        static constexpr float stiffness = 1000.f;
         return -(cvel + c * stiffness * world->current_timestep()) / inv_mass;
     }
     return -cvel / inv_mass;
