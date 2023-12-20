@@ -161,7 +161,7 @@ void constraint_manager2D::solve()
             ctr->warmup();
         if (m_collisions)
             for (contact_constraint2D &contact : m_contacts)
-                contact.solve();
+                contact.warmup();
     }
 
     for (std::size_t i = 0; i < iterations; i++)
