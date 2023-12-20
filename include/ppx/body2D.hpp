@@ -71,6 +71,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     body_events events;
 
     glm::vec2 constraint_velocity;
+    float constraint_angular_velocity;
 
     world2D *world = nullptr;
 
