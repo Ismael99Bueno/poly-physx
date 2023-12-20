@@ -214,6 +214,12 @@ void body_manager2D::retrieve_data_from_state_variables(const std::vector<float>
         body.retrieve_data_from_state_variables(vars_buffer);
 }
 
+void body_manager2D::prepare_constraint_velocities()
+{
+    for (body2D &body : m_bodies)
+        body.constraint_velocity = body.velocity + body.force() * m_world.current_timestep();
+}
+
 std::size_t body_manager2D::size() const
 {
     return m_bodies.size();

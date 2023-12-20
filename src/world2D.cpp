@@ -146,6 +146,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     if (collisions.enabled)
         collisions.solve();
 
+    bodies.prepare_constraint_velocities();
     constraints.solve();
     return create_state_derivative();
 }

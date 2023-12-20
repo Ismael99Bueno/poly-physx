@@ -61,6 +61,8 @@ class body_manager2D
     void send_data_to_state(rk::state &state);
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
+    void prepare_constraint_velocities();
+
     std::size_t size() const;
     void clear();
     void validate();

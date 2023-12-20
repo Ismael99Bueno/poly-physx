@@ -70,6 +70,8 @@ class body2D : public kit::identifiable<>, public kit::indexable
     bool kinematic;
     body_events events;
 
+    glm::vec2 constraint_velocity;
+
     world2D *world = nullptr;
 
     const_ptr as_ptr() const;
