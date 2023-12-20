@@ -18,6 +18,10 @@ class constraint_manager2D final : kit::non_copyable
   public:
     constraint_manager2D(world2D &world);
 
+    std::size_t iterations = 10;
+    bool warmup = true;
+    bool position_corrections = true;
+
     template <typename T, class... ConstraintArgs> T *add(ConstraintArgs &&...args)
     {
         static_assert(std::is_base_of_v<constraint2D, T>, "Constraint must inherit from constraint2D!");
@@ -64,7 +68,6 @@ class constraint_manager2D final : kit::non_copyable
     std::vector<constraint2D *> operator[](const std::vector<kit::uuid> &ids);
 
     void delegate_collisions(const std::vector<collision2D> *collisions);
-    void reset_delegated_collisions();
 
     std::size_t size() const;
     void clear();

@@ -121,6 +121,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     float rotation() const;
 
     glm::vec2 velocity_at(const glm::vec2 &at) const;
+    glm::vec2 constraint_velocity_at(const glm::vec2 &at) const;
 
     void position(const glm::vec2 &position);
     void rotation(float rotation);

@@ -28,26 +28,8 @@ float distance_joint2D::constraint_value() const
 float distance_joint2D::constraint_velocity() const
 {
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
-    return glm::dot(dir, joint.body1()->velocity_at(rot_anchor1) - joint.body2()->velocity_at(rot_anchor2));
-}
-float distance_joint2D::constraint_acceleration() const
-{
-    const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
-    const body2D::ptr &body1 = joint.body1();
-    const body2D::ptr &body2 = joint.body2();
-
-    const glm::vec2 orth_anchor1 = glm::vec2(-rot_anchor1.y, rot_anchor1.x);
-    const glm::vec2 orth_anchor2 = glm::vec2(-rot_anchor2.y, rot_anchor2.x);
-
-    const glm::vec2 lin_term1 = body1->inv_mass() * body1->force() +
-                                body1->inv_inertia() * body1->torque() * orth_anchor1 -
-                                rot_anchor1 * body1->angular_velocity * body1->angular_velocity;
-    const glm::vec2 lin_term2 = body2->inv_mass() * body2->force() +
-                                body2->inv_inertia() * body2->torque() * orth_anchor2 -
-                                rot_anchor2 * body2->angular_velocity * body2->angular_velocity;
-    const float cross = kit::cross2D(dir, body1->velocity - body2->velocity);
-    return glm::dot(dir, lin_term1 - lin_term2) +
-           cross * cross / glm::distance(body1->position() + rot_anchor1, body2->position() + rot_anchor2);
+    return glm::dot(dir, joint.body1()->constraint_velocity_at(rot_anchor1) -
+                             joint.body2()->constraint_velocity_at(rot_anchor2));
 }
 
 std::tuple<glm::vec2, glm::vec2, glm::vec2> distance_joint2D::compute_anchors_and_direction() const
@@ -62,12 +44,10 @@ std::tuple<glm::vec2, glm::vec2, glm::vec2> distance_joint2D::compute_anchors_an
 float distance_joint2D::compute_lambda() const
 {
     const float c = constraint_value();
-    const float cvel = constraint_velocity();
-
     static constexpr float stiffness = 100.f;
     static constexpr float dampening = 5.f;
 
-    const float cacc = constraint_acceleration() + c * stiffness + cvel * dampening;
+    const float cvel = constraint_velocity() + c * stiffness * world->current_timestep();
 
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
 
@@ -79,20 +59,26 @@ float distance_joint2D::compute_lambda() const
 
     const float inv_mass = body1->inv_mass() + body2->inv_mass() + body1->inv_inertia() * cross1 * cross1 +
                            body2->inv_inertia() * cross2 * cross2;
-    return -cacc / inv_mass;
+    return -cvel / inv_mass;
 }
 
 void distance_joint2D::apply_lambda(const float lambda)
 {
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
-    const glm::vec2 f1 = lambda * dir;
-    const glm::vec2 f2 = -f1;
+    const glm::vec2 imp1 = lambda * dir;
+    const glm::vec2 imp2 = -imp1;
 
     const body2D::ptr &body1 = joint.body1();
     const body2D::ptr &body2 = joint.body2();
 
-    body1->apply_simulation_force_at(f1, rot_anchor1);
-    body2->apply_simulation_force_at(f2, rot_anchor2);
+    body1->constraint_velocity += body1->inv_mass() * imp1;
+    body2->constraint_velocity += body2->inv_mass() * imp2;
+
+    body1->constraint_angular_velocity += body1->inv_inertia() * kit::cross2D(rot_anchor1, imp1);
+    body2->constraint_angular_velocity += body2->inv_inertia() * kit::cross2D(rot_anchor2, imp2);
+
+    body1->apply_simulation_force_at(imp1 / world->current_timestep(), rot_anchor1);
+    body2->apply_simulation_force_at(imp2 / world->current_timestep(), rot_anchor2);
 }
 
 void distance_joint2D::warmup()

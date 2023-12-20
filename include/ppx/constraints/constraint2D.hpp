@@ -21,12 +21,10 @@ class constraint2D : public kit::identifiable<>, public kit::serializable, publi
 
     virtual float constraint_value() const = 0;
     virtual float constraint_velocity() const = 0;
-    virtual float constraint_acceleration() const = 0;
 
     virtual bool contains(kit::uuid id) const = 0;
     bool contains(const body2D &body) const;
 
-  protected:
   private:
     virtual bool valid() const = 0;
 
