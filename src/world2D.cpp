@@ -167,6 +167,11 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     nc["Resolution method"] = (int)world.collisions.resolution_method();
     nc["Manifold over time"] = collision_detection2D::build_contact_manifold_over_time;
 
+    YAML::Node nctrm = node["Constraints"];
+    nctrm["Iterations"] = world.constraints.iterations;
+    nctrm["Warmup"] = world.constraints.warmup;
+    nctrm["Position corrections"] = world.constraints.position_corrections;
+
     YAML::Node nqt = nc["Quad tree"];
     nqt["Force square"] = quad_tree_detection2D::force_square_shape;
     nqt["Max bodies"] = quad_tree::max_bodies;
@@ -211,6 +216,11 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
 
     const YAML::Node nc = node["Collision"];
     collision_detection2D::build_contact_manifold_over_time = nc["Manifold over time"].as<bool>();
+
+    const YAML::Node nctrm = node["Constraints"];
+    world.constraints.iterations = nctrm["Iterations"].as<std::uint32_t>();
+    world.constraints.warmup = nctrm["Warmup"].as<bool>();
+    world.constraints.position_corrections = nctrm["Position corrections"].as<bool>();
 
     const YAML::Node nqt = nc["Quad tree"];
     quad_tree_detection2D::force_square_shape = nqt["Force square"].as<bool>();
