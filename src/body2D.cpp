@@ -94,6 +94,11 @@ void body2D::apply_simulation_force(const glm::vec2 &force)
 {
     m_force += force;
 }
+void body2D::apply_simulation_force_at(const glm::vec2 &force, const glm::vec2 &at)
+{
+    m_force += force;
+    m_torque += kit::cross2D(at, force);
+}
 void body2D::apply_simulation_torque(const float torque)
 {
     m_torque += torque;

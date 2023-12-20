@@ -50,7 +50,6 @@ void world2D::pre_step_preparation(const float timestep)
     m_current_timestep = timestep;
 
     collisions.detection()->clear_cached_collisions();
-    constraints.reset_delegated_collisions();
 
     bodies.send_data_to_state(integrator.state);
 }
