@@ -43,12 +43,7 @@ std::tuple<glm::vec2, glm::vec2, glm::vec2> distance_joint2D::compute_anchors_an
 
 float distance_joint2D::compute_lambda() const
 {
-    const float c = constraint_value();
-    static constexpr float stiffness = 100.f;
-    static constexpr float dampening = 5.f;
-
-    const float cvel = constraint_velocity() + c * stiffness * world->current_timestep();
-
+    const float cvel = constraint_velocity();
     const auto [dir, rot_anchor1, rot_anchor2] = compute_anchors_and_direction();
 
     const float cross1 = kit::cross2D(rot_anchor1, dir);
@@ -59,6 +54,13 @@ float distance_joint2D::compute_lambda() const
 
     const float inv_mass = body1->inv_mass() + body2->inv_mass() + body1->inv_inertia() * cross1 * cross1 +
                            body2->inv_inertia() * cross2 * cross2;
+
+    if (world->constraints.position_corrections)
+    {
+        const float c = constraint_value();
+        static constexpr float stiffness = 100.f;
+        return -(cvel + c * stiffness * world->current_timestep()) / inv_mass;
+    }
     return -cvel / inv_mass;
 }
 
