@@ -58,8 +58,6 @@ void world2D::post_step_setup()
 {
     bodies.reset_impulse_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
-    if (collision_detection2D::build_contact_manifold_over_time)
-        collisions.detection()->query_last_contact_points();
 
 #ifdef DEBUG
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
@@ -165,7 +163,6 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     YAML::Node nc = node["Collision"];
     nc["Detection method"] = (int)world.collisions.detection_method();
     nc["Resolution method"] = (int)world.collisions.resolution_method();
-    nc["Manifold over time"] = collision_detection2D::build_contact_manifold_over_time;
 
     YAML::Node nctrm = node["Constraint params"];
     nctrm["Iterations"] = world.constraints.iterations;
@@ -215,7 +212,6 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     world.m_elapsed = node["Elapsed"].as<float>();
 
     const YAML::Node nc = node["Collision"];
-    collision_detection2D::build_contact_manifold_over_time = nc["Manifold over time"].as<bool>();
 
     const YAML::Node nctrm = node["Constraint params"];
     world.constraints.iterations = nctrm["Iterations"].as<std::uint32_t>();

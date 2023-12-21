@@ -30,17 +30,4 @@ glm::vec2 collision2D::touch2(std::size_t manifold_index) const
 {
     return manifold[manifold_index] - normal;
 }
-
-contact_point_query::contact_point_query(const glm::vec2 &first_contact)
-{
-    contacts[0] = first_contact;
-}
-
-void contact_point_query::add_contact_point(const glm::vec2 &contact)
-{
-    contacts[next] = contact;
-    next = (next + 1) % (collision2D::MANIFOLD_SIZE - 1);
-    if (size < collision2D::MANIFOLD_SIZE - 1)
-        size++;
-}
 } // namespace ppx
