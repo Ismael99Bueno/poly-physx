@@ -97,7 +97,7 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
     if (!gres.intersect)
         return false;
 
-    const geo::mtv_result mres = geo::epa(sh1, sh2, gres.simplex);
+    const geo::mtv_result mres = geo::epa(sh1, sh2, gres.simplex, epa_threshold);
     if (!mres.valid)
         return false;
 
