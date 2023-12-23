@@ -270,8 +270,8 @@ body2D::specs body2D::specs::from_body(const body2D &body)
     if (const auto *poly = body.shape_if<geo::polygon>())
     {
         const kit::transform2D &transform = poly->transform();
-        return {transform.position, body.velocity, transform.rotation, body.angular_velocity,
-                body.real_mass(),   body.charge,   poly->locals(),     0.f,
+        return {transform.position, body.velocity, transform.rotation,         body.angular_velocity,
+                body.real_mass(),   body.charge,   poly->locals().as_vector(), 0.f,
                 body.kinematic,     body.type()};
     }
 
