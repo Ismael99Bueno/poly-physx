@@ -14,14 +14,6 @@ bool collision2D::add_contact_point(const glm::vec2 &contact)
     return true;
 }
 
-collision2D collision2D::reciprocal() const
-{
-    collision2D c = {incoming, current, -normal, {}, size};
-    for (std::size_t i = 0; i < size; i++)
-        c.manifold[i] = touch2(i);
-    return c;
-}
-
 const glm::vec2 &collision2D::touch1(std::size_t manifold_index) const
 {
     return manifold[manifold_index];

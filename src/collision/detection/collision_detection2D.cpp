@@ -36,12 +36,12 @@ const std::vector<collision2D> &collision_detection2D::detect_collisions_cached(
 
 #ifdef PPX_MULTITHREADED
     kit::for_each_mt<PPX_THREAD_COUNT, collision2D>(m_collisions, [this](std::size_t thread_index, collision2D &colis) {
-        if (!narrow_collision_check(*colis.current, *colis.incoming, &colis))
+        if (!narrow_collision_check(*colis.body1, *colis.body2, &colis))
             colis.valid = false;
     });
 #else
     for (collision2D &colis : m_collisions)
-        if (!narrow_collision_check(*colis.current, *colis.incoming, &colis))
+        if (!narrow_collision_check(*colis.body1, *colis.body2, &colis))
             colis.valid = false;
 #endif
     return m_collisions;
@@ -108,8 +108,8 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
 
 void collision_detection2D::try_enter_or_stay_callback(const collision2D &c) const
 {
-    c.current->events.try_enter_or_stay(c);
-    c.incoming->events.try_enter_or_stay(c.reciprocal());
+    c.body1->events.try_enter_or_stay(c);
+    c.body2->events.try_enter_or_stay(c);
 }
 void collision_detection2D::try_exit_callback(body2D &body1, body2D &body2) const
 {

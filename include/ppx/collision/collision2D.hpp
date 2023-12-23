@@ -9,8 +9,8 @@ struct collision2D
     static inline constexpr std::size_t MANIFOLD_SIZE = 4;
     static inline constexpr float MIN_CONTACT_DIST = 0.1f;
 
-    body2D::ptr current;
-    body2D::ptr incoming;
+    body2D::ptr body1;
+    body2D::ptr body2;
 
     glm::vec2 normal{0.f};
     std::array<glm::vec2, MANIFOLD_SIZE> manifold;
@@ -19,7 +19,6 @@ struct collision2D
     bool valid = true;
 
     bool add_contact_point(const glm::vec2 &contact);
-    collision2D reciprocal() const;
 
     const glm::vec2 &touch1(std::size_t manifold_index) const;
     glm::vec2 touch2(std::size_t manifold_index) const;

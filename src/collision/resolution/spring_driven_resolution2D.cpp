@@ -32,10 +32,10 @@ void spring_driven_resolution2D::solve(const std::vector<collision2D> &collision
 std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collision_forces(
     const collision2D &colis, std::size_t manifold_index) const
 {
-    const glm::vec2 rel1 = colis.touch1(manifold_index) - colis.current->position();
-    const glm::vec2 rel2 = colis.touch2(manifold_index) - colis.incoming->position();
+    const glm::vec2 rel1 = colis.touch1(manifold_index) - colis.body1->position();
+    const glm::vec2 rel2 = colis.touch2(manifold_index) - colis.body2->position();
 
-    const glm::vec2 relvel = (colis.incoming->velocity_at(rel2) - colis.current->velocity_at(rel1));
+    const glm::vec2 relvel = (colis.body2->velocity_at(rel2) - colis.body1->velocity_at(rel1));
     const glm::vec2 reltouch = colis.touch2(manifold_index) - colis.touch1(manifold_index);
 
     const glm::vec2 normal_dir = glm::normalize(colis.normal);
@@ -66,10 +66,10 @@ void spring_driven_resolution2D::solve_and_apply_collision_forces(const collisio
     torque1 /= colis.size;
     torque2 /= colis.size;
 
-    colis.current->apply_simulation_force(force);
-    colis.current->apply_simulation_torque(torque1);
+    colis.body1->apply_simulation_force(force);
+    colis.body1->apply_simulation_torque(torque1);
 
-    colis.incoming->apply_simulation_force(-force);
-    colis.incoming->apply_simulation_torque(torque2);
+    colis.body2->apply_simulation_force(-force);
+    colis.body2->apply_simulation_torque(torque2);
 }
 } // namespace ppx

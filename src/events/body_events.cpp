@@ -13,7 +13,7 @@ void body_events::try_enter_or_stay(const collision2D &c) const
 {
     if (on_collision_enter.callbacks().empty() && on_collision_stay.callbacks().empty())
         return;
-    if (m_collided_ids.find(c.incoming->id) != m_collided_ids.end())
+    if (m_collided_ids.find(c.body2->id) != m_collided_ids.end())
         on_collision_stay(c);
     else
         on_collision_enter(c);
