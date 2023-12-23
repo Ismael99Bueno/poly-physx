@@ -18,7 +18,7 @@ bool constraint_manager2D::remove(std::size_t index)
         return false;
     }
     m_world.events.on_constraint_removal(*m_constraints[index]);
-    m_constraints.erase(m_constraints.begin() + (long)index);
+    m_constraints.erase(m_constraints.begin() + index);
     return true;
 }
 bool constraint_manager2D::remove(const constraint2D *ctr)

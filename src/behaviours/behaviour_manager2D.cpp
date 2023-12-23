@@ -26,7 +26,7 @@ bool behaviour_manager2D::remove(std::size_t index)
         return false;
     }
     m_world.events.on_behaviour_removal(*m_behaviours[index]);
-    m_behaviours.erase(m_behaviours.begin() + (long)index);
+    m_behaviours.erase(m_behaviours.begin() + index);
     return true;
 }
 bool behaviour_manager2D::remove(const behaviour2D *bhv)
