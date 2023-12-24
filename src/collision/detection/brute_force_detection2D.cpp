@@ -58,6 +58,6 @@ void brute_force_detection2D::detect_collisions_mt()
     };
     kit::for_each_mt<PPX_THREAD_COUNT, body2D>(world->bodies, exec);
     for (const auto &pairs : m_mt_collisions)
-        m_collisions.insert(m_collisions.begin(), pairs.begin(), pairs.end());
+        m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
 } // namespace ppx

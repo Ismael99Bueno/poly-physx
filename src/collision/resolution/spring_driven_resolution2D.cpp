@@ -38,7 +38,7 @@ std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collisio
     const glm::vec2 relvel = (colis.body2->velocity_at(rel2) - colis.body1->velocity_at(rel1));
     const glm::vec2 reltouch = colis.touch2(manifold_index) - colis.touch1(manifold_index);
 
-    const glm::vec2 normal_dir = glm::normalize(colis.normal);
+    const glm::vec2 normal_dir = glm::normalize(colis.mtv);
 
     const glm::vec2 normal_vel = glm::dot(normal_dir, relvel) * normal_dir;
     const glm::vec2 tangent_vel = relvel - normal_vel;

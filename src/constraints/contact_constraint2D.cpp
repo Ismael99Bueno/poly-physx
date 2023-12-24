@@ -9,7 +9,7 @@ contact_constraint2D::contact_constraint2D(const collision2D &collision, const s
     : constraint2D("Contact"), m_collision(collision),
       m_anchor1(collision.touch1(manifold_index) - collision.body1->position()),
       m_anchor2(collision.touch2(manifold_index) - collision.body2->position()),
-      m_normal(glm::normalize(collision.normal)), m_index(manifold_index)
+      m_normal(glm::normalize(collision.mtv)), m_index(manifold_index)
 {
 }
 

@@ -10,7 +10,7 @@ struct collision2D
     body2D::ptr body1;
     body2D::ptr body2;
 
-    glm::vec2 normal{0.f};
+    glm::vec2 mtv{0.f};
     manifold2D manifold;
 
     bool valid = true;
