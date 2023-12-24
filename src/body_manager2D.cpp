@@ -125,7 +125,7 @@ body2D::ptr body_manager2D::process_addition(body2D &body)
 
     const kit::transform2D &transform = body.transform();
 
-    rk::state &state = m_world.integrator.state;
+    rk::state<float> &state = m_world.integrator.state;
     state.append({transform.position.x, transform.position.y, transform.rotation, body.velocity.x, body.velocity.y,
                   body.angular_velocity});
     body.retrieve_data_from_state_variables(state.vars());
@@ -150,7 +150,7 @@ bool body_manager2D::remove(std::size_t index)
     KIT_INFO("Removing body with index {0} and id {1}", index, m_bodies[index].id)
 
     m_world.events.on_early_body_removal(m_bodies[index]);
-    rk::state &state = m_world.integrator.state;
+    rk::state<float> &state = m_world.integrator.state;
     if (index != m_bodies.size() - 1)
     {
         m_bodies[index] = m_bodies.back();
@@ -190,7 +190,7 @@ void body_manager2D::validate()
     }
 }
 
-void body_manager2D::send_data_to_state(rk::state &state)
+void body_manager2D::send_data_to_state(rk::state<float> &state)
 {
     KIT_PERF_FUNCTION()
     for (const body2D &body : m_bodies)
@@ -218,9 +218,9 @@ void body_manager2D::prepare_constraint_velocities()
 {
     for (body2D &body : m_bodies)
     {
-        body.constraint_velocity = body.velocity + body.inv_mass() * body.force() * m_world.current_timestep();
+        body.constraint_velocity = body.velocity + body.inv_mass() * body.force() * m_world.integrator.ts.value;
         body.constraint_angular_velocity =
-            body.angular_velocity + body.inv_inertia() * body.torque() * m_world.current_timestep();
+            body.angular_velocity + body.inv_inertia() * body.torque() * m_world.integrator.ts.value;
     }
 }
 

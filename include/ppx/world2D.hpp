@@ -25,9 +25,14 @@ class world2D final : kit::non_copyable
     };
 #endif
 
-    world2D(const rk::butcher_tableau &table = rk::butcher_tableau::rk4);
+    template <class... IntegArgs>
+    world2D(IntegArgs &&...args)
+        : integrator(std::forward<IntegArgs>(args)...), bodies(*this), springs(*this), behaviours(*this),
+          collisions(*this), constraints(*this), m_previous_timestep(integrator.ts.value)
+    {
+    }
 
-    rk::integrator integrator;
+    rk::integrator<float> integrator;
     body_manager2D bodies;
     spring_manager2D springs;
     behaviour_manager2D behaviours;
@@ -35,11 +40,7 @@ class world2D final : kit::non_copyable
     constraint_manager2D constraints;
     world_events events;
 
-    bool raw_forward(float timestep);
-    bool reiterative_forward(float &timestep, std::uint8_t reiterations = 2);
-    bool embedded_forward(float &timestep);
-
-    float current_timestep() const;
+    bool step();
     float timestep_ratio() const;
 
     float kinetic_energy() const;
@@ -48,15 +49,13 @@ class world2D final : kit::non_copyable
 
     std::vector<float> operator()(float time, float timestep, const std::vector<float> &vars);
 
-    float elapsed() const;
     void validate();
 
   private:
-    float m_elapsed = 0.f;
-    float m_current_timestep = 0.f;
+    float m_previous_timestep = 0.f;
     float m_timestep_ratio = 1.f;
 
-    void pre_step_preparation(float timestep);
+    void pre_step_preparation();
     void post_step_setup();
 
     std::vector<float> create_state_derivative() const;

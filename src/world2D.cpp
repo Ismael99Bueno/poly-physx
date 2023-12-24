@@ -14,42 +14,21 @@
 
 namespace ppx
 {
-world2D::world2D(const rk::butcher_tableau &table)
-    : integrator(table), bodies(*this), springs(*this), behaviours(*this), collisions(*this), constraints(*this)
+bool world2D::step()
 {
-}
-
-bool world2D::raw_forward(const float timestep)
-{
-    pre_step_preparation(timestep);
-    const bool valid = integrator.raw_forward(m_elapsed, timestep, *this);
-    post_step_setup();
-    return valid;
-}
-bool world2D::reiterative_forward(float &timestep, const std::uint8_t reiterations)
-{
-    pre_step_preparation(timestep);
-    const bool valid = integrator.reiterative_forward(m_elapsed, timestep, *this, reiterations);
-    post_step_setup();
-    return valid;
-}
-bool world2D::embedded_forward(float &timestep)
-{
-    pre_step_preparation(timestep);
-    const bool valid = integrator.embedded_forward(m_elapsed, timestep, *this);
+    pre_step_preparation();
+    const bool valid = integrator.raw_forward(*this);
     post_step_setup();
     return valid;
 }
 
-void world2D::pre_step_preparation(const float timestep)
+void world2D::pre_step_preparation()
 {
 #ifdef DEBUG
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 
-    m_timestep_ratio = kit::approaches_zero(timestep) ? 1.f : m_current_timestep / timestep;
-    m_current_timestep = timestep;
-
+    m_timestep_ratio = kit::approaches_zero(integrator.ts.value) ? 1.f : m_previous_timestep / integrator.ts.value;
     collisions.detection()->clear_cached_collisions();
 
     bodies.send_data_to_state(integrator.state);
@@ -58,16 +37,13 @@ void world2D::post_step_setup()
 {
     bodies.reset_impulse_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
+    m_previous_timestep = integrator.ts.value;
 
 #ifdef DEBUG
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 }
 
-float world2D::current_timestep() const
-{
-    return m_current_timestep;
-}
 float world2D::timestep_ratio() const
 {
     return m_timestep_ratio;
@@ -149,16 +125,11 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     return create_state_derivative();
 }
 
-float world2D::elapsed() const
-{
-    return m_elapsed;
-}
 #ifdef KIT_USE_YAML_CPP
 YAML::Node world2D::serializer::encode(const world2D &world) const
 {
     YAML::Node node;
     node["Integrator"] = world.integrator;
-    node["Elapsed"] = world.elapsed();
 
     YAML::Node nc = node["Collision"];
     nc["Detection method"] = (int)world.collisions.detection_method();
@@ -206,10 +177,8 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
         return false;
 
     world.bodies.clear();
-    world.integrator = node["Integrator"].as<rk::integrator>();
+    world.integrator = node["Integrator"].as<rk::integrator<float>>();
     world.integrator.state.clear();
-
-    world.m_elapsed = node["Elapsed"].as<float>();
 
     const YAML::Node nc = node["Collision"];
 

@@ -55,16 +55,16 @@ void spring_driven_resolution2D::solve_and_apply_collision_forces(const collisio
     glm::vec2 force{0.f};
     float torque1 = 0.f;
     float torque2 = 0.f;
-    for (std::size_t i = 0; i < colis.size; i++)
+    for (std::size_t i = 0; i < colis.manifold.size; i++)
     {
         const auto [f, t1, t2] = compute_collision_forces(colis, i);
         force += f;
         torque1 += t1;
         torque2 += t2;
     }
-    force /= colis.size;
-    torque1 /= colis.size;
-    torque2 /= colis.size;
+    force /= colis.manifold.size;
+    torque1 /= colis.manifold.size;
+    torque2 /= colis.manifold.size;
 
     colis.body1->apply_simulation_force(force);
     colis.body1->apply_simulation_torque(torque1);

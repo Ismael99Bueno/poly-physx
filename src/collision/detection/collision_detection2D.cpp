@@ -83,7 +83,12 @@ bool collision_detection2D::circle_narrow_collision_check(body2D &body1, body2D 
     if (!mres.valid)
         return false;
 
-    *colis = {body1.as_ptr(), body2.as_ptr(), mres.mtv, {geo::contact_point(c1, c2)}};
+    colis->body1 = body1.as_ptr();
+    colis->body2 = body2.as_ptr();
+    colis->normal = mres.mtv;
+    colis->manifold.contacts = {geo::contact_point(c1, c2)};
+    colis->manifold.size = 1;
+
     return true;
 }
 
@@ -101,7 +106,11 @@ bool collision_detection2D::mixed_narrow_collision_check(body2D &body1, body2D &
     if (!mres.valid)
         return false;
 
-    *colis = {body1.as_ptr(), body2.as_ptr(), mres.mtv, {geo::contact_point(sh1, sh2, mres.mtv)}};
+    colis->body1 = body1.as_ptr();
+    colis->body2 = body2.as_ptr();
+    colis->normal = mres.mtv;
+    colis->manifold.contacts = {geo::contact_point(sh1, sh2, mres.mtv)};
+    colis->manifold.size = 1;
 
     return true;
 }

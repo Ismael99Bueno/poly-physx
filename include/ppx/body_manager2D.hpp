@@ -58,7 +58,7 @@ class body_manager2D
     void reset_impulse_forces();
     void reset_simulation_forces();
 
-    void send_data_to_state(rk::state &state);
+    void send_data_to_state(rk::state<float> &state);
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
     void prepare_constraint_velocities();

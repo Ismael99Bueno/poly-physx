@@ -40,7 +40,7 @@ float contact_constraint2D::compute_lambda() const
     {
         const float c = constraint_value();
         static constexpr float stiffness = 1000.f;
-        return -(cvel + c * stiffness * world->current_timestep()) / inv_mass;
+        return -(cvel + c * stiffness * world->integrator.ts.value) / inv_mass;
     }
     return -cvel / inv_mass;
 }
@@ -59,8 +59,8 @@ void contact_constraint2D::apply_lambda(const float lambda)
     body1->constraint_angular_velocity += body1->inv_inertia() * kit::cross2D(m_anchor1, imp1);
     body2->constraint_angular_velocity += body2->inv_inertia() * kit::cross2D(m_anchor2, imp2);
 
-    body1->apply_simulation_force_at(imp1 / world->current_timestep(), m_anchor1);
-    body2->apply_simulation_force_at(imp2 / world->current_timestep(), m_anchor2);
+    body1->apply_simulation_force_at(imp1 / world->integrator.ts.value, m_anchor1);
+    body2->apply_simulation_force_at(imp2 / world->integrator.ts.value, m_anchor2);
 }
 
 void contact_constraint2D::warmup()
