@@ -17,7 +17,7 @@ class collision_detection2D
     virtual ~collision_detection2D() = default;
 
     world2D *world = nullptr;
-    static inline float epa_threshold = 1.e-3f;
+    float epa_threshold = 1.e-3f;
 
     const std::vector<collision2D> &detect_collisions_cached();
     void clear_cached_collisions();

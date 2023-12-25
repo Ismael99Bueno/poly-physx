@@ -4,6 +4,10 @@
 
 namespace ppx
 {
+constraint_driven_resolution2D::constraint_driven_resolution2D(const float restitution, const float friction)
+    : restitution(restitution), friction(friction)
+{
+}
 void constraint_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
 {
     world->constraints.delegate_collisions(&collisions);

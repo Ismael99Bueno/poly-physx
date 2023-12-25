@@ -132,28 +132,44 @@ YAML::Node world2D::serializer::encode(const world2D &world) const
     node["Integrator"] = world.integrator;
 
     YAML::Node nc = node["Collision"];
-    nc["Detection method"] = (int)world.collisions.detection_method();
-    nc["Resolution method"] = (int)world.collisions.resolution_method();
+    YAML::Node ndet = nc["Detection"];
+
+    ndet["Method"] = (int)world.collisions.detection_method();
+
+    if (world.collisions.detection_method() == collision_manager2D::detection_type::QUAD_TREE)
+        ndet["Force square"] = world.collisions.detection<quad_tree_detection2D>()->force_square_shape;
+
+    YAML::Node nqt = ndet["Quad tree"];
+    nqt["Max bodies"] = quad_tree::max_bodies;
+    nqt["Max depth"] = quad_tree::max_depth;
+    nqt["Min size"] = quad_tree::min_size;
+
+    YAML::Node nres = nc["Resolution"];
+    nres["Method"] = (int)world.collisions.resolution_method();
+
+    switch (world.collisions.resolution_method())
+    {
+    case collision_manager2D::resolution_type::SPRING_DRIVEN: {
+        auto resol = world.collisions.resolution<spring_driven_resolution2D>();
+        nres["Rigidity"] = resol->rigidity;
+        nres["Normal damping"] = resol->normal_damping;
+        nres["Tangent damping"] = resol->tangent_damping;
+        break;
+    }
+    case collision_manager2D::resolution_type::CONSTRAINT_DRIVEN: {
+        auto resol = world.collisions.resolution<constraint_driven_resolution2D>();
+        nres["Friction"] = resol->friction;
+        nres["Restitution"] = resol->restitution;
+        break;
+    }
+    case collision_manager2D::resolution_type::CUSTOM:
+        break;
+    }
 
     YAML::Node nctrm = node["Constraint params"];
     nctrm["Iterations"] = world.constraints.iterations;
     nctrm["Warmup"] = world.constraints.warmup;
     nctrm["Position corrections"] = world.constraints.position_corrections;
-
-    YAML::Node nqt = nc["Quad tree"];
-    nqt["Force square"] = quad_tree_detection2D::force_square_shape;
-    nqt["Max bodies"] = quad_tree::max_bodies;
-    nqt["Max depth"] = quad_tree::max_depth;
-    nqt["Min size"] = quad_tree::min_size;
-
-    YAML::Node nsprng = nc["Spring driven"];
-    nsprng["Rigidity"] = spring_driven_resolution2D::rigidity;
-    nsprng["Normal damping"] = spring_driven_resolution2D::normal_damping;
-    nsprng["Tangent damping"] = spring_driven_resolution2D::tangent_damping;
-
-    YAML::Node nctr = nc["Constraint driven"];
-    nctr["Friction"] = constraint_driven_resolution2D::friction;
-    nctr["Restitution"] = constraint_driven_resolution2D::restitution;
 
     for (const body2D &body : world.bodies)
         node["Bodies"].push_back(body);
@@ -181,29 +197,40 @@ bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
     world.integrator.state.clear();
 
     const YAML::Node nc = node["Collision"];
+    const YAML::Node ndet = nc["Detection"];
+
+    auto det_type = (collision_manager2D::detection_type)ndet["Method"].as<int>();
+    world.collisions.detection(det_type);
+    if (det_type == collision_manager2D::detection_type::QUAD_TREE)
+        world.collisions.detection<quad_tree_detection2D>()->force_square_shape = ndet["Force square"].as<bool>();
+
+    const YAML::Node nqt = ndet["Quad tree"];
+    quad_tree::max_bodies = nqt["Max bodies"].as<std::size_t>();
+    quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
+    quad_tree::min_size = nqt["Min size"].as<float>();
+
+    const YAML::Node nres = nc["Resolution"];
+    auto res_type = (collision_manager2D::resolution_type)nres["Method"].as<int>();
+    switch (res_type)
+    {
+    case collision_manager2D::resolution_type::SPRING_DRIVEN: {
+        world.collisions.set_resolution<spring_driven_resolution2D>(
+            nres["Rigidity"].as<float>(), nres["Normal damping"].as<float>(), nres["Tangent damping"].as<float>());
+        break;
+    }
+    case collision_manager2D::resolution_type::CONSTRAINT_DRIVEN: {
+        world.collisions.set_resolution<constraint_driven_resolution2D>(nres["Friction"].as<float>(),
+                                                                        nres["Restitution"].as<float>());
+        break;
+    case collision_manager2D::resolution_type::CUSTOM:
+        break;
+    }
+    }
 
     const YAML::Node nctrm = node["Constraint params"];
     world.constraints.iterations = nctrm["Iterations"].as<std::uint32_t>();
     world.constraints.warmup = nctrm["Warmup"].as<bool>();
     world.constraints.position_corrections = nctrm["Position corrections"].as<bool>();
-
-    const YAML::Node nqt = nc["Quad tree"];
-    quad_tree_detection2D::force_square_shape = nqt["Force square"].as<bool>();
-    quad_tree::max_bodies = nqt["Max bodies"].as<std::size_t>();
-    quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
-    quad_tree::min_size = nqt["Min size"].as<float>();
-
-    const YAML::Node nsprng = nc["Spring driven"];
-    spring_driven_resolution2D::rigidity = nsprng["Rigidity"].as<float>();
-    spring_driven_resolution2D::normal_damping = nsprng["Normal damping"].as<float>();
-    spring_driven_resolution2D::tangent_damping = nsprng["Tangent damping"].as<float>();
-
-    const YAML::Node nctr = nc["Constraint driven"];
-    constraint_driven_resolution2D::friction = nctr["Friction"].as<float>();
-    constraint_driven_resolution2D::restitution = nctr["Restitution"].as<float>();
-
-    world.collisions.detection((collision_manager2D::detection_type)nc["Detection method"].as<int>());
-    world.collisions.resolution((collision_manager2D::resolution_type)nc["Resolution method"].as<int>());
 
     if (node["Bodies"])
         for (const YAML::Node &n : node["Bodies"])

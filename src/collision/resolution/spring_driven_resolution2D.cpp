@@ -13,6 +13,11 @@
 
 namespace ppx
 {
+spring_driven_resolution2D::spring_driven_resolution2D(const float rigidity, const float normal_damping,
+                                                       const float tangen_damping)
+    : rigidity(rigidity), normal_damping(normal_damping), tangent_damping(tangent_damping)
+{
+}
 void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
 {
     KIT_PERF_FUNCTION()

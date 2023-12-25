@@ -13,7 +13,6 @@ class collision_resolution2D
 
     world2D *world = nullptr;
 
-  protected:
   private:
     virtual void on_attach()
     {
