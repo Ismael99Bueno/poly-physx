@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ppx/body2D.hpp"
-#include "ppx/collision/manifolds/manifold2D.hpp"
+#include "ppx/collision/manifold/manifold2D.hpp"
 
 namespace ppx
 {
