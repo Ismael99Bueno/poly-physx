@@ -42,23 +42,19 @@ constraint2D &constraint_manager2D::operator[](std::size_t index)
     return *m_constraints[index];
 }
 
-static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<kit::scope<constraint2D>> &vec)
-{
-    for (std::size_t i = 0; i < vec.size(); i++)
-        if (vec[i]->id == id)
-            return i;
-    return {};
-}
-
 const constraint2D *constraint_manager2D::operator[](const kit::uuid id) const
 {
-    const auto index = index_from_id(id, m_constraints);
-    return index ? m_constraints[index.value()].get() : nullptr;
+    for (const auto &ctr : m_constraints)
+        if (ctr->id == id)
+            return ctr.get();
+    return nullptr;
 }
 constraint2D *constraint_manager2D::operator[](const kit::uuid id)
 {
-    const auto index = index_from_id(id, m_constraints);
-    return index ? m_constraints[index.value()].get() : nullptr;
+    for (const auto &ctr : m_constraints)
+        if (ctr->id == id)
+            return ctr.get();
+    return nullptr;
 }
 
 template <typename T>

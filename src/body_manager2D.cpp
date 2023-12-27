@@ -35,23 +35,19 @@ void body_manager2D::reset_simulation_forces()
         body.reset_simulation_forces();
 }
 
-static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<body2D> &vec)
-{
-    for (std::size_t i = 0; i < vec.size(); i++)
-        if (vec[i].id == id)
-            return i;
-    return {};
-}
-
 body2D::const_ptr body_manager2D::operator[](const kit::uuid id) const
 {
-    const auto index = index_from_id(id, m_bodies);
-    return index ? ptr(index.value()) : nullptr;
+    for (const auto &body : m_bodies)
+        if (body.id == id)
+            return ptr(body.index);
+    return nullptr;
 }
 body2D::ptr body_manager2D::operator[](const kit::uuid id)
 {
-    const auto index = index_from_id(id, m_bodies);
-    return index ? ptr(index.value()) : nullptr;
+    for (const auto &body : m_bodies)
+        if (body.id == id)
+            return ptr(body.index);
+    return nullptr;
 }
 
 const body2D &body_manager2D::operator[](const std::size_t index) const

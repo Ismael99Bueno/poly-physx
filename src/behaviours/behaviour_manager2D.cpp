@@ -17,6 +17,15 @@ behaviour2D &behaviour_manager2D::operator[](std::size_t index)
     return *m_behaviours[index];
 }
 
+const behaviour2D *behaviour_manager2D::operator[](const std::string &name) const
+{
+    return from_name<behaviour2D>(name);
+}
+behaviour2D *behaviour_manager2D::operator[](const std::string &name)
+{
+    return from_name<behaviour2D>(name);
+}
+
 bool behaviour_manager2D::remove(std::size_t index)
 {
     if (index >= m_behaviours.size())

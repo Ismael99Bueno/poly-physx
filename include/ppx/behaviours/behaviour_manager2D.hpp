@@ -65,6 +65,9 @@ class behaviour_manager2D : kit::non_copyable
     const behaviour2D &operator[](std::size_t index) const;
     behaviour2D &operator[](std::size_t index);
 
+    const behaviour2D *operator[](const std::string &name) const;
+    behaviour2D *operator[](const std::string &name);
+
     bool remove(std::size_t index);
     bool remove(const behaviour2D *bhv);
     bool remove(const std::string &name);

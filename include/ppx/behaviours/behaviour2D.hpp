@@ -48,6 +48,9 @@ class behaviour2D : kit::non_copyable,
     body2D::const_ptr operator[](std::size_t index) const;
     const body2D::ptr &operator[](std::size_t index);
 
+    body2D::const_ptr operator[](kit::uuid id) const;
+    const body2D::ptr &operator[](kit::uuid id);
+
     void apply_force_to_bodies();
 
     virtual glm::vec3 force(const body2D &body) const = 0;

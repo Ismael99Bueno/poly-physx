@@ -56,6 +56,21 @@ const body2D::ptr &behaviour2D::operator[](std::size_t index)
     return m_bodies[index];
 }
 
+body2D::const_ptr behaviour2D::operator[](const kit::uuid id) const
+{
+    for (const auto &body : m_bodies)
+        if (body->id == id)
+            return body;
+    return nullptr;
+}
+const body2D::ptr &behaviour2D::operator[](const kit::uuid id)
+{
+    for (const auto &body : m_bodies)
+        if (body->id == id)
+            return body;
+    return nullptr;
+}
+
 float behaviour2D::energy(const body2D &body) const
 {
     return body.kinetic_energy() + potential_energy(body);

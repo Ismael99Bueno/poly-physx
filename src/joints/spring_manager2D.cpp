@@ -47,23 +47,19 @@ spring2D::ptr spring_manager2D::ptr(const std::size_t index)
     return {&m_springs, index};
 }
 
-static std::optional<std::size_t> index_from_id(const kit::uuid id, const std::vector<spring2D> &vec)
-{
-    for (std::size_t i = 0; i < vec.size(); i++)
-        if (vec[i].id == id)
-            return i;
-    return {};
-}
-
 spring2D::const_ptr spring_manager2D::operator[](const kit::uuid id) const
 {
-    const auto index = index_from_id(id, m_springs);
-    return index ? ptr(index.value()) : nullptr;
+    for (const auto &sp : m_springs)
+        if (sp.id == id)
+            return ptr(sp.index);
+    return nullptr;
 }
 spring2D::ptr spring_manager2D::operator[](const kit::uuid id)
 {
-    const auto index = index_from_id(id, m_springs);
-    return index ? ptr(index.value()) : nullptr;
+    for (const auto &sp : m_springs)
+        if (sp.id == id)
+            return ptr(sp.index);
+    return nullptr;
 }
 
 std::vector<spring2D::const_ptr> spring_manager2D::from_ids(const kit::uuid id1, const kit::uuid id2) const

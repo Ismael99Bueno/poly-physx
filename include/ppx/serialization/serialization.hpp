@@ -195,7 +195,7 @@ template <> struct kit::yaml::codec<ppx::behaviour_manager2D>
         if (node["Behaviours"])
             for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
             {
-                const auto bhv = bm.from_name<ppx::behaviour2D>(it->first.as<std::string>());
+                const auto bhv = bm[it->first.as<std::string>()];
                 if (bhv)
                     it->second.as<ppx::behaviour2D>(*bhv);
             }
