@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rk/integrator.hpp"
+#include "rk/integration/integrator.hpp"
 #include "ppx/body_manager2D.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/constraints/constraint_manager2D.hpp"
@@ -16,15 +16,6 @@ namespace ppx
 class world2D final : kit::non_copyable
 {
   public:
-#ifdef KIT_USE_YAML_CPP
-    class serializer : public kit::serializer<world2D>
-    {
-      public:
-        YAML::Node encode(const world2D &world) const override;
-        bool decode(const YAML::Node &node, world2D &world) const override;
-    };
-#endif
-
     template <class... IntegArgs>
     world2D(IntegArgs &&...args)
         : integrator(std::forward<IntegArgs>(args)...), bodies(*this), springs(*this), behaviours(*this),

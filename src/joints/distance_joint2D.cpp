@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
+#include "ppx/serialization/serialization.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
@@ -114,27 +115,11 @@ distance_joint2D::specs distance_joint2D::specs::from_distance_joint(const dista
 #ifdef KIT_USE_YAML_CPP
 YAML::Node distance_joint2D::encode() const
 {
-    const YAML::Node node1 = joint.encode();
-    const YAML::Node node2 = constraint2D::encode();
-
-    YAML::Node node;
-    node["Joint2D"] = node1;
-    node["Constraint2D"] = node2;
-    node["Length"] = length;
-
-    return node;
+    return kit::yaml::codec<distance_joint2D>::encode(*this);
 }
 bool distance_joint2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() != 3)
-        return false;
-
-    if (!joint.decode(node["Joint2D"], *world))
-        return false;
-    if (!constraint2D::decode(node["Constraint2D"]))
-        return false;
-    length = node["Length"].as<float>();
-    return true;
+    return kit::yaml::codec<distance_joint2D>::decode(node, *this);
 }
 #endif
 } // namespace ppx

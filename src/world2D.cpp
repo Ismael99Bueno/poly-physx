@@ -3,10 +3,6 @@
 #include "ppx/behaviours/behaviour2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
 
-#include "ppx/collision/detection/quad_tree_detection2D.hpp"
-#include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
-#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
-
 #include <cstring>
 #ifdef DEBUG
 #include "kit/missing/fenv.h"
@@ -54,7 +50,7 @@ std::vector<float> world2D::create_state_derivative() const
     KIT_PERF_FUNCTION()
     std::vector<float> state_derivative(6 * bodies.size(), 0.f);
 
-    for (const body2D &body : bodies)
+    for (const body2D &body : bodies) // SEMI IMPLICIT!!
     {
         const std::size_t index = 6 * body.index;
         const glm::vec2 &velocity = body.velocity;
@@ -124,146 +120,4 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     constraints.solve();
     return create_state_derivative();
 }
-
-#ifdef KIT_USE_YAML_CPP
-YAML::Node world2D::serializer::encode(const world2D &world) const
-{
-    YAML::Node node;
-    node["Integrator"] = world.integrator;
-
-    YAML::Node nc = node["Collision"];
-    YAML::Node ndet = nc["Detection"];
-
-    ndet["Method"] = (int)world.collisions.detection_method();
-
-    if (world.collisions.detection_method() == collision_manager2D::detection_type::QUAD_TREE)
-        ndet["Force square"] = world.collisions.detection<quad_tree_detection2D>()->force_square_shape;
-
-    YAML::Node nqt = ndet["Quad tree"];
-    nqt["Max bodies"] = quad_tree::max_bodies;
-    nqt["Max depth"] = quad_tree::max_depth;
-    nqt["Min size"] = quad_tree::min_size;
-
-    YAML::Node nres = nc["Resolution"];
-    nres["Method"] = (int)world.collisions.resolution_method();
-
-    switch (world.collisions.resolution_method())
-    {
-    case collision_manager2D::resolution_type::SPRING_DRIVEN: {
-        auto resol = world.collisions.resolution<spring_driven_resolution2D>();
-        nres["Rigidity"] = resol->rigidity;
-        nres["Normal damping"] = resol->normal_damping;
-        nres["Tangent damping"] = resol->tangent_damping;
-        break;
-    }
-    case collision_manager2D::resolution_type::CONSTRAINT_DRIVEN: {
-        auto resol = world.collisions.resolution<constraint_driven_resolution2D>();
-        nres["Friction"] = resol->friction;
-        nres["Restitution"] = resol->restitution;
-        break;
-    }
-    case collision_manager2D::resolution_type::CUSTOM:
-        break;
-    }
-
-    YAML::Node nctrm = node["Constraint params"];
-    nctrm["Iterations"] = world.constraints.iterations;
-    nctrm["Warmup"] = world.constraints.warmup;
-    nctrm["Position corrections"] = world.constraints.position_corrections;
-
-    for (const body2D &body : world.bodies)
-        node["Bodies"].push_back(body);
-
-    for (const spring2D &sp : world.springs)
-        node["Springs"].push_back(sp);
-    for (const auto &ctr : world.constraints)
-    {
-        YAML::Node child;
-        child[ctr->name] = *ctr;
-        node["Constraints"].push_back(child);
-    }
-
-    for (const auto &bhv : world.behaviours)
-        node["Behaviours"][bhv->id] = *bhv;
-    return node;
-}
-bool world2D::serializer::decode(const YAML::Node &node, world2D &world) const
-{
-    if (!node.IsMap() || node.size() < 3)
-        return false;
-
-    world.bodies.clear();
-    world.integrator = node["Integrator"].as<rk::integrator<float>>();
-    world.integrator.state.clear();
-
-    const YAML::Node nc = node["Collision"];
-    const YAML::Node ndet = nc["Detection"];
-
-    auto det_type = (collision_manager2D::detection_type)ndet["Method"].as<int>();
-    world.collisions.detection(det_type);
-    if (det_type == collision_manager2D::detection_type::QUAD_TREE)
-        world.collisions.detection<quad_tree_detection2D>()->force_square_shape = ndet["Force square"].as<bool>();
-
-    const YAML::Node nqt = ndet["Quad tree"];
-    quad_tree::max_bodies = nqt["Max bodies"].as<std::size_t>();
-    quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
-    quad_tree::min_size = nqt["Min size"].as<float>();
-
-    const YAML::Node nres = nc["Resolution"];
-    auto res_type = (collision_manager2D::resolution_type)nres["Method"].as<int>();
-    switch (res_type)
-    {
-    case collision_manager2D::resolution_type::SPRING_DRIVEN: {
-        world.collisions.set_resolution<spring_driven_resolution2D>(
-            nres["Rigidity"].as<float>(), nres["Normal damping"].as<float>(), nres["Tangent damping"].as<float>());
-        break;
-    }
-    case collision_manager2D::resolution_type::CONSTRAINT_DRIVEN: {
-        world.collisions.set_resolution<constraint_driven_resolution2D>(nres["Friction"].as<float>(),
-                                                                        nres["Restitution"].as<float>());
-        break;
-    case collision_manager2D::resolution_type::CUSTOM:
-        break;
-    }
-    }
-
-    const YAML::Node nctrm = node["Constraint params"];
-    world.constraints.iterations = nctrm["Iterations"].as<std::uint32_t>();
-    world.constraints.warmup = nctrm["Warmup"].as<bool>();
-    world.constraints.position_corrections = nctrm["Position corrections"].as<bool>();
-
-    if (node["Bodies"])
-        for (const YAML::Node &n : node["Bodies"])
-            world.bodies.add(n.as<body2D>());
-
-    if (node["Springs"])
-        for (const YAML::Node &n : node["Springs"])
-        {
-            spring2D sp;
-            sp.world = &world;
-            n.as<spring2D>(sp);
-            world.springs.add(sp);
-        }
-
-    if (node["Constraints"])
-        for (const YAML::Node &n : node["Constraints"])
-            if (n["Distance"])
-            {
-                distance_joint2D dj;
-                dj.world = &world;
-                n["Distance"].as<distance_joint2D>(dj);
-                world.constraints.add<distance_joint2D>(dj);
-            }
-
-    if (node["Behaviours"])
-        for (auto it = node["Behaviours"].begin(); it != node["Behaviours"].end(); ++it)
-        {
-            const auto bhv = world.behaviours.from_name<behaviour2D>(it->first.as<std::string>());
-            if (bhv)
-                it->second.as<behaviour2D>(*bhv);
-        }
-
-    return true;
-}
-#endif
 } // namespace ppx

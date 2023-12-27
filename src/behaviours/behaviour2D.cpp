@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
+#include "ppx/serialization/serialization.hpp"
 #include "ppx/world2D.hpp"
 
 namespace ppx
@@ -86,24 +87,11 @@ void behaviour2D::apply_force_to_bodies()
 #ifdef KIT_USE_YAML_CPP
 YAML::Node behaviour2D::encode() const
 {
-    YAML::Node node;
-    node["Enabled"] = enabled;
-
-    for (const auto &body : m_bodies)
-        node["Bodies"].push_back(body->index);
-    node["Bodies"].SetStyle(YAML::EmitterStyle::Flow);
-    return node;
+    return kit::yaml::codec<behaviour2D>::encode(*this);
 }
 bool behaviour2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 2 || !world)
-        return false;
-    clear();
-
-    enabled = node["Enabled"].as<bool>();
-    for (const YAML::Node &n : node["Bodies"])
-        add(world->bodies.ptr(n.as<std::size_t>()));
-    return true;
+    return kit::yaml::codec<behaviour2D>::decode(node, *this);
 }
 #endif
 } // namespace ppx

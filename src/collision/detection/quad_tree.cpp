@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/detection/quad_tree.hpp"
-#include "geo/intersection.hpp"
+#include "geo/algorithm/intersection.hpp"
 #include "kit/profile/perf.hpp"
 
 namespace ppx

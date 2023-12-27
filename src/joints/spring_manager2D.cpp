@@ -4,20 +4,20 @@
 
 namespace ppx
 {
-spring_manager2D::spring_manager2D(world2D &world) : m_world(world)
+spring_manager2D::spring_manager2D(world2D &world) : world(world)
 {
 }
 
 spring2D::ptr spring_manager2D::process_addition(spring2D &sp)
 {
-    sp.world = &m_world;
+    sp.world = &world;
     sp.index = m_springs.size() - 1;
-    sp.world = &m_world;
+    sp.world = &world;
 
     const spring2D::ptr sp_ptr = {&m_springs, sp.index};
 
     KIT_ASSERT_ERROR(sp.joint.valid(), "The spring joint must be valid to be able to add it into the simulation")
-    m_world.events.on_spring_addition(sp_ptr);
+    world.events.on_spring_addition(sp_ptr);
     return sp_ptr;
 }
 
@@ -97,14 +97,14 @@ bool spring_manager2D::remove(std::size_t index)
         KIT_WARN("Spring index exceeds array bounds. Aborting... - index: {0}, size: {1}", index, m_springs.size())
         return false;
     }
-    m_world.events.on_early_spring_removal(m_springs[index]);
+    world.events.on_early_spring_removal(m_springs[index]);
     if (index != m_springs.size() - 1)
     {
         m_springs[index] = m_springs.back();
         m_springs[index].index = index;
     }
     m_springs.pop_back();
-    m_world.events.on_late_spring_removal(std::move(index));
+    world.events.on_late_spring_removal(std::move(index));
     return true;
 }
 bool spring_manager2D::remove(const spring2D &sp)
@@ -143,13 +143,13 @@ void spring_manager2D::validate()
     for (auto it = m_springs.begin(); it != m_springs.end(); index++)
         if (!it->joint.valid())
         {
-            m_world.events.on_early_spring_removal(*it);
+            world.events.on_early_spring_removal(*it);
             it = m_springs.erase(it);
-            m_world.events.on_late_spring_removal(std::move(index));
+            world.events.on_late_spring_removal(std::move(index));
         }
         else
         {
-            it->world = &m_world;
+            it->world = &world;
             it->index = index;
             ++it;
         }

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "geo/aabb2D.hpp"
-#include "geo/polygon.hpp"
-#include "geo/circle.hpp"
-#include "rk/state.hpp"
+#include "geo/shapes2D/aabb2D.hpp"
+#include "geo/shapes2D/polygon.hpp"
+#include "geo/shapes2D/circle.hpp"
 #include "ppx/events/body_events.hpp"
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/indexable.hpp"
@@ -37,15 +36,6 @@ class body2D : public kit::identifiable<>, public kit::indexable
         shape_type shape = shape_type::POLYGON;
         static specs from_body(const body2D &body);
     };
-
-#ifdef KIT_USE_YAML_CPP
-    class serializer : public kit::serializer<body2D>
-    {
-      public:
-        YAML::Node encode(const body2D &world) const override;
-        bool decode(const YAML::Node &node, body2D &world) const override;
-    };
-#endif
 
     body2D(const std::vector<glm::vec2> &vertices, const glm::vec2 &position = glm::vec2(0.f),
            const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f, float angular_velocity = 0.f,
@@ -115,7 +105,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
-    const kit::transform2D &transform() const;
+    const kit::transform2D<float> &transform() const;
 
     const glm::vec2 &position() const;
     float rotation() const;

@@ -17,6 +17,7 @@ class constraint_manager2D final : kit::non_copyable
 {
   public:
     constraint_manager2D(world2D &world);
+    world2D &world;
 
     std::uint32_t iterations = 10;
     bool warmup = true;
@@ -29,7 +30,7 @@ class constraint_manager2D final : kit::non_copyable
         T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));
-        ptr->world = &m_world;
+        ptr->world = &world;
 
         KIT_ASSERT_ERROR(ptr->valid(), "The constraint must be valid before it can be added into the simulation")
         m_events.on_constraint_addition(ptr);
@@ -76,7 +77,6 @@ class constraint_manager2D final : kit::non_copyable
     void solve();
 
   private:
-    world2D &m_world;
     world_events &m_events;
     std::vector<kit::scope<constraint2D>> m_constraints;
 

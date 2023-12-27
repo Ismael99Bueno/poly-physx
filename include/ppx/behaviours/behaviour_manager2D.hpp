@@ -14,6 +14,7 @@ class behaviour_manager2D : kit::non_copyable
 {
   public:
     behaviour_manager2D(world2D &world);
+    world2D &world;
 
     template <typename T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
     {
@@ -31,7 +32,7 @@ class behaviour_manager2D : kit::non_copyable
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
-        m_behaviours.back()->world = &m_world;
+        m_behaviours.back()->world = &world;
         m_events.on_behaviour_addition(ptr);
         return ptr;
     }
@@ -74,7 +75,6 @@ class behaviour_manager2D : kit::non_copyable
     void apply_forces();
 
   private:
-    world2D &m_world;
     world_events &m_events;
     std::vector<kit::scope<behaviour2D>> m_behaviours;
 };

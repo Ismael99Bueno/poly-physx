@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ppx/body2D.hpp"
-#include "kit/interface/serialization.hpp"
 
 namespace ppx
 {
@@ -37,11 +36,6 @@ class joint_proxy2D
 
     void anchor1(const glm::vec2 &anchor1);
     void anchor2(const glm::vec2 &anchor2);
-
-#ifdef KIT_USE_YAML_CPP
-    YAML::Node encode() const;
-    bool decode(const YAML::Node &node, world2D &world);
-#endif
 
   private:
     body2D::ptr m_body1 = nullptr, m_body2 = nullptr;
