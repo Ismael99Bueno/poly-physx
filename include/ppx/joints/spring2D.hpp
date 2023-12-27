@@ -11,15 +11,6 @@ class spring2D : public kit::identifiable<>, public kit::indexable
     using ptr = kit::vector_ptr<spring2D>;
     using const_ptr = kit::const_vector_ptr<spring2D>;
 
-#ifdef KIT_USE_YAML_CPP
-    class serializer : public kit::serializer<spring2D>
-    {
-      public:
-        YAML::Node encode(const spring2D &world) const override;
-        bool decode(const YAML::Node &node, spring2D &world) const override;
-    };
-#endif
-
     struct specs
     {
         joint_proxy2D::specs joint;

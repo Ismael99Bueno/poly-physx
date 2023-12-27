@@ -1,11 +1,11 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/body_manager2D.hpp"
 #include "ppx/world2D.hpp"
-#include "geo/intersection.hpp"
+#include "geo/algorithm/intersection.hpp"
 
 namespace ppx
 {
-body_manager2D::body_manager2D(world2D &world) : m_world(world)
+body_manager2D::body_manager2D(world2D &world) : world(world)
 {
 }
 
@@ -120,12 +120,12 @@ body2D::ptr body_manager2D::operator[](const glm::vec2 &point)
 body2D::ptr body_manager2D::process_addition(body2D &body)
 {
     body.index = m_bodies.size() - 1;
-    body.world = &m_world;
+    body.world = &world;
     const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
 
-    const kit::transform2D &transform = body.transform();
+    const kit::transform2D<float> &transform = body.transform();
 
-    rk::state<float> &state = m_world.integrator.state;
+    rk::state<float> &state = world.integrator.state;
     state.append({transform.position.x, transform.position.y, transform.rotation, body.velocity.x, body.velocity.y,
                   body.angular_velocity});
     body.retrieve_data_from_state_variables(state.vars());
@@ -136,7 +136,7 @@ body2D::ptr body_manager2D::process_addition(body2D &body)
         KIT_ASSERT_CRITICAL(m_bodies[i].id != body.id, "Body with index {0} has the same id as body with index {1}", i,
                             body.index)
 #endif
-    m_world.events.on_body_addition(e_ptr);
+    world.events.on_body_addition(e_ptr);
     return e_ptr;
 }
 
@@ -149,8 +149,8 @@ bool body_manager2D::remove(std::size_t index)
     }
     KIT_INFO("Removing body with index {0} and id {1}", index, m_bodies[index].id)
 
-    m_world.events.on_early_body_removal(m_bodies[index]);
-    rk::state<float> &state = m_world.integrator.state;
+    world.events.on_early_body_removal(m_bodies[index]);
+    rk::state<float> &state = world.integrator.state;
     if (index != m_bodies.size() - 1)
     {
         m_bodies[index] = m_bodies.back();
@@ -162,8 +162,8 @@ bool body_manager2D::remove(std::size_t index)
         state[6 * index + i] = state[state.size() - 6 + i];
     state.resize(6 * m_bodies.size());
 
-    m_world.validate();
-    m_world.events.on_late_body_removal(std::move(index)); // It just made me do this...
+    world.validate();
+    world.events.on_late_body_removal(std::move(index)); // It just made me do this...
     return true;
 }
 
@@ -185,7 +185,7 @@ void body_manager2D::validate()
     std::size_t index = 0;
     for (auto it = m_bodies.begin(); it != m_bodies.end(); index++, ++it)
     {
-        it->world = &m_world;
+        it->world = &world;
         it->index = index;
     }
 }
@@ -218,9 +218,9 @@ void body_manager2D::prepare_constraint_velocities()
 {
     for (body2D &body : m_bodies)
     {
-        body.constraint_velocity = body.velocity + body.inv_mass() * body.force() * m_world.integrator.ts.value;
+        body.constraint_velocity = body.velocity + body.inv_mass() * body.force() * world.integrator.ts.value;
         body.constraint_angular_velocity =
-            body.angular_velocity + body.inv_inertia() * body.torque() * m_world.integrator.ts.value;
+            body.angular_velocity + body.inv_inertia() * body.torque() * world.integrator.ts.value;
     }
 }
 

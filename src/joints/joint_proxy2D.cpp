@@ -68,35 +68,4 @@ void joint_proxy2D::anchor2(const glm::vec2 &anchor2)
     m_anchor2 = anchor2;
     m_angle2 = m_body2->rotation();
 }
-
-#ifdef KIT_USE_YAML_CPP
-YAML::Node joint_proxy2D::encode() const
-{
-    YAML::Node node;
-    node["Index1"] = m_body1->index;
-    node["Index2"] = m_body2->index;
-
-    node["Anchor1"] = rotated_anchor1();
-    node["Anchor2"] = rotated_anchor2();
-
-    return node;
-}
-bool joint_proxy2D::decode(const YAML::Node &node, world2D &world)
-{
-    if (!node.IsMap() || node.size() < 2)
-        return false;
-    const std::size_t index1 = node["Index1"].as<std::size_t>();
-    const std::size_t index2 = node["Index2"].as<std::size_t>();
-
-    const glm::vec2 a1 = node["Anchor1"].as<glm::vec2>();
-    const glm::vec2 a2 = node["Anchor2"].as<glm::vec2>();
-
-    m_body1 = world.bodies.ptr(index1);
-    m_body2 = world.bodies.ptr(index2);
-
-    anchor1(a1);
-    anchor2(a2);
-    return true;
-}
-#endif
 } // namespace ppx

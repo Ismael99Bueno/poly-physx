@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/constraint2D.hpp"
+#include "ppx/serialization/serialization.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
@@ -18,17 +19,11 @@ bool constraint2D::contains(const body2D &body) const
 #ifdef KIT_USE_YAML_CPP
 YAML::Node constraint2D::encode() const
 {
-    YAML::Node node;
-    node["UUID"] = (std::uint64_t)id;
-
-    return node;
+    return kit::yaml::codec<constraint2D>::encode(*this);
 }
 bool constraint2D::decode(const YAML::Node &node)
 {
-    if (!node.IsMap() || node.size() < 1)
-        return false;
-    id = kit::uuid(node["UUID"].as<std::uint64_t>());
-    return true;
+    return kit::yaml::codec<constraint2D>::decode(node, *this);
 }
 #endif
 } // namespace ppx

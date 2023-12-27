@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-behaviour_manager2D::behaviour_manager2D(world2D &world) : m_world(world), m_events(world.events)
+behaviour_manager2D::behaviour_manager2D(world2D &world) : world(world), m_events(world.events)
 {
 }
 
@@ -25,7 +25,7 @@ bool behaviour_manager2D::remove(std::size_t index)
                  m_behaviours.size())
         return false;
     }
-    m_world.events.on_behaviour_removal(*m_behaviours[index]);
+    world.events.on_behaviour_removal(*m_behaviours[index]);
     m_behaviours.erase(m_behaviours.begin() + index);
     return true;
 }
@@ -34,7 +34,7 @@ bool behaviour_manager2D::remove(const behaviour2D *bhv)
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
         if (it->get() == bhv)
         {
-            m_world.events.on_behaviour_removal(*bhv);
+            world.events.on_behaviour_removal(*bhv);
             m_behaviours.erase(it);
             return true;
         }
@@ -45,7 +45,7 @@ bool behaviour_manager2D::remove(const std::string &name)
     for (auto it = m_behaviours.begin(); it != m_behaviours.end(); ++it)
         if ((*it)->id == name)
         {
-            m_world.events.on_behaviour_removal(**it);
+            world.events.on_behaviour_removal(**it);
             m_behaviours.erase(it);
             return true;
         }
@@ -63,7 +63,7 @@ template <> behaviour2D *behaviour_manager2D::from_name(const std::string &name)
 void behaviour_manager2D::clear()
 {
     for (const auto &bhv : m_behaviours)
-        m_world.events.on_behaviour_removal(*bhv);
+        world.events.on_behaviour_removal(*bhv);
     m_behaviours.clear();
 }
 
@@ -72,7 +72,7 @@ void behaviour_manager2D::validate()
     for (const auto &bhv : m_behaviours)
     {
         bhv->validate();
-        bhv->world = &m_world;
+        bhv->world = &world;
     }
 }
 

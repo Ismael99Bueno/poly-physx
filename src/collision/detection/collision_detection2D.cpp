@@ -2,7 +2,7 @@
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/world2D.hpp"
 
-#include "geo/intersection.hpp"
+#include "geo/algorithm/intersection.hpp"
 
 #include "kit/utility/multithreading.hpp"
 

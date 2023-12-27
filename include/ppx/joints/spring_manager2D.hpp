@@ -10,6 +10,7 @@ class spring_manager2D
 {
   public:
     spring_manager2D(world2D &world);
+    world2D &world;
 
     // Move to process addtition
     template <class... SpringArgs> spring2D::ptr add(SpringArgs &&...args)
@@ -59,7 +60,6 @@ class spring_manager2D
     void validate();
 
   private:
-    world2D &m_world;
     std::vector<spring2D> m_springs;
 
     spring2D::ptr process_addition(spring2D &sp);

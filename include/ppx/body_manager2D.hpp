@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ppx/body2D.hpp"
+#include "rk/integration/state.hpp"
 
 namespace ppx
 {
@@ -10,6 +11,7 @@ class body_manager2D
 {
   public:
     body_manager2D(world2D &world);
+    world2D &world;
 
     template <class... BodyArgs> body2D::ptr add(BodyArgs &&...args)
     {
@@ -68,7 +70,6 @@ class body_manager2D
     void validate();
 
   private:
-    world2D &m_world;
     std::vector<body2D> m_bodies;
 
     body2D::ptr process_addition(body2D &body);

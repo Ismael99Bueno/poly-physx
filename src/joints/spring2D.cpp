@@ -81,26 +81,4 @@ spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
             sp.damping,
             sp.length};
 }
-
-#ifdef KIT_USE_YAML_CPP
-YAML::Node spring2D::serializer::encode(const spring2D &sp) const
-{
-    YAML::Node node = sp.joint.encode();
-    node["UUID"] = (std::uint64_t)sp.id;
-    node["Stiffness"] = sp.stiffness;
-    node["Damping"] = sp.damping;
-    node["Length"] = sp.length;
-    return node;
-}
-bool spring2D::serializer::decode(const YAML::Node &node, spring2D &sp) const
-{
-    if (!sp.joint.decode(node, *sp.world))
-        return false;
-    sp.id = kit::uuid(node["UUID"].as<std::uint64_t>());
-    sp.stiffness = node["Stiffness"].as<float>();
-    sp.damping = node["Damping"].as<float>();
-    sp.length = node["Length"].as<float>();
-    return true;
-}
-#endif
 } // namespace ppx

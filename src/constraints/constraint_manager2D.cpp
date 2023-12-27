@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-constraint_manager2D::constraint_manager2D(world2D &world) : m_world(world), m_events(world.events)
+constraint_manager2D::constraint_manager2D(world2D &world) : world(world), m_events(world.events)
 {
 }
 
@@ -17,7 +17,7 @@ bool constraint_manager2D::remove(std::size_t index)
                  m_constraints.size())
         return false;
     }
-    m_world.events.on_constraint_removal(*m_constraints[index]);
+    world.events.on_constraint_removal(*m_constraints[index]);
     m_constraints.erase(m_constraints.begin() + index);
     return true;
 }
@@ -26,7 +26,7 @@ bool constraint_manager2D::remove(const constraint2D *ctr)
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if (it->get() == ctr)
         {
-            m_world.events.on_constraint_removal(*ctr);
+            world.events.on_constraint_removal(*ctr);
             m_constraints.erase(it);
             return true;
         }
@@ -102,7 +102,7 @@ bool constraint_manager2D::remove(kit::uuid id)
     for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it)
         if ((*it)->id == id)
         {
-            m_world.events.on_constraint_removal(**it);
+            world.events.on_constraint_removal(**it);
             m_constraints.erase(it);
             return true;
         }
@@ -112,7 +112,7 @@ bool constraint_manager2D::remove(kit::uuid id)
 void constraint_manager2D::clear()
 {
     for (const auto &ctr : m_constraints)
-        m_world.events.on_constraint_removal(*ctr);
+        world.events.on_constraint_removal(*ctr);
     m_constraints.clear();
 }
 
@@ -121,12 +121,12 @@ void constraint_manager2D::validate()
     for (auto it = m_constraints.begin(); it != m_constraints.end();)
         if (!(*it)->valid())
         {
-            m_world.events.on_constraint_removal(**it);
+            world.events.on_constraint_removal(**it);
             it = m_constraints.erase(it);
         }
         else
         {
-            (*it)->world = &m_world;
+            (*it)->world = &world;
             ++it;
         }
 }
@@ -153,7 +153,7 @@ void constraint_manager2D::solve()
         for (const collision2D &collision : *m_collisions)
             if (collision.valid)
                 for (std::size_t i = 0; i < collision.manifold.size; i++)
-                    m_contacts.emplace_back(collision, i).world = &m_world;
+                    m_contacts.emplace_back(collision, i).world = &world;
     }
 
     if (warmup)
