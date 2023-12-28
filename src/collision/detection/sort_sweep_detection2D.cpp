@@ -43,12 +43,14 @@ void sort_sweep_detection2D::detect_collisions()
         {
             for (body2D *body : eligible)
             {
-                collision2D c;
-                body2D &body1 = *body, &body2 = *edg.body;
-                if (gather_collision_data(body1, body2, &c))
+                body2D &body1 = *body;
+                body2D &body2 = *edg.body;
+                const collision2D colis = generate_collision(body1, body2);
+
+                if (colis.collided)
                 {
-                    try_enter_or_stay_callback(c);
-                    m_collisions.push_back(c);
+                    try_enter_or_stay_callback(colis);
+                    m_collisions.push_back(colis);
                 }
                 else
                     try_exit_callback(body1, body2);

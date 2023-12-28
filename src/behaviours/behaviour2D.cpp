@@ -63,7 +63,7 @@ body2D::const_ptr behaviour2D::operator[](const kit::uuid id) const
             return body;
     return nullptr;
 }
-const body2D::ptr &behaviour2D::operator[](const kit::uuid id)
+body2D::ptr behaviour2D::operator[](const kit::uuid id)
 {
     for (const auto &body : m_bodies)
         if (body->id == id)

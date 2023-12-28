@@ -34,10 +34,10 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tr
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
-                collision2D colis;
                 body2D &body1 = *(*partition)[i];
                 body2D &body2 = *(*partition)[j];
-                if (gather_collision_data(body1, body2, &colis))
+                const collision2D colis = generate_collision(body1, body2);
+                if (colis.collided)
                 {
                     try_enter_or_stay_callback(colis);
                     m_collisions.push_back(colis);
@@ -53,10 +53,10 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
-                collision2D colis;
                 body2D &body1 = *(*partition)[i];
                 body2D &body2 = *(*partition)[j];
-                if (gather_collision_data(body1, body2, &colis))
+                const collision2D colis = generate_collision(body1, body2);
+                if (colis.collided)
                 {
                     try_enter_or_stay_callback(colis);
                     m_mt_collisions[thread_idx].push_back(colis);

@@ -13,7 +13,7 @@ struct collision2D
     glm::vec2 mtv{0.f};
     manifold2D manifold;
 
-    bool valid = true;
+    bool collided = false;
 
     const glm::vec2 &touch1(std::size_t manifold_index) const;
     glm::vec2 touch2(std::size_t manifold_index) const;

@@ -88,6 +88,8 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void shape(const geo::polygon &poly);
     void shape(const geo::circle &c);
 
+    bool is_polygon() const;
+    bool is_circle() const;
     shape_type type() const;
 
     float mass() const;

@@ -27,10 +27,10 @@ void brute_force_detection2D::detect_collisions_st()
     for (std::size_t i = 0; i < world->bodies.size(); i++)
         for (std::size_t j = i + 1; j < world->bodies.size(); j++)
         {
-            collision2D colis;
             body2D &body1 = world->bodies[i];
             body2D &body2 = world->bodies[j];
-            if (gather_collision_data(body1, body2, &colis))
+            const collision2D colis = generate_collision(body1, body2);
+            if (colis.collided)
             {
                 try_enter_or_stay_callback(colis);
                 m_collisions.push_back(colis);
@@ -45,9 +45,9 @@ void brute_force_detection2D::detect_collisions_mt()
     const auto exec = [this](const std::size_t thread_idx, body2D &body1) {
         for (std::size_t j = 0; j < world->bodies.size(); j++)
         {
-            collision2D colis;
             body2D &body2 = world->bodies[j];
-            if (gather_collision_data(body1, body2, &colis))
+            const collision2D colis = generate_collision(body1, body2);
+            if (colis.collided)
             {
                 try_enter_or_stay_callback(colis);
                 m_mt_collisions[thread_idx].push_back(colis);

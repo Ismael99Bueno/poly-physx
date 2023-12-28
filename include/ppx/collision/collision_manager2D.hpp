@@ -16,6 +16,17 @@ class collision_manager2D
 
     bool enabled = true;
 
+    auto begin() const
+    {
+        return m_collision_detection->collisions().begin();
+    }
+    auto end() const
+    {
+        return m_collision_detection->collisions().end();
+    }
+
+    const collision2D &operator[](std::size_t index) const;
+
     template <typename T = collision_detection2D> const T *detection() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_collision_detection);
@@ -33,25 +44,15 @@ class collision_manager2D
         return kit::get_casted_raw_ptr<T>(m_collision_resolution);
     }
 
-    auto begin() const
-    {
-        return m_collision_detection->collisions().begin();
-    }
-    auto end() const
-    {
-        return m_collision_detection->collisions().end();
-    }
-
-    const collision2D &operator[](std::size_t index) const;
-
     template <typename T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
     {
         static_assert(std::is_base_of_v<collision_detection2D, T>,
                       "Detection method must inherit from collision_detection2D");
         auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
-        T *ptr = coldet.get();
         if (m_collision_detection)
-            ptr->epa_threshold = m_collision_detection->epa_threshold;
+            coldet->inherit(*m_collision_detection);
+
+        T *ptr = coldet.get();
 
         m_collision_detection = std::move(coldet);
         m_collision_detection->world = &world;

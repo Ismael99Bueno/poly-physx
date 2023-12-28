@@ -24,12 +24,12 @@ void spring_driven_resolution2D::solve(const std::vector<collision2D> &collision
 #ifdef PPX_MULTITHREADED
     kit::const_for_each_mt<PPX_THREAD_COUNT, collision2D>(
         collisions, [this](const std::size_t thread_index, const collision2D &colis) {
-            if (colis.valid)
+            if (colis.collided)
                 solve_and_apply_collision_forces(colis);
         });
 #else
     for (const collision2D &colis : collisions)
-        if (colis.valid)
+        if (colis.collided)
             solve_and_apply_collision_forces(colis);
 #endif
 }

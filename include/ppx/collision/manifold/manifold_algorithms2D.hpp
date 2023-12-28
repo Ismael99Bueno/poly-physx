@@ -6,23 +6,26 @@
 namespace ppx
 {
 class world2D;
-class circle_circle_manifold2D
+class cc_manifold_algorithm2D
 {
   public:
+    virtual ~cc_manifold_algorithm2D() = default;
     virtual manifold2D circle_circle_contacts(const geo::circle &circ1, const geo::circle &circ2,
                                               const glm::vec2 &mtv) const = 0;
 };
 
-class polygon_circle_manifold2D
+class cp_manifold_algorithm2D
 {
   public:
-    virtual manifold2D polygon_circle_contacts(const geo::polygon &poly, const geo::circle &circ,
+    virtual ~cp_manifold_algorithm2D() = default;
+    virtual manifold2D circle_polygon_contacts(const geo::circle &circ, const geo::polygon &poly,
                                                const glm::vec2 &mtv) const = 0;
 };
 
-class polygon_polygon_manifold2D
+class pp_manifold_algorithm2D
 {
   public:
+    virtual ~pp_manifold_algorithm2D() = default;
     virtual manifold2D polygon_polygon_contacts(const geo::polygon &poly1, const geo::polygon &poly2,
                                                 const glm::vec2 &mtv) const = 0;
 };

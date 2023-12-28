@@ -172,6 +172,14 @@ template <typename T> void body2D::compute_inertia(const T &shape)
     m_inv_inertia = 1.f / m_inertia;
 }
 
+bool body2D::is_polygon() const
+{
+    return m_shape.index() == 0;
+}
+bool body2D::is_circle() const
+{
+    return m_shape.index() == 1;
+}
 body2D::shape_type body2D::type() const
 {
     return m_shape.index() == 0 ? shape_type::POLYGON : shape_type::CIRCLE;
