@@ -9,8 +9,9 @@ contact_constraint2D::contact_constraint2D(const collision2D &collision, const s
     : constraint2D("Contact"), m_collision(collision),
       m_anchor1(collision.touch1(manifold_index) - collision.body1->position()),
       m_anchor2(collision.touch2(manifold_index) - collision.body2->position()),
-      m_normal(glm::normalize(collision.mtv)), m_index(manifold_index)
+      m_normal(glm::normalize(collision.mtv)), m_index(manifold_index), m_init_vel(0.f)
 {
+    m_init_vel = constraint_velocity();
 }
 
 float contact_constraint2D::constraint_value() const
@@ -19,8 +20,8 @@ float contact_constraint2D::constraint_value() const
 }
 float contact_constraint2D::constraint_velocity() const
 {
-    return glm::dot(m_normal, m_collision.body1->constraint_velocity_at(m_anchor1) -
-                                  m_collision.body2->constraint_velocity_at(m_anchor2));
+    return 0.1f * m_init_vel + glm::dot(m_normal, m_collision.body1->constraint_velocity_at(m_anchor1) -
+                                                      m_collision.body2->constraint_velocity_at(m_anchor2));
 }
 
 float contact_constraint2D::compute_lambda() const

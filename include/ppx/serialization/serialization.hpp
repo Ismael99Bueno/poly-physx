@@ -174,6 +174,7 @@ template <> struct kit::yaml::codec<ppx::body_manager2D>
     }
     static bool decode(const YAML::Node &node, ppx::body_manager2D &bm)
     {
+        bm.clear();
         if (node["Bodies"])
             for (const YAML::Node &n : node["Bodies"])
                 bm.add(n.as<ppx::body2D>());
@@ -214,6 +215,7 @@ template <> struct kit::yaml::codec<ppx::spring_manager2D>
     }
     static bool decode(const YAML::Node &node, ppx::spring_manager2D &sm)
     {
+        sm.clear();
         if (node["Springs"])
             for (const YAML::Node &n : node["Springs"])
             {
