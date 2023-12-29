@@ -10,6 +10,10 @@
 #include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 #include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
 
+#include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
+#include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
+#include "ppx/collision/manifold/radius_distance_manifold2D.hpp"
+
 #include "rk/serialization/serialization.hpp"
 
 #include "kit/serialization/yaml/codec.hpp"
@@ -250,6 +254,19 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         else if (cm.detection<ppx::sort_sweep_detection2D>())
             ndet["Method"] = 2;
 
+        if (cm.detection()->cc_manifold_algorithm<ppx::radius_distance_manifold2D>())
+            ndet["C-C Algorithm"] = 0;
+        else if (cm.detection()->cc_manifold_algorithm<ppx::mtv_support_manifold2D>())
+            ndet["C-C Algorithm"] = 1;
+
+        if (cm.detection()->cp_manifold_algorithm<ppx::mtv_support_manifold2D>())
+            ndet["C-P Algorithm"] = 0;
+
+        if (cm.detection()->pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>())
+            ndet["P-P Algorithm"] = 0;
+        else if (cm.detection()->pp_manifold_algorithm<ppx::mtv_support_manifold2D>())
+            ndet["P-P Algorithm"] = 1;
+
         YAML::Node nres = node["Resolution"];
         if (auto colres = cm.resolution<ppx::spring_driven_resolution2D>())
         {
@@ -287,6 +304,31 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 cm.set_detection<ppx::brute_force_detection2D>();
             else if (method == 2)
                 cm.set_detection<ppx::sort_sweep_detection2D>();
+        }
+
+        if (ndet["C-C Algorithm"])
+        {
+            const int alg = ndet["C-C Algorithm"].as<int>();
+            if (alg == 0)
+                cm.detection()->set_pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>();
+            else if (alg == 1)
+                cm.detection()->set_pp_manifold_algorithm<ppx::mtv_support_manifold2D>();
+        }
+
+        if (ndet["C-P Algorithm"])
+        {
+            const int alg = ndet["C-P Algorithm"].as<int>();
+            if (alg == 0)
+                cm.detection()->set_cp_manifold_algorithm<ppx::mtv_support_manifold2D>();
+        }
+
+        if (ndet["P-P Algorithm"])
+        {
+            const int alg = ndet["P-P Algorithm"].as<int>();
+            if (alg == 0)
+                cm.detection()->set_pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>();
+            else if (alg == 1)
+                cm.detection()->set_pp_manifold_algorithm<ppx::mtv_support_manifold2D>();
         }
 
         const YAML::Node nres = node["Resolution"];
