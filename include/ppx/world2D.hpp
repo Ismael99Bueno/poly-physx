@@ -31,8 +31,6 @@ class world2D final : kit::non_copyable
     constraint_manager2D constraints;
     world_events events;
 
-    bool semi_implicit_integration = false;
-
     bool step();
     float timestep_ratio() const;
 
