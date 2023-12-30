@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class quad_tree_detection2D : public collision_detection2D
+class quad_tree_detection2D final : public collision_detection2D
 {
   public:
     const quad_tree &qtree() const;

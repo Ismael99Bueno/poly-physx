@@ -7,7 +7,7 @@
 
 namespace ppx
 {
-class quad_tree final
+class quad_tree
 {
   public:
     quad_tree(const glm::vec2 &min, const glm::vec2 &max, std::size_t max_bodies = 12, std::uint32_t depth = 0);

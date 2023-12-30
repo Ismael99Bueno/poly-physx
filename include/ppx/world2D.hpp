@@ -13,7 +13,7 @@
 
 namespace ppx
 {
-class world2D final : kit::non_copyable
+class world2D : kit::non_copyable
 {
   public:
     template <class... IntegArgs>

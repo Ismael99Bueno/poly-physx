@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class distance_joint2D : public constraint2D
+class distance_joint2D final : public constraint2D
 {
   public:
     struct specs

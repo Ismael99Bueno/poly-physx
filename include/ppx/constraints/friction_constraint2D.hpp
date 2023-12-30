@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class friction_constraint2D : public constraint2D
+class friction_constraint2D final : public constraint2D
 {
   public:
     friction_constraint2D(const collision2D *collision, std::size_t manifold_index, float friction);

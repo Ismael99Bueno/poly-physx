@@ -11,7 +11,7 @@ namespace ppx
 {
 struct collision2D;
 class body2D;
-class body_events final
+class body_events
 {
   public:
     void try_enter_or_stay(const collision2D &c) const;

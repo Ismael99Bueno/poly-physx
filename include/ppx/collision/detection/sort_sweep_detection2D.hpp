@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class sort_sweep_detection2D : public collision_detection2D, kit::non_copyable
+class sort_sweep_detection2D final : public collision_detection2D, kit::non_copyable
 {
   public:
     struct edge

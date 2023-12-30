@@ -11,7 +11,7 @@
 
 namespace ppx
 {
-class world_events final : kit::non_copyable
+class world_events : kit::non_copyable
 {
   public:
     kit::event<const body2D::ptr &> on_body_addition;

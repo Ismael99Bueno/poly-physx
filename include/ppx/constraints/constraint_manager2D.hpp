@@ -16,7 +16,7 @@
 namespace ppx
 {
 class world2D;
-class constraint_manager2D final : kit::non_copyable
+class constraint_manager2D : kit::non_copyable
 {
   public:
     constraint_manager2D(world2D &world);
