@@ -149,7 +149,7 @@ void constraint_manager2D::solve()
         for (const collision2D &collision : *m_collisions)
             if (collision.collided)
                 for (std::size_t i = 0; i < collision.manifold.size; i++)
-                    m_contacts.emplace_back(collision, i).world = &world;
+                    m_contacts.emplace_back(&collision, i).world = &world;
     }
 
     if (warmup)

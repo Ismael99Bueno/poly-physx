@@ -8,7 +8,7 @@ namespace ppx
 class contact_constraint2D : public constraint2D
 {
   public:
-    contact_constraint2D(const collision2D &collision, std::size_t manifold_index);
+    contact_constraint2D(const collision2D *collision, std::size_t manifold_index);
 
     float constraint_value() const override;
     float constraint_velocity() const override;
@@ -19,7 +19,7 @@ class contact_constraint2D : public constraint2D
     void solve() override;
 
   private:
-    const collision2D &m_collision;
+    const collision2D *m_collision;
 
     glm::vec2 m_anchor1;
     glm::vec2 m_anchor2;

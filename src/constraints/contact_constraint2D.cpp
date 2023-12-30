@@ -5,22 +5,22 @@
 
 namespace ppx
 {
-contact_constraint2D::contact_constraint2D(const collision2D &collision, const std::size_t manifold_index)
+contact_constraint2D::contact_constraint2D(const collision2D *collision, const std::size_t manifold_index)
     : constraint2D("Contact"), m_collision(collision),
-      m_anchor1(collision.touch1(manifold_index) - collision.body1->position()),
-      m_anchor2(collision.touch2(manifold_index) - collision.body2->position()),
-      m_normal(glm::normalize(collision.mtv)), m_index(manifold_index)
+      m_anchor1(collision->touch1(manifold_index) - collision->body1->position()),
+      m_anchor2(collision->touch2(manifold_index) - collision->body2->position()),
+      m_normal(glm::normalize(collision->mtv)), m_index(manifold_index)
 {
 }
 
 float contact_constraint2D::constraint_value() const
 {
-    return glm::dot(m_collision.touch1(m_index) - m_collision.touch2(m_index), m_normal);
+    return glm::dot(m_collision->touch1(m_index) - m_collision->touch2(m_index), m_normal);
 }
 float contact_constraint2D::constraint_velocity() const
 {
-    return glm::dot(m_normal, m_collision.body1->constraint_velocity_at(m_anchor1) -
-                                  m_collision.body2->constraint_velocity_at(m_anchor2));
+    return glm::dot(m_normal, m_collision->body1->constraint_velocity_at(m_anchor1) -
+                                  m_collision->body2->constraint_velocity_at(m_anchor2));
 }
 
 float contact_constraint2D::compute_lambda() const
@@ -30,8 +30,8 @@ float contact_constraint2D::compute_lambda() const
     const float cross1 = kit::cross2D(m_anchor1, m_normal);
     const float cross2 = kit::cross2D(m_anchor2, m_normal);
 
-    const body2D::ptr &body1 = m_collision.body1;
-    const body2D::ptr &body2 = m_collision.body2;
+    const body2D::ptr &body1 = m_collision->body1;
+    const body2D::ptr &body2 = m_collision->body2;
 
     const float inv_mass = body1->inv_mass() + body2->inv_mass() + body1->inv_inertia() * cross1 * cross1 +
                            body2->inv_inertia() * cross2 * cross2;
@@ -50,8 +50,8 @@ void contact_constraint2D::apply_lambda(const float lambda)
     const glm::vec2 imp1 = lambda * m_normal;
     const glm::vec2 imp2 = -imp1;
 
-    const body2D::ptr &body1 = m_collision.body1;
-    const body2D::ptr &body2 = m_collision.body2;
+    const body2D::ptr &body1 = m_collision->body1;
+    const body2D::ptr &body2 = m_collision->body2;
 
     body1->constraint_velocity += body1->inv_mass() * imp1;
     body2->constraint_velocity += body2->inv_mass() * imp2;
@@ -85,12 +85,12 @@ void contact_constraint2D::solve()
 
 bool contact_constraint2D::contains(kit::uuid id) const
 {
-    return m_collision.body1->id == id || m_collision.body2->id == id;
+    return m_collision->body1->id == id || m_collision->body2->id == id;
 }
 
 bool contact_constraint2D::valid() const
 {
-    return m_collision.body1 && m_collision.body2;
+    return m_collision->body1 && m_collision->body2;
 }
 
 } // namespace ppx
