@@ -401,7 +401,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
     }
     static bool decode(const YAML::Node &node, ppx::world2D &world)
     {
-        if (!node.IsMap() || node.size() != 6)
+        if (!node.IsMap() || node.size() != 7)
             return false;
 
         node["Integrator"].as<rk::integrator<float>>(world.integrator);
