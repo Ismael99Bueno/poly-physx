@@ -391,6 +391,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
     {
         YAML::Node node;
         node["Integrator"] = world.integrator;
+        node["Semi-implicit integration"] = world.semi_implicit_integration;
         node["Body manager"] = world.bodies;
         node["Behaviour manager"] = world.behaviours;
         node["Spring manager"] = world.springs;
@@ -405,6 +406,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
 
         node["Integrator"].as<rk::integrator<float>>(world.integrator);
         world.integrator.state.clear();
+        world.semi_implicit_integration = node["Semi-implicit integration"].as<bool>();
         node["Body manager"].as<ppx::body_manager2D>(world.bodies);
         node["Behaviour manager"].as<ppx::behaviour_manager2D>(world.behaviours);
         node["Spring manager"].as<ppx::spring_manager2D>(world.springs);
