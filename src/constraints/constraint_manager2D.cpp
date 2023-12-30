@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/constraint_manager2D.hpp"
+#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
@@ -137,6 +138,33 @@ void constraint_manager2D::delegate_collisions(const std::vector<collision2D> *c
     m_collisions = collisions;
 }
 
+void constraint_manager2D::update_contacts()
+{
+    for (const collision2D &collision : *m_collisions)
+        if (collision.collided)
+            for (std::size_t i = 0; i < collision.manifold.size; i++)
+            {
+                const kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t> hash{collision.body1->id,
+                                                                                     collision.body2->id, i};
+                const auto ctrres = world.collisions.resolution<constraint_driven_resolution2D>();
+
+                const auto old_contact = m_contacts.find(hash);
+                if (old_contact != m_contacts.end())
+                    old_contact->second.update(&collision, ctrres->restitution, ctrres->friction);
+                else
+                    m_contacts.emplace(hash, contact_constraint2D(&collision, i, ctrres->restitution, ctrres->friction))
+                        .first->second.world = &world;
+            }
+    for (auto it = m_contacts.begin(); it != m_contacts.end();)
+        if (!it->second.recently_updated)
+            it = m_contacts.erase(it);
+        else
+        {
+            it->second.recently_updated = false;
+            ++it;
+        }
+}
+
 void constraint_manager2D::solve()
 {
     KIT_PERF_FUNCTION()
@@ -144,20 +172,14 @@ void constraint_manager2D::solve()
         return;
 
     if (m_collisions)
-    {
-        m_contacts.clear();
-        for (const collision2D &collision : *m_collisions)
-            if (collision.collided)
-                for (std::size_t i = 0; i < collision.manifold.size; i++)
-                    m_contacts.emplace_back(&collision, i).world = &world;
-    }
+        update_contacts();
 
     if (warmup)
     {
         for (const auto &ctr : m_constraints)
             ctr->warmup();
         if (m_collisions)
-            for (contact_constraint2D &contact : m_contacts)
+            for (auto &[hash, contact] : m_contacts)
                 contact.warmup();
     }
 
@@ -166,7 +188,7 @@ void constraint_manager2D::solve()
         for (const auto &ctr : m_constraints)
             ctr->solve();
         if (m_collisions)
-            for (contact_constraint2D &contact : m_contacts)
+            for (auto &[hash, contact] : m_contacts)
                 contact.solve();
     }
     m_collisions = nullptr;

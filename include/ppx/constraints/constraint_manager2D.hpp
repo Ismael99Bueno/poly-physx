@@ -2,9 +2,12 @@
 
 #include "ppx/events/world_events.hpp"
 #include "ppx/constraints/contact_constraint2D.hpp"
+
 #include "kit/interface/non_copyable.hpp"
 #include "kit/container/stack_vector.hpp"
 #include "kit/memory/scope.hpp"
+#include "kit/container/hashable_tuple.hpp"
+
 #include <vector>
 #include <functional>
 #include <memory>
@@ -81,6 +84,8 @@ class constraint_manager2D final : kit::non_copyable
     std::vector<kit::scope<constraint2D>> m_constraints;
 
     const std::vector<collision2D> *m_collisions;
-    std::vector<contact_constraint2D> m_contacts;
+    std::unordered_map<kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t>, contact_constraint2D> m_contacts;
+
+    void update_contacts();
 };
 } // namespace ppx
