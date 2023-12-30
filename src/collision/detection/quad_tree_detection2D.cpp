@@ -28,6 +28,7 @@ void quad_tree_detection2D::detect_collisions()
 #endif
 }
 
+#ifndef PPX_MULTITHREADED
 void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tree::partition *> &partitions)
 {
     for (const quad_tree::partition *partition : partitions)
@@ -47,6 +48,7 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tr
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
+#else
 void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tree::partition *> &partitions)
 {
     const auto exec = [this](const std::size_t thread_idx, const quad_tree::partition *partition) {
@@ -69,7 +71,7 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
-
+#endif
 void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();

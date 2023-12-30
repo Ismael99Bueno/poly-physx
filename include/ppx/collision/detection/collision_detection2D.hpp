@@ -8,7 +8,7 @@
 #include "kit/utility/utils.hpp"
 
 #ifndef PPX_THREAD_COUNT
-#define PPX_THREAD_COUNT 8
+#define PPX_THREAD_COUNT 16
 #endif
 
 namespace ppx

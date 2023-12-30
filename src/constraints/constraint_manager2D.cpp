@@ -153,7 +153,7 @@ void constraint_manager2D::update_contacts()
                     old_contact->second.update(&collision, ctrres->restitution, ctrres->friction);
                 else
                     m_contacts.emplace(hash, contact_constraint2D(&collision, i, ctrres->restitution, ctrres->friction))
-                        .first->second.world = &world;
+                        .first->second.set_world(&world);
             }
     for (auto it = m_contacts.begin(); it != m_contacts.end();)
         if (!it->second.recently_updated)

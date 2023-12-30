@@ -12,7 +12,7 @@ manifold2D mtv_support_manifold2D::circle_circle_contacts(const geo::circle &cir
 manifold2D mtv_support_manifold2D::circle_polygon_contacts(const geo::circle &circ, const geo::polygon &poly,
                                                            const glm::vec2 &mtv) const
 {
-    return {{geo::mtv_support_contact_point(poly, circ, mtv)}, 1};
+    return {{geo::mtv_support_contact_point(circ, poly, mtv)}, 1};
 }
 manifold2D mtv_support_manifold2D::polygon_polygon_contacts(const geo::polygon &poly1, const geo::polygon &poly2,
                                                             const glm::vec2 &mtv) const

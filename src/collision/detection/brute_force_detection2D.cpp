@@ -21,7 +21,7 @@ void brute_force_detection2D::detect_collisions()
     detect_collisions_st();
 #endif
 }
-
+#ifndef PPX_MULTITHREADED
 void brute_force_detection2D::detect_collisions_st()
 {
     for (std::size_t i = 0; i < world->bodies.size(); i++)
@@ -40,6 +40,7 @@ void brute_force_detection2D::detect_collisions_st()
         }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
+#else
 void brute_force_detection2D::detect_collisions_mt()
 {
     const auto exec = [this](const std::size_t thread_idx, body2D &body1) {
@@ -60,4 +61,5 @@ void brute_force_detection2D::detect_collisions_mt()
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
+#endif
 } // namespace ppx

@@ -5,12 +5,21 @@
 
 namespace ppx
 {
-contact_constraint2D::contact_constraint2D(const collision2D *collision, const std::size_t manifold_index)
+contact_constraint2D::contact_constraint2D(const collision2D *collision, const std::size_t manifold_index,
+                                           const float restitution, const float friction)
     : constraint2D("Contact"), m_collision(collision),
       m_anchor1(collision->touch1(manifold_index) - collision->body1->position()),
       m_anchor2(collision->touch2(manifold_index) - collision->body2->position()),
-      m_normal(glm::normalize(collision->mtv)), m_index(manifold_index)
+      m_normal(glm::normalize(collision->mtv)), m_index(manifold_index), m_restitution(restitution),
+      m_friction(collision, manifold_index, friction)
 {
+    m_init_ctr_vel = constraint_velocity();
+}
+
+void contact_constraint2D::set_world(world2D *world)
+{
+    this->world = world;
+    m_friction.world = world;
 }
 
 float contact_constraint2D::constraint_value() const
@@ -19,7 +28,8 @@ float contact_constraint2D::constraint_value() const
 }
 float contact_constraint2D::constraint_velocity() const
 {
-    return glm::dot(m_normal, m_collision->body1->constraint_velocity_at(m_anchor1) -
+    return m_restitution * m_init_ctr_vel +
+           glm::dot(m_normal, m_collision->body1->constraint_velocity_at(m_anchor1) -
                                   m_collision->body2->constraint_velocity_at(m_anchor2));
 }
 
@@ -69,18 +79,31 @@ void contact_constraint2D::warmup()
         return;
     m_accumulated_lambda *= world->timestep_ratio();
     apply_lambda(m_accumulated_lambda);
+    m_friction.warmup();
 }
 void contact_constraint2D::solve()
 {
     const float lambda = compute_lambda();
     const float old_lambda = m_accumulated_lambda;
-
-    m_accumulated_lambda += lambda;
-    m_accumulated_lambda = std::min(0.f, m_accumulated_lambda);
+    m_accumulated_lambda = std::min(0.f, m_accumulated_lambda + lambda);
 
     const float delta_lambda = m_accumulated_lambda - old_lambda;
     if (!kit::approaches_zero(delta_lambda))
         apply_lambda(delta_lambda);
+
+    m_friction.max_lambda = std::abs(m_accumulated_lambda);
+    m_friction.solve();
+}
+
+void contact_constraint2D::update(const collision2D *collision, const float restitution, const float friction)
+{
+    m_collision = collision;
+    m_anchor1 = collision->touch1(m_index) - collision->body1->position();
+    m_anchor2 = collision->touch2(m_index) - collision->body2->position();
+    m_normal = glm::normalize(collision->mtv);
+    m_restitution = restitution;
+    m_friction.update(collision, m_normal, m_anchor1, m_anchor2, friction);
+    recently_updated = true;
 }
 
 bool contact_constraint2D::contains(kit::uuid id) const
