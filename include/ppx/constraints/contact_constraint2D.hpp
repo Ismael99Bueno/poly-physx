@@ -28,7 +28,6 @@ class contact_constraint2D : public constraint2D
     std::size_t m_index;
 
     float m_accumulated_lambda = 0.f;
-    float m_init_vel;
 
     void apply_lambda(float lambda);
     float compute_lambda() const;
