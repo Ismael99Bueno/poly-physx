@@ -5,9 +5,12 @@
 
 namespace ppx
 {
+joint_constraint2D::joint_constraint2D(const char *name, const bool allow_position_corrections)
+    : constraint2D(name), m_allow_position_corrections(allow_position_corrections)
+{
+}
 float joint_constraint2D::compute_lambda(body2D &body1, body2D &body2, const glm::vec2 &anchor1,
-                                         const glm::vec2 &anchor2, const glm::vec2 &dir,
-                                         bool allow_position_corrections) const
+                                         const glm::vec2 &anchor2, const glm::vec2 &dir) const
 {
     const float cvel = constraint_velocity();
 
@@ -17,7 +20,7 @@ float joint_constraint2D::compute_lambda(body2D &body1, body2D &body2, const glm
     const float inv_mass = body1.inv_mass() + body2.inv_mass() + body1.inv_inertia() * cross1 * cross1 +
                            body2.inv_inertia() * cross2 * cross2;
 
-    if (allow_position_corrections && world->constraints.position_corrections)
+    if (m_allow_position_corrections && world->constraints.position_corrections)
     {
         const float c = constraint_value();
         static constexpr float stiffness = 1000.f;

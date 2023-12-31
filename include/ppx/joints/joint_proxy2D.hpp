@@ -20,6 +20,7 @@ class joint_proxy2D
     joint_proxy2D(const specs &spc);
     virtual ~joint_proxy2D() = default;
 
+    std::tuple<glm::vec2, glm::vec2, glm::vec2> compute_anchors_and_direction() const;
     bool valid() const;
 
     const body2D::ptr &body1() const;

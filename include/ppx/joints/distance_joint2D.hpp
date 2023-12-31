@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ppx/constraints/constraint2D.hpp"
+#include "ppx/constraints/joint_constraint2D.hpp"
 #include "ppx/joints/joint_proxy2D.hpp"
 
 namespace ppx
 {
-class distance_joint2D final : public constraint2D
+class distance_joint2D final : public joint_constraint2D
 {
   public:
     struct specs
@@ -33,12 +33,6 @@ class distance_joint2D final : public constraint2D
 #endif
 
   private:
-    float m_accumulated_lambda = 0.f;
-
-    std::tuple<glm::vec2, glm::vec2, glm::vec2> compute_anchors_and_direction() const;
-    float compute_lambda() const;
-    void apply_lambda(float lambda);
-
     void warmup() override;
     void solve() override;
 };

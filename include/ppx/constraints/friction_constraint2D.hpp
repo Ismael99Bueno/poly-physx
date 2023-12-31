@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ppx/constraints/constraint2D.hpp"
+#include "ppx/constraints/joint_constraint2D.hpp"
 #include "ppx/collision/collision2D.hpp"
 
 namespace ppx
 {
-class friction_constraint2D final : public constraint2D
+class friction_constraint2D final : public joint_constraint2D
 {
   public:
     friction_constraint2D(const collision2D *collision, std::size_t manifold_index, float friction);
@@ -32,9 +32,5 @@ class friction_constraint2D final : public constraint2D
     glm::vec2 m_tangent;
 
     float m_friction;
-    float m_accumulated_lambda;
-
-    void apply_lambda(float lambda);
-    float compute_lambda() const;
 };
 } // namespace ppx

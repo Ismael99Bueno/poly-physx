@@ -15,6 +15,14 @@ joint_proxy2D::joint_proxy2D(const specs &spc) : joint_proxy2D(spc.body1, spc.bo
 {
 }
 
+std::tuple<glm::vec2, glm::vec2, glm::vec2> joint_proxy2D::compute_anchors_and_direction() const
+{
+    const glm::vec2 rot_anchor1 = rotated_anchor1();
+    const glm::vec2 rot_anchor2 = rotated_anchor2();
+    const glm::vec2 dir = glm::normalize(rot_anchor1 - rot_anchor2 + m_body1->position() - m_body2->position());
+    return {dir, rot_anchor1, rot_anchor2};
+}
+
 bool joint_proxy2D::valid() const
 {
     return m_body1 && m_body2;
