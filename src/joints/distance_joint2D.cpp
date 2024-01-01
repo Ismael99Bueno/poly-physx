@@ -37,12 +37,12 @@ float distance_joint2D::constraint_velocity() const
 void distance_joint2D::warmup()
 {
     const auto [dir, rot_anchor1, rot_anchor2] = joint.compute_anchors_and_direction();
-    apply_warmup(*joint.body1(), *joint.body1(), rot_anchor1, rot_anchor2, dir);
+    apply_warmup(*joint.body1(), *joint.body2(), rot_anchor1, rot_anchor2, dir);
 }
 void distance_joint2D::solve()
 {
     const auto [dir, rot_anchor1, rot_anchor2] = joint.compute_anchors_and_direction();
-    solve_unclamped(*joint.body1(), *joint.body1(), rot_anchor1, rot_anchor2, dir);
+    solve_unclamped(*joint.body1(), *joint.body2(), rot_anchor1, rot_anchor2, dir);
 }
 
 bool distance_joint2D::valid() const
