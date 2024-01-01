@@ -49,7 +49,7 @@ void brute_force_detection2D::detect_collisions_mt()
                 try_exit_callback(body1, body2);
         }
     };
-    kit::for_each_mt<PPX_THREAD_COUNT, body2D>(world->bodies, exec);
+    kit::for_each_mt<PPX_THREAD_COUNT>(world->bodies, exec);
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
