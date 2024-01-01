@@ -49,6 +49,7 @@ const std::vector<collision2D> &collision_detection2D::collisions() const
 void collision_detection2D::inherit(collision_detection2D &coldet)
 {
     epa_threshold = coldet.epa_threshold;
+    multithreaded = coldet.multithreaded;
     m_cc_manifold = std::move(coldet.m_cc_manifold);
     m_cp_manifold = std::move(coldet.m_cp_manifold);
     m_pp_manifold = std::move(coldet.m_pp_manifold);

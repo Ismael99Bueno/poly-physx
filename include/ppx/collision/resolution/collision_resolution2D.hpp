@@ -12,6 +12,9 @@ class collision_resolution2D
     virtual void solve(const std::vector<collision2D> &collisions) const = 0;
 
     world2D *world = nullptr;
+    bool multithreaded = false;
+
+    void inherit(collision_resolution2D &colres);
 
   private:
     virtual void on_attach()
