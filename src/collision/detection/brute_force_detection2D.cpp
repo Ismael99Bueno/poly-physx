@@ -4,24 +4,16 @@
 #include "kit/profile/perf.hpp"
 #include "kit/utility/multithreading.hpp"
 
-#if defined(PPX_MULTITHREADED) && defined(KIT_PROFILE)
-#pragma message(                                                                                                       \
-        "Multithreading for PPX will be disabled because the thread unsafe profiling features of cpp-kit are enabled")
-#undef PPX_MULTITHREADED
-#endif
-
 namespace ppx
 {
 void brute_force_detection2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
-#ifdef PPX_MULTITHREADED
-    detect_collisions_mt();
-#else
-    detect_collisions_st();
-#endif
+    if (multithreaded)
+        detect_collisions_mt();
+    else
+        detect_collisions_st();
 }
-#ifndef PPX_MULTITHREADED
 void brute_force_detection2D::detect_collisions_st()
 {
     for (std::size_t i = 0; i < world->bodies.size(); i++)
@@ -40,7 +32,7 @@ void brute_force_detection2D::detect_collisions_st()
         }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
-#else
+
 void brute_force_detection2D::detect_collisions_mt()
 {
     const auto exec = [this](const std::size_t thread_idx, body2D &body1) {
@@ -61,5 +53,4 @@ void brute_force_detection2D::detect_collisions_mt()
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
-#endif
 } // namespace ppx

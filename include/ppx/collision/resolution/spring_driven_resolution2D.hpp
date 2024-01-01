@@ -12,6 +12,7 @@ class spring_driven_resolution2D : public collision_resolution2D
     float rigidity;
     float normal_damping;
     float tangent_damping;
+    bool multithreaded = false;
 
   private:
     void solve(const std::vector<collision2D> &collisions) const override;

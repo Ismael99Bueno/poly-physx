@@ -4,12 +4,6 @@
 #include "kit/profile/perf.hpp"
 #include "kit/utility/multithreading.hpp"
 
-#if defined(PPX_MULTITHREADED) && defined(KIT_PROFILE)
-#pragma message(                                                                                                       \
-        "Multithreading for PPX will be disabled because the thread unsafe profiling features of cpp-kit are enabled")
-#undef PPX_MULTITHREADED
-#endif
-
 namespace ppx
 {
 void quad_tree_detection2D::detect_collisions()
@@ -21,14 +15,12 @@ void quad_tree_detection2D::detect_collisions()
     partitions.reserve(20);
     m_quad_tree.collect_partitions(partitions);
 
-#ifdef PPX_MULTITHREADED
-    detect_collisions_mt(partitions);
-#else
-    detect_collisions_st(partitions);
-#endif
+    if (multithreaded)
+        detect_collisions_mt(partitions);
+    else
+        detect_collisions_st(partitions);
 }
 
-#ifndef PPX_MULTITHREADED
 void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tree::partition *> &partitions)
 {
     for (const quad_tree::partition *partition : partitions)
@@ -48,7 +40,6 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tr
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
-#else
 void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tree::partition *> &partitions)
 {
     const auto exec = [this](const std::size_t thread_idx, const quad_tree::partition *partition) {
@@ -71,7 +62,6 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
-#endif
 void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();

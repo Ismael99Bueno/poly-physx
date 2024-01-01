@@ -21,9 +21,7 @@
 #include <array>
 #include <cstdint>
 #include <variant>
-#ifdef PPX_MULTITHREADED
 #include <thread>
-#endif
 #ifdef KIT_USE_YAML_CPP
 #include <yaml-cpp/yaml.h>
 #endif

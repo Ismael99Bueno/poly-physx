@@ -22,6 +22,7 @@ class collision_detection2D
 
     world2D *world = nullptr;
     float epa_threshold = 1.e-3f;
+    bool multithreaded = false;
 
     template <typename T = cc_manifold_algorithm2D> const T *cc_manifold_algorithm() const
     {
@@ -93,9 +94,7 @@ class collision_detection2D
 
   protected:
     std::vector<collision2D> m_collisions;
-#ifdef PPX_MULTITHREADED
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
-#endif
 
     collision2D generate_collision(body2D &body1, body2D &body2) const;
     void cc_narrow_collision_check(body2D &body1, body2D &body2, collision2D &collision) const;

@@ -6,42 +6,39 @@
 
 #include "kit/utility/multithreading.hpp"
 
-#if defined(PPX_MULTITHREADED) && defined(KIT_PROFILE)
-#pragma message(                                                                                                       \
-        "Multithreading for PPX will be disabled because the thread unsafe profiling features of cpp-kit are enabled")
-#undef PPX_MULTITHREADED
-#endif
-
 namespace ppx
 {
 const std::vector<collision2D> &collision_detection2D::detect_collisions_cached()
 {
     KIT_PERF_FUNCTION()
+#ifdef KIT_PROFILE
+    KIT_ASSERT_ERROR(!multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
+#endif
     if (m_collisions.empty())
     {
         detect_collisions();
         return m_collisions;
     }
 
-#ifdef PPX_MULTITHREADED
-    kit::for_each_mt<PPX_THREAD_COUNT, collision2D>(m_collisions, [this](std::size_t thread_index, collision2D &colis) {
-        if (colis.collided)
-            colis = generate_collision(*colis.body1, *colis.body2);
-    });
-#else
-    for (collision2D &colis : m_collisions)
-        if (colis.collided)
-            colis = generate_collision(*colis.body1, *colis.body2);
-#endif
+    if (multithreaded)
+        kit::for_each_mt<PPX_THREAD_COUNT, collision2D>(m_collisions,
+                                                        [this](std::size_t thread_index, collision2D &colis) {
+                                                            if (colis.collided)
+                                                                colis = generate_collision(*colis.body1, *colis.body2);
+                                                        });
+    else
+        for (collision2D &colis : m_collisions)
+            if (colis.collided)
+                colis = generate_collision(*colis.body1, *colis.body2);
+
     return m_collisions;
 }
 void collision_detection2D::clear_cached_collisions()
 {
     m_collisions.clear();
-#ifdef PPX_MULTITHREADED
-    for (auto &collisions : m_mt_collisions)
-        collisions.clear();
-#endif
+    if (multithreaded)
+        for (auto &collisions : m_mt_collisions)
+            collisions.clear();
 }
 
 const std::vector<collision2D> &collision_detection2D::collisions() const

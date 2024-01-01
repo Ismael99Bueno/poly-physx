@@ -5,12 +5,6 @@
 #include "kit/utility/multithreading.hpp"
 #include "kit/utility/utils.hpp"
 
-#if defined(PPX_MULTITHREADED) && defined(KIT_PROFILE)
-#pragma message(                                                                                                       \
-        "Multithreading for PPX will be disabled because the thread unsafe profiling features of cpp-kit are enabled")
-#undef PPX_MULTITHREADED
-#endif
-
 namespace ppx
 {
 spring_driven_resolution2D::spring_driven_resolution2D(const float rigidity, const float normal_damping,
@@ -21,17 +15,20 @@ spring_driven_resolution2D::spring_driven_resolution2D(const float rigidity, con
 void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
 {
     KIT_PERF_FUNCTION()
-#ifdef PPX_MULTITHREADED
-    kit::const_for_each_mt<PPX_THREAD_COUNT, collision2D>(
-        collisions, [this](const std::size_t thread_index, const collision2D &colis) {
+#ifdef KIT_PROFILE
+    KIT_ASSERT_ERROR(!multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
+#endif
+    if (multithreaded)
+        kit::const_for_each_mt<PPX_THREAD_COUNT, collision2D>(
+            collisions, [this](const std::size_t thread_index, const collision2D &colis) {
+                if (colis.collided)
+                    solve_and_apply_collision_forces(colis);
+            });
+    else
+        for (const collision2D &colis : collisions)
             if (colis.collided)
                 solve_and_apply_collision_forces(colis);
-        });
-#else
-    for (const collision2D &colis : collisions)
-        if (colis.collided)
-            solve_and_apply_collision_forces(colis);
-#endif
+#
 }
 
 std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collision_forces(
