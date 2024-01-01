@@ -83,7 +83,7 @@ class constraint_manager2D : kit::non_copyable
     world_events &m_events;
     std::vector<kit::scope<constraint2D>> m_constraints;
 
-    const std::vector<collision2D> *m_collisions;
+    const std::vector<collision2D> *m_collisions = nullptr;
     std::unordered_map<kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t>, contact_constraint2D> m_contacts;
 
     void update_contacts();
