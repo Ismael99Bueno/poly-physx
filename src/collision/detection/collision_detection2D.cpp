@@ -4,7 +4,7 @@
 
 #include "geo/algorithm/intersection.hpp"
 
-#include "kit/utility/multithreading.hpp"
+#include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
 {
@@ -21,10 +21,13 @@ const std::vector<collision2D> &collision_detection2D::detect_collisions_cached(
     }
 
     if (multithreaded)
-        kit::for_each_mt<PPX_THREAD_COUNT>(m_collisions, [this](std::size_t thread_index, collision2D &colis) {
-            if (colis.collided)
-                colis = generate_collision(*colis.body1, *colis.body2);
-        });
+        kit::mt::for_each(
+            m_collisions,
+            [this](std::size_t thread_index, collision2D &colis) {
+                if (colis.collided)
+                    colis = generate_collision(*colis.body1, *colis.body2);
+            },
+            PPX_THREAD_COUNT);
     else
         for (collision2D &colis : m_collisions)
             if (colis.collided)

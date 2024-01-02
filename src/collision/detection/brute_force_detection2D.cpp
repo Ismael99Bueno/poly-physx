@@ -2,7 +2,7 @@
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/profile/perf.hpp"
-#include "kit/utility/multithreading.hpp"
+#include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
 {
@@ -49,7 +49,7 @@ void brute_force_detection2D::detect_collisions_mt()
                 try_exit_callback(body1, body2);
         }
     };
-    kit::for_each_mt<PPX_THREAD_COUNT>(world->bodies, exec);
+    kit::mt::for_each(world->bodies, exec, PPX_THREAD_COUNT);
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }

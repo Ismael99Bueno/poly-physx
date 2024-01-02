@@ -2,7 +2,7 @@
 #include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 #include "kit/profile/perf.hpp"
 
-#include "kit/utility/multithreading.hpp"
+#include "kit/multithreading/mt_for_each.hpp"
 #include "kit/utility/utils.hpp"
 
 namespace ppx
@@ -15,19 +15,9 @@ spring_driven_resolution2D::spring_driven_resolution2D(const float rigidity, con
 void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
 {
     KIT_PERF_FUNCTION()
-#ifdef KIT_PROFILE
-    KIT_ASSERT_ERROR(!multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
-#endif
-    if (multithreaded)
-        kit::for_each_mt<PPX_THREAD_COUNT>(collisions,
-                                           [this](const std::size_t thread_index, const collision2D &colis) {
-                                               if (colis.collided)
-                                                   solve_and_apply_collision_forces(colis);
-                                           });
-    else
-        for (const collision2D &colis : collisions)
-            if (colis.collided)
-                solve_and_apply_collision_forces(colis);
+    for (const collision2D &colis : collisions)
+        if (colis.collided)
+            solve_and_apply_collision_forces(colis);
 #
 }
 

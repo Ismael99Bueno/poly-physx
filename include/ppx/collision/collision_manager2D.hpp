@@ -64,9 +64,6 @@ class collision_manager2D
         static_assert(std::is_base_of_v<collision_resolution2D, T>,
                       "Resolution method must inherit from collision_resolution2D");
         auto colres = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
-        if (m_collision_resolution)
-            colres->inherit(*m_collision_resolution);
-
         T *ptr = colres.get();
 
         m_collision_resolution = std::move(colres);

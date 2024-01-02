@@ -2,7 +2,7 @@
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/profile/perf.hpp"
-#include "kit/utility/multithreading.hpp"
+#include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
 {
@@ -58,7 +58,7 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
                     try_exit_callback(body1, body2);
             }
     };
-    kit::for_each_mt<PPX_THREAD_COUNT>(partitions, exec);
+    kit::mt::for_each(partitions, exec, PPX_THREAD_COUNT);
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
