@@ -58,7 +58,7 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
                     try_exit_callback(body1, body2);
             }
     };
-    kit::mt::for_each(partitions, exec, PPX_THREAD_COUNT);
+    kit::mt::for_each<PPX_THREAD_COUNT>(partitions, exec);
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }

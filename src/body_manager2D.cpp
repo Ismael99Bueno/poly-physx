@@ -143,7 +143,7 @@ bool body_manager2D::remove(std::size_t index)
         KIT_WARN("Body index exceeds array bounds. Aborting... - index: {0}, size: {1}", index, m_bodies.size())
         return false;
     }
-    KIT_INFO("Removing body with index {0} and id {1}", index, m_bodies[index].id)
+    KIT_INFO("Removing body with id {0}", m_bodies[index].id)
 
     world.events.on_early_body_removal(m_bodies[index]);
     rk::state<float> &state = world.integrator.state;

@@ -244,6 +244,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         nqt["Max depth"] = ppx::quad_tree::max_depth;
         nqt["Min size"] = ppx::quad_tree::min_size;
 
+        ndet["Multithreading"] = cm.detection()->multithreaded;
         if (auto coldet = cm.detection<ppx::quad_tree_detection2D>())
         {
             ndet["Method"] = 0;
@@ -295,6 +296,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         ppx::quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
         ppx::quad_tree::min_size = nqt["Min size"].as<float>();
 
+        cm.detection()->multithreaded = ndet["Multithreading"].as<bool>();
         if (ndet["Method"])
         {
             const int method = ndet["Method"].as<int>();
