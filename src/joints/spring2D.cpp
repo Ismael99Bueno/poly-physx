@@ -6,16 +6,18 @@
 namespace ppx
 {
 spring2D::spring2D(const float stiffness, const float damping, const float length)
-    : stiffness(stiffness), damping(damping), length(length)
+    : kit::identifiable<>(kit::uuid::random()), stiffness(stiffness), damping(damping), length(length)
 {
 }
 spring2D::spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
                    const glm::vec2 &anchor2, const float stiffness, const float damping, const float length)
-    : joint(body1, body2, anchor1, anchor2), stiffness(stiffness), damping(damping), length(length)
+    : kit::identifiable<>(kit::uuid::random()), joint(body1, body2, anchor1, anchor2), stiffness(stiffness),
+      damping(damping), length(length)
 {
 }
 spring2D::spring2D(const specs &spc)
-    : joint(spc.joint), stiffness(spc.stiffness), damping(spc.damping), length(spc.length)
+    : kit::identifiable<>(kit::uuid::random()), joint(spc.joint), stiffness(spc.stiffness), damping(spc.damping),
+      length(spc.length)
 {
 }
 
