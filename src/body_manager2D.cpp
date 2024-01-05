@@ -35,18 +35,18 @@ void body_manager2D::reset_simulation_forces()
         body.reset_simulation_forces();
 }
 
-body2D::const_ptr body_manager2D::operator[](const kit::uuid id) const
+const body2D *body_manager2D::operator[](const kit::uuid id) const
 {
-    for (const auto &body : m_bodies)
+    for (const body2D &body : m_bodies)
         if (body.id == id)
-            return ptr(body.index);
+            return &body;
     return nullptr;
 }
-body2D::ptr body_manager2D::operator[](const kit::uuid id)
+body2D *body_manager2D::operator[](const kit::uuid id)
 {
-    for (const auto &body : m_bodies)
+    for (body2D &body : m_bodies)
         if (body.id == id)
-            return ptr(body.index);
+            return &body;
     return nullptr;
 }
 
@@ -96,28 +96,27 @@ std::vector<body2D::ptr> body_manager2D::operator[](const geo::aabb2D &aabb)
     return in_area;
 }
 
-body2D::const_ptr body_manager2D::operator[](const glm::vec2 &point) const
+const body2D *body_manager2D::operator[](const glm::vec2 &point) const
 {
     const geo::aabb2D aabb = point;
     for (const body2D &body : m_bodies)
         if (geo::intersects(body.shape().bounding_box(), aabb))
-            return {&m_bodies, body.index};
+            return &body;
     return nullptr;
 }
-body2D::ptr body_manager2D::operator[](const glm::vec2 &point)
+body2D *body_manager2D::operator[](const glm::vec2 &point)
 {
     const geo::aabb2D aabb = point;
-    for (const body2D &body : m_bodies)
+    for (body2D &body : m_bodies)
         if (geo::intersects(body.shape().bounding_box(), aabb))
-            return {&m_bodies, body.index};
+            return &body;
     return nullptr;
 }
 
-body2D::ptr body_manager2D::process_addition(body2D &body)
+void body_manager2D::process_addition(body2D &body)
 {
     body.index = m_bodies.size() - 1;
     body.world = &world;
-    const body2D::ptr e_ptr = {&m_bodies, m_bodies.size() - 1};
 
     const kit::transform2D<float> &transform = body.transform();
 
@@ -132,8 +131,7 @@ body2D::ptr body_manager2D::process_addition(body2D &body)
         KIT_ASSERT_CRITICAL(m_bodies[i].id != body.id, "Body with index {0} has the same id as body with index {1}", i,
                             body.index)
 #endif
-    world.events.on_body_addition(e_ptr);
-    return e_ptr;
+    world.events.on_body_addition(body);
 }
 
 bool body_manager2D::remove(std::size_t index)

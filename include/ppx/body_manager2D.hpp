@@ -13,10 +13,11 @@ class body_manager2D
     body_manager2D(world2D &world);
     world2D &world;
 
-    template <class... BodyArgs> body2D::ptr add(BodyArgs &&...args)
+    template <class... BodyArgs> body2D &add(BodyArgs &&...args)
     {
         body2D &body = m_bodies.emplace_back(std::forward<BodyArgs>(args)...);
-        return process_addition(body);
+        process_addition(body);
+        return body;
     }
 
     auto begin() const
@@ -46,11 +47,11 @@ class body_manager2D
     std::vector<body2D::const_ptr> operator[](const geo::aabb2D &aabb) const;
     std::vector<body2D::ptr> operator[](const geo::aabb2D &aabb);
 
-    body2D::const_ptr operator[](const glm::vec2 &point) const;
-    body2D::ptr operator[](const glm::vec2 &point);
+    const body2D *operator[](const glm::vec2 &point) const;
+    body2D *operator[](const glm::vec2 &point);
 
-    body2D::const_ptr operator[](kit::uuid id) const;
-    body2D::ptr operator[](kit::uuid id);
+    const body2D *operator[](kit::uuid id) const;
+    body2D *operator[](kit::uuid id);
 
     bool remove(std::size_t index);
     bool remove(const body2D &body);
@@ -72,6 +73,6 @@ class body_manager2D
   private:
     std::vector<body2D> m_bodies;
 
-    body2D::ptr process_addition(body2D &body);
+    void process_addition(body2D &body);
 };
 } // namespace ppx

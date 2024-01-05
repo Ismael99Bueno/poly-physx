@@ -6,9 +6,9 @@ namespace ppx
 {
 void sort_sweep_detection2D::on_attach()
 {
-    m_add_edge = kit::callback<const body2D::ptr &>([this](const body2D::ptr &body) {
-        m_edges.emplace_back(body, edge::end_side::LEFT);
-        m_edges.emplace_back(body, edge::end_side::RIGHT);
+    m_add_edge = kit::callback<body2D &>([this](body2D &body) {
+        m_edges.emplace_back(body.as_ptr(), edge::end_side::LEFT);
+        m_edges.emplace_back(body.as_ptr(), edge::end_side::RIGHT);
     });
     m_remove_edge = kit::callback<std::size_t>([this](std::size_t index) {
         for (auto it = m_edges.begin(); it != m_edges.end();)
@@ -22,7 +22,7 @@ void sort_sweep_detection2D::on_attach()
     world->events.on_late_body_removal += m_remove_edge;
 
     for (std::size_t i = 0; i < world->bodies.size(); i++)
-        m_add_edge(world->bodies.ptr(i));
+        m_add_edge(world->bodies[i]);
 }
 
 sort_sweep_detection2D::~sort_sweep_detection2D()

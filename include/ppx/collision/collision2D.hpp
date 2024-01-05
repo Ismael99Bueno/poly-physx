@@ -7,8 +7,8 @@ namespace ppx
 {
 struct collision2D
 {
-    body2D::ptr body1;
-    body2D::ptr body2;
+    body2D *body1 = nullptr;
+    body2D *body2 = nullptr;
 
     glm::vec2 mtv{0.f};
     manifold2D manifold;

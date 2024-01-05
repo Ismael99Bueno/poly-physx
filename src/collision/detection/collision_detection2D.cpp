@@ -86,8 +86,8 @@ void collision_detection2D::cc_narrow_collision_check(body2D &body1, body2D &bod
     if (!mres.valid)
         return;
     collision.collided = true;
-    collision.body1 = body1.as_ptr();
-    collision.body2 = body2.as_ptr();
+    collision.body1 = &body1;
+    collision.body2 = &body2;
     collision.mtv = mres.mtv;
     collision.manifold = m_cc_manifold->circle_circle_contacts(circ1, circ2, mres.mtv);
 }
@@ -105,8 +105,8 @@ void collision_detection2D::cp_narrow_collision_check(body2D &body1, body2D &bod
         return;
 
     collision.collided = true;
-    collision.body1 = body1.as_ptr();
-    collision.body2 = body2.as_ptr();
+    collision.body1 = &body1;
+    collision.body2 = &body2;
     collision.mtv = mres.mtv;
     collision.manifold = m_cp_manifold->circle_polygon_contacts(circ, poly, mres.mtv);
 }
@@ -124,8 +124,8 @@ void collision_detection2D::pp_narrow_collision_check(body2D &body1, body2D &bod
         return;
 
     collision.collided = true;
-    collision.body1 = body1.as_ptr();
-    collision.body2 = body2.as_ptr();
+    collision.body1 = &body1;
+    collision.body2 = &body2;
     collision.mtv = mres.mtv;
     collision.manifold = m_pp_manifold->polygon_polygon_contacts(poly1, poly2, mres.mtv);
 }
@@ -137,8 +137,8 @@ void collision_detection2D::try_enter_or_stay_callback(const collision2D &c) con
 }
 void collision_detection2D::try_exit_callback(body2D &body1, body2D &body2) const
 {
-    body1.events.try_exit(body1.as_ptr(), body2.as_ptr());
-    body2.events.try_exit(body2.as_ptr(), body1.as_ptr());
+    body1.events.try_exit(body1, body2);
+    body2.events.try_exit(body2, body1);
 }
 
 } // namespace ppx

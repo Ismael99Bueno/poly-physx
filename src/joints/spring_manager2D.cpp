@@ -8,17 +8,14 @@ spring_manager2D::spring_manager2D(world2D &world) : world(world)
 {
 }
 
-spring2D::ptr spring_manager2D::process_addition(spring2D &sp)
+void spring_manager2D::process_addition(spring2D &sp)
 {
     sp.world = &world;
     sp.index = m_springs.size() - 1;
     sp.world = &world;
 
-    const spring2D::ptr sp_ptr = {&m_springs, sp.index};
-
     KIT_ASSERT_ERROR(sp.joint.valid(), "The spring joint must be valid to be able to add it into the simulation")
-    world.events.on_spring_addition(sp_ptr);
-    return sp_ptr;
+    world.events.on_spring_addition(sp);
 }
 
 const spring2D &spring_manager2D::operator[](const std::size_t index) const
@@ -47,18 +44,18 @@ spring2D::ptr spring_manager2D::ptr(const std::size_t index)
     return {&m_springs, index};
 }
 
-spring2D::const_ptr spring_manager2D::operator[](const kit::uuid id) const
+const spring2D *spring_manager2D::operator[](const kit::uuid id) const
 {
-    for (const auto &sp : m_springs)
+    for (const spring2D &sp : m_springs)
         if (sp.id == id)
-            return ptr(sp.index);
+            return &sp;
     return nullptr;
 }
-spring2D::ptr spring_manager2D::operator[](const kit::uuid id)
+spring2D *spring_manager2D::operator[](const kit::uuid id)
 {
-    for (const auto &sp : m_springs)
+    for (spring2D &sp : m_springs)
         if (sp.id == id)
-            return ptr(sp.index);
+            return &sp;
     return nullptr;
 }
 

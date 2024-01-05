@@ -15,10 +15,10 @@ class body_events
 {
   public:
     void try_enter_or_stay(const collision2D &c) const;
-    void try_exit(const kit::vector_ptr<body2D> &current, const kit::vector_ptr<body2D> &outcoming) const;
+    void try_exit(body2D &current, body2D &outcoming) const;
 
     kit::event<const collision2D &> on_collision_enter, on_collision_stay;
-    kit::event<const kit::vector_ptr<body2D> &, const kit::vector_ptr<body2D> &> on_collision_exit;
+    kit::event<body2D &, body2D &> on_collision_exit;
 
   private:
     mutable std::unordered_set<kit::uuid> m_collided_ids;

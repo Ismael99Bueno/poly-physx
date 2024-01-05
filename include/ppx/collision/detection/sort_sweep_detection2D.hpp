@@ -34,7 +34,7 @@ class sort_sweep_detection2D final : public collision_detection2D, kit::non_copy
 
   private:
     std::vector<edge> m_edges;
-    kit::callback<const body2D::ptr &> m_add_edge;
+    kit::callback<body2D &> m_add_edge;
     kit::callback<std::size_t> m_remove_edge;
 
     void detect_collisions() override;
