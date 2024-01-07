@@ -182,14 +182,6 @@ void constraint_manager2D::solve()
             for (auto &[hash, contact] : m_contacts)
                 contact.warmup();
     }
-    else
-    {
-        for (const auto &ctr : m_constraints)
-            ctr->reset_accumulated_lambda();
-        if (m_collisions)
-            for (auto &[hash, contact] : m_contacts)
-                contact.reset_accumulated_lambda();
-    }
 
     for (std::size_t i = 0; i < iterations; i++)
     {
