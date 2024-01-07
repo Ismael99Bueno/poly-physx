@@ -114,6 +114,8 @@ template <> struct kit::yaml::codec<ppx::spring2D>
         node["Stiffness"] = sp.stiffness;
         node["Damping"] = sp.damping;
         node["Length"] = sp.length;
+        node["Non linear terms"] = sp.non_linear_terms;
+        node["Non linear contribution"] = sp.non_linear_contribution;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::spring2D &sp)
@@ -127,6 +129,8 @@ template <> struct kit::yaml::codec<ppx::spring2D>
         sp.stiffness = node["Stiffness"].as<float>();
         sp.damping = node["Damping"].as<float>();
         sp.length = node["Length"].as<float>();
+        sp.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
+        sp.non_linear_contribution = node["Non linear contribution"].as<float>();
         return true;
     }
 };
