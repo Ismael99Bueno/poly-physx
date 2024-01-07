@@ -2,19 +2,18 @@
 
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
+#include "kit/interface/toggleable.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/collision/resolution/collision_resolution2D.hpp"
 
 namespace ppx
 {
 class world2D;
-class collision_manager2D
+class collision_manager2D : public kit::toggleable
 {
   public:
     collision_manager2D(world2D &world);
     world2D &world;
-
-    bool enabled = true;
 
     auto begin() const
     {
