@@ -37,10 +37,12 @@ glm::vec2 spring2D::non_linear_displacement(const glm::vec2 &displacement) const
 {
     glm::vec2 nl_term = displacement;
     glm::vec2 nl_cummulative = displacement;
-    for (std::uint32_t term = 1; term <= non_linear_terms; term++)
+    float decay = 16.f;
+    for (std::uint32_t term = 0; term < non_linear_terms; term++)
     {
         nl_term *= displacement * displacement;
-        nl_cummulative += nl_term / (float)(term * term);
+        nl_cummulative += nl_term / decay;
+        decay *= decay;
     }
     return nl_cummulative * non_linear_contribution;
 }

@@ -120,7 +120,7 @@ template <> struct kit::yaml::codec<ppx::spring2D>
     }
     static bool decode(const YAML::Node &node, ppx::spring2D &sp)
     {
-        if (!node.IsMap() || node.size() != 8)
+        if (!node.IsMap() || node.size() != 10)
             return false;
 
         decode_joint(node, sp.joint, *sp.world);

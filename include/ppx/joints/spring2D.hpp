@@ -19,16 +19,16 @@ class spring2D : public kit::identifiable<>, public kit::indexable
         float length = 0.f;
 
         std::uint32_t non_linear_terms = 0;
-        float non_linear_contribution = 0.15f;
+        float non_linear_contribution = 0.001f;
 
         static specs from_spring(const spring2D &sp);
     };
 
     spring2D(float stiffness = 1.f, float damping = 0.f, float length = 0.f, std::uint32_t non_linear_terms = 0,
-             float non_linear_contribution = 0.15f);
+             float non_linear_contribution = 0.001f);
     spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
              const glm::vec2 &anchor2 = glm::vec2(0.f), float stiffness = 1.f, float damping = 0.f, float length = 0.f,
-             std::uint32_t non_linear_terms = 0, float non_linear_contribution = 0.15f);
+             std::uint32_t non_linear_terms = 0, float non_linear_contribution = 0.001f);
     spring2D(const specs &spc);
 
     joint_proxy2D joint;
