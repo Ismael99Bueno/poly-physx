@@ -10,7 +10,6 @@ class joint_constraint2D : public constraint2D
     joint_constraint2D(const char *name, bool allow_position_corrections = true);
 
   protected:
-    float m_accumulated_lambda = 0.f;
     float compute_lambda(body2D &body1, body2D &body2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,
                          const glm::vec2 &dir) const;
 
