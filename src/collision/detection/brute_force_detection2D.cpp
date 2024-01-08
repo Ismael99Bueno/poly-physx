@@ -21,14 +21,7 @@ void brute_force_detection2D::detect_collisions_st()
         {
             body2D &body1 = world->bodies[i];
             body2D &body2 = world->bodies[j];
-            const collision2D colis = generate_collision(body1, body2);
-            if (colis.collided)
-            {
-                try_enter_or_stay_callback(colis);
-                m_collisions.push_back(colis);
-            }
-            else
-                try_exit_callback(body1, body2);
+            process_collision_st(body1, body2);
         }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
@@ -39,18 +32,10 @@ void brute_force_detection2D::detect_collisions_mt()
         for (std::size_t j = 0; j < world->bodies.size(); j++)
         {
             body2D &body2 = world->bodies[j];
-            const collision2D colis = generate_collision(body1, body2);
-            if (colis.collided)
-            {
-                try_enter_or_stay_callback(colis);
-                m_mt_collisions[thread_idx].push_back(colis);
-            }
-            else
-                try_exit_callback(body1, body2);
+            process_collision_mt(body1, body2, thread_idx);
         }
     };
     kit::mt::for_each<PPX_THREAD_COUNT>(world->bodies, exec);
-    for (const auto &pairs : m_mt_collisions)
-        m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
+    join_mt_collisions();
 }
 } // namespace ppx

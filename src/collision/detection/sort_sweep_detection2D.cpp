@@ -46,15 +46,7 @@ void sort_sweep_detection2D::detect_collisions()
             {
                 body2D &body1 = *body;
                 body2D &body2 = *edg.body;
-                const collision2D colis = generate_collision(body1, body2);
-
-                if (colis.collided)
-                {
-                    try_enter_or_stay_callback(colis);
-                    m_collisions.push_back(colis);
-                }
-                else
-                    try_exit_callback(body1, body2);
+                process_collision_st(body1, body2);
             }
             m_eligible.insert(edg.body.raw());
         }

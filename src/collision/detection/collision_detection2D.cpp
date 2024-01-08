@@ -54,6 +54,34 @@ void collision_detection2D::inherit(collision_detection2D &coldet)
     m_pp_manifold = std::move(coldet.m_pp_manifold);
 }
 
+void collision_detection2D::process_collision_st(body2D &body1, body2D &body2)
+{
+    const collision2D colis = generate_collision(body1, body2);
+    if (colis.collided)
+    {
+        try_enter_or_stay_callback(colis);
+        m_collisions.push_back(colis);
+    }
+    else
+        try_exit_callback(body1, body2);
+}
+void collision_detection2D::process_collision_mt(body2D &body1, body2D &body2, const std::size_t thread_idx)
+{
+    const collision2D colis = generate_collision(body1, body2);
+    if (colis.collided)
+    {
+        try_enter_or_stay_callback(colis);
+        m_mt_collisions[thread_idx].push_back(colis);
+    }
+    else
+        try_exit_callback(body1, body2);
+}
+void collision_detection2D::join_mt_collisions()
+{
+    for (const auto &pairs : m_mt_collisions)
+        m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
+}
+
 static bool broad_collision_check(body2D &body1, body2D &body2)
 {
     return body1 != body2 && (body1.kinematic || body2.kinematic) && geo::may_intersect(body1.shape(), body2.shape());

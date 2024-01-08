@@ -93,6 +93,11 @@ class collision_detection2D
     void inherit(collision_detection2D &coldet);
 
   protected:
+    void process_collision_st(body2D &body1, body2D &body2);
+    void process_collision_mt(body2D &body1, body2D &body2, std::size_t thread_idx);
+    void join_mt_collisions();
+
+  private:
     std::vector<collision2D> m_collisions;
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
 
@@ -104,7 +109,6 @@ class collision_detection2D
     void try_enter_or_stay_callback(const collision2D &c) const;
     void try_exit_callback(body2D &body1, body2D &body2) const;
 
-  private:
     kit::scope<cc_manifold_algorithm2D> m_cc_manifold;
     kit::scope<cp_manifold_algorithm2D> m_cp_manifold;
     kit::scope<pp_manifold_algorithm2D> m_pp_manifold;
