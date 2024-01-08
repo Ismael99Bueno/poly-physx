@@ -7,25 +7,19 @@ namespace ppx
 {
 class sort_sweep_detection2D final : public collision_detection2D, kit::non_copyable
 {
+    enum class end_side
+    {
+        LEFT,
+        RIGHT
+    };
     struct edge
     {
-      public:
-        enum class end_side
-        {
-            LEFT,
-            RIGHT
-        };
-
-        edge(const body2D::ptr &body, end_side end) : body(body), end(end)
-        {
-        }
         body2D::ptr body;
         end_side end;
-
-        float value() const
+        float value;
+        bool operator<(const edge &other) const
         {
-            const geo::aabb2D &bbox = body->shape().bounding_box();
-            return end == end_side::LEFT ? bbox.min.x : bbox.max.x;
+            return value < other.value;
         }
     };
 
@@ -39,6 +33,6 @@ class sort_sweep_detection2D final : public collision_detection2D, kit::non_copy
 
     void detect_collisions() override;
     void on_attach() override;
-    void sort_edges();
+    void update_edges();
 };
 } // namespace ppx
