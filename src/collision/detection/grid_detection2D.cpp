@@ -6,6 +6,10 @@
 
 namespace ppx
 {
+grid_detection2D::grid_detection2D(const float cell_size) : cell_size(cell_size)
+{
+}
+
 void grid_detection2D::on_attach()
 {
     m_add_cell = kit::callback<body2D &>{[this](body2D &body) {
@@ -31,6 +35,14 @@ grid_detection2D::~grid_detection2D()
 {
     world->events.on_body_addition -= m_add_cell;
     world->events.on_late_body_removal -= m_remove_cell;
+}
+
+void grid_detection2D::detect_collisions()
+{
+    if (multithreaded)
+        detect_collisions_mt();
+    else
+        detect_collisions_st();
 }
 
 void grid_detection2D::detect_collisions_mt()
@@ -62,7 +74,7 @@ void grid_detection2D::detect_collisions_st()
             if (m_cells[start].cell_index == m_cells[i].cell_index)
             {
                 body2D &body1 = world->bodies[i];
-                for (std::size_t j = i + 1; j < m_cells.size(); i++)
+                for (std::size_t j = i + 1; j < m_cells.size(); j++)
                     if (m_cells[start].cell_index == m_cells[j].cell_index)
                     {
                         body2D &body2 = world->bodies[j];
@@ -73,9 +85,9 @@ void grid_detection2D::detect_collisions_st()
 
 std::size_t grid_detection2D::cell_index_from_position(const glm::vec2 &position)
 {
-    const std::size_t i = (std::size_t)(position.x / cell_size);
-    const std::size_t j = (std::size_t)(position.y / cell_size);
-    const kit::non_commutative_tuple<std::size_t, std::size_t> hash{i, j};
+    const std::int32_t i = (std::int32_t)(position.x / cell_size);
+    const std::int32_t j = (std::int32_t)(position.y / cell_size);
+    const kit::non_commutative_tuple<std::int32_t, std::int32_t> hash{i, j};
     return hash() % world->bodies.size();
 }
 

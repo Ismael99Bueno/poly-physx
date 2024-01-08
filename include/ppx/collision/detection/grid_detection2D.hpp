@@ -18,10 +18,10 @@ class grid_detection2D final : public collision_detection2D, kit::non_copyable
     };
 
   public:
-    using collision_detection2D::collision_detection2D;
+    grid_detection2D(float cell_size = 15.f);
     ~grid_detection2D();
 
-    float cell_size = 15.f;
+    float cell_size;
 
   private:
     std::vector<cell> m_cells;

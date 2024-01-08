@@ -6,9 +6,6 @@ namespace ppx
 {
 class brute_force_detection2D final : public collision_detection2D
 {
-  public:
-    using collision_detection2D::collision_detection2D;
-
   private:
     void detect_collisions() override;
 
