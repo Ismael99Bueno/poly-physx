@@ -37,14 +37,12 @@ void sort_sweep_detection2D::detect_collisions()
     KIT_PERF_FUNCTION()
 
     update_edges();
-
-    std::unordered_set<body2D *> eligible;
-    eligible.reserve(30);
+    m_eligible.clear();
 
     for (const edge &edg : m_edges)
         if (edg.end == end_side::LEFT)
         {
-            for (body2D *body : eligible)
+            for (body2D *body : m_eligible)
             {
                 body2D &body1 = *body;
                 body2D &body2 = *edg.body;
@@ -58,10 +56,10 @@ void sort_sweep_detection2D::detect_collisions()
                 else
                     try_exit_callback(body1, body2);
             }
-            eligible.insert(edg.body.raw());
+            m_eligible.insert(edg.body.raw());
         }
         else
-            eligible.erase(edg.body.raw());
+            m_eligible.erase(edg.body.raw());
 }
 
 void sort_sweep_detection2D::update_edges()
