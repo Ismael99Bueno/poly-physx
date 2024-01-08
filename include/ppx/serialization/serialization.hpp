@@ -6,7 +6,6 @@
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
 #include "ppx/collision/detection/sort_sweep_detection2D.hpp"
-#include "ppx/collision/detection/grid_detection2D.hpp"
 
 #include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 #include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
@@ -259,11 +258,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["Method"] = 1;
         else if (cm.detection<ppx::sort_sweep_detection2D>())
             ndet["Method"] = 2;
-        else if (auto coldet = cm.detection<ppx::grid_detection2D>())
-        {
-            ndet["Method"] = 3;
-            ndet["Cell size"] = coldet->cell_size;
-        }
 
         if (cm.detection()->cc_manifold_algorithm<ppx::radius_distance_manifold2D>())
             ndet["C-C Algorithm"] = 0;
@@ -316,8 +310,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 cm.set_detection<ppx::brute_force_detection2D>();
             else if (method == 2)
                 cm.set_detection<ppx::sort_sweep_detection2D>();
-            else if (method == 3)
-                cm.set_detection<ppx::grid_detection2D>(ndet["Cell size"].as<float>());
         }
 
         if (ndet["C-C Algorithm"])
