@@ -11,11 +11,6 @@ constraint2D::constraint2D(const char *name) : kit::identifiable<>(kit::uuid::ra
 {
 }
 
-void constraint2D::reset_accumulated_lambda()
-{
-    m_accumulated_lambda = 0.f;
-}
-
 bool constraint2D::contains(const body2D &body) const
 {
     return contains(body.id);

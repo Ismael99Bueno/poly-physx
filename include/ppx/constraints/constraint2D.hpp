@@ -25,7 +25,6 @@ class constraint2D : public kit::identifiable<>, public kit::nameable, public ki
 
     virtual void warmup() = 0;
     virtual void solve() = 0;
-    void reset_accumulated_lambda();
 
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const override;
