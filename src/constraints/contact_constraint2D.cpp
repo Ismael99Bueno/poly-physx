@@ -24,13 +24,13 @@ void contact_constraint2D::set_world(world2D *world)
 
 float contact_constraint2D::constraint_value() const
 {
-    return glm::dot(m_collision->touch1(m_index) - m_collision->touch2(m_index), m_normal);
+    return glm::dot(m_collision->touch2(m_index) - m_collision->touch1(m_index), m_normal);
 }
 float contact_constraint2D::constraint_velocity() const
 {
     return m_restitution * m_init_ctr_vel +
-           glm::dot(m_normal, m_collision->body1->constraint_velocity_at(m_anchor1) -
-                                  m_collision->body2->constraint_velocity_at(m_anchor2));
+           glm::dot(m_normal, m_collision->body2->constraint_velocity_at(m_anchor2) -
+                                  m_collision->body1->constraint_velocity_at(m_anchor1));
 }
 
 void contact_constraint2D::warmup()
@@ -40,7 +40,7 @@ void contact_constraint2D::warmup()
 }
 void contact_constraint2D::solve()
 {
-    solve_clamped(*m_collision->body1, *m_collision->body2, m_anchor1, m_anchor2, m_normal, -FLT_MAX, 0.f);
+    solve_clamped(*m_collision->body1, *m_collision->body2, m_anchor1, m_anchor2, m_normal, 0.f, FLT_MAX);
     m_friction.max_lambda = std::abs(m_accumulated_lambda);
     m_friction.solve();
 }

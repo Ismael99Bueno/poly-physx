@@ -20,8 +20,8 @@ float friction_constraint2D::constraint_value() const
 }
 float friction_constraint2D::constraint_velocity() const
 {
-    return glm::dot(m_tangent, m_collision->body1->constraint_velocity_at(m_anchor1) -
-                                   m_collision->body2->constraint_velocity_at(m_anchor2));
+    return glm::dot(m_tangent, m_collision->body2->constraint_velocity_at(m_anchor2) -
+                                   m_collision->body1->constraint_velocity_at(m_anchor1));
 }
 
 void friction_constraint2D::warmup()

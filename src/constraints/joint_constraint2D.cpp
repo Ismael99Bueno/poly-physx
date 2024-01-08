@@ -41,8 +41,8 @@ void joint_constraint2D::apply_warmup(body2D &body1, body2D &body2, const glm::v
 void joint_constraint2D::apply_lambda(const float lambda, body2D &body1, body2D &body2, const glm::vec2 &anchor1,
                                       const glm::vec2 &anchor2, const glm::vec2 &dir) const
 {
-    const glm::vec2 imp1 = lambda * dir;
-    const glm::vec2 imp2 = -imp1;
+    const glm::vec2 imp2 = lambda * dir;
+    const glm::vec2 imp1 = -imp2;
 
     body1.constraint_velocity += body1.inv_mass() * imp1;
     body2.constraint_velocity += body2.inv_mass() * imp2;

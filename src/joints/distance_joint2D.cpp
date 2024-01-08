@@ -25,13 +25,13 @@ float distance_joint2D::constraint_value() const
 {
     const glm::vec2 p1 = joint.rotated_anchor1() + joint.body1()->position(),
                     p2 = joint.rotated_anchor2() + joint.body2()->position();
-    return glm::distance(p1, p2) - length;
+    return length - glm::distance(p1, p2);
 }
 float distance_joint2D::constraint_velocity() const
 {
     const auto [dir, rot_anchor1, rot_anchor2] = joint.compute_anchors_and_direction();
-    return glm::dot(dir, joint.body1()->constraint_velocity_at(rot_anchor1) -
-                             joint.body2()->constraint_velocity_at(rot_anchor2));
+    return glm::dot(dir, joint.body2()->constraint_velocity_at(rot_anchor2) -
+                             joint.body1()->constraint_velocity_at(rot_anchor1));
 }
 
 void distance_joint2D::warmup()
