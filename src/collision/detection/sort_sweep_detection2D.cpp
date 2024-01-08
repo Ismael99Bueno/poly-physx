@@ -8,8 +8,8 @@ void sort_sweep_detection2D::on_attach()
 {
     m_add_edge = kit::callback<body2D &>([this](body2D &body) {
         const body2D::ptr bptr = body.as_ptr();
-        m_edges.push_back({bptr, end_side::LEFT, 0.f});
-        m_edges.push_back({bptr, end_side::RIGHT, 0.f});
+        m_edges.push_back({bptr, end_side::LEFT, FLT_MAX});
+        m_edges.push_back({bptr, end_side::RIGHT, FLT_MAX});
     });
     m_remove_edge = kit::callback<std::size_t>([this](std::size_t index) {
         for (auto it = m_edges.begin(); it != m_edges.end();)
@@ -22,8 +22,8 @@ void sort_sweep_detection2D::on_attach()
     world->events.on_body_addition += m_add_edge;
     world->events.on_late_body_removal += m_remove_edge;
 
-    for (std::size_t i = 0; i < world->bodies.size(); i++)
-        m_add_edge(world->bodies[i]);
+    for (body2D &body : world->bodies)
+        m_add_edge(body);
 }
 
 sort_sweep_detection2D::~sort_sweep_detection2D()
