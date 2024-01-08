@@ -5,29 +5,31 @@
 
 namespace ppx
 {
-enum class end_side
-{
-    LEFT,
-    RIGHT
-};
-struct edge
-{
-    edge(const body2D::ptr &body, end_side end) : body(body), end(end)
-    {
-    }
-    body2D::ptr body;
-    end_side end;
-
-    float value() const
-    {
-        const geo::aabb2D &bbox = body->shape().bounding_box();
-        return end == end_side::LEFT ? bbox.min.x : bbox.max.x;
-    }
-};
-
 class sort_sweep_detection2D final : public collision_detection2D, kit::non_copyable
 {
   public:
+    struct edge
+    {
+      public:
+        enum class end_side
+        {
+            LEFT,
+            RIGHT
+        };
+
+        edge(const body2D::ptr &body, end_side end) : body(body), end(end)
+        {
+        }
+        body2D::ptr body;
+        end_side end;
+
+        float value() const
+        {
+            const geo::aabb2D &bbox = body->shape().bounding_box();
+            return end == end_side::LEFT ? bbox.min.x : bbox.max.x;
+        }
+    };
+
     ~sort_sweep_detection2D();
 
   private:
