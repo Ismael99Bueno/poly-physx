@@ -5,8 +5,8 @@
 
 namespace ppx
 {
-joint_constraint2D::joint_constraint2D(const char *name, const bool allow_position_corrections)
-    : constraint2D(name), m_allow_position_corrections(allow_position_corrections)
+joint_constraint2D::joint_constraint2D(const char *name, const bool allow_baumgarte_correction)
+    : constraint2D(name), m_allow_baumgarte_correction(allow_baumgarte_correction)
 {
 }
 float joint_constraint2D::compute_lambda(body2D &body1, body2D &body2, const glm::vec2 &anchor1,
@@ -20,11 +20,11 @@ float joint_constraint2D::compute_lambda(body2D &body1, body2D &body2, const glm
     const float inv_mass = body1.inv_mass() + body2.inv_mass() + body1.inv_inertia() * cross1 * cross1 +
                            body2.inv_inertia() * cross2 * cross2;
 
-    if (m_allow_position_corrections && world->constraints.position_corrections)
+    if (m_allow_baumgarte_correction && world->constraints.baumgarte_correction)
     {
         const float c = constraint_value();
-        static constexpr float stiffness = 1000.f;
-        return -(cvel + c * stiffness * world->integrator.ts.value) / inv_mass;
+        if (c > world->constraints.baumgarte_threshold)
+            return -(cvel + world->constraints.baumgarte_coef * c / world->integrator.ts.value) / inv_mass;
     }
     return -cvel / inv_mass;
 }

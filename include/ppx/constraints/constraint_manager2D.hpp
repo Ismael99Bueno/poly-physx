@@ -24,7 +24,10 @@ class constraint_manager2D : kit::non_copyable
 
     std::uint32_t iterations = 10;
     bool warmup = true;
-    bool position_corrections = true;
+    bool baumgarte_correction = true;
+
+    float baumgarte_coef = 0.1f;
+    float baumgarte_threshold = 0.05f;
 
     template <typename T, class... ConstraintArgs> T *add(ConstraintArgs &&...args)
     {

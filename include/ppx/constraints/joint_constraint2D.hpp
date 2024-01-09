@@ -24,6 +24,6 @@ class joint_constraint2D : public constraint2D
                          const glm::vec2 &dir);
 
   private:
-    bool m_allow_position_corrections;
+    bool m_allow_baumgarte_correction;
 };
 } // namespace ppx

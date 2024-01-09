@@ -360,7 +360,7 @@ template <> struct kit::yaml::codec<ppx::constraint_manager2D>
         YAML::Node node;
         node["Iterations"] = cm.iterations;
         node["Warmup"] = cm.warmup;
-        node["Position corrections"] = cm.position_corrections;
+        node["Position corrections"] = cm.baumgarte_correction;
         for (const auto &ctr : cm)
         {
             YAML::Node child;
@@ -376,7 +376,7 @@ template <> struct kit::yaml::codec<ppx::constraint_manager2D>
 
         cm.iterations = node["Iterations"].as<std::uint32_t>();
         cm.warmup = node["Warmup"].as<bool>();
-        cm.position_corrections = node["Position corrections"].as<bool>();
+        cm.baumgarte_correction = node["Position corrections"].as<bool>();
 
         if (node["Constraints"])
             for (const YAML::Node &n : node["Constraints"])
