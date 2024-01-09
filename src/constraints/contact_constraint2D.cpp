@@ -6,11 +6,11 @@
 namespace ppx
 {
 contact_constraint2D::contact_constraint2D(const collision2D *collision, const std::size_t manifold_index,
-                                           const float restitution, const float friction)
+                                           const float restitution, const float friction, const float slop)
     : joint_constraint2D("Contact"), m_collision(collision),
       m_anchor1(collision->touch1(manifold_index) - collision->body1->position()),
       m_anchor2(collision->touch2(manifold_index) - collision->body2->position()),
-      m_normal(glm::normalize(collision->mtv)), m_index(manifold_index), m_restitution(restitution),
+      m_normal(glm::normalize(collision->mtv)), m_index(manifold_index), m_restitution(restitution), m_slop(slop),
       m_friction(collision, manifold_index, friction)
 {
     m_init_ctr_vel = constraint_velocity();
@@ -28,9 +28,14 @@ float contact_constraint2D::constraint_value() const
 }
 float contact_constraint2D::constraint_velocity() const
 {
-    return m_restitution * m_init_ctr_vel +
-           glm::dot(m_normal, m_collision->body2->constraint_velocity_at(m_anchor2) -
-                                  m_collision->body1->constraint_velocity_at(m_anchor1));
+    KIT_ASSERT_ERROR(m_slop >= 0.f, "The slop must be non negative")
+    const float cdot =
+        m_restitution * m_init_ctr_vel + glm::dot(m_normal, m_collision->body2->constraint_velocity_at(m_anchor2) -
+                                                                m_collision->body1->constraint_velocity_at(m_anchor1));
+    const float abs_cdot = std::abs(cdot);
+    if (abs_cdot < m_slop)
+        return cdot * abs_cdot / m_slop;
+    return cdot;
 }
 
 void contact_constraint2D::warmup()
@@ -45,13 +50,15 @@ void contact_constraint2D::solve()
     m_friction.solve();
 }
 
-void contact_constraint2D::update(const collision2D *collision, const float restitution, const float friction)
+void contact_constraint2D::update(const collision2D *collision, const float restitution, const float friction,
+                                  const float slop)
 {
     m_collision = collision;
     m_anchor1 = collision->touch1(m_index) - collision->body1->position();
     m_anchor2 = collision->touch2(m_index) - collision->body2->position();
     m_normal = glm::normalize(collision->mtv);
     m_restitution = restitution;
+    m_slop = slop;
     m_friction.update(collision, m_normal, m_anchor1, m_anchor2, friction);
     recently_updated = true;
 }
