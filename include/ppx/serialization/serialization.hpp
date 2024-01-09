@@ -285,6 +285,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             nres["Method"] = 1;
             nres["Friction"] = colres->friction;
             nres["Restitution"] = colres->restitution;
+            nres["Slop"] = colres->slop;
         }
         return node;
     }
@@ -346,8 +347,8 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                                                                    nres["Normal damping"].as<float>(),
                                                                    nres["Tangent damping"].as<float>());
             else if (method == 1)
-                cm.set_resolution<ppx::constraint_driven_resolution2D>(nres["Restitution"].as<float>(),
-                                                                       nres["Friction"].as<float>());
+                cm.set_resolution<ppx::constraint_driven_resolution2D>(
+                    nres["Restitution"].as<float>(), nres["Friction"].as<float>(), nres["Slop"].as<float>());
         }
         return true;
     }
