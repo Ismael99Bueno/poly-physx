@@ -28,7 +28,6 @@ float contact_constraint2D::constraint_value() const
 }
 float contact_constraint2D::constraint_velocity() const
 {
-    KIT_ASSERT_ERROR(m_slop >= 0.f, "The slop must be non negative")
     const float cdot =
         m_restitution * m_init_ctr_vel + glm::dot(m_normal, m_collision->body2->constraint_velocity_at(m_anchor2) -
                                                                 m_collision->body1->constraint_velocity_at(m_anchor1));

@@ -49,6 +49,12 @@ glm::vec2 spring2D::non_linear_displacement(const glm::vec2 &displacement) const
 
 glm::vec4 spring2D::force() const
 {
+    KIT_ASSERT_ERROR(stiffness >= 0.f, "Stiffness must be non-negative: %f", stiffness)
+    KIT_ASSERT_ERROR(damping >= 0.f, "Damping must be non-negative: %f", damping)
+    KIT_ASSERT_ERROR(length >= 0.f, "Length must be non-negative: %f", length)
+    KIT_ASSERT_ERROR(non_linear_contribution >= 0.f, "Non linear contribution must be non-negative: %f",
+                     non_linear_contribution)
+
     const body2D::ptr &body1 = joint.body1();
     const body2D::ptr &body2 = joint.body2();
 

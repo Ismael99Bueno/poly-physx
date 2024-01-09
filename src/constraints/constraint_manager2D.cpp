@@ -149,9 +149,11 @@ void constraint_manager2D::update_contacts()
                                                                                      collision.body2->id, i};
                 const auto old_contact = m_contacts.find(hash);
                 if (old_contact != m_contacts.end())
-                    old_contact->second.update(&collision, ctrres->restitution, ctrres->friction);
+                    old_contact->second.update(&collision, ctrres->restitution, ctrres->friction, ctrres->slop);
                 else
-                    m_contacts.emplace(hash, contact_constraint2D(&collision, i, ctrres->restitution, ctrres->friction))
+                    m_contacts
+                        .emplace(hash, contact_constraint2D(&collision, i, ctrres->restitution, ctrres->friction,
+                                                            ctrres->slop))
                         .first->second.set_world(&world);
             }
     for (auto it = m_contacts.begin(); it != m_contacts.end();)
@@ -166,6 +168,8 @@ void constraint_manager2D::update_contacts()
 
 void constraint_manager2D::solve()
 {
+    KIT_ASSERT_ERROR(baumgarte_coef >= 0.f, "Baumgarte coef must be non-negative: %f", baumgarte_coef)
+    KIT_ASSERT_ERROR(baumgarte_threshold >= 0.f, "Baumgarte threshold must be non-negative: %f", baumgarte_threshold)
     KIT_PERF_FUNCTION()
     if (m_constraints.empty() && !m_collisions)
         return;
