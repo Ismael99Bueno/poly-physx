@@ -140,14 +140,13 @@ void constraint_manager2D::delegate_collisions(const std::vector<collision2D> *c
 
 void constraint_manager2D::update_contacts()
 {
+    const auto ctrres = world.collisions.resolution<constraint_driven_resolution2D>();
     for (const collision2D &collision : *m_collisions)
         if (collision.collided)
             for (std::size_t i = 0; i < collision.manifold.size; i++)
             {
                 const kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t> hash{collision.body1->id,
                                                                                      collision.body2->id, i};
-                const auto ctrres = world.collisions.resolution<constraint_driven_resolution2D>();
-
                 const auto old_contact = m_contacts.find(hash);
                 if (old_contact != m_contacts.end())
                     old_contact->second.update(&collision, ctrres->restitution, ctrres->friction);
