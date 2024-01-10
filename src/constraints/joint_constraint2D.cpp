@@ -23,7 +23,7 @@ float joint_constraint2D::compute_lambda(body2D &body1, body2D &body2, const glm
     if (m_allow_baumgarte_correction && world->constraints.baumgarte_correction)
     {
         const float c = constraint_value();
-        if (c > world->constraints.baumgarte_threshold)
+        if (std::abs(c) > world->constraints.baumgarte_threshold)
             return -(cvel + world->constraints.baumgarte_coef * c / world->integrator.ts.value) / inv_mass;
     }
     return -cvel / inv_mass;

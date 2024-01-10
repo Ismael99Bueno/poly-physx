@@ -24,7 +24,7 @@ void contact_constraint2D::set_world(world2D *world)
 
 float contact_constraint2D::constraint_value() const
 {
-    return glm::dot(m_collision->touch2(m_index) - m_collision->touch1(m_index), m_normal);
+    return -glm::length(m_collision->mtv);
 }
 float contact_constraint2D::constraint_velocity() const
 {
