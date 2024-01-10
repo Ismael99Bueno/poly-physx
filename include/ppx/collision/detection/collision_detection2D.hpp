@@ -22,7 +22,7 @@ class collision_detection2D
 
     world2D *world = nullptr;
     float epa_threshold = 1.e-3f;
-    bool multithreaded = false;
+    bool multithreaded = true;
 
     template <typename T = cc_manifold_algorithm2D> const T *cc_manifold_algorithm() const
     {
