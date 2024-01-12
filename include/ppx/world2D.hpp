@@ -7,7 +7,6 @@
 #include "ppx/behaviours/behaviour_manager2D.hpp"
 #include "ppx/joints/spring_manager2D.hpp"
 #include "ppx/events/world_events.hpp"
-#include "kit/container/container_view.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/utility/utils.hpp"
 

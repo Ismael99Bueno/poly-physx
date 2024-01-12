@@ -49,10 +49,12 @@ float behaviour2D::kinetic_energy() const
 
 body2D::const_ptr behaviour2D::operator[](std::size_t index) const
 {
+    KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds container size: {0}", index)
     return m_bodies[index];
 }
 const body2D::ptr &behaviour2D::operator[](std::size_t index)
 {
+    KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds container size: {0}", index)
     return m_bodies[index];
 }
 

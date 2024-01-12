@@ -23,7 +23,7 @@ distance_joint2D::distance_joint2D(const specs &spc)
 
 float distance_joint2D::constraint_value() const
 {
-    KIT_ASSERT_ERROR(length >= 0.f, "Length must be non-negative: %f", length)
+    KIT_ASSERT_ERROR(length >= 0.f, "Length must be non-negative: {0}", length)
     const glm::vec2 p1 = joint.rotated_anchor1() + joint.body1()->position(),
                     p2 = joint.rotated_anchor2() + joint.body2()->position();
     return length - glm::distance(p1, p2);

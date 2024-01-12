@@ -168,8 +168,8 @@ void constraint_manager2D::update_contacts()
 
 void constraint_manager2D::solve()
 {
-    KIT_ASSERT_ERROR(baumgarte_coef >= 0.f, "Baumgarte coef must be non-negative: %f", baumgarte_coef)
-    KIT_ASSERT_ERROR(baumgarte_threshold >= 0.f, "Baumgarte threshold must be non-negative: %f", baumgarte_threshold)
+    KIT_ASSERT_ERROR(baumgarte_coef >= 0.f, "Baumgarte coef must be non-negative: {0}", baumgarte_coef)
+    KIT_ASSERT_ERROR(baumgarte_threshold >= 0.f, "Baumgarte threshold must be non-negative: {0}", baumgarte_threshold)
     KIT_PERF_FUNCTION()
     if (m_constraints.empty() && !m_collisions)
         return;

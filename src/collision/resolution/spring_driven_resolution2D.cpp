@@ -14,9 +14,9 @@ spring_driven_resolution2D::spring_driven_resolution2D(const float rigidity, con
 }
 void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
 {
-    KIT_ASSERT_ERROR(rigidity >= 0.f, "Rigidity must be non-negative: %f", rigidity)
-    KIT_ASSERT_ERROR(tangent_damping >= 0.f, "Tangent damping must be non-negative: %f", tangent_damping)
-    KIT_ASSERT_ERROR(normal_damping >= 0.f, "Normal damping must be non-negative: %f", normal_damping)
+    KIT_ASSERT_ERROR(rigidity >= 0.f, "Rigidity must be non-negative: {0}", rigidity)
+    KIT_ASSERT_ERROR(tangent_damping >= 0.f, "Tangent damping must be non-negative: {0}", tangent_damping)
+    KIT_ASSERT_ERROR(normal_damping >= 0.f, "Normal damping must be non-negative: {0}", normal_damping)
 
     KIT_PERF_FUNCTION()
     for (const collision2D &colis : collisions)

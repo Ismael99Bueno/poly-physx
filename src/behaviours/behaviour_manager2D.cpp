@@ -10,10 +10,12 @@ behaviour_manager2D::behaviour_manager2D(world2D &world) : world(world), m_event
 
 const behaviour2D &behaviour_manager2D::operator[](std::size_t index) const
 {
+    KIT_ASSERT_ERROR(index < m_behaviours.size(), "Index exceeds container size: {0}", index)
     return *m_behaviours[index];
 }
 behaviour2D &behaviour_manager2D::operator[](std::size_t index)
 {
+    KIT_ASSERT_ERROR(index < m_behaviours.size(), "Index exceeds container size: {0}", index)
     return *m_behaviours[index];
 }
 

@@ -22,6 +22,7 @@ collision_manager2D::collision_manager2D(world2D &world) : world(world)
 
 const collision2D &collision_manager2D::operator[](const std::size_t index) const
 {
+    KIT_ASSERT_ERROR(index < m_collision_detection->collisions().size(), "Index exceeds container size: {0}", index)
     return m_collision_detection->collisions()[index];
 }
 
