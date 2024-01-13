@@ -83,7 +83,7 @@ std::vector<spring2D::ptr> spring_manager2D::from_ids(const kit::uuid id1, const
     return springs;
 }
 
-bool spring_manager2D::remove(std::size_t index)
+bool spring_manager2D::remove(const std::size_t index)
 {
     if (index >= m_springs.size())
     {
@@ -97,7 +97,7 @@ bool spring_manager2D::remove(std::size_t index)
         m_springs[index].index = index;
     }
     m_springs.pop_back();
-    world.events.on_late_spring_removal(std::move(index));
+    world.events.on_late_spring_removal(index);
     return true;
 }
 bool spring_manager2D::remove(const spring2D &sp)
@@ -138,7 +138,7 @@ void spring_manager2D::validate()
         {
             world.events.on_early_spring_removal(*it);
             it = m_springs.erase(it);
-            world.events.on_late_spring_removal(std::move(index));
+            world.events.on_late_spring_removal(index);
         }
         else
         {

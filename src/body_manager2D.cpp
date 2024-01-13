@@ -134,7 +134,7 @@ void body_manager2D::process_addition(body2D &body)
     world.events.on_body_addition(body);
 }
 
-bool body_manager2D::remove(std::size_t index)
+bool body_manager2D::remove(const std::size_t index)
 {
     if (index >= m_bodies.size())
     {
@@ -157,7 +157,7 @@ bool body_manager2D::remove(std::size_t index)
     state.resize(6 * m_bodies.size());
 
     world.validate();
-    world.events.on_late_body_removal(std::move(index)); // It just made me do this...
+    world.events.on_late_body_removal(index);
     return true;
 }
 
