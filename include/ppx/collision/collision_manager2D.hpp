@@ -3,18 +3,13 @@
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
 #include "kit/interface/toggleable.hpp"
+#include "kit/utility/type_constraints.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/collision/resolution/collision_resolution2D.hpp"
 
 namespace ppx
 {
 class world2D;
-
-template <typename T>
-concept CollisionDetection2D = std::is_base_of_v<collision_detection2D, T>;
-template <typename T>
-concept CollisionResolution2D = std::is_base_of_v<collision_resolution2D, T>;
-
 class collision_manager2D : public kit::toggleable
 {
   public:
@@ -32,24 +27,24 @@ class collision_manager2D : public kit::toggleable
 
     const collision2D &operator[](std::size_t index) const;
 
-    template <CollisionDetection2D T = collision_detection2D> const T *detection() const
+    template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> const T *detection() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_collision_detection);
     }
-    template <CollisionDetection2D T = collision_detection2D> T *detection()
+    template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> T *detection()
     {
         return kit::get_casted_raw_ptr<T>(m_collision_detection);
     }
-    template <CollisionResolution2D T = collision_resolution2D> const T *resolution() const
+    template <kit::DerivedFrom<collision_resolution2D> T = collision_resolution2D> const T *resolution() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_collision_resolution);
     }
-    template <CollisionResolution2D T = collision_resolution2D> T *resolution()
+    template <kit::DerivedFrom<collision_resolution2D> T = collision_resolution2D> T *resolution()
     {
         return kit::get_casted_raw_ptr<T>(m_collision_resolution);
     }
 
-    template <CollisionDetection2D T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
+    template <kit::DerivedFrom<collision_detection2D> T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
     {
         auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
         if (m_collision_detection)
@@ -62,7 +57,7 @@ class collision_manager2D : public kit::toggleable
         m_collision_detection->on_attach();
         return ptr;
     }
-    template <CollisionResolution2D T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
+    template <kit::DerivedFrom<collision_resolution2D> T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
     {
         auto colres = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
         T *ptr = colres.get();

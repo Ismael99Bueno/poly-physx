@@ -6,6 +6,7 @@
 #include "ppx/collision/manifold/manifold_algorithms2D.hpp"
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
+#include "kit/utility/type_constraints.hpp"
 
 #ifndef PPX_THREAD_COUNT
 #define PPX_THREAD_COUNT 16
@@ -14,14 +15,6 @@
 namespace ppx
 {
 class world2D;
-
-template <typename T>
-concept CCManifoldAlgorithm2D = std::is_base_of_v<cc_manifold_algorithm2D, T>;
-template <typename T>
-concept CPManifoldAlgorithm2D = std::is_base_of_v<cp_manifold_algorithm2D, T>;
-template <typename T>
-concept PPManifoldAlgorithm2D = std::is_base_of_v<pp_manifold_algorithm2D, T>;
-
 class collision_detection2D
 {
   public:
@@ -31,32 +24,36 @@ class collision_detection2D
     float epa_threshold = 1.e-3f;
     bool multithreaded = true;
 
-    template <CCManifoldAlgorithm2D T = cc_manifold_algorithm2D> const T *cc_manifold_algorithm() const
+    template <kit::DerivedFrom<cc_manifold_algorithm2D> T = cc_manifold_algorithm2D>
+    const T *cc_manifold_algorithm() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_cc_manifold);
     }
-    template <CCManifoldAlgorithm2D T = cc_manifold_algorithm2D> T *cc_manifold_algorithm()
+    template <kit::DerivedFrom<cc_manifold_algorithm2D> T = cc_manifold_algorithm2D> T *cc_manifold_algorithm()
     {
         return kit::get_casted_raw_ptr<T>(m_cc_manifold);
     }
-    template <CPManifoldAlgorithm2D T = cp_manifold_algorithm2D> const T *cp_manifold_algorithm() const
+    template <kit::DerivedFrom<cp_manifold_algorithm2D> T = cp_manifold_algorithm2D>
+    const T *cp_manifold_algorithm() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_cp_manifold);
     }
-    template <CPManifoldAlgorithm2D T = cp_manifold_algorithm2D> T *cp_manifold_algorithm()
+    template <kit::DerivedFrom<cp_manifold_algorithm2D> T = cp_manifold_algorithm2D> T *cp_manifold_algorithm()
     {
         return kit::get_casted_raw_ptr<T>(m_cp_manifold);
     }
-    template <PPManifoldAlgorithm2D T = pp_manifold_algorithm2D> const T *pp_manifold_algorithm() const
+    template <kit::DerivedFrom<pp_manifold_algorithm2D> T = pp_manifold_algorithm2D>
+    const T *pp_manifold_algorithm() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_pp_manifold);
     }
-    template <PPManifoldAlgorithm2D T = pp_manifold_algorithm2D> T *pp_manifold_algorithm()
+    template <kit::DerivedFrom<pp_manifold_algorithm2D> T = pp_manifold_algorithm2D> T *pp_manifold_algorithm()
     {
         return kit::get_casted_raw_ptr<T>(m_pp_manifold);
     }
 
-    template <CCManifoldAlgorithm2D T, class... ManifArgs> const T *set_cc_manifold_algorithm(ManifArgs &&...args)
+    template <kit::DerivedFrom<cc_manifold_algorithm2D> T, class... ManifArgs>
+    const T *set_cc_manifold_algorithm(ManifArgs &&...args)
     {
         auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
         T *ptr = manalg.get();
@@ -64,7 +61,8 @@ class collision_detection2D
         m_cc_manifold = std::move(manalg);
         return ptr;
     }
-    template <CPManifoldAlgorithm2D T, class... ManifArgs> const T *set_cp_manifold_algorithm(ManifArgs &&...args)
+    template <kit::DerivedFrom<cp_manifold_algorithm2D> T, class... ManifArgs>
+    const T *set_cp_manifold_algorithm(ManifArgs &&...args)
     {
         auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
         T *ptr = manalg.get();
@@ -72,7 +70,8 @@ class collision_detection2D
         m_cp_manifold = std::move(manalg);
         return ptr;
     }
-    template <PPManifoldAlgorithm2D T, class... ManifArgs> const T *set_pp_manifold_algorithm(ManifArgs &&...args)
+    template <kit::DerivedFrom<pp_manifold_algorithm2D> T, class... ManifArgs>
+    const T *set_pp_manifold_algorithm(ManifArgs &&...args)
     {
         auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
         T *ptr = manalg.get();

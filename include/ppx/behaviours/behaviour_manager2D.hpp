@@ -2,6 +2,7 @@
 
 #include "kit/memory/scope.hpp"
 #include "kit/interface/non_copyable.hpp"
+#include "kit/utility/type_constraints.hpp"
 #include "ppx/events/world_events.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
 
@@ -10,17 +11,13 @@
 namespace ppx
 {
 class world2D;
-
-template <typename T>
-concept DerivedFromBehaviour = std::is_base_of_v<behaviour2D, T>;
-
 class behaviour_manager2D : kit::non_copyable
 {
   public:
     behaviour_manager2D(world2D &world);
     world2D &world;
 
-    template <DerivedFromBehaviour T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
+    template <kit::DerivedFrom<behaviour2D> T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
     {
         auto bhv = kit::make_scope<T>(std::forward<BehaviourArgs>(args)...);
 #ifdef DEBUG
@@ -39,7 +36,7 @@ class behaviour_manager2D : kit::non_copyable
         return ptr;
     }
 
-    template <DerivedFromBehaviour T> T *from_name(const std::string &name) const
+    template <kit::DerivedFrom<behaviour2D> T> T *from_name(const std::string &name) const
     {
         return dynamic_cast<T *>(from_name<behaviour2D>(name));
     }
