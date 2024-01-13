@@ -16,6 +16,10 @@
 namespace ppx
 {
 class world2D;
+
+template <typename T>
+concept Constraint2D = std::is_base_of_v<constraint2D, T>;
+
 class constraint_manager2D : kit::non_copyable
 {
   public:
@@ -29,9 +33,8 @@ class constraint_manager2D : kit::non_copyable
     float baumgarte_coef = 0.1f;
     float baumgarte_threshold = 0.05f;
 
-    template <typename T, class... ConstraintArgs> T *add(ConstraintArgs &&...args)
+    template <Constraint2D T, class... ConstraintArgs> T *add(ConstraintArgs &&...args)
     {
-        static_assert(std::is_base_of_v<constraint2D, T>, "Constraint must inherit from constraint2D!");
         auto ctr = kit::make_scope<T>(std::forward<ConstraintArgs>(args)...);
         T *ptr = ctr.get();
 

@@ -15,6 +15,13 @@ namespace ppx
 {
 class world2D;
 
+template <typename T>
+concept CCManifoldAlgorithm2D = std::is_base_of_v<cc_manifold_algorithm2D, T>;
+template <typename T>
+concept CPManifoldAlgorithm2D = std::is_base_of_v<cp_manifold_algorithm2D, T>;
+template <typename T>
+concept PPManifoldAlgorithm2D = std::is_base_of_v<pp_manifold_algorithm2D, T>;
+
 class collision_detection2D
 {
   public:
@@ -24,56 +31,49 @@ class collision_detection2D
     float epa_threshold = 1.e-3f;
     bool multithreaded = true;
 
-    template <typename T = cc_manifold_algorithm2D> const T *cc_manifold_algorithm() const
+    template <CCManifoldAlgorithm2D T = cc_manifold_algorithm2D> const T *cc_manifold_algorithm() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_cc_manifold);
     }
-    template <typename T = cc_manifold_algorithm2D> T *cc_manifold_algorithm()
+    template <CCManifoldAlgorithm2D T = cc_manifold_algorithm2D> T *cc_manifold_algorithm()
     {
         return kit::get_casted_raw_ptr<T>(m_cc_manifold);
     }
-    template <typename T = cp_manifold_algorithm2D> const T *cp_manifold_algorithm() const
+    template <CPManifoldAlgorithm2D T = cp_manifold_algorithm2D> const T *cp_manifold_algorithm() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_cp_manifold);
     }
-    template <typename T = cp_manifold_algorithm2D> T *cp_manifold_algorithm()
+    template <CPManifoldAlgorithm2D T = cp_manifold_algorithm2D> T *cp_manifold_algorithm()
     {
         return kit::get_casted_raw_ptr<T>(m_cp_manifold);
     }
-    template <typename T = pp_manifold_algorithm2D> const T *pp_manifold_algorithm() const
+    template <PPManifoldAlgorithm2D T = pp_manifold_algorithm2D> const T *pp_manifold_algorithm() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_pp_manifold);
     }
-    template <typename T = pp_manifold_algorithm2D> T *pp_manifold_algorithm()
+    template <PPManifoldAlgorithm2D T = pp_manifold_algorithm2D> T *pp_manifold_algorithm()
     {
         return kit::get_casted_raw_ptr<T>(m_pp_manifold);
     }
 
-    template <typename T, class... ManifArgs> const T *set_cc_manifold_algorithm(ManifArgs &&...args)
+    template <CCManifoldAlgorithm2D T, class... ManifArgs> const T *set_cc_manifold_algorithm(ManifArgs &&...args)
     {
-        static_assert(std::is_base_of_v<cc_manifold_algorithm2D, T>,
-                      "Manifold algorithm must inherit from cc_manifold_algorithm2D");
-
         auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
         T *ptr = manalg.get();
 
         m_cc_manifold = std::move(manalg);
         return ptr;
     }
-    template <typename T, class... ManifArgs> const T *set_cp_manifold_algorithm(ManifArgs &&...args)
+    template <CPManifoldAlgorithm2D T, class... ManifArgs> const T *set_cp_manifold_algorithm(ManifArgs &&...args)
     {
-        static_assert(std::is_base_of_v<cp_manifold_algorithm2D, T>,
-                      "Manifold algorithm must inherit from cp_manifold_algorithm2D");
         auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
         T *ptr = manalg.get();
 
         m_cp_manifold = std::move(manalg);
         return ptr;
     }
-    template <typename T, class... ManifArgs> const T *set_pp_manifold_algorithm(ManifArgs &&...args)
+    template <PPManifoldAlgorithm2D T, class... ManifArgs> const T *set_pp_manifold_algorithm(ManifArgs &&...args)
     {
-        static_assert(std::is_base_of_v<pp_manifold_algorithm2D, T>,
-                      "Manifold algorithm must inherit from pp_manifold_algorithm2D");
         auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
         T *ptr = manalg.get();
 

@@ -10,16 +10,18 @@
 namespace ppx
 {
 class world2D;
+
+template <typename T>
+concept DerivedFromBehaviour = std::is_base_of_v<behaviour2D, T>;
+
 class behaviour_manager2D : kit::non_copyable
 {
   public:
     behaviour_manager2D(world2D &world);
     world2D &world;
 
-    template <typename T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
+    template <DerivedFromBehaviour T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
     {
-        static_assert(std::is_base_of_v<behaviour2D, T>, "Type must inherit from behaviour2D! (Although it is "
-                                                         "recommended to inherit from force2D or interaction2D)");
         auto bhv = kit::make_scope<T>(std::forward<BehaviourArgs>(args)...);
 #ifdef DEBUG
         for (const auto &old : m_behaviours)
@@ -37,10 +39,8 @@ class behaviour_manager2D : kit::non_copyable
         return ptr;
     }
 
-    template <typename T> T *from_name(const std::string &name) const
+    template <DerivedFromBehaviour T> T *from_name(const std::string &name) const
     {
-        static_assert(std::is_base_of_v<behaviour2D, T>, "Type must inherit from behaviour2D! (Although it is "
-                                                         "recommended to inherit from force2D or interaction2D)");
         return dynamic_cast<T *>(from_name<behaviour2D>(name));
     }
 
