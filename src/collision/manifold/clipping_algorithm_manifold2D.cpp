@@ -4,7 +4,8 @@
 
 namespace ppx
 {
-manifold2D clipping_algorithm_manifold2D::polygon_polygon_contacts(const geo::polygon &poly1, const geo::polygon &poly2,
+manifold2D clipping_algorithm_manifold2D::polygon_polygon_contacts(const geo::polygon<> &poly1,
+                                                                   const geo::polygon<> &poly2,
                                                                    const glm::vec2 &mtv) const
 {
     const geo::clip_info<manifold2D::CAPACITY> result =

@@ -18,7 +18,7 @@ class cp_manifold_algorithm2D
 {
   public:
     virtual ~cp_manifold_algorithm2D() = default;
-    virtual manifold2D circle_polygon_contacts(const geo::circle &circ, const geo::polygon &poly,
+    virtual manifold2D circle_polygon_contacts(const geo::circle &circ, const geo::polygon<> &poly,
                                                const glm::vec2 &mtv) const = 0;
 };
 
@@ -26,7 +26,7 @@ class pp_manifold_algorithm2D
 {
   public:
     virtual ~pp_manifold_algorithm2D() = default;
-    virtual manifold2D polygon_polygon_contacts(const geo::polygon &poly1, const geo::polygon &poly2,
+    virtual manifold2D polygon_polygon_contacts(const geo::polygon<> &poly1, const geo::polygon<> &poly2,
                                                 const glm::vec2 &mtv) const = 0;
 };
 } // namespace ppx
