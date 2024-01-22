@@ -160,7 +160,7 @@ template <> struct kit::yaml::codec<ppx::body2D>
         if (node["Shape"]["Radius"])
             body.shape(node["Shape"].as<geo::circle>());
         else
-            body.shape(node["Shape"].as<geo::polygon<>>());
+            body.shape(node["Shape"].as<geo::polygon<8>>());
         body.velocity = node["Velocity"].as<glm::vec2>();
         body.angular_velocity = node["Angular velocity"].as<float>();
         body.mass(node["Mass"].as<float>());

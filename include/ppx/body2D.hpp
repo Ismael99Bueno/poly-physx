@@ -30,7 +30,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
         float angular_velocity = 0.f;
         float mass = 1.f;
         float charge = 1.f;
-        geo::vertices2D<> vertices = geo::polygon<>::square(5.f);
+        geo::vertices2D<> vertices = geo::polygon<8>::square(5.f);
         float radius = 2.5f;
         bool kinematic = true;
         shape_type shape = shape_type::POLYGON;
@@ -85,7 +85,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     void shape(const geo::vertices2D<> &vertices);
     void shape(float radius);
-    void shape(const geo::polygon<> &poly);
+    void shape(const geo::polygon<8> &poly);
     void shape(const geo::circle &c);
 
     bool is_polygon() const;
@@ -123,7 +123,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
   private:
-    std::variant<geo::polygon<>, geo::circle> m_shape;
+    std::variant<geo::polygon<8>, geo::circle> m_shape;
     glm::vec2 m_force{0.f};
     float m_torque = 0.f;
     float m_mass;

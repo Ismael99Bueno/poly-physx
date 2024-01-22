@@ -10,9 +10,9 @@ body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float
                const float mass, const float charge, const bool kinematic)
     : kit::identifiable<>(kit::uuid::random()), velocity(velocity), angular_velocity(angular_velocity), charge(charge),
       kinematic(kinematic),
-      m_shape(geo::polygon<>(kit::transform2D<float>::builder().position(position).rotation(rotation).build(),
-                             geo::polygon<>::square(5.f))),
-      m_mass(mass), m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape<geo::polygon<>>().inertia()),
+      m_shape(geo::polygon<8>(kit::transform2D<float>::builder().position(position).rotation(rotation).build(),
+                              geo::polygon<8>::square(5.f))),
+      m_mass(mass), m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape<geo::polygon<8>>().inertia()),
       m_inv_inertia(1.f / m_inertia)
 {
 }
@@ -22,8 +22,8 @@ body2D::body2D(const geo::vertices2D<> &vertices, const glm::vec2 &position, con
     : kit::identifiable<>(kit::uuid::random()), velocity(velocity), angular_velocity(angular_velocity), charge(charge),
       kinematic(kinematic),
       m_shape(
-          geo::polygon<>(kit::transform2D<float>::builder().position(position).rotation(rotation).build(), vertices)),
-      m_mass(mass), m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape<geo::polygon<>>().inertia()),
+          geo::polygon<8>(kit::transform2D<float>::builder().position(position).rotation(rotation).build(), vertices)),
+      m_mass(mass), m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape<geo::polygon<8>>().inertia()),
       m_inv_inertia(1.f / m_inertia)
 {
 }
@@ -42,9 +42,9 @@ body2D::body2D(const specs &spc)
 {
     if (spc.shape == shape_type::POLYGON)
     {
-        m_shape = geo::polygon<>(
+        m_shape = geo::polygon<8>(
             kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build(), spc.vertices);
-        compute_inertia(shape<geo::polygon<>>());
+        compute_inertia(shape<geo::polygon<8>>());
     }
     else
     {
@@ -120,13 +120,13 @@ float body2D::torque() const
 const geo::shape2D &body2D::shape() const
 {
     if (m_shape.index() == 0)
-        return std::get<geo::polygon<>>(m_shape);
+        return std::get<geo::polygon<8>>(m_shape);
     return std::get<geo::circle>(m_shape);
 }
 geo::shape2D &body2D::mutable_shape()
 {
     if (m_shape.index() == 0)
-        return std::get<geo::polygon<>>(m_shape);
+        return std::get<geo::polygon<8>>(m_shape);
     return std::get<geo::circle>(m_shape);
 }
 template <typename T> const T &body2D::shape() const
@@ -134,7 +134,7 @@ template <typename T> const T &body2D::shape() const
     return std::get<T>(m_shape);
 }
 
-template const geo::polygon<> &body2D::shape<geo::polygon<>>() const;
+template const geo::polygon<8> &body2D::shape<geo::polygon<8>>() const;
 template const geo::circle &body2D::shape<geo::circle>() const;
 
 template <typename T> const T *body2D::shape_if() const
@@ -142,13 +142,13 @@ template <typename T> const T *body2D::shape_if() const
     return std::get_if<T>(&m_shape);
 }
 
-template const geo::polygon<> *body2D::shape_if<geo::polygon<>>() const;
+template const geo::polygon<8> *body2D::shape_if<geo::polygon<8>>() const;
 template const geo::circle *body2D::shape_if<geo::circle>() const;
 
 void body2D::shape(const geo::vertices2D<> &vertices)
 {
     const geo::shape2D &sh = shape();
-    const geo::polygon<> poly(sh.transform(), vertices);
+    const geo::polygon<8> poly(sh.transform(), vertices);
     compute_inertia(poly);
     m_shape = poly;
 }
@@ -159,7 +159,7 @@ void body2D::shape(const float radius)
     compute_inertia(circle);
     m_shape = circle;
 }
-void body2D::shape(const geo::polygon<> &poly)
+void body2D::shape(const geo::polygon<8> &poly)
 {
     compute_inertia(poly);
     m_shape = poly;
@@ -237,7 +237,7 @@ void body2D::rotate(const float dangle)
 const kit::transform2D<float> &body2D::transform() const
 {
     if (m_shape.index() == 0)
-        return std::get<geo::polygon<>>(m_shape).transform();
+        return std::get<geo::polygon<8>>(m_shape).transform();
     return std::get<geo::circle>(m_shape).transform();
 }
 
@@ -279,7 +279,7 @@ void body2D::mass(const float mass)
 
 body2D::specs body2D::specs::from_body(const body2D &body)
 {
-    if (const auto *poly = body.shape_if<geo::polygon<>>())
+    if (const auto *poly = body.shape_if<geo::polygon<8>>())
     {
         const kit::transform2D<float> &transform = poly->transform();
         return {transform.position, body.velocity, transform.rotation, body.angular_velocity,

@@ -9,12 +9,12 @@ manifold2D mtv_support_manifold2D::circle_circle_contacts(const geo::circle &cir
 {
     return {{geo::mtv_support_contact_point(circ1, circ2, mtv)}, 1};
 }
-manifold2D mtv_support_manifold2D::circle_polygon_contacts(const geo::circle &circ, const geo::polygon<> &poly,
+manifold2D mtv_support_manifold2D::circle_polygon_contacts(const geo::circle &circ, const geo::polygon<8> &poly,
                                                            const glm::vec2 &mtv) const
 {
     return {{geo::mtv_support_contact_point(circ, poly, mtv)}, 1};
 }
-manifold2D mtv_support_manifold2D::polygon_polygon_contacts(const geo::polygon<> &poly1, const geo::polygon<> &poly2,
+manifold2D mtv_support_manifold2D::polygon_polygon_contacts(const geo::polygon<8> &poly1, const geo::polygon<8> &poly2,
                                                             const glm::vec2 &mtv) const
 {
     return {{geo::mtv_support_contact_point(poly1, poly2, mtv)}, 1};
