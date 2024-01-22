@@ -16,7 +16,7 @@ body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float
       m_inv_inertia(1.f / m_inertia)
 {
 }
-body2D::body2D(const geo::vertices2D<> &vertices, const glm::vec2 &position, const glm::vec2 &velocity,
+body2D::body2D(const kit::dynarray<glm::vec2, 8> &vertices, const glm::vec2 &position, const glm::vec2 &velocity,
                const float rotation, const float angular_velocity, const float mass, const float charge,
                const bool kinematic)
     : kit::identifiable<>(kit::uuid::random()), velocity(velocity), angular_velocity(angular_velocity), charge(charge),
@@ -145,7 +145,7 @@ template <typename T> const T *body2D::shape_if() const
 template const geo::polygon<8> *body2D::shape_if<geo::polygon<8>>() const;
 template const geo::circle *body2D::shape_if<geo::circle>() const;
 
-void body2D::shape(const geo::vertices2D<> &vertices)
+void body2D::shape(const kit::dynarray<glm::vec2, 8> &vertices)
 {
     const geo::shape2D &sh = shape();
     const geo::polygon<8> poly(sh.transform(), vertices);
@@ -283,7 +283,7 @@ body2D::specs body2D::specs::from_body(const body2D &body)
     {
         const kit::transform2D<float> &transform = poly->transform();
         return {transform.position, body.velocity, transform.rotation, body.angular_velocity,
-                body.real_mass(),   body.charge,   poly->locals(),     0.f,
+                body.real_mass(),   body.charge,   poly->locals,       0.f,
                 body.kinematic,     body.type()};
     }
 

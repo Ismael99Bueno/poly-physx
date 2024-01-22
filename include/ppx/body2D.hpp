@@ -30,14 +30,14 @@ class body2D : public kit::identifiable<>, public kit::indexable
         float angular_velocity = 0.f;
         float mass = 1.f;
         float charge = 1.f;
-        geo::vertices2D<> vertices = geo::polygon<8>::square(5.f);
+        kit::dynarray<glm::vec2, 8> vertices = geo::polygon<8>::square(5.f);
         float radius = 2.5f;
         bool kinematic = true;
         shape_type shape = shape_type::POLYGON;
         static specs from_body(const body2D &body);
     };
 
-    body2D(const geo::vertices2D<> &vertices, const glm::vec2 &position = glm::vec2(0.f),
+    body2D(const kit::dynarray<glm::vec2, 8> &vertices, const glm::vec2 &position = glm::vec2(0.f),
            const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f, float angular_velocity = 0.f,
            float mass = 1.f, float charge = 1.f, bool kinematic = true);
     body2D(float radius, const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f),
@@ -83,7 +83,7 @@ class body2D : public kit::identifiable<>, public kit::indexable
     template <typename T> const T &shape() const;
     template <typename T> const T *shape_if() const;
 
-    void shape(const geo::vertices2D<> &vertices);
+    void shape(const kit::dynarray<glm::vec2, 8> &vertices);
     void shape(float radius);
     void shape(const geo::polygon<8> &poly);
     void shape(const geo::circle &c);
