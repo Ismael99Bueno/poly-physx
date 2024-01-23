@@ -8,6 +8,9 @@
 
 namespace ppx
 {
+collision_detection2D::collision_detection2D(world2D &world) : world(world)
+{
+}
 const std::vector<collision2D> &collision_detection2D::detect_collisions_cached()
 {
     KIT_PERF_FUNCTION()

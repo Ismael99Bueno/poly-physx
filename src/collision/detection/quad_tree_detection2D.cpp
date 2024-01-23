@@ -51,7 +51,7 @@ void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();
     aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
-    for (const body2D &body : world->bodies)
+    for (const body2D &body : world.bodies)
         if (body.kinematic)
             aabb += body.shape().bounding_box();
 
@@ -71,7 +71,7 @@ void quad_tree_detection2D::update_quad_tree()
     }
 
     m_quad_tree.aabb = aabb;
-    for (body2D &body : world->bodies)
+    for (body2D &body : world.bodies)
         m_quad_tree.insert(&body);
 }
 

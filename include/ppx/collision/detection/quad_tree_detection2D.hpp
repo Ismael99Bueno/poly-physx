@@ -8,6 +8,7 @@ namespace ppx
 class quad_tree_detection2D final : public collision_detection2D
 {
   public:
+    using collision_detection2D::collision_detection2D;
     const quad_tree &qtree() const;
     bool force_square_shape = false;
 

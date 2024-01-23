@@ -8,10 +8,11 @@ namespace ppx
 class collision_resolution2D
 {
   public:
+    collision_resolution2D(world2D &world);
     virtual ~collision_resolution2D() = default;
     virtual void solve(const std::vector<collision2D> &collisions) const = 0;
 
-    world2D *world = nullptr;
+    world2D &world;
 
   private:
     virtual void on_attach()

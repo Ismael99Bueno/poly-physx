@@ -18,9 +18,10 @@ class world2D;
 class collision_detection2D
 {
   public:
+    collision_detection2D(world2D &world);
     virtual ~collision_detection2D() = default;
 
-    world2D *world = nullptr;
+    world2D &world;
     float epa_threshold = 1.e-3f;
     bool multithreaded = true;
 

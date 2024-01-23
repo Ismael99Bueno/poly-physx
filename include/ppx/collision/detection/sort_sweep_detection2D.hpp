@@ -24,6 +24,7 @@ class sort_sweep_detection2D final : public collision_detection2D, kit::non_copy
     };
 
   public:
+    using collision_detection2D::collision_detection2D;
     ~sort_sweep_detection2D();
 
   private:

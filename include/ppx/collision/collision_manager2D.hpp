@@ -46,24 +46,22 @@ class collision_manager2D : public kit::toggleable
 
     template <kit::DerivedFrom<collision_detection2D> T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
     {
-        auto coldet = kit::make_scope<T>(std::forward<ColDetArgs>(args)...);
+        auto coldet = kit::make_scope<T>(world, std::forward<ColDetArgs>(args)...);
         if (m_collision_detection)
             coldet->inherit(*m_collision_detection);
 
         T *ptr = coldet.get();
 
         m_collision_detection = std::move(coldet);
-        m_collision_detection->world = &world;
         m_collision_detection->on_attach();
         return ptr;
     }
     template <kit::DerivedFrom<collision_resolution2D> T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
     {
-        auto colres = kit::make_scope<T>(std::forward<ColSolvArgs>(args)...);
+        auto colres = kit::make_scope<T>(world, std::forward<ColSolvArgs>(args)...);
         T *ptr = colres.get();
 
         m_collision_resolution = std::move(colres);
-        m_collision_resolution->world = &world;
         m_collision_resolution->on_attach();
         return ptr;
     }

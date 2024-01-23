@@ -19,17 +19,17 @@ void sort_sweep_detection2D::on_attach()
                 ++it;
     });
 
-    world->events.on_body_addition += m_add_edge;
-    world->events.on_late_body_removal += m_remove_edge;
+    world.events.on_body_addition += m_add_edge;
+    world.events.on_late_body_removal += m_remove_edge;
 
-    for (body2D &body : world->bodies)
+    for (body2D &body : world.bodies)
         m_add_edge(body);
 }
 
 sort_sweep_detection2D::~sort_sweep_detection2D()
 {
-    world->events.on_body_addition -= m_add_edge;
-    world->events.on_late_body_removal -= m_remove_edge;
+    world.events.on_body_addition -= m_add_edge;
+    world.events.on_late_body_removal -= m_remove_edge;
 }
 
 void sort_sweep_detection2D::detect_collisions()
