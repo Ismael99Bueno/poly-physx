@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/body2D.hpp"
+#include "ppx/entities/body2D.hpp"
 #include "kit/interface/nameable.hpp"
 #include "kit/serialization/yaml/codec.hpp"
 

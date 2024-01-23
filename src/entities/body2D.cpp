@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/body2D.hpp"
+#include "ppx/entities/body2D.hpp"
 #include "ppx/world2D.hpp"
 #include "ppx/behaviours/force2D.hpp"
 #include "ppx/behaviours/interaction2D.hpp"

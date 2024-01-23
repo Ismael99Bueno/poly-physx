@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/body2D.hpp"
+#include "ppx/entities/body2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "kit/event_handling/event.hpp"

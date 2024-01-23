@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/body_manager2D.hpp"
+#include "ppx/entities/body_manager2D.hpp"
 #include "ppx/world2D.hpp"
 #include "geo/algorithm/intersection.hpp"
 

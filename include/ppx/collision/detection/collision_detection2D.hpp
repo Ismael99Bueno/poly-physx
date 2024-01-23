@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/body2D.hpp"
+#include "ppx/entities/body2D.hpp"
 #include "ppx/collision/collision2D.hpp"
 
 #include "ppx/collision/manifold/manifold_algorithms2D.hpp"

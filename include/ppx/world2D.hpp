@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rk/integration/integrator.hpp"
-#include "ppx/body_manager2D.hpp"
+#include "ppx/entities/body_manager2D.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/constraints/constraint_manager2D.hpp"
 #include "ppx/behaviours/behaviour_manager2D.hpp"
