@@ -81,10 +81,7 @@ void behaviour_manager2D::clear()
 void behaviour_manager2D::validate()
 {
     for (const auto &bhv : m_behaviours)
-    {
         bhv->validate();
-        bhv->world = &world;
-    }
 }
 
 std::size_t behaviour_manager2D::size() const

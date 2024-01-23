@@ -19,7 +19,7 @@ class behaviour_manager2D : kit::non_copyable
 
     template <kit::DerivedFrom<behaviour2D> T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
     {
-        auto bhv = kit::make_scope<T>(std::forward<BehaviourArgs>(args)...);
+        auto bhv = kit::make_scope<T>(world, std::forward<BehaviourArgs>(args)...);
 #ifdef DEBUG
         for (const auto &old : m_behaviours)
         {
@@ -31,7 +31,6 @@ class behaviour_manager2D : kit::non_copyable
         T *ptr = bhv.get();
 
         m_behaviours.push_back(std::move(bhv));
-        m_behaviours.back()->world = &world;
         m_events.on_behaviour_addition(ptr);
         return ptr;
     }

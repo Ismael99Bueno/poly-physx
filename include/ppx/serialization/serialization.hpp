@@ -33,13 +33,13 @@ template <> struct kit::yaml::codec<ppx::behaviour2D>
     }
     static bool decode(const YAML::Node &node, ppx::behaviour2D &bhv)
     {
-        if (!node.IsMap() || node.size() < 2 || !bhv.world)
+        if (!node.IsMap() || node.size() < 2)
             return false;
         bhv.clear();
 
         bhv.enabled = node["Enabled"].as<bool>();
         for (const YAML::Node &n : node["Bodies"])
-            bhv.add(bhv.world->bodies.ptr(n.as<std::size_t>()));
+            bhv.add(bhv.world.bodies.ptr(n.as<std::size_t>()));
         return true;
     }
 };

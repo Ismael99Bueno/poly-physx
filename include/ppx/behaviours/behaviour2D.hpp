@@ -16,10 +16,10 @@ class behaviour2D : kit::non_copyable,
                     public kit::yaml::codecable
 {
   public:
-    behaviour2D(const std::string &name, std::size_t allocations = 50);
+    behaviour2D(world2D &world, const std::string &name, std::size_t allocations = 50);
     virtual ~behaviour2D() = default;
 
-    world2D *world = nullptr;
+    world2D &world;
 
     void validate();
 
