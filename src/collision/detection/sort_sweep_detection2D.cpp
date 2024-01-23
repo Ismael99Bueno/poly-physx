@@ -58,7 +58,7 @@ void sort_sweep_detection2D::update_edges()
 {
     for (edge &edg : m_edges)
     {
-        const geo::aabb2D &bbox = edg.body->shape().bounding_box();
+        const aabb2D &bbox = edg.body->shape().bounding_box();
         edg.value = edg.end == end_side::LEFT ? bbox.min.x : bbox.max.x;
     }
     std::sort(m_edges.begin(), m_edges.end());

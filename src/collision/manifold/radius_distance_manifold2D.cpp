@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-manifold2D radius_distance_manifold2D::circle_circle_contacts(const geo::circle &circ1, const geo::circle &circ2,
+manifold2D radius_distance_manifold2D::circle_circle_contacts(const circle &circ1, const circle &circ2,
                                                               const glm::vec2 &mtv) const
 {
     return {{geo::radius_distance_contact_point(circ1, circ2)}, 1};

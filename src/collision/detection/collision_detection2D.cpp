@@ -105,8 +105,8 @@ collision2D collision_detection2D::generate_collision(body2D &body1, body2D &bod
 
 void collision_detection2D::cc_narrow_collision_check(body2D &body1, body2D &body2, collision2D &collision) const
 {
-    const geo::circle &circ1 = body1.shape<geo::circle>();
-    const geo::circle &circ2 = body2.shape<geo::circle>();
+    const circle &circ1 = body1.shape<circle>();
+    const circle &circ2 = body2.shape<circle>();
 
     if (!geo::intersects(circ1, circ2))
         return;
@@ -121,8 +121,8 @@ void collision_detection2D::cc_narrow_collision_check(body2D &body1, body2D &bod
 }
 void collision_detection2D::cp_narrow_collision_check(body2D &body1, body2D &body2, collision2D &collision) const
 {
-    const geo::circle &circ = body1.shape<geo::circle>();
-    const geo::polygon<8> &poly = body2.shape<geo::polygon<8>>();
+    const circle &circ = body1.shape<circle>();
+    const polygon &poly = body2.shape<polygon>();
 
     const geo::gjk_result gres = geo::gjk(circ, poly);
     if (!gres.intersect)
@@ -140,8 +140,8 @@ void collision_detection2D::cp_narrow_collision_check(body2D &body1, body2D &bod
 }
 void collision_detection2D::pp_narrow_collision_check(body2D &body1, body2D &body2, collision2D &collision) const
 {
-    const geo::polygon<8> &poly1 = body1.shape<geo::polygon<8>>();
-    const geo::polygon<8> &poly2 = body2.shape<geo::polygon<8>>();
+    const polygon &poly1 = body1.shape<polygon>();
+    const polygon &poly2 = body2.shape<polygon>();
 
     const geo::gjk_result gres = geo::gjk(poly1, poly2);
     if (!gres.intersect)

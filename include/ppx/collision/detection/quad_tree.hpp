@@ -13,7 +13,7 @@ class quad_tree
     quad_tree(const glm::vec2 &min, const glm::vec2 &max, std::size_t max_bodies = 12, std::uint32_t depth = 0);
     using partition = std::vector<body2D *>;
 
-    geo::aabb2D aabb;
+    aabb2D aabb;
 
     void collect_partitions(std::vector<const partition *> &partitions) const;
     void insert(body2D *body);

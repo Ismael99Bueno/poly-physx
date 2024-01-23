@@ -50,7 +50,7 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
 void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();
-    geo::aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
+    aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
     for (const body2D &body : world->bodies)
         if (body.kinematic)
             aabb += body.shape().bounding_box();

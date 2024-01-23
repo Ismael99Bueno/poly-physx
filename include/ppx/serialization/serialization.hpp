@@ -158,9 +158,9 @@ template <> struct kit::yaml::codec<ppx::body2D>
         body.id = kit::uuid(node["UUID"].as<std::uint64_t>());
         body.index = node["Index"].as<std::size_t>();
         if (node["Shape"]["Radius"])
-            body.shape(node["Shape"].as<geo::circle>());
+            body.shape(node["Shape"].as<ppx::circle>());
         else
-            body.shape(node["Shape"].as<geo::polygon<8>>());
+            body.shape(node["Shape"].as<ppx::polygon>());
         body.velocity = node["Velocity"].as<glm::vec2>();
         body.angular_velocity = node["Angular velocity"].as<float>();
         body.mass(node["Mass"].as<float>());

@@ -44,8 +44,8 @@ class body_manager2D
     body2D::const_ptr ptr(std::size_t index) const;
     body2D::ptr ptr(std::size_t index);
 
-    std::vector<body2D::const_ptr> operator[](const geo::aabb2D &aabb) const;
-    std::vector<body2D::ptr> operator[](const geo::aabb2D &aabb);
+    std::vector<body2D::const_ptr> operator[](const aabb2D &aabb) const;
+    std::vector<body2D::ptr> operator[](const aabb2D &aabb);
 
     const body2D *operator[](const glm::vec2 &point) const;
     body2D *operator[](const glm::vec2 &point);

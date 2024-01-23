@@ -76,7 +76,7 @@ body2D::ptr body_manager2D::ptr(const std::size_t index)
     return {&m_bodies, index};
 }
 
-std::vector<body2D::const_ptr> body_manager2D::operator[](const geo::aabb2D &aabb) const
+std::vector<body2D::const_ptr> body_manager2D::operator[](const aabb2D &aabb) const
 {
     std::vector<body2D::const_ptr> in_area;
     in_area.reserve(m_bodies.size() / 2);
@@ -86,7 +86,7 @@ std::vector<body2D::const_ptr> body_manager2D::operator[](const geo::aabb2D &aab
             in_area.emplace_back(&m_bodies, body.index);
     return in_area;
 }
-std::vector<body2D::ptr> body_manager2D::operator[](const geo::aabb2D &aabb)
+std::vector<body2D::ptr> body_manager2D::operator[](const aabb2D &aabb)
 {
     std::vector<body2D::ptr> in_area;
     in_area.reserve(m_bodies.size() / 2);
@@ -98,7 +98,7 @@ std::vector<body2D::ptr> body_manager2D::operator[](const geo::aabb2D &aabb)
 
 const body2D *body_manager2D::operator[](const glm::vec2 &point) const
 {
-    const geo::aabb2D aabb = point;
+    const aabb2D aabb = point;
     for (const body2D &body : m_bodies)
         if (geo::intersects(body.shape().bounding_box(), aabb))
             return &body;
@@ -106,7 +106,7 @@ const body2D *body_manager2D::operator[](const glm::vec2 &point) const
 }
 body2D *body_manager2D::operator[](const glm::vec2 &point)
 {
-    const geo::aabb2D aabb = point;
+    const aabb2D aabb = point;
     for (body2D &body : m_bodies)
         if (geo::intersects(body.shape().bounding_box(), aabb))
             return &body;
