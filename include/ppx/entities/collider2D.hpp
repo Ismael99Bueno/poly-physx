@@ -1,14 +1,9 @@
 #pragma once
 
-#include "geo/shapes2D/polygon.hpp"
-#include "geo/shapes2D/circle.hpp"
+#include "ppx/entities/shapes2D.hpp"
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/indexable.hpp"
 #include "kit/memory/vector_ptr.hpp"
-
-#ifndef PPX_MAX_VERTICES
-#define PPX_MAX_VERTICES 8
-#endif
 
 namespace ppx
 {
