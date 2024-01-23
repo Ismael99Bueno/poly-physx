@@ -2,7 +2,6 @@
 
 #include "kit/event_handling/event.hpp"
 #include "kit/utility/uuid.hpp"
-#include "kit/memory/track_ptr.hpp"
 #include <vector>
 #include <functional>
 #include <unordered_set>

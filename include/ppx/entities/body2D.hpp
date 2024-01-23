@@ -1,12 +1,7 @@
 #pragma once
 
-#include "geo/shapes2D/aabb2D.hpp"
-#include "geo/shapes2D/polygon.hpp"
-#include "geo/shapes2D/circle.hpp"
+#include "ppx/entities/collider2D.hpp"
 #include "ppx/events/body_events.hpp"
-#include "kit/interface/identifiable.hpp"
-#include "kit/interface/indexable.hpp"
-#include "kit/memory/track_ptr.hpp"
 #include <variant>
 
 namespace ppx
