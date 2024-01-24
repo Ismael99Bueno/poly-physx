@@ -8,7 +8,7 @@
 
 namespace ppx
 {
-collision_detection2D::collision_detection2D(world2D &world) : world(world)
+collision_detection2D::collision_detection2D(world2D &world) : worldref2D(world)
 {
 }
 const std::vector<collision2D> &collision_detection2D::detect_collisions_cached()

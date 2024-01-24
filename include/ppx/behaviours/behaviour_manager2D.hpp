@@ -5,17 +5,17 @@
 #include "kit/utility/type_constraints.hpp"
 #include "ppx/events/world_events.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
+#include "ppx/internal/worldref.hpp"
 
 #include <vector>
 
 namespace ppx
 {
 class world2D;
-class behaviour_manager2D : kit::non_copyable
+class behaviour_manager2D : kit::non_copyable, public worldref2D
 {
   public:
     behaviour_manager2D(world2D &world);
-    world2D &world;
 
     template <kit::DerivedFrom<behaviour2D> T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
     {

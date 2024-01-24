@@ -123,7 +123,7 @@ template <> struct kit::yaml::codec<ppx::spring2D>
         if (!node.IsMap() || node.size() != 10)
             return false;
 
-        decode_joint(node, sp.joint, sp.world->bodies);
+        decode_joint(node, sp.joint, sp.world.bodies);
 
         sp.id = kit::uuid(node["UUID"].as<std::uint64_t>());
         sp.stiffness = node["Stiffness"].as<float>();
@@ -227,10 +227,10 @@ template <> struct kit::yaml::codec<ppx::spring_manager2D>
         if (node["Springs"])
             for (const YAML::Node &n : node["Springs"])
             {
-                ppx::spring2D sp;
-                sp.world = &sm.world;
+                ppx::spring2D sp{sm.world};
                 n.as<ppx::spring2D>(sp);
-                sm.add(sp);
+                const auto specs = ppx::spring2D::specs::from_spring(sp);
+                sm.add(specs);
             }
         return true;
     }

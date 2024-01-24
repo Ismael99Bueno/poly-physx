@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-body_manager2D::body_manager2D(world2D &world) : world(world)
+body_manager2D::body_manager2D(world2D &world) : worldref2D(world)
 {
 }
 

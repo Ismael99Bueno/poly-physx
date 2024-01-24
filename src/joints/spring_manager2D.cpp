@@ -4,16 +4,13 @@
 
 namespace ppx
 {
-spring_manager2D::spring_manager2D(world2D &world) : world(world)
+spring_manager2D::spring_manager2D(world2D &world) : worldref2D(world)
 {
 }
 
 void spring_manager2D::process_addition(spring2D &sp)
 {
-    sp.world = &world;
     sp.index = m_springs.size() - 1;
-    sp.world = &world;
-
     KIT_ASSERT_ERROR(sp.joint.valid(), "The spring joint must be valid to be able to add it into the simulation")
     world.events.on_spring_addition(sp);
 }
@@ -142,7 +139,6 @@ void spring_manager2D::validate()
         }
         else
         {
-            it->world = &world;
             it->index = index;
             ++it;
         }

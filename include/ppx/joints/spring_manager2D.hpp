@@ -6,16 +6,15 @@ namespace ppx
 {
 class world2D;
 
-class spring_manager2D
+class spring_manager2D : public worldref2D
 {
   public:
     spring_manager2D(world2D &world);
-    world2D &world;
 
     // Move to process addtition
     template <class... SpringArgs> spring2D &add(SpringArgs &&...args)
     {
-        spring2D &sp = m_springs.emplace_back(std::forward<SpringArgs>(args)...);
+        spring2D &sp = m_springs.emplace_back(world, std::forward<SpringArgs>(args)...);
         process_addition(sp);
         return sp;
     }

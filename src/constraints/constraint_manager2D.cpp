@@ -6,7 +6,7 @@
 
 namespace ppx
 {
-constraint_manager2D::constraint_manager2D(world2D &world) : world(world), m_events(world.events)
+constraint_manager2D::constraint_manager2D(world2D &world) : worldref2D(world), m_events(world.events)
 {
 }
 

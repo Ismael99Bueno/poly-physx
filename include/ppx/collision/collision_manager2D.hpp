@@ -6,15 +6,15 @@
 #include "kit/utility/type_constraints.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/collision/resolution/collision_resolution2D.hpp"
+#include "ppx/internal/worldref.hpp"
 
 namespace ppx
 {
 class world2D;
-class collision_manager2D : public kit::toggleable
+class collision_manager2D : public kit::toggleable, public worldref2D
 {
   public:
     collision_manager2D(world2D &world);
-    world2D &world;
 
     auto begin() const
     {

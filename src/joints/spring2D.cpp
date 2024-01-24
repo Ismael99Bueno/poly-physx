@@ -5,32 +5,33 @@
 
 namespace ppx
 {
-spring2D::spring2D(const float stiffness, const float damping, const float length, const std::uint32_t non_linear_terms,
-                   const float non_linear_contribution)
-    : kit::identifiable<>(kit::uuid::random()), stiffness(stiffness), damping(damping), length(length),
-      non_linear_terms(non_linear_terms)
+spring2D::spring2D(world2D &world, const float stiffness, const float damping, const float length,
+                   const std::uint32_t non_linear_terms, const float non_linear_contribution)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), stiffness(stiffness), damping(damping),
+      length(length), non_linear_terms(non_linear_terms)
 {
 }
-spring2D::spring2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
+spring2D::spring2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
                    const glm::vec2 &anchor2, const float stiffness, const float damping, const float length,
                    const std::uint32_t non_linear_terms, const float non_linear_contribution)
-    : kit::identifiable<>(kit::uuid::random()), joint(body1, body2, anchor1, anchor2), stiffness(stiffness),
-      damping(damping), length(length), non_linear_terms(non_linear_terms)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), joint(body1, body2, anchor1, anchor2),
+      stiffness(stiffness), damping(damping), length(length), non_linear_terms(non_linear_terms)
 {
 }
-spring2D::spring2D(const specs &spc)
-    : kit::identifiable<>(kit::uuid::random()), joint(spc.joint), stiffness(spc.stiffness), damping(spc.damping),
-      length(spc.length), non_linear_terms(spc.non_linear_terms), non_linear_contribution(spc.non_linear_contribution)
+spring2D::spring2D(world2D &world, const specs &spc)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), joint(spc.joint), stiffness(spc.stiffness),
+      damping(spc.damping), length(spc.length), non_linear_terms(spc.non_linear_terms),
+      non_linear_contribution(spc.non_linear_contribution)
 {
 }
 
 spring2D::const_ptr spring2D::as_ptr() const
 {
-    return world->springs.ptr(index);
+    return world.springs.ptr(index);
 }
 spring2D::ptr spring2D::as_ptr()
 {
-    return world->springs.ptr(index);
+    return world.springs.ptr(index);
 }
 
 glm::vec2 spring2D::non_linear_displacement(const glm::vec2 &displacement) const

@@ -10,7 +10,7 @@
 
 namespace ppx
 {
-collision_manager2D::collision_manager2D(world2D &world) : world(world)
+collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
 {
     set_detection<quad_tree_detection2D>();
     set_resolution<constraint_driven_resolution2D>();

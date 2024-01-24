@@ -3,17 +3,16 @@
 #include "ppx/entities/body2D.hpp"
 #include "kit/interface/nameable.hpp"
 #include "kit/serialization/yaml/codec.hpp"
+#include "ppx/internal/worldref.hpp"
 
 namespace ppx
 {
 class world2D;
-class constraint2D : public kit::identifiable<>, public kit::nameable, public kit::yaml::codecable
+class constraint2D : public kit::identifiable<>, public kit::nameable, public kit::yaml::codecable, public worldref2D
 {
   public:
     constraint2D(world2D &world, const char *name);
     virtual ~constraint2D() = default;
-
-    world2D &world;
 
     virtual float constraint_value() const = 0;
     virtual float constraint_velocity() const = 0;

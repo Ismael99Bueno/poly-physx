@@ -6,6 +6,7 @@
 #include "kit/interface/nameable.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/serialization/yaml/codec.hpp"
+#include "ppx/internal/worldref.hpp"
 
 namespace ppx
 {
@@ -13,13 +14,12 @@ class world2D;
 class behaviour2D : kit::non_copyable,
                     public kit::identifiable<std::string>,
                     public kit::toggleable,
-                    public kit::yaml::codecable
+                    public kit::yaml::codecable,
+                    public worldref2D
 {
   public:
     behaviour2D(world2D &world, const std::string &name, std::size_t allocations = 50);
     virtual ~behaviour2D() = default;
-
-    world2D &world;
 
     void validate();
 

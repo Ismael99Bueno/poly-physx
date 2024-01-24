@@ -2,16 +2,16 @@
 
 #include "ppx/entities/body2D.hpp"
 #include "rk/integration/state.hpp"
+#include "ppx/internal/worldref.hpp"
 
 namespace ppx
 {
 class world2D;
 
-class body_manager2D
+class body_manager2D : public worldref2D
 {
   public:
     body_manager2D(world2D &world);
-    world2D &world;
 
     template <class... BodyArgs> body2D &add(BodyArgs &&...args)
     {

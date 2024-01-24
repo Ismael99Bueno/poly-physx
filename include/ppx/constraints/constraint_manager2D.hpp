@@ -20,11 +20,10 @@ class world2D;
 template <typename T>
 concept Constraint2D = std::is_base_of_v<constraint2D, T>;
 
-class constraint_manager2D : kit::non_copyable
+class constraint_manager2D : kit::non_copyable, public worldref2D
 {
   public:
     constraint_manager2D(world2D &world);
-    world2D &world;
 
     std::uint32_t iterations = 10;
     bool warmup = true;

@@ -7,6 +7,7 @@
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
 #include "kit/utility/type_constraints.hpp"
+#include "ppx/internal/worldref.hpp"
 
 #ifndef PPX_THREAD_COUNT
 #define PPX_THREAD_COUNT 16
@@ -15,13 +16,12 @@
 namespace ppx
 {
 class world2D;
-class collision_detection2D
+class collision_detection2D : public worldref2D
 {
   public:
     collision_detection2D(world2D &world);
     virtual ~collision_detection2D() = default;
 
-    world2D &world;
     float epa_threshold = 1.e-3f;
     bool multithreaded = true;
 
