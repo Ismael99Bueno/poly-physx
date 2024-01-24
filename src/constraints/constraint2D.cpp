@@ -7,7 +7,8 @@
 namespace ppx
 {
 
-constraint2D::constraint2D(const char *name) : kit::identifiable<>(kit::uuid::random()), nameable(name)
+constraint2D::constraint2D(world2D &world, const char *name)
+    : kit::identifiable<>(kit::uuid::random()), nameable(name), world(world)
 {
 }
 

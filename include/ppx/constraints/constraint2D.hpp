@@ -10,10 +10,10 @@ class world2D;
 class constraint2D : public kit::identifiable<>, public kit::nameable, public kit::yaml::codecable
 {
   public:
-    constraint2D(const char *name);
+    constraint2D(world2D &world, const char *name);
     virtual ~constraint2D() = default;
 
-    world2D *world = nullptr;
+    world2D &world;
 
     virtual float constraint_value() const = 0;
     virtual float constraint_velocity() const = 0;

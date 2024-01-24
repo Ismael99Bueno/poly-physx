@@ -8,7 +8,7 @@ namespace ppx
 class friction_constraint2D final : public joint_constraint2D
 {
   public:
-    friction_constraint2D(const collision2D *collision, std::size_t manifold_index, float friction);
+    friction_constraint2D(world2D &world, const collision2D *collision, std::size_t manifold_index, float friction);
 
     float max_lambda;
 

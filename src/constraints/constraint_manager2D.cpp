@@ -122,10 +122,7 @@ void constraint_manager2D::validate()
             it = m_constraints.erase(it);
         }
         else
-        {
-            (*it)->world = &world;
             ++it;
-        }
 }
 
 std::size_t constraint_manager2D::size() const
@@ -151,10 +148,8 @@ void constraint_manager2D::update_contacts()
                 if (old_contact != m_contacts.end())
                     old_contact->second.update(&collision, ctrres->restitution, ctrres->friction, ctrres->slop);
                 else
-                    m_contacts
-                        .emplace(hash, contact_constraint2D(&collision, i, ctrres->restitution, ctrres->friction,
-                                                            ctrres->slop))
-                        .first->second.set_world(&world);
+                    m_contacts.emplace(hash, contact_constraint2D(world, &collision, i, ctrres->restitution,
+                                                                  ctrres->friction, ctrres->slop));
             }
     for (auto it = m_contacts.begin(); it != m_contacts.end();)
         if (!it->second.recently_updated)

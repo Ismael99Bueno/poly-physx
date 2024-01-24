@@ -35,11 +35,10 @@ class constraint_manager2D : kit::non_copyable
 
     template <Constraint2D T, class... ConstraintArgs> T *add(ConstraintArgs &&...args)
     {
-        auto ctr = kit::make_scope<T>(std::forward<ConstraintArgs>(args)...);
+        auto ctr = kit::make_scope<T>(world, std::forward<ConstraintArgs>(args)...);
         T *ptr = ctr.get();
 
         m_constraints.push_back(std::move(ctr));
-        ptr->world = &world;
 
         KIT_ASSERT_ERROR(ptr->valid(), "The constraint must be valid before it can be added into the simulation")
         m_events.on_constraint_addition(ptr);

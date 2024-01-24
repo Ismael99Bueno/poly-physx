@@ -69,7 +69,7 @@ static void encode_joint(YAML::Node &node, const ppx::joint_proxy2D &joint)
     node["Anchor1"] = joint.rotated_anchor1();
     node["Anchor2"] = joint.rotated_anchor2();
 }
-static void decode_joint(const YAML::Node &node, ppx::joint_proxy2D &joint, ppx::world2D &world)
+static void decode_joint(const YAML::Node &node, ppx::joint_proxy2D &joint, ppx::body_manager2D &bodies)
 {
     const std::size_t index1 = node["Index1"].as<std::size_t>();
     const std::size_t index2 = node["Index2"].as<std::size_t>();
@@ -77,8 +77,8 @@ static void decode_joint(const YAML::Node &node, ppx::joint_proxy2D &joint, ppx:
     const glm::vec2 a1 = node["Anchor1"].as<glm::vec2>();
     const glm::vec2 a2 = node["Anchor2"].as<glm::vec2>();
 
-    joint.body1(world.bodies.ptr(index1));
-    joint.body2(world.bodies.ptr(index2));
+    joint.body1(bodies.ptr(index1));
+    joint.body2(bodies.ptr(index2));
 
     joint.anchor1(a1);
     joint.anchor2(a2);
@@ -98,7 +98,7 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D>
         if (!node.IsMap() || node.size() != 5)
             return false;
 
-        decode_joint(node, dj.joint, *dj.world);
+        decode_joint(node, dj.joint, dj.world.bodies);
         dj.length = node["Length"].as<float>();
         return true;
     }
@@ -123,7 +123,7 @@ template <> struct kit::yaml::codec<ppx::spring2D>
         if (!node.IsMap() || node.size() != 10)
             return false;
 
-        decode_joint(node, sp.joint, *sp.world);
+        decode_joint(node, sp.joint, sp.world->bodies);
 
         sp.id = kit::uuid(node["UUID"].as<std::uint64_t>());
         sp.stiffness = node["Stiffness"].as<float>();
@@ -388,10 +388,10 @@ template <> struct kit::yaml::codec<ppx::constraint_manager2D>
             for (const YAML::Node &n : node["Constraints"])
                 if (n["Distance"])
                 {
-                    ppx::distance_joint2D dj;
-                    dj.world = &cm.world;
+                    ppx::distance_joint2D dj{cm.world};
                     n["Distance"].as<ppx::distance_joint2D>(dj);
-                    cm.add<ppx::distance_joint2D>(dj);
+                    const auto specs = ppx::distance_joint2D::specs::from_distance_joint(dj);
+                    cm.add<ppx::distance_joint2D>(specs);
                 }
         return true;
     }

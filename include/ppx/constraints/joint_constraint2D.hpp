@@ -7,7 +7,7 @@ namespace ppx
 class joint_constraint2D : public constraint2D
 {
   public:
-    joint_constraint2D(const char *name, bool allow_baumgarte_correction = true);
+    joint_constraint2D(world2D &world, const char *name, bool allow_baumgarte_correction = true);
 
   protected:
     float compute_lambda(body2D &body1, body2D &body2, const glm::vec2 &anchor1, const glm::vec2 &anchor2,

@@ -9,8 +9,8 @@ namespace ppx
 class contact_constraint2D final : public joint_constraint2D
 {
   public:
-    contact_constraint2D(const collision2D *collision, std::size_t manifold_index, float restitution, float friction,
-                         float slop);
+    contact_constraint2D(world2D &world, const collision2D *collision, std::size_t manifold_index, float restitution,
+                         float friction, float slop);
 
     bool recently_updated = true;
 
@@ -23,7 +23,6 @@ class contact_constraint2D final : public joint_constraint2D
     void solve() override;
 
     void update(const collision2D *collision, float restitution, float friction, float slop);
-    void set_world(world2D *world);
 
   private:
     const collision2D *m_collision;

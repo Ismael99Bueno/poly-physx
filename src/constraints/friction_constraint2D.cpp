@@ -5,9 +5,9 @@
 
 namespace ppx
 {
-friction_constraint2D::friction_constraint2D(const collision2D *collision, const std::size_t manifold_index,
-                                             const float friction)
-    : joint_constraint2D("Friction", false), m_collision(collision),
+friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision,
+                                             const std::size_t manifold_index, const float friction)
+    : joint_constraint2D(world, "Friction", false), m_collision(collision),
       m_anchor1(collision->touch1(manifold_index) - collision->body1->position()),
       m_anchor2(collision->touch2(manifold_index) - collision->body2->position()),
       m_tangent(glm::normalize(glm::vec2(-collision->mtv.y, collision->mtv.x))), m_friction(friction)
