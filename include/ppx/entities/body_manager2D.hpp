@@ -15,7 +15,7 @@ class body_manager2D : public worldref2D
 
     template <class... BodyArgs> body2D &add(BodyArgs &&...args)
     {
-        body2D &body = m_bodies.emplace_back(std::forward<BodyArgs>(args)...);
+        body2D &body = m_bodies.emplace_back(world, std::forward<BodyArgs>(args)...);
         process_addition(body);
         return body;
     }

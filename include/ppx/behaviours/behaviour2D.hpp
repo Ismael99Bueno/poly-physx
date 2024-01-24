@@ -18,7 +18,7 @@ class behaviour2D : kit::non_copyable,
                     public worldref2D
 {
   public:
-    behaviour2D(world2D &world, const std::string &name, std::size_t allocations = 50);
+    behaviour2D(world2D &world, const std::string &name);
     virtual ~behaviour2D() = default;
 
     void validate();

@@ -7,7 +7,7 @@ namespace ppx
 class interaction2D : public behaviour2D
 {
   public:
-    using behaviour2D::behaviour2D;
+    interaction2D(world2D &world, const std::string &name);
     virtual ~interaction2D() = default;
 
     virtual glm::vec3 force_pair(const body2D &body1, const body2D &body2) const = 0;

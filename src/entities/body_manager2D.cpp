@@ -116,7 +116,6 @@ body2D *body_manager2D::operator[](const glm::vec2 &point)
 void body_manager2D::process_addition(body2D &body)
 {
     body.index = m_bodies.size() - 1;
-    body.world = &world;
 
     const kit::transform2D<float> &transform = body.transform();
 
@@ -178,10 +177,7 @@ void body_manager2D::validate()
 {
     std::size_t index = 0;
     for (auto it = m_bodies.begin(); it != m_bodies.end(); index++, ++it)
-    {
-        it->world = &world;
         it->index = index;
-    }
 }
 
 void body_manager2D::send_data_to_state(rk::state<float> &state)

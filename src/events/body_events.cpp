@@ -4,11 +4,6 @@
 
 namespace ppx
 {
-body_events::body_events(const std::size_t allocations)
-{
-    m_collided_ids.reserve(allocations);
-}
-
 void body_events::try_enter_or_stay(const collision2D &c) const
 {
     if (on_collision_enter.empty() && on_collision_stay.empty())

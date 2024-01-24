@@ -6,38 +6,40 @@
 
 namespace ppx
 {
-body2D::body2D(const glm::vec2 &position, const glm::vec2 &velocity, const float rotation, const float angular_velocity,
-               const float mass, const float charge, const bool kinematic)
-    : kit::identifiable<>(kit::uuid::random()), velocity(velocity), angular_velocity(angular_velocity), charge(charge),
-      kinematic(kinematic),
+body2D::body2D(world2D &world, const glm::vec2 &position, const glm::vec2 &velocity, const float rotation,
+               const float angular_velocity, const float mass, const float charge, const bool kinematic)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(velocity),
+      angular_velocity(angular_velocity), charge(charge), kinematic(kinematic),
       m_shape(polygon(kit::transform2D<float>::builder().position(position).rotation(rotation).build(),
                       polygon::square(5.f))),
       m_mass(mass), m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape<polygon>().inertia()),
       m_inv_inertia(1.f / m_inertia)
 {
 }
-body2D::body2D(const kit::dynarray<glm::vec2, PPX_MAX_VERTICES> &vertices, const glm::vec2 &position,
+body2D::body2D(world2D &world, const kit::dynarray<glm::vec2, PPX_MAX_VERTICES> &vertices, const glm::vec2 &position,
                const glm::vec2 &velocity, const float rotation, const float angular_velocity, const float mass,
                const float charge, const bool kinematic)
-    : kit::identifiable<>(kit::uuid::random()), velocity(velocity), angular_velocity(angular_velocity), charge(charge),
-      kinematic(kinematic),
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(velocity),
+      angular_velocity(angular_velocity), charge(charge), kinematic(kinematic),
       m_shape(polygon(kit::transform2D<float>::builder().position(position).rotation(rotation).build(), vertices)),
       m_mass(mass), m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape<polygon>().inertia()),
       m_inv_inertia(1.f / m_inertia)
 {
 }
-body2D::body2D(const float radius, const glm::vec2 &position, const glm::vec2 &velocity, const float rotation,
-               const float angular_velocity, const float mass, const float charge, const bool kinematic)
-    : kit::identifiable<>(kit::uuid::random()), velocity(velocity), angular_velocity(angular_velocity), charge(charge),
-      kinematic(kinematic),
+body2D::body2D(world2D &world, const float radius, const glm::vec2 &position, const glm::vec2 &velocity,
+               const float rotation, const float angular_velocity, const float mass, const float charge,
+               const bool kinematic)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(velocity),
+      angular_velocity(angular_velocity), charge(charge), kinematic(kinematic),
       m_shape(circle(kit::transform2D<float>::builder().position(position).rotation(rotation).build(), radius)),
       m_mass(mass), m_inv_mass(1.f / m_mass), m_inertia(m_mass * shape<circle>().inertia()),
       m_inv_inertia(1.f / m_inertia)
 {
 }
-body2D::body2D(const specs &spc)
-    : kit::identifiable<>(kit::uuid::random()), velocity(spc.velocity), angular_velocity(spc.angular_velocity),
-      charge(spc.charge), kinematic(spc.kinematic), m_mass(spc.mass), m_inv_mass(1.f / m_mass)
+body2D::body2D(world2D &world, const specs &spc)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(spc.velocity),
+      angular_velocity(spc.angular_velocity), charge(spc.charge), kinematic(spc.kinematic), m_mass(spc.mass),
+      m_inv_mass(1.f / m_mass)
 {
     if (spc.shape == shape_type::POLYGON)
     {
@@ -75,11 +77,11 @@ void body2D::reset_simulation_forces()
 
 body2D::const_ptr body2D::as_ptr() const
 {
-    return world->bodies.ptr(index);
+    return world.bodies.ptr(index);
 }
 body2D::ptr body2D::as_ptr()
 {
-    return world->bodies.ptr(index);
+    return world.bodies.ptr(index);
 }
 
 float body2D::kinetic_energy() const

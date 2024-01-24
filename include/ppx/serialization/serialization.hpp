@@ -185,7 +185,12 @@ template <> struct kit::yaml::codec<ppx::body_manager2D>
         bm.clear();
         if (node["Bodies"])
             for (const YAML::Node &n : node["Bodies"])
-                bm.add(n.as<ppx::body2D>());
+            {
+                ppx::body2D body{bm.world};
+                n.as<ppx::body2D>(body);
+                const auto specs = ppx::body2D::specs::from_body(body);
+                bm.add(specs);
+            }
         return true;
     }
 };

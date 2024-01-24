@@ -2,12 +2,13 @@
 
 #include "ppx/entities/collider2D.hpp"
 #include "ppx/events/body_events.hpp"
+#include "ppx/internal/worldref.hpp"
 #include <variant>
 
 namespace ppx
 {
 class world2D;
-class body2D : public kit::identifiable<>, public kit::indexable
+class body2D : public kit::identifiable<>, public kit::indexable, public worldref2D
 {
   public:
     using ptr = kit::vector_ptr<body2D>;
@@ -32,15 +33,16 @@ class body2D : public kit::identifiable<>, public kit::indexable
         static specs from_body(const body2D &body);
     };
 
-    body2D(const kit::dynarray<glm::vec2, PPX_MAX_VERTICES> &vertices, const glm::vec2 &position = glm::vec2(0.f),
+    body2D(world2D &world, const kit::dynarray<glm::vec2, PPX_MAX_VERTICES> &vertices,
+           const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f,
+           float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
+    body2D(world2D &world, float radius, const glm::vec2 &position = glm::vec2(0.f),
            const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f, float angular_velocity = 0.f,
            float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    body2D(float radius, const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f),
+    body2D(world2D &world, const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f),
            float rotation = 0.f, float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f,
            bool kinematic = true);
-    body2D(const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f,
-           float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    explicit body2D(const specs &spc);
+    explicit body2D(world2D &world, const specs &spc);
 
     glm::vec2 impulse_force{0.f};
     glm::vec2 persistent_force{0.f};
@@ -57,8 +59,6 @@ class body2D : public kit::identifiable<>, public kit::indexable
 
     glm::vec2 constraint_velocity;
     float constraint_angular_velocity;
-
-    world2D *world = nullptr;
 
     const_ptr as_ptr() const;
     ptr as_ptr();

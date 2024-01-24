@@ -22,7 +22,7 @@ class body_events
   private:
     mutable std::unordered_set<kit::uuid> m_collided_ids;
 
-    body_events(std::size_t allocations = 15);
+    body_events() = default;
     body_events(const body_events &) = default;
     body_events &operator=(const body_events &) = default;
 

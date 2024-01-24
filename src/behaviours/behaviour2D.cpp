@@ -5,10 +5,9 @@
 
 namespace ppx
 {
-behaviour2D::behaviour2D(world2D &world, const std::string &name, const std::size_t allocations)
+behaviour2D::behaviour2D(world2D &world, const std::string &name)
     : kit::identifiable<std::string>(name), worldref2D(world)
 {
-    m_bodies.reserve(allocations);
 }
 
 void behaviour2D::validate()

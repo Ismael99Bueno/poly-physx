@@ -3,6 +3,10 @@
 
 namespace ppx
 {
+interaction2D::interaction2D(world2D &world, const std::string &name) : behaviour2D(world, name), m_unit(world)
+
+{
+}
 float interaction2D::potential(const body2D &body, const glm::vec2 &position) const
 {
     m_unit.position(position);
