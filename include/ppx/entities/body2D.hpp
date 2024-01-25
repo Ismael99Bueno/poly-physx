@@ -21,7 +21,8 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     };
     struct specs
     {
-        glm::vec2 position{0.f}, velocity{0.f};
+        glm::vec2 position{0.f};
+        glm::vec2 velocity{0.f};
         float rotation = 0.f;
         float angular_velocity = 0.f;
         float mass = 1.f;
@@ -33,16 +34,8 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
         static specs from_body(const body2D &body);
     };
 
-    body2D(world2D &world, const kit::dynarray<glm::vec2, PPX_MAX_VERTICES> &vertices,
-           const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f,
-           float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    body2D(world2D &world, float radius, const glm::vec2 &position = glm::vec2(0.f),
-           const glm::vec2 &velocity = glm::vec2(0.f), float rotation = 0.f, float angular_velocity = 0.f,
-           float mass = 1.f, float charge = 1.f, bool kinematic = true);
-    body2D(world2D &world, const glm::vec2 &position = glm::vec2(0.f), const glm::vec2 &velocity = glm::vec2(0.f),
-           float rotation = 0.f, float angular_velocity = 0.f, float mass = 1.f, float charge = 1.f,
-           bool kinematic = true);
-    explicit body2D(world2D &world, const specs &spc);
+    body2D(world2D &world);
+    body2D(world2D &world, const specs &spc);
 
     glm::vec2 impulse_force{0.f};
     glm::vec2 persistent_force{0.f};
