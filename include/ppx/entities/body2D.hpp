@@ -14,10 +14,17 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     using ptr = kit::vector_ptr<body2D>;
     using const_ptr = kit::const_vector_ptr<body2D>;
 
-    enum class shape_type
+    struct properties
     {
-        POLYGON = 0,
-        CIRCLE = 1
+        struct data
+        {
+            float mass;
+            float inv_mass;
+            float inertia;
+            float inv_inertia;
+        };
+        data dynamic;
+        data nondynamic;
     };
     enum class btype
     {
@@ -36,7 +43,6 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
         kit::dynarray<glm::vec2, PPX_MAX_VERTICES> vertices = polygon::square(5.f);
         float radius = 2.5f;
         btype type = btype::DYNAMIC;
-        shape_type shape = shape_type::POLYGON;
         static specs from_body(const body2D &body);
     };
 
