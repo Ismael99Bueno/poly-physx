@@ -10,9 +10,17 @@ joint_proxy2D::joint_proxy2D(const body2D::ptr &body1, const body2D::ptr &body2,
     : m_body1(body1), m_body2(body2), m_anchor1(anchor1), m_anchor2(anchor2), m_angle1(body1->rotation()),
       m_angle2(body2->rotation())
 {
+    KIT_ASSERT_ERROR(body1 != body2, "Cannot create joint between same body: {0}", body1->id)
+
+    KIT_ASSERT_ERROR(body1->type == body2D::btype::DYNAMIC || body2->type == body2D::btype::DYNAMIC,
+                     "Cannot create joint between two static bodies: {0}, {1}", body1->id, body2->id);
 }
 joint_proxy2D::joint_proxy2D(const specs &spc) : joint_proxy2D(spc.body1, spc.body2, spc.anchor1, spc.anchor2)
 {
+    KIT_ASSERT_ERROR(spc.body1 != spc.body2, "Cannot create joint between same body: {0}", spc.body1->id)
+
+    KIT_ASSERT_ERROR(spc.body1->type == body2D::btype::DYNAMIC || spc.body2->type == body2D::btype::DYNAMIC,
+                     "Cannot create joint between two static bodies: {0}, {1}", spc.body1->id, spc.body2->id);
 }
 
 std::tuple<glm::vec2, glm::vec2, glm::vec2> joint_proxy2D::compute_anchors_and_direction() const

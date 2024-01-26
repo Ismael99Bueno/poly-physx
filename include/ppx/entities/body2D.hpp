@@ -19,6 +19,12 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
         POLYGON = 0,
         CIRCLE = 1
     };
+    enum class btype
+    {
+        DYNAMIC = 0,
+        KINEMATIC = 1,
+        STATIC = 2
+    };
     struct specs
     {
         glm::vec2 position{0.f};
@@ -29,7 +35,7 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
         float charge = 1.f;
         kit::dynarray<glm::vec2, PPX_MAX_VERTICES> vertices = polygon::square(5.f);
         float radius = 2.5f;
-        bool kinematic = true;
+        btype type = btype::DYNAMIC;
         shape_type shape = shape_type::POLYGON;
         static specs from_body(const body2D &body);
     };
@@ -47,11 +53,12 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     float angular_velocity;
     float charge;
 
-    bool kinematic;
     body_events events;
 
     glm::vec2 constraint_velocity;
     float constraint_angular_velocity;
+
+    btype type;
 
     const_ptr as_ptr() const;
     ptr as_ptr();
@@ -78,7 +85,7 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
 
     bool is_polygon() const;
     bool is_circle() const;
-    shape_type type() const;
+    shape_type stype() const;
 
     float mass() const;
     float inv_mass() const;

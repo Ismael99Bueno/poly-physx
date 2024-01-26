@@ -11,7 +11,7 @@ body2D::body2D(world2D &world) : body2D(world, specs{})
 }
 body2D::body2D(world2D &world, const specs &spc)
     : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(spc.velocity),
-      angular_velocity(spc.angular_velocity), charge(spc.charge), kinematic(spc.kinematic), m_mass(spc.mass),
+      angular_velocity(spc.angular_velocity), charge(spc.charge), type(spc.type), m_mass(spc.mass),
       m_inv_mass(1.f / m_mass)
 {
     if (spc.shape == shape_type::POLYGON)
@@ -158,27 +158,27 @@ bool body2D::is_circle() const
 {
     return m_shape.index() == 1;
 }
-body2D::shape_type body2D::type() const
+body2D::shape_type body2D::stype() const
 {
     return m_shape.index() == 0 ? shape_type::POLYGON : shape_type::CIRCLE;
 }
 
 float body2D::mass() const
 {
-    return kinematic ? m_mass : FLT_MAX;
+    return type == btype::DYNAMIC ? m_mass : FLT_MAX;
 }
 float body2D::inv_mass() const
 {
-    return kinematic ? m_inv_mass : 0.f;
+    return type == btype::DYNAMIC ? m_inv_mass : 0.f;
 }
 
 float body2D::inertia() const
 {
-    return kinematic ? m_inertia : FLT_MAX;
+    return type == btype::DYNAMIC ? m_inertia : FLT_MAX;
 }
 float body2D::inv_inertia() const
 {
-    return kinematic ? m_inv_inertia : 0.f;
+    return type == btype::DYNAMIC ? m_inv_inertia : 0.f;
 }
 
 float body2D::real_mass() const
@@ -258,20 +258,13 @@ body2D::specs body2D::specs::from_body(const body2D &body)
         const kit::transform2D<float> &transform = poly->transform();
         return {transform.position, body.velocity, transform.rotation, body.angular_velocity,
                 body.real_mass(),   body.charge,   poly->locals,       0.f,
-                body.kinematic,     body.type()};
+                body.type,          body.stype()};
     }
 
     const circle &circ = body.shape<circle>();
     const kit::transform2D<float> &transform = circ.transform();
-    return {transform.position,
-            body.velocity,
-            transform.rotation,
-            body.angular_velocity,
-            body.real_mass(),
-            body.charge,
-            {},
-            circ.radius,
-            body.kinematic,
-            body.type()};
+    return {
+        transform.position, body.velocity, transform.rotation, body.angular_velocity, body.real_mass(), body.charge, {},
+        circ.radius,        body.type,     body.stype()};
 }
 } // namespace ppx

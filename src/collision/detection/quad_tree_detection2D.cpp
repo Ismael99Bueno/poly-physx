@@ -52,7 +52,7 @@ void quad_tree_detection2D::update_quad_tree()
     m_quad_tree.clear();
     aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
     for (const body2D &body : world.bodies)
-        if (body.kinematic)
+        if (body.type == body2D::btype::DYNAMIC)
             aabb += body.shape().bounding_box();
 
     if (force_square_shape)

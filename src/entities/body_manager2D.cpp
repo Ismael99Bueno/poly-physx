@@ -183,10 +183,12 @@ void body_manager2D::validate()
 void body_manager2D::send_data_to_state(rk::state<float> &state)
 {
     KIT_PERF_FUNCTION()
-    for (const body2D &body : m_bodies)
+    for (body2D &body : m_bodies)
     {
         const std::size_t index = 6 * body.index;
         const glm::vec2 &position = body.position();
+        if (body.type == body2D::btype::STATIC)
+            body.velocity = glm::vec2(0.f);
 
         state[index] = position.x;
         state[index + 1] = position.y;

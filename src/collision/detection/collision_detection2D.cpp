@@ -87,7 +87,8 @@ void collision_detection2D::join_mt_collisions()
 
 static bool broad_collision_check(body2D &body1, body2D &body2)
 {
-    return body1 != body2 && (body1.kinematic || body2.kinematic) && geo::may_intersect(body1.shape(), body2.shape());
+    return body1 != body2 && (body1.type == body2D::btype::DYNAMIC || body2.type == body2D::btype::DYNAMIC) &&
+           geo::may_intersect(body1.shape(), body2.shape());
 }
 
 collision2D collision_detection2D::generate_collision(body2D &body1, body2D &body2) const
