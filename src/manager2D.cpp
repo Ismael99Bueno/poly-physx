@@ -102,6 +102,11 @@ template <typename T> bool manager2D<T>::empty() const
 {
     return m_elements.empty();
 }
+template <typename T> void manager2D<T>::clear()
+{
+    for (std::size_t i = m_elements.size() - 1; i < m_elements.size(); --i)
+        remove(i);
+}
 
 template class manager2D<body2D>;
 template class manager2D<collider2D>;

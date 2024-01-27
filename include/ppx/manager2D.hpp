@@ -60,6 +60,7 @@ template <typename T> class manager2D : public worldref2D
 
     std::size_t size() const;
     bool empty() const;
+    void clear();
 
   protected:
     std::vector<T> m_elements;
