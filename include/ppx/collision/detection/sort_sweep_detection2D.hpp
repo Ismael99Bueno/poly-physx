@@ -14,7 +14,7 @@ class sort_sweep_detection2D final : public collision_detection2D, kit::non_copy
     };
     struct edge
     {
-        body2D::ptr body;
+        collider2D::ptr collider;
         end_side end;
         float value;
         bool operator<(const edge &other) const
@@ -29,9 +29,9 @@ class sort_sweep_detection2D final : public collision_detection2D, kit::non_copy
 
   private:
     std::vector<edge> m_edges;
-    std::unordered_set<body2D *> m_eligible;
+    std::unordered_set<collider2D *> m_eligible;
 
-    kit::callback<body2D &> m_add_edge;
+    kit::callback<collider2D &> m_add_edge;
     kit::callback<std::size_t> m_remove_edge;
 
     void detect_collisions() override;

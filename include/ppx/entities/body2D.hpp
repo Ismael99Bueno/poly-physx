@@ -1,18 +1,34 @@
 #pragma once
 
-#include "ppx/entities/collider2D.hpp"
-#include "ppx/events/body_events.hpp"
+#include "kit/interface/identifiable.hpp"
+#include "kit/interface/indexable.hpp"
+#include "kit/memory/vector_ptr.hpp"
+#include "kit/utility/type_constraints.hpp"
 #include "ppx/internal/worldref.hpp"
+#include "ppx/entities/specs2D.hpp"
 #include <variant>
 
 namespace ppx
 {
 class world2D;
+class collider2D;
 class body2D : public kit::identifiable<>, public kit::indexable, public worldref2D
 {
+    struct constraint_proxy
+    {
+        glm::vec2 velocity{0.f};
+        float angular_velocity = 0.f;
+        glm::vec2 velocity_at(const glm::vec2 &at) const
+        {
+            return velocity + angular_velocity * glm::vec2(-at.y, at.x);
+        } // v + cross(w, at)
+    };
+
   public:
     using ptr = kit::vector_ptr<body2D>;
     using const_ptr = kit::const_vector_ptr<body2D>;
+    using specs = specs::body2D;
+    using btype = specs::btype;
 
     struct properties
     {
@@ -25,29 +41,11 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
         };
         data dynamic;
         data nondynamic;
-    };
-    enum class btype
-    {
-        DYNAMIC = 0,
-        KINEMATIC = 1,
-        STATIC = 2
-    };
-    struct specs
-    {
-        glm::vec2 position{0.f};
-        glm::vec2 velocity{0.f};
-        float rotation = 0.f;
-        float angular_velocity = 0.f;
-        float mass = 1.f;
-        float charge = 1.f;
-        kit::dynarray<glm::vec2, PPX_MAX_VERTICES> vertices = polygon::square(5.f);
-        float radius = 2.5f;
-        btype type = btype::DYNAMIC;
-        static specs from_body(const body2D &body);
+        glm::vec2 position;
+        float charge;
     };
 
-    body2D(world2D &world);
-    body2D(world2D &world, const specs &spc);
+    body2D(world2D &world, const specs &spc = {});
 
     glm::vec2 impulse_force{0.f};
     glm::vec2 persistent_force{0.f};
@@ -59,12 +57,43 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     float angular_velocity;
     float charge;
 
-    body_events events;
-
-    glm::vec2 constraint_velocity;
-    float constraint_angular_velocity;
+    constraint_proxy ctr_proxy;
 
     btype type;
+
+    const collider2D &operator[](std::size_t index) const;
+    collider2D &operator[](std::size_t index);
+
+    const collider2D *operator[](kit::uuid id) const;
+    collider2D *operator[](kit::uuid id);
+
+    collider2D &add(const ppx::specs::collider2D &spc);
+
+    bool remove(std::size_t index);
+    bool remove(kit::uuid id);
+    bool remove(const collider2D &collider);
+    void clear();
+
+    std::vector<collider2D>::const_iterator begin() const;
+    std::vector<collider2D>::const_iterator end() const;
+
+    std::vector<collider2D>::iterator begin();
+    std::vector<collider2D>::iterator end();
+
+    bool empty() const;
+    std::size_t size() const;
+
+    bool is_dynamic() const;
+    bool is_kinematic() const;
+    bool is_static() const;
+
+    void begin_density_update();
+    void end_density_update();
+
+    void begin_spatial_update();
+    void end_spatial_update();
+
+    void match_position_with_centroid();
 
     const_ptr as_ptr() const;
     ptr as_ptr();
@@ -73,67 +102,61 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
 
     void add_force_at(const glm::vec2 &force, const glm::vec2 &at);
 
-    void apply_simulation_force(const glm::vec2 &force);
-    void apply_simulation_force_at(const glm::vec2 &force, const glm::vec2 &at);
-    void apply_simulation_torque(float torque);
-
     const glm::vec2 &force() const;
     float torque() const;
 
-    const shape2D &shape() const;
-    template <typename T> const T &shape() const;
-    template <typename T> const T *shape_if() const;
-
-    void shape(const kit::dynarray<glm::vec2, PPX_MAX_VERTICES> &vertices);
-    void shape(float radius);
-    void shape(const polygon &poly);
-    void shape(const circle &c);
-
-    bool is_polygon() const;
-    bool is_circle() const;
-    shape_type stype() const;
-
-    float mass() const;
-    float inv_mass() const;
-
-    float inertia() const;
-    float inv_inertia() const;
-
-    float real_mass() const;
-    float real_inv_mass() const;
-
-    float real_inertia() const;
-    float real_inv_inertia() const;
+    const properties &props() const;
 
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
     const kit::transform2D<float> &transform() const;
 
+    const glm::vec2 &centroid() const;
     const glm::vec2 &position() const;
+    const glm::vec2 &origin() const;
     float rotation() const;
 
-    glm::vec2 velocity_at(const glm::vec2 &at) const;
-    glm::vec2 constraint_velocity_at(const glm::vec2 &at) const;
+    const glm::vec2 &charge_centroid() const;
 
+    glm::vec2 velocity_at(const glm::vec2 &at) const;
+
+    void centroid(const glm::vec2 &centroid);
     void position(const glm::vec2 &position);
+    void origin(const glm::vec2 &origin);
     void rotation(float rotation);
     void mass(float mass);
+
+  private:
+    kit::transform2D<float> m_transform;
+    properties m_props;
+    glm::vec2 m_charge_centroid;
+    glm::vec2 m_force{0.f};
+    float m_torque = 0.f;
+
+    std::size_t m_start = 0;
+    std::size_t m_size = 0;
+
+    bool m_density_update = false;
+    bool m_spatial_update = false;
+
+    void update_colliders();
+    void update_centroids();
+    void update_inertia();
 
     void reset_simulation_forces();
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
-  private:
-    std::variant<polygon, circle> m_shape;
-    glm::vec2 m_force{0.f};
-    float m_torque = 0.f;
-    float m_mass;
-    float m_inv_mass;
-    float m_inertia;
-    float m_inv_inertia;
+    void apply_simulation_force(const glm::vec2 &force);
+    void apply_simulation_force_at(const glm::vec2 &force, const glm::vec2 &at);
+    void apply_simulation_torque(float torque);
 
-    shape2D &mutable_shape();
-
-    template <typename T> void compute_inertia(const T &shape);
+    friend class collider2D;
+    friend class spring2D;
+    friend class behaviour2D;
+    friend class body_manager2D;
+    friend class collider_manager2D;
+    friend class joint_constraint2D;
+    friend class spring_driven_resolution2D;
 };
 } // namespace ppx

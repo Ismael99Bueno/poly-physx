@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/entities/body2D.hpp"
+#include "ppx/entities/collider2D.hpp"
 #include "ppx/collision/collision2D.hpp"
 
 #include "ppx/collision/manifold/manifold_algorithms2D.hpp"
@@ -93,21 +93,21 @@ class collision_detection2D : public worldref2D
     void inherit(collision_detection2D &coldet);
 
   protected:
-    void process_collision_st(body2D &body1, body2D &body2);
-    void process_collision_mt(body2D &body1, body2D &body2, std::size_t thread_idx);
+    void process_collision_st(collider2D &collider1, collider2D &collider2);
+    void process_collision_mt(collider2D &collider1, collider2D &collider2, std::size_t thread_idx);
     void join_mt_collisions();
 
   private:
     std::vector<collision2D> m_collisions;
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
 
-    collision2D generate_collision(body2D &body1, body2D &body2) const;
-    void cc_narrow_collision_check(body2D &body1, body2D &body2, collision2D &collision) const;
-    void cp_narrow_collision_check(body2D &body1, body2D &body2, collision2D &collision) const;
-    void pp_narrow_collision_check(body2D &body1, body2D &body2, collision2D &collision) const;
+    collision2D generate_collision(collider2D &collider1, collider2D &collider2) const;
+    void cc_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
+    void cp_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
+    void pp_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
 
     void try_enter_or_stay_callback(const collision2D &c) const;
-    void try_exit_callback(body2D &body1, body2D &body2) const;
+    void try_exit_callback(collider2D &collider1, collider2D &collider2) const;
 
     kit::scope<cc_manifold_algorithm2D> m_cc_manifold;
     kit::scope<cp_manifold_algorithm2D> m_cp_manifold;

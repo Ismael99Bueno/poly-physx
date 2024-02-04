@@ -12,28 +12,28 @@ distance_joint2D::distance_joint2D(world2D &world) : joint_constraint2D(world, "
 distance_joint2D::distance_joint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2,
                                    const glm::vec2 &anchor1, const glm::vec2 &anchor2)
     : joint_constraint2D(world, "Distance"), joint(body1, body2, anchor1, anchor2),
-      length(glm::distance(body1->position() + anchor1, body2->position() + anchor2))
+      length(glm::distance(body1->centroid() + anchor1, body2->centroid() + anchor2))
 {
 }
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
     : joint_constraint2D(world, "Distance"), joint(spc.joint),
-      length(glm::distance(spc.joint.body1->position() + spc.joint.anchor1,
-                           spc.joint.body2->position() + spc.joint.anchor2))
+      length(glm::distance(spc.joint.body1->centroid() + spc.joint.anchor1,
+                           spc.joint.body2->centroid() + spc.joint.anchor2))
 {
 }
 
 float distance_joint2D::constraint_value() const
 {
     KIT_ASSERT_ERROR(length >= 0.f, "Length must be non-negative: {0}", length)
-    const glm::vec2 p1 = joint.rotated_anchor1() + joint.body1()->position(),
-                    p2 = joint.rotated_anchor2() + joint.body2()->position();
+    const glm::vec2 p1 = joint.rotated_anchor1() + joint.body1()->centroid(),
+                    p2 = joint.rotated_anchor2() + joint.body2()->centroid();
     return length - glm::distance(p1, p2);
 }
 float distance_joint2D::constraint_velocity() const
 {
     const auto [dir, rot_anchor1, rot_anchor2] = joint.compute_anchors_and_direction();
-    return glm::dot(dir, joint.body2()->constraint_velocity_at(rot_anchor2) -
-                             joint.body1()->constraint_velocity_at(rot_anchor1));
+    return glm::dot(dir, joint.body2()->ctr_proxy.velocity_at(rot_anchor2) -
+                             joint.body1()->ctr_proxy.velocity_at(rot_anchor1));
 }
 
 void distance_joint2D::warmup()
@@ -54,11 +54,6 @@ bool distance_joint2D::valid() const
 bool distance_joint2D::contains(const kit::uuid id) const
 {
     return joint.body1()->id == id || joint.body2()->id == id;
-}
-
-distance_joint2D::specs distance_joint2D::specs::from_distance_joint(const distance_joint2D &dj)
-{
-    return {{dj.joint.body1(), dj.joint.body2(), dj.joint.rotated_anchor1(), dj.joint.rotated_anchor2()}};
 }
 
 #ifdef KIT_USE_YAML_CPP

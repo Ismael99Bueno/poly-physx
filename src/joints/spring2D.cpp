@@ -60,7 +60,7 @@ glm::vec4 spring2D::force() const
     const body2D::ptr &body2 = joint.body2();
 
     const glm::vec2 rot_anchor1 = joint.rotated_anchor1(), rot_anchor2 = joint.rotated_anchor2();
-    const glm::vec2 p1 = body1->position() + rot_anchor1, p2 = body2->position() + rot_anchor2;
+    const glm::vec2 p1 = body1->centroid() + rot_anchor1, p2 = body2->centroid() + rot_anchor2;
 
     const glm::vec2 relpos = p2 - p1;
     const glm::vec2 direction = glm::normalize(relpos);
@@ -82,8 +82,8 @@ float spring2D::kinetic_energy() const
 }
 float spring2D::potential_energy() const
 {
-    const glm::vec2 p1 = joint.body1()->position() + joint.rotated_anchor1(),
-                    p2 = joint.body2()->position() + joint.rotated_anchor2();
+    const glm::vec2 p1 = joint.body1()->centroid() + joint.rotated_anchor1(),
+                    p2 = joint.body2()->centroid() + joint.rotated_anchor2();
     const float dist = glm::distance(p1, p2) - length;
     return 0.5f * stiffness * dist * dist;
 }
@@ -103,13 +103,5 @@ void spring2D::apply_force_to_bodies()
 
     body1->apply_simulation_torque(f.z);
     body2->apply_simulation_torque(f.w);
-}
-
-spring2D::specs spring2D::specs::from_spring(const spring2D &sp)
-{
-    return {{sp.joint.body1(), sp.joint.body2(), sp.joint.rotated_anchor1(), sp.joint.rotated_anchor2()},
-            sp.stiffness,
-            sp.damping,
-            sp.length};
 }
 } // namespace ppx

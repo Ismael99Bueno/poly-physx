@@ -1,47 +1,29 @@
 #pragma once
 
 #include "ppx/joints/spring2D.hpp"
+#include "ppx/manager2D.hpp"
+#include "kit/events/event.hpp"
 
 namespace ppx
 {
-class world2D;
-
-class spring_manager2D : public worldref2D
+class spring_manager2D : public manager2D<spring2D>
 {
   public:
-    spring_manager2D(world2D &world);
+    using manager2D<spring2D>::manager2D;
 
-    // Move to process addtition
+    struct
+    {
+        kit::event<spring2D &> on_addition;
+        kit::event<const spring2D &> on_early_removal;
+        kit::event<std::size_t> on_late_removal;
+    } events;
+
     template <class... SpringArgs> spring2D &add(SpringArgs &&...args)
     {
-        spring2D &sp = m_springs.emplace_back(world, std::forward<SpringArgs>(args)...);
+        spring2D &sp = m_elements.emplace_back(world, std::forward<SpringArgs>(args)...);
         process_addition(sp);
         return sp;
     }
-
-    auto begin() const
-    {
-        return m_springs.begin();
-    }
-    auto end() const
-    {
-        return m_springs.end();
-    }
-
-    auto begin()
-    {
-        return m_springs.begin();
-    }
-    auto end()
-    {
-        return m_springs.end();
-    }
-
-    const spring2D &operator[](std::size_t index) const;
-    spring2D &operator[](std::size_t index);
-
-    const spring2D *operator[](kit::uuid id) const;
-    spring2D *operator[](kit::uuid id);
 
     std::vector<spring2D::const_ptr> from_ids(kit::uuid id1, kit::uuid id2) const;
     std::vector<spring2D::ptr> from_ids(kit::uuid id1, kit::uuid id2);
@@ -49,19 +31,16 @@ class spring_manager2D : public worldref2D
     spring2D::const_ptr ptr(std::size_t index) const;
     spring2D::ptr ptr(std::size_t index);
 
+    using manager2D<spring2D>::remove;
     bool remove(std::size_t index);
-    bool remove(const spring2D &body);
-    bool remove(kit::uuid id);
 
-    void apply_forces();
-
-    std::size_t size() const;
-    void clear();
     void validate();
 
   private:
-    std::vector<spring2D> m_springs;
-
     void process_addition(spring2D &sp);
+
+    void apply_forces();
+
+    friend class world2D;
 };
 } // namespace ppx

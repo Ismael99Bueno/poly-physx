@@ -11,26 +11,16 @@ class spring2D : public kit::identifiable<>, public kit::indexable, public world
   public:
     using ptr = kit::vector_ptr<spring2D>;
     using const_ptr = kit::const_vector_ptr<spring2D>;
-
-    struct specs
-    {
-        joint_proxy2D::specs joint;
-        float stiffness = 1.f;
-        float damping = 0.f;
-        float length = 0.f;
-
-        std::uint32_t non_linear_terms = 0;
-        float non_linear_contribution = 0.001f;
-
-        static specs from_spring(const spring2D &sp);
-    };
+    using specs = specs::spring2D;
 
     spring2D(world2D &world, float stiffness = 1.f, float damping = 0.f, float length = 0.f,
              std::uint32_t non_linear_terms = 0, float non_linear_contribution = 0.001f);
+
     spring2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2,
              const glm::vec2 &anchor1 = glm::vec2(0.f), const glm::vec2 &anchor2 = glm::vec2(0.f),
              float stiffness = 1.f, float damping = 0.f, float length = 0.f, std::uint32_t non_linear_terms = 0,
              float non_linear_contribution = 0.001f);
+
     spring2D(world2D &world, const specs &spc);
 
     joint_proxy2D joint;

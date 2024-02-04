@@ -36,5 +36,9 @@ std::size_t collision_manager2D::size() const
 {
     return m_collision_detection->collisions().size();
 }
+bool collision_manager2D::empty() const
+{
+    return m_collision_detection->collisions().empty();
+}
 
 } // namespace ppx

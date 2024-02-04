@@ -21,11 +21,12 @@ class behaviour2D : kit::non_copyable,
     behaviour2D(world2D &world, const std::string &name);
     virtual ~behaviour2D() = default;
 
-    void validate();
-
     void add(const body2D::ptr &body);
-    void remove(const body2D &body);
     bool contains(const body2D &body) const;
+
+    bool remove(std::size_t index);
+    bool remove(kit::uuid id);
+    bool remove(const body2D &body);
 
     auto begin() const
     {
@@ -45,13 +46,11 @@ class behaviour2D : kit::non_copyable,
         return m_bodies.end();
     }
 
-    body2D::const_ptr operator[](std::size_t index) const;
-    const body2D::ptr &operator[](std::size_t index);
+    const body2D &operator[](std::size_t index) const;
+    body2D &operator[](std::size_t index);
 
-    body2D::const_ptr operator[](kit::uuid id) const;
-    body2D::ptr operator[](kit::uuid id);
-
-    void apply_force_to_bodies();
+    const body2D *operator[](kit::uuid id) const;
+    body2D *operator[](kit::uuid id);
 
     virtual glm::vec3 force(const body2D &body) const = 0;
 
@@ -65,6 +64,8 @@ class behaviour2D : kit::non_copyable,
     void clear();
     std::size_t size() const;
 
+    void validate();
+
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
@@ -72,6 +73,11 @@ class behaviour2D : kit::non_copyable,
 
   protected:
     std::vector<body2D::ptr> m_bodies;
+
+  private:
+    void apply_force_to_bodies();
+
+    friend class behaviour_manager2D;
 };
 
 } // namespace ppx

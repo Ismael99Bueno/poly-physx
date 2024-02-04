@@ -28,3 +28,4 @@
 #include <random>
 #include <optional>
 #include "kit/debug/log.hpp"
+#include "kit/profile/perf.hpp"

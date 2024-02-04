@@ -3,37 +3,37 @@
 #include "ppx/entities/body2D.hpp"
 #include "ppx/entities/collider2D.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
-#include "ppx/joints/spring2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"
+#include "ppx/joints/spring2D.hpp"
 
 namespace ppx
 {
-template <typename T> manager2D<T>::manager2D(world2D &world) : worldref2D(world)
+template <Identifiable T> manager2D<T>::manager2D(world2D &world) : worldref2D(world)
 {
 }
 
-template <typename T> const typename manager2D<T>::value_type &manager2D<T>::operator[](std::size_t index) const
+template <Identifiable T> const typename manager2D<T>::value_type &manager2D<T>::operator[](std::size_t index) const
 {
     KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_elements.size())
 
     if constexpr (is_scope)
-        return m_elements[index];
-    else
         return *m_elements[index];
+    else
+        return m_elements[index];
 }
 
-template <typename T> typename manager2D<T>::value_type &manager2D<T>::operator[](std::size_t index)
+template <Identifiable T> typename manager2D<T>::value_type &manager2D<T>::operator[](std::size_t index)
 {
     KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                      m_elements.size())
     if constexpr (is_scope)
-        return m_elements[index];
-    else
         return *m_elements[index];
+    else
+        return m_elements[index];
 }
 
-template <typename T> const typename manager2D<T>::value_type *manager2D<T>::operator[](const id_type &id) const
+template <Identifiable T> const typename manager2D<T>::value_type *manager2D<T>::operator[](const id_type &id) const
 {
     if constexpr (is_scope)
     {
@@ -47,7 +47,7 @@ template <typename T> const typename manager2D<T>::value_type *manager2D<T>::ope
                 return &element;
     return nullptr;
 }
-template <typename T> typename manager2D<T>::value_type *manager2D<T>::operator[](const id_type &id)
+template <Identifiable T> typename manager2D<T>::value_type *manager2D<T>::operator[](const id_type &id)
 {
     if constexpr (is_scope)
     {
@@ -62,24 +62,14 @@ template <typename T> typename manager2D<T>::value_type *manager2D<T>::operator[
     return nullptr;
 }
 
-template <typename T> bool manager2D<T>::remove(const value_type &element)
+template <Identifiable T> bool manager2D<T>::remove(const value_type &element)
 {
     if constexpr (kit::Indexable<T>)
-    {
-        if constexpr (is_scope)
-            return remove(element->index);
-        else
-            return remove(element.index);
-    }
+        return remove(element.index);
     else
-    {
-        if constexpr (is_scope)
-            return remove(element->id);
-        else
-            return remove(element.id);
-    }
+        return remove(element.id);
 }
-template <typename T> bool manager2D<T>::remove(const id_type &id)
+template <Identifiable T> bool manager2D<T>::remove(const id_type &id)
 {
     if constexpr (is_scope)
     {
@@ -94,15 +84,15 @@ template <typename T> bool manager2D<T>::remove(const id_type &id)
     return false;
 }
 
-template <typename T> std::size_t manager2D<T>::size() const
+template <Identifiable T> std::size_t manager2D<T>::size() const
 {
     return m_elements.size();
 }
-template <typename T> bool manager2D<T>::empty() const
+template <Identifiable T> bool manager2D<T>::empty() const
 {
     return m_elements.empty();
 }
-template <typename T> void manager2D<T>::clear()
+template <Identifiable T> void manager2D<T>::clear()
 {
     for (std::size_t i = m_elements.size() - 1; i < m_elements.size(); --i)
         remove(i);

@@ -8,11 +8,7 @@ namespace ppx
 class distance_joint2D final : public joint_constraint2D
 {
   public:
-    struct specs
-    {
-        joint_proxy2D::specs joint;
-        static specs from_distance_joint(const distance_joint2D &dj);
-    };
+    using specs = specs::distance_joint2D;
     distance_joint2D(world2D &world);
     distance_joint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2,
                      const glm::vec2 &anchor1 = glm::vec2(0.f), const glm::vec2 &anchor2 = glm::vec2(0.f));

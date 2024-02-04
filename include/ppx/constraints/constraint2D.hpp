@@ -20,11 +20,6 @@ class constraint2D : public kit::identifiable<>, public kit::nameable, public ki
     virtual bool contains(kit::uuid id) const = 0;
     bool contains(const body2D &body) const;
 
-    virtual bool valid() const = 0;
-
-    virtual void warmup() = 0;
-    virtual void solve() = 0;
-
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const override;
     virtual bool decode(const YAML::Node &node) override;
@@ -34,5 +29,11 @@ class constraint2D : public kit::identifiable<>, public kit::nameable, public ki
     float m_accumulated_lambda = 0.f;
 
   private:
+    virtual bool valid() const = 0;
+
+    virtual void warmup() = 0;
+    virtual void solve() = 0;
+
+    friend class constraint_manager2D;
 };
 } // namespace ppx

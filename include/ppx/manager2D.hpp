@@ -3,27 +3,35 @@
 #include "ppx/internal/worldref.hpp"
 #include "kit/interface/identifiable.hpp"
 #include "kit/memory/scope.hpp"
+#include "kit/interface/non_copyable.hpp"
 #include <vector>
 
 namespace ppx
 {
 class world2D;
 
-template <kit::Identifiable T> struct type_wrapper
+template <typename T> struct type_wrapper
 {
     using value = T;
     static inline constexpr bool is_scope = false;
 };
-template <kit::Identifiable T> struct type_wrapper<kit::scope<T>>
+template <typename T> struct type_wrapper<kit::scope<T>>
 {
     using value = T;
     static inline constexpr bool is_scope = true;
 };
 
-template <typename T> class manager2D : public worldref2D
+template <typename T>
+concept Identifiable = kit::Identifiable<typename type_wrapper<T>::value>;
+
+template <Identifiable T>
+class manager2D
+
+    : kit::non_copyable,
+      public worldref2D
 {
   public:
-    using value_type = type_wrapper<T>::value;
+    using value_type = typename type_wrapper<T>::value;
     using id_type = typename value_type::id_type;
     static inline constexpr bool is_scope = type_wrapper<T>::is_scope;
 

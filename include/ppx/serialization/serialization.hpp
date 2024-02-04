@@ -135,6 +135,38 @@ template <> struct kit::yaml::codec<ppx::spring2D>
     }
 };
 
+template <> struct kit::yaml::codec<ppx::collider2D>
+{
+    static YAML::Node encode(const ppx::collider2D &collider)
+    {
+        YAML::Node node;
+        node["UUID"] = (std::uint64_t)collider.id;
+        node["Index"] = collider.index;
+        node["Parent"] = collider.parent().index;
+        node["Shape"] = collider.shape();
+        node["Charge density"] = collider.charge_density();
+        node["Restitution"] = collider.restitution;
+        node["Friction"] = collider.friction;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::collider2D &collider)
+    {
+        if (!node.IsMap() || node.size() != 7)
+            return false;
+
+        collider.id = kit::uuid(node["UUID"].as<std::uint64_t>());
+        collider.index = node["Index"].as<std::size_t>();
+        if (node["Shape"]["Radius"])
+            collider.set_shape<ppx::circle>(node["Shape"]["Radius"].as<ppx::circle>());
+        else
+            collider.set_shape<ppx::polygon>(node["Shape"].as<ppx::polygon>());
+        collider.charge_density(node["Charge density"].as<float>());
+        collider.restitution = node["Restitution"].as<float>();
+        collider.friction = node["Friction"].as<float>();
+        return true;
+    }
+};
+
 template <> struct kit::yaml::codec<ppx::body2D>
 {
     static YAML::Node encode(const ppx::body2D &body)
@@ -142,12 +174,11 @@ template <> struct kit::yaml::codec<ppx::body2D>
         YAML::Node node;
         node["UUID"] = (std::uint64_t)body.id;
         node["Index"] = body.index;
-        node["Shape"] = body.shape();
         node["Velocity"] = body.velocity;
         node["Angular velocity"] = body.angular_velocity;
-        node["Mass"] = body.real_mass();
+        node["Mass"] = body.props().nondynamic.mass;
         node["Charge"] = body.charge;
-        node["Kinematic"] = (int)body.type;
+        node["Type"] = (int)body.type;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::body2D &body)
@@ -157,16 +188,37 @@ template <> struct kit::yaml::codec<ppx::body2D>
 
         body.id = kit::uuid(node["UUID"].as<std::uint64_t>());
         body.index = node["Index"].as<std::size_t>();
-        if (node["Shape"]["Radius"])
-            body.shape(node["Shape"].as<ppx::circle>());
-        else
-            body.shape(node["Shape"].as<ppx::polygon>());
         body.velocity = node["Velocity"].as<glm::vec2>();
         body.angular_velocity = node["Angular velocity"].as<float>();
         body.mass(node["Mass"].as<float>());
         body.charge = node["Charge"].as<float>();
-        body.type = (ppx::body2D::btype)node["Kinematic"].as<int>();
+        body.type = (ppx::body2D::btype)node["Type"].as<int>();
 
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::collider_manager2D>
+{
+    static YAML::Node encode(const ppx::collider_manager2D &cm)
+    {
+        YAML::Node node;
+        for (const ppx::collider2D &collider : cm)
+            node["Colliders"].push_back(collider);
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::collider_manager2D &cm)
+    {
+        cm.clear();
+        if (node["Colliders"])
+            for (const YAML::Node &n : node["Colliders"])
+            {
+                const ppx::body2D::ptr parent = cm.world.bodies[n["Parent"].as<std::size_t>()].as_ptr();
+                ppx::collider2D collider{cm.world, parent};
+                n.as<ppx::collider2D>(collider);
+                const auto specs = ppx::collider2D::specs::from_collider(collider);
+                cm.add(parent, specs);
+            }
         return true;
     }
 };
@@ -249,7 +301,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         YAML::Node ndet = node["Detection"];
         YAML::Node nqt = ndet["Quad tree"];
         ndet["EPA Threshold"] = cm.detection()->epa_threshold;
-        nqt["Max bodies"] = ppx::quad_tree::max_bodies;
+        nqt["Max colliders"] = ppx::quad_tree::max_colliders;
         nqt["Max depth"] = ppx::quad_tree::max_depth;
         nqt["Min size"] = ppx::quad_tree::min_size;
 
@@ -288,8 +340,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         else if (auto colres = cm.resolution<ppx::constraint_driven_resolution2D>())
         {
             nres["Method"] = 1;
-            nres["Friction"] = colres->friction;
-            nres["Restitution"] = colres->restitution;
             nres["Slop"] = colres->slop;
         }
         return node;
@@ -302,7 +352,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         const YAML::Node ndet = node["Detection"];
         const YAML::Node nqt = ndet["Quad tree"];
         cm.detection()->epa_threshold = ndet["EPA Threshold"].as<float>();
-        ppx::quad_tree::max_bodies = nqt["Max bodies"].as<std::size_t>();
+        ppx::quad_tree::max_colliders = nqt["Max colliders"].as<std::size_t>();
         ppx::quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
         ppx::quad_tree::min_size = nqt["Min size"].as<float>();
 
@@ -352,8 +402,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                                                                    nres["Normal damping"].as<float>(),
                                                                    nres["Tangent damping"].as<float>());
             else if (method == 1)
-                cm.set_resolution<ppx::constraint_driven_resolution2D>(
-                    nres["Restitution"].as<float>(), nres["Friction"].as<float>(), nres["Slop"].as<float>());
+                cm.set_resolution<ppx::constraint_driven_resolution2D>(nres["Slop"].as<float>());
         }
         return true;
     }

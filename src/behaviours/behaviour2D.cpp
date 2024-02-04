@@ -23,14 +23,32 @@ void behaviour2D::add(const body2D::ptr &body)
 {
     m_bodies.push_back(body);
 }
-void behaviour2D::remove(const body2D &body)
+bool behaviour2D::remove(std::size_t index)
+{
+    if (index >= m_bodies.size())
+        return false;
+    m_bodies.erase(m_bodies.begin() + index);
+    return true;
+}
+bool behaviour2D::remove(kit::uuid id)
+{
+    for (auto it = m_bodies.begin(); it != m_bodies.end(); ++it)
+        if ((*it)->id == id)
+        {
+            m_bodies.erase(it);
+            return true;
+        }
+    return false;
+}
+bool behaviour2D::remove(const body2D &body)
 {
     for (auto it = m_bodies.begin(); it != m_bodies.end(); ++it)
         if (*(*it) == body)
         {
             m_bodies.erase(it);
-            break;
+            return true;
         }
+    return false;
 }
 bool behaviour2D::contains(const body2D &body) const
 {
@@ -47,29 +65,29 @@ float behaviour2D::kinetic_energy() const
     return ke;
 }
 
-body2D::const_ptr behaviour2D::operator[](std::size_t index) const
+const body2D &behaviour2D::operator[](std::size_t index) const
 {
     KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds container size: {0}", index)
-    return m_bodies[index];
+    return *m_bodies[index];
 }
-const body2D::ptr &behaviour2D::operator[](std::size_t index)
+body2D &behaviour2D::operator[](std::size_t index)
 {
     KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds container size: {0}", index)
-    return m_bodies[index];
+    return *m_bodies[index];
 }
 
-body2D::const_ptr behaviour2D::operator[](const kit::uuid id) const
+const body2D *behaviour2D::operator[](const kit::uuid id) const
 {
     for (const auto &body : m_bodies)
         if (body->id == id)
-            return body;
+            return body.raw();
     return nullptr;
 }
-body2D::ptr behaviour2D::operator[](const kit::uuid id)
+body2D *behaviour2D::operator[](const kit::uuid id)
 {
     for (const auto &body : m_bodies)
         if (body->id == id)
-            return body;
+            return body.raw();
     return nullptr;
 }
 

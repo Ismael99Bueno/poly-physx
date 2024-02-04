@@ -66,11 +66,14 @@ class collision_manager2D : public kit::toggleable, public worldref2D
         return ptr;
     }
 
-    void solve();
     std::size_t size() const;
+    bool empty() const;
 
   private:
     kit::scope<collision_detection2D> m_collision_detection;
     kit::scope<collision_resolution2D> m_collision_resolution;
+
+    void solve();
+    friend class world2D;
 };
 } // namespace ppx

@@ -8,11 +8,7 @@ class world2D;
 class joint_proxy2D
 {
   public:
-    struct specs
-    {
-        body2D::ptr body1 = nullptr, body2 = nullptr;
-        glm::vec2 anchor1{0.f}, anchor2{0.f};
-    };
+    using specs = specs::joint_proxy2D;
 
     joint_proxy2D() = default;
     joint_proxy2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
@@ -39,7 +35,8 @@ class joint_proxy2D
     void anchor2(const glm::vec2 &anchor2);
 
   private:
-    body2D::ptr m_body1 = nullptr, m_body2 = nullptr;
+    body2D::ptr m_body1 = nullptr;
+    body2D::ptr m_body2 = nullptr;
     glm::vec2 m_anchor1{0.f}, m_anchor2{0.f};
     float m_angle1 = 0.f, m_angle2 = 0.f;
 };

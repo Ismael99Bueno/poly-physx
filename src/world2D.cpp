@@ -54,8 +54,8 @@ std::vector<float> world2D::create_state_derivative() const
     {
         const std::size_t index = 6 * body.index;
 
-        const glm::vec2 &accel = body.force() * body.inv_mass();
-        const float angaccel = body.torque() * body.inv_inertia();
+        const glm::vec2 &accel = body.force() * body.props().dynamic.inv_mass;
+        const float angaccel = body.torque() * body.props().dynamic.inv_inertia;
 
         const glm::vec2 velocity =
             semi_implicit_integration ? body.velocity + accel * integrator.ts.value : body.velocity;
@@ -76,6 +76,7 @@ std::vector<float> world2D::create_state_derivative() const
 void world2D::validate()
 {
     bodies.validate();
+    colliders.validate();
     constraints.validate();
     behaviours.validate();
     springs.validate();

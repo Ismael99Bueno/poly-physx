@@ -2,11 +2,11 @@
 
 #include "rk/integration/integrator.hpp"
 #include "ppx/entities/body_manager2D.hpp"
+#include "ppx/entities/collider_manager2D.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/constraints/constraint_manager2D.hpp"
 #include "ppx/behaviours/behaviour_manager2D.hpp"
 #include "ppx/joints/spring_manager2D.hpp"
-#include "ppx/events/world_events.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/utility/utils.hpp"
 
@@ -24,11 +24,11 @@ class world2D : kit::non_copyable
 
     rk::integrator<float> integrator;
     body_manager2D bodies;
+    collider_manager2D colliders;
     spring_manager2D springs;
     behaviour_manager2D behaviours;
     collision_manager2D collisions;
     constraint_manager2D constraints;
-    world_events events;
 
     bool semi_implicit_integration = false;
 

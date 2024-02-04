@@ -1,7 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/world2D.hpp"
-#include "kit/profile/perf.hpp"
+
 #include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
@@ -27,9 +27,9 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tr
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
-                body2D &body1 = *(*partition)[i];
-                body2D &body2 = *(*partition)[j];
-                process_collision_st(body1, body2);
+                collider2D &collider1 = *(*partition)[i];
+                collider2D &collider2 = *(*partition)[j];
+                process_collision_st(collider1, collider2);
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
@@ -39,9 +39,9 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
-                body2D &body1 = *(*partition)[i];
-                body2D &body2 = *(*partition)[j];
-                process_collision_mt(body1, body2, thread_idx);
+                collider2D &collider1 = *(*partition)[i];
+                collider2D &collider2 = *(*partition)[j];
+                process_collision_mt(collider1, collider2, thread_idx);
             }
     };
     kit::mt::for_each<PPX_THREAD_COUNT>(partitions, exec);
@@ -51,9 +51,9 @@ void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();
     aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
-    for (const body2D &body : world.bodies)
-        if (body.type == body2D::btype::DYNAMIC)
-            aabb += body.shape().bounding_box();
+    for (const collider2D &collider : world.colliders)
+        if (collider.parent().is_dynamic())
+            aabb += collider.shape().bounding_box();
 
     if (force_square_shape)
     {
@@ -71,8 +71,8 @@ void quad_tree_detection2D::update_quad_tree()
     }
 
     m_quad_tree.aabb = aabb;
-    for (body2D &body : world.bodies)
-        m_quad_tree.insert(&body);
+    for (collider2D &collider : world.colliders)
+        m_quad_tree.insert(&collider);
 }
 
 const quad_tree &quad_tree_detection2D::qtree() const

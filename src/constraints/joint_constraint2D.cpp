@@ -17,8 +17,9 @@ float joint_constraint2D::compute_lambda(body2D &body1, body2D &body2, const glm
     const float cross1 = kit::cross2D(anchor1, dir);
     const float cross2 = kit::cross2D(anchor2, dir);
 
-    const float inv_mass = body1.inv_mass() + body2.inv_mass() + body1.inv_inertia() * cross1 * cross1 +
-                           body2.inv_inertia() * cross2 * cross2;
+    const float inv_mass = body1.props().dynamic.inv_mass + body2.props().dynamic.inv_mass +
+                           body1.props().dynamic.inv_inertia * cross1 * cross1 +
+                           body2.props().dynamic.inv_inertia * cross2 * cross2;
 
     if (m_allow_baumgarte_correction && world.constraints.baumgarte_correction)
     {
@@ -44,11 +45,11 @@ void joint_constraint2D::apply_lambda(const float lambda, body2D &body1, body2D 
     const glm::vec2 imp2 = lambda * dir;
     const glm::vec2 imp1 = -imp2;
 
-    body1.constraint_velocity += body1.inv_mass() * imp1;
-    body2.constraint_velocity += body2.inv_mass() * imp2;
+    body1.ctr_proxy.velocity += body1.props().dynamic.inv_mass * imp1;
+    body2.ctr_proxy.velocity += body2.props().dynamic.inv_mass * imp2;
 
-    body1.constraint_angular_velocity += body1.inv_inertia() * kit::cross2D(anchor1, imp1);
-    body2.constraint_angular_velocity += body2.inv_inertia() * kit::cross2D(anchor2, imp2);
+    body1.ctr_proxy.angular_velocity += body1.props().dynamic.inv_inertia * kit::cross2D(anchor1, imp1);
+    body2.ctr_proxy.angular_velocity += body2.props().dynamic.inv_inertia * kit::cross2D(anchor2, imp2);
 
     body1.apply_simulation_force_at(imp1 / world.integrator.ts.value, anchor1);
     body2.apply_simulation_force_at(imp2 / world.integrator.ts.value, anchor2);
