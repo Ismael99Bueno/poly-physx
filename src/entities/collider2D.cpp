@@ -61,6 +61,10 @@ void collider2D::charge_density(float charge_density)
     m_charge_density = charge_density;
 }
 
+const aabb2D &collider2D::bounding_box() const
+{
+    return shape().bounding_box();
+}
 const kit::transform2D<float> &collider2D::transform() const
 {
     return shape().transform();

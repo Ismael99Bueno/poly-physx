@@ -53,7 +53,7 @@ void quad_tree_detection2D::update_quad_tree()
     aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
     for (const collider2D &collider : world.colliders)
         if (collider.parent().is_dynamic())
-            aabb += collider.shape().bounding_box();
+            aabb += collider.bounding_box();
 
     if (force_square_shape)
     {

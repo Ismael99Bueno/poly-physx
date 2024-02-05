@@ -45,6 +45,7 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
+    const aabb2D &bounding_box() const;
     const kit::transform2D<float> &transform() const;
 
     glm::vec2 gposition() const;

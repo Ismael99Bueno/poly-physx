@@ -25,8 +25,8 @@ class collider_manager2D final : public manager2D<collider2D>
     collider2D::ptr ptr(std::size_t index);
 
     using manager2D<collider2D>::operator[];
-    std::vector<collider2D::const_ptr> operator[](const aabb2D &aabb) const;
-    std::vector<collider2D::ptr> operator[](const aabb2D &aabb);
+    std::vector<const collider2D *> operator[](const aabb2D &aabb) const;
+    std::vector<collider2D *> operator[](const aabb2D &aabb);
 
     const collider2D *operator[](const glm::vec2 &point) const;
     collider2D *operator[](const glm::vec2 &point);

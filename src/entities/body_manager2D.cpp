@@ -69,12 +69,18 @@ static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
     in_area.reserve(elements.size() / 2);
 
     for (Body &body : elements)
-        for (Collider &collider : body)
-            if (geo::intersects(collider.shape().bounding_box(), aabb))
-            {
-                in_area.push_back(&body);
-                break;
-            }
+        if (geo::intersects(aabb, body.centroid()))
+        {
+            in_area.push_back(&body);
+            break;
+        }
+        else
+            for (Collider &collider : body)
+                if (geo::intersects(collider.bounding_box(), aabb))
+                {
+                    in_area.push_back(&body);
+                    break;
+                }
     return in_area;
 }
 
@@ -87,23 +93,22 @@ std::vector<body2D *> body_manager2D::operator[](const aabb2D &aabb)
     return in_area<body2D, collider2D>(m_elements, aabb);
 }
 
-const body2D *body_manager2D::operator[](const glm::vec2 &point) const
+template <typename Body, typename Collider, typename C> static Body *at_point(C &elements, const glm::vec2 &point)
 {
-    const aabb2D aabb = point;
-    for (const body2D &body : m_elements)
-        for (const collider2D &collider : body)
-            if (geo::intersects(collider.shape().bounding_box(), aabb))
+    for (Body &body : elements)
+        for (Collider &collider : body)
+            if (geo::intersects(collider.bounding_box(), point))
                 return &body;
     return nullptr;
 }
+
+const body2D *body_manager2D::operator[](const glm::vec2 &point) const
+{
+    return at_point<const body2D, const collider2D>(m_elements, point);
+}
 body2D *body_manager2D::operator[](const glm::vec2 &point)
 {
-    const aabb2D aabb = point;
-    for (body2D &body : m_elements)
-        for (const collider2D &collider : body)
-            if (geo::intersects(collider.shape().bounding_box(), aabb))
-                return &body;
-    return nullptr;
+    return at_point<body2D, collider2D>(m_elements, point);
 }
 
 bool body_manager2D::remove(const std::size_t index)

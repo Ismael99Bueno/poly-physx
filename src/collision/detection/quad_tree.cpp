@@ -16,7 +16,7 @@ void quad_tree::insert(collider2D *collider)
     KIT_ASSERT_CRITICAL(m_colliders.size() <= max_colliders || rock_bottom(),
                         "Quad tree contains more bodies than allowed! - Contained bodies: {0}, maximum bodies: {1}",
                         m_colliders.size(), max_colliders)
-    if (!geo::intersects(aabb, collider->shape().bounding_box()))
+    if (!geo::intersects(aabb, collider->bounding_box()))
         return;
     if (full() && !rock_bottom())
         subdivide();

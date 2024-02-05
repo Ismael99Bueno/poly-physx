@@ -38,40 +38,41 @@ collider2D::ptr collider_manager2D::ptr(const std::size_t index)
     return {&m_elements, index};
 }
 
-std::vector<collider2D::const_ptr> collider_manager2D::operator[](const aabb2D &aabb) const
+template <typename Collider, typename C> static std::vector<Collider *> in_area(C &elements, const aabb2D &aabb)
 {
-    std::vector<collider2D::const_ptr> in_area;
-    in_area.reserve(m_elements.size() / 2);
+    std::vector<Collider *> in_area;
+    in_area.reserve(elements.size() / 2);
 
-    for (const collider2D &collider : m_elements)
-        if (geo::intersects(collider.shape().bounding_box(), aabb))
-            in_area.emplace_back(&m_elements, collider.index);
+    for (Collider &collider : elements)
+        if (geo::intersects(collider.bounding_box(), aabb))
+            in_area.emplace_back(&collider);
     return in_area;
 }
-std::vector<collider2D::ptr> collider_manager2D::operator[](const aabb2D &aabb)
-{
-    std::vector<collider2D::ptr> in_area;
-    in_area.reserve(m_elements.size() / 2);
 
-    for (collider2D &collider : m_elements)
-        if (geo::intersects(collider.shape().bounding_box(), aabb))
-            in_area.emplace_back(&m_elements, collider.index);
-    return in_area;
+std::vector<const collider2D *> collider_manager2D::operator[](const aabb2D &aabb) const
+{
+    return in_area<const collider2D>(m_elements, aabb);
+}
+std::vector<collider2D *> collider_manager2D::operator[](const aabb2D &aabb)
+{
+    return in_area<collider2D>(m_elements, aabb);
+}
+
+template <typename Collider, typename C> static Collider *at_point(C &elements, const glm::vec2 &point)
+{
+    for (Collider &collider : elements)
+        if (geo::intersects(collider.bounding_box(), point))
+            return &collider;
+    return nullptr;
 }
 
 const collider2D *collider_manager2D::operator[](const glm::vec2 &point) const
 {
-    for (const collider2D &collider : m_elements)
-        if (geo::intersects(collider.shape().bounding_box(), point))
-            return &collider;
-    return nullptr;
+    return at_point<const collider2D>(m_elements, point);
 }
 collider2D *collider_manager2D::operator[](const glm::vec2 &point)
 {
-    for (collider2D &collider : m_elements)
-        if (geo::intersects(collider.shape().bounding_box(), point))
-            return &collider;
-    return nullptr;
+    return at_point<collider2D>(m_elements, point);
 }
 
 bool collider_manager2D::remove(const std::size_t index)
