@@ -61,6 +61,11 @@ void collider2D::charge_density(float charge_density)
     m_charge_density = charge_density;
 }
 
+const kit::transform2D<float> &collider2D::transform() const
+{
+    return shape().transform();
+}
+
 const glm::vec2 &collider2D::lposition() const
 {
     return m_position;
