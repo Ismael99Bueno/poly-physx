@@ -154,12 +154,12 @@ void body_manager2D::send_data_to_state(rk::state<float> &state)
     for (body2D &body : m_elements)
     {
         const std::size_t index = 6 * body.index;
-        const glm::vec2 &position = body.position();
+        const glm::vec2 &centroid = body.centroid();
         if (body.is_dynamic())
             body.velocity = glm::vec2(0.f);
 
-        state[index] = position.x;
-        state[index + 1] = position.y;
+        state[index] = centroid.x;
+        state[index + 1] = centroid.y;
         state[index + 2] = body.rotation();
         state[index + 3] = body.velocity.x;
         state[index + 4] = body.velocity.y;

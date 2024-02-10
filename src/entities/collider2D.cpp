@@ -89,6 +89,15 @@ void collider2D::end_update()
     mutable_shape().end_update();
 }
 
+float collider2D::area() const
+{
+    return shape().area();
+}
+float collider2D::inertia() const
+{
+    return shape().inertia();
+}
+
 bool collider2D::is_circle() const
 {
     return m_type == stype::CIRCLE;

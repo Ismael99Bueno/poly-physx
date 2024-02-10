@@ -17,8 +17,8 @@ class world2D : kit::non_copyable
   public:
     template <class... IntegArgs>
     world2D(IntegArgs &&...args)
-        : integrator(std::forward<IntegArgs>(args)...), bodies(*this), springs(*this), behaviours(*this),
-          collisions(*this), constraints(*this), m_previous_timestep(integrator.ts.value)
+        : integrator(std::forward<IntegArgs>(args)...), bodies(*this), colliders(*this), springs(*this),
+          behaviours(*this), collisions(*this), constraints(*this), m_previous_timestep(integrator.ts.value)
     {
     }
 

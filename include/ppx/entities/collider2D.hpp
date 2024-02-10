@@ -30,6 +30,9 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
     const body2D &parent() const;
     body2D &parent();
 
+    float area() const;
+    float inertia() const;
+
     bool is_circle() const;
     bool is_polygon() const;
 

@@ -161,6 +161,12 @@ void body2D::update_centroids()
 {
     if (m_density_update)
         return;
+    if (empty())
+    {
+        m_charge_centroid = m_props.position;
+        m_transform.position = m_props.position;
+        return;
+    }
     glm::vec2 centroid{0.f};
     float artificial_mass = 0.f;
 
@@ -190,7 +196,14 @@ void body2D::update_inertia()
 {
     if (m_density_update)
         return;
+
     m_props.nondynamic.inertia = 0.f;
+    if (empty())
+    {
+        m_props.dynamic.inertia = 0.f;
+        return;
+    }
+
     float artificial_mass = 0.f;
     for (const collider2D &collider : *this)
     {
