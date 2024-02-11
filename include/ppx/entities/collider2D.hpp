@@ -45,28 +45,27 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
     void begin_update();
     void end_update();
 
-    void translate(const glm::vec2 &dpos);
-    void rotate(float dangle);
+    void ltranslate(const glm::vec2 &dpos);
+    void gtranslate(const glm::vec2 &dpos);
+    void lrotate(float dangle);
 
     const aabb2D &bounding_box() const;
-    const kit::transform2D<float> &transform() const;
+    const kit::transform2D<float> &ltransform() const;
 
-    glm::vec2 gposition() const;
     const glm::vec2 &lposition() const;
 
     const glm::vec2 &gcentroid() const;
     glm::vec2 lcentroid() const;
 
-    float rotation() const;
+    float lrotation() const;
     const glm::vec2 &origin() const;
 
-    void gposition(const glm::vec2 &gposition);
     void lposition(const glm::vec2 &lposition);
 
     void gcentroid(const glm::vec2 &gcentroid);
     void lcentroid(const glm::vec2 &lcentroid);
 
-    void rotation(float rotation);
+    void lrotation(float lrotation);
     void origin(const glm::vec2 &origin);
 
     const shape2D &shape() const;
@@ -82,7 +81,7 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
     template <kit::DerivedFrom<shape2D> T, class... ShapeArgs> void set_shape(ShapeArgs &&...args)
     {
         T shape{std::forward<ShapeArgs>(args)...};
-        shape.parent(&m_parent->transform());
+        shape.parent(&m_parent->centroid_transform());
         m_shape = shape;
         if constexpr (std::is_same_v<T, polygon>)
             m_type = stype::POLYGON;

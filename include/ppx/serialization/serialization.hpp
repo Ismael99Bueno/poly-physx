@@ -178,7 +178,7 @@ template <> struct kit::yaml::codec<ppx::body2D>
         node["Angular velocity"] = body.angular_velocity;
         node["Mass"] = body.props().nondynamic.mass;
         node["Charge"] = body.charge;
-        node["Type"] = (int)body.type;
+        node["Type"] = (int)body.type();
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::body2D &body)
@@ -192,7 +192,7 @@ template <> struct kit::yaml::codec<ppx::body2D>
         body.angular_velocity = node["Angular velocity"].as<float>();
         body.mass(node["Mass"].as<float>());
         body.charge = node["Charge"].as<float>();
-        body.type = (ppx::body2D::btype)node["Type"].as<int>();
+        body.type((ppx::body2D::btype)node["Type"].as<int>());
 
         return true;
     }

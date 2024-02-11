@@ -8,17 +8,24 @@ namespace ppx
 {
 collider2D &collider_manager2D::add(const body2D::ptr &parent, const collider2D::specs &spc)
 {
+    const auto it = parent->end();
+    const bool empty = parent->empty();
+
     parent->m_size++;
-    collider2D &collider = parent->empty() ? m_elements.emplace_back(world, parent, spc)
-                                           : *m_elements.emplace(parent->end(), world, parent, spc);
-    if (parent->m_size == 1)
+    collider2D &collider =
+        empty ? m_elements.emplace_back(world, parent, spc) : *m_elements.emplace(it, world, parent, spc);
+
+    if (empty)
+    {
+        collider.index = m_elements.size() - 1;
         parent->m_start = collider.index;
+    }
     else
     {
+        validate_indices();
         for (body2D &body : world.bodies)
             if (body.m_start > parent->m_start)
                 body.m_start++;
-        validate_indices();
     }
     events.on_addition(collider);
     KIT_INFO("Added collider with index {0} and id {1}.", collider.index, collider.id)
@@ -110,7 +117,7 @@ void collider_manager2D::validate_indices()
 void collider_manager2D::validate_parents()
 {
     for (collider2D &collider : m_elements)
-        collider.mutable_shape().parent(&collider.parent().transform());
+        collider.mutable_shape().parent(&collider.parent().centroid_transform());
 }
 
 void collider_manager2D::validate()

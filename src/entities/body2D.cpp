@@ -9,18 +9,12 @@ namespace ppx
 {
 body2D::body2D(world2D &world, const body2D::specs &spc)
     : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(spc.velocity),
-      angular_velocity(spc.angular_velocity), charge(spc.charge), type(spc.type),
-      m_transform(kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()),
-      m_charge_centroid(spc.position)
+      angular_velocity(spc.angular_velocity), charge(spc.charge),
+      m_centroid(kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()),
+      m_charge_centroid(spc.position), m_type(spc.type)
 {
-    m_props.position = m_transform.position;
-    m_props.dynamic.mass = is_dynamic() ? spc.mass : FLT_MAX;
-    m_props.nondynamic.mass = spc.mass;
-
-    begin_density_update();
-    for (const auto &collider_spc : spc.colliders)
-        add(collider_spc);
-    end_density_update();
+    m_position = m_centroid.position;
+    mass(spc.mass);
 }
 
 const collider2D &body2D::operator[](const std::size_t index) const
@@ -138,7 +132,7 @@ void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_b
     const std::size_t idx = 6 * index;
 
     begin_spatial_update();
-    position({vars_buffer[idx + 0], vars_buffer[idx + 1]});
+    centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});
     rotation(vars_buffer[idx + 2]);
     end_spatial_update();
 
@@ -163,8 +157,8 @@ void body2D::update_centroids()
         return;
     if (empty())
     {
-        m_charge_centroid = m_props.position;
-        m_transform.position = m_props.position;
+        m_charge_centroid = m_position;
+        m_centroid.position = m_position;
         return;
     }
     glm::vec2 centroid{0.f};
@@ -178,19 +172,20 @@ void body2D::update_centroids()
         const shape2D &shape = collider.shape();
 
         const float cmass = collider.density() * shape.area();
-        centroid += cmass * shape.centroid();
+        centroid += cmass * shape.gcentroid();
         artificial_mass += cmass;
 
         const float ccharge = collider.charge_density() * shape.area();
-        charge_centroid += ccharge * shape.centroid();
+        charge_centroid += ccharge * shape.gcentroid();
         artificial_charge += ccharge;
     }
     m_charge_centroid = charge_centroid / artificial_charge;
+    centroid /= artificial_mass;
 
-    const glm::vec2 diff = centroid / artificial_mass - m_transform.position;
-    m_transform.position = centroid / artificial_mass;
+    const glm::vec2 diff = m_centroid.position - centroid;
+    m_centroid.position = centroid;
     for (collider2D &collider : *this)
-        collider.mutable_shape().translate(diff);
+        collider.mutable_shape().gtranslate(diff);
 }
 void body2D::update_inertia()
 {
@@ -209,7 +204,7 @@ void body2D::update_inertia()
     {
         const shape2D &shape = collider.shape();
         const float cmass = collider.density() * shape.area();
-        const float dist2 = glm::length2(shape.centroid() - m_transform.position);
+        const float dist2 = glm::length2(shape.gcentroid() - m_centroid.position);
 
         m_props.nondynamic.inertia += cmass * (dist2 + shape.inertia());
         artificial_mass += cmass;
@@ -227,15 +222,25 @@ void body2D::reset_simulation_forces()
 
 bool body2D::is_dynamic() const
 {
-    return type == btype::DYNAMIC;
+    return m_type == btype::DYNAMIC;
 }
 bool body2D::is_kinematic() const
 {
-    return type == btype::KINEMATIC;
+    return m_type == btype::KINEMATIC;
 }
 bool body2D::is_static() const
 {
-    return type == btype::STATIC;
+    return m_type == btype::STATIC;
+}
+
+body2D::btype body2D::type() const
+{
+    return m_type;
+}
+void body2D::type(btype type)
+{
+    m_type = type;
+    reset_dynamic_properties();
 }
 
 body2D::const_ptr body2D::as_ptr() const
@@ -288,32 +293,32 @@ const glm::vec2 &body2D::charge_centroid() const
 
 void body2D::translate(const glm::vec2 &dpos)
 {
-    m_transform.position += dpos;
-    m_props.position += dpos;
+    m_centroid.position += dpos;
+    m_position += dpos;
     update_colliders();
 }
 void body2D::rotate(const float dangle)
 {
-    m_transform.rotation += dangle;
+    m_centroid.rotation += dangle;
     update_colliders();
 }
 
-const kit::transform2D<float> &body2D::transform() const
+const kit::transform2D<float> &body2D::centroid_transform() const
 {
-    return m_transform;
+    return m_centroid;
 }
 
 const glm::vec2 &body2D::centroid() const
 {
-    return m_transform.position;
+    return m_centroid.position;
 }
 const glm::vec2 &body2D::position() const
 {
-    return m_props.position;
+    return m_position;
 }
 const glm::vec2 &body2D::origin() const
 {
-    return m_transform.origin;
+    return m_centroid.origin;
 }
 
 glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
@@ -323,48 +328,63 @@ glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
 
 float body2D::rotation() const
 {
-    return m_transform.rotation;
+    return m_centroid.rotation;
 }
 
 void body2D::centroid(const glm::vec2 &centroid)
 {
-    m_props.position += centroid - m_transform.position;
-    m_transform.position = centroid;
+    m_position += centroid - m_centroid.position;
+    m_centroid.position = centroid;
     update_colliders();
 }
 void body2D::position(const glm::vec2 &position)
 {
-    m_transform.position += position - m_props.position;
-    m_props.position = position;
+    m_centroid.position += position - m_position;
+    m_position = position;
     update_colliders();
 }
 void body2D::origin(const glm::vec2 &origin)
 {
-    m_transform.origin = origin;
+    m_centroid.origin = origin;
     update_colliders();
 }
 void body2D::rotation(const float rotation)
 {
-    m_props.position =
-        m_transform.position + kit::transform2D<float>::rotation_matrix(rotation - m_transform.rotation) *
-                                   (m_props.position - m_transform.position);
-    m_transform.rotation = rotation;
+    m_position = m_centroid.position + kit::transform2D<float>::rotation_matrix(rotation - m_centroid.rotation) *
+                                           (m_position - m_centroid.position);
+    m_centroid.rotation = rotation;
     update_colliders();
 }
 
 void body2D::match_position_with_centroid()
 {
-    m_props.position = m_transform.position;
+    m_position = m_centroid.position;
 }
 
 void body2D::mass(const float mass)
 {
-    m_props.nondynamic.inertia *= mass / m_props.nondynamic.mass;
-    m_props.nondynamic.mass = mass;
-    if (is_dynamic())
+    if (!kit::approaches_zero(m_props.nondynamic.mass))
     {
-        m_props.dynamic.mass = mass;
-        m_props.dynamic.inertia = m_props.nondynamic.inertia;
+        const float ratio = mass / m_props.nondynamic.mass;
+        m_props.nondynamic.inertia *= ratio;
+        m_props.nondynamic.inv_inertia /= ratio;
+    }
+
+    m_props.nondynamic.mass = mass;
+    m_props.nondynamic.inv_mass = 1.f / mass;
+    reset_dynamic_properties();
+}
+
+void body2D::reset_dynamic_properties()
+{
+    if (is_dynamic())
+        m_props.dynamic = m_props.nondynamic;
+    else
+    {
+        m_props.dynamic.mass = FLT_MAX;
+        m_props.dynamic.inv_mass = 0.f;
+        m_props.dynamic.inertia = FLT_MAX;
+        m_props.dynamic.inv_inertia = 0.f;
     }
 }
 

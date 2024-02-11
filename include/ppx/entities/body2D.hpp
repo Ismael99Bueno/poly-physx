@@ -41,7 +41,6 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
         };
         data dynamic;
         data nondynamic;
-        glm::vec2 position;
         float charge;
     };
 
@@ -58,8 +57,6 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     float charge;
 
     constraint_proxy ctr_proxy;
-
-    btype type;
 
     const collider2D &operator[](std::size_t index) const;
     collider2D &operator[](std::size_t index);
@@ -87,6 +84,9 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     bool is_kinematic() const;
     bool is_static() const;
 
+    btype type() const;
+    void type(btype type);
+
     void begin_density_update();
     void end_density_update();
 
@@ -110,7 +110,7 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
-    const kit::transform2D<float> &transform() const;
+    const kit::transform2D<float> &centroid_transform() const;
 
     const glm::vec2 &centroid() const;
     const glm::vec2 &position() const;
@@ -128,7 +128,8 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     void mass(float mass);
 
   private:
-    kit::transform2D<float> m_transform;
+    kit::transform2D<float> m_centroid;
+    glm::vec2 m_position;
     properties m_props;
     glm::vec2 m_charge_centroid;
     glm::vec2 m_force{0.f};
@@ -136,6 +137,7 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
 
     std::size_t m_start = 0;
     std::size_t m_size = 0;
+    btype m_type;
 
     bool m_density_update = false;
     bool m_spatial_update = false;
@@ -150,6 +152,8 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     void apply_simulation_force(const glm::vec2 &force);
     void apply_simulation_force_at(const glm::vec2 &force, const glm::vec2 &at);
     void apply_simulation_torque(float torque);
+
+    void reset_dynamic_properties();
 
     friend class collider2D;
     friend class spring2D;

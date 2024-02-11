@@ -10,12 +10,16 @@ body2D &body_manager2D::add(const body2D::specs &spc)
     body2D &body = m_elements.emplace_back(world, spc);
     body.index = m_elements.size() - 1;
 
-    const kit::transform2D<float> &transform = body.transform();
+    body.begin_density_update();
+    for (const auto &collider_spc : spc.colliders)
+        body.add(collider_spc);
+    body.end_density_update();
+
+    const kit::transform2D<float> &transform = body.centroid_transform();
 
     rk::state<float> &state = world.integrator.state;
     state.append({transform.position.x, transform.position.y, transform.rotation, body.velocity.x, body.velocity.y,
                   body.angular_velocity});
-    body.retrieve_data_from_state_variables(state.vars());
 
     world.colliders.validate_parents();
     events.on_addition(body);
@@ -155,7 +159,7 @@ void body_manager2D::send_data_to_state(rk::state<float> &state)
     {
         const std::size_t index = 6 * body.index;
         const glm::vec2 &centroid = body.centroid();
-        if (body.is_dynamic())
+        if (body.is_static())
             body.velocity = glm::vec2(0.f);
 
         state[index] = centroid.x;

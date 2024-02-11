@@ -11,14 +11,14 @@ collider2D collider2D::from_collider(const ppx::collider2D &collider)
 {
     if (const auto *poly = collider.shape_if<polygon>())
     {
-        const kit::transform2D<float> &transform = poly->transform();
-        return {transform.position,   transform.rotation, collider.density(), collider.charge_density(),
-                collider.restitution, collider.friction,  poly->locals,       0.f,
+        const kit::transform2D<float> &transform = poly->ltransform();
+        return {transform.position,   transform.rotation, collider.density(),   collider.charge_density(),
+                collider.restitution, collider.friction,  poly->vertices.model, 0.f,
                 collider.shape_type()};
     }
 
     const circle &circ = collider.shape<circle>();
-    const kit::transform2D<float> &transform = circ.transform();
+    const kit::transform2D<float> &transform = circ.ltransform();
     return {transform.position,
             transform.rotation,
             collider.density(),
@@ -39,7 +39,7 @@ body2D body2D::from_body(const ppx::body2D &body)
         colliders.push_back(collider2D::from_collider(collider));
 
     return {body.position(), body.velocity, body.rotation(), body.angular_velocity, body.props().nondynamic.mass,
-            body.charge,     colliders,     body.type};
+            body.charge,     colliders,     body.type()};
 }
 
 spring2D spring2D::from_spring(const ppx::spring2D &sp)

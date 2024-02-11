@@ -5,13 +5,14 @@
 namespace ppx
 {
 collider2D::collider2D(world2D &world, const body2D::ptr &parent, const specs &spc)
-    : worldref2D(world), restitution(spc.restitution), friction(spc.friction), m_position(spc.position),
-      m_parent(parent), m_density(spc.density), m_charge_density(spc.charge_density), m_type(spc.shape)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), restitution(spc.restitution), friction(spc.friction),
+      m_position(spc.position), m_parent(parent), m_density(spc.density), m_charge_density(spc.charge_density),
+      m_type(spc.shape)
 {
     const kit::transform2D<float> transform = kit::transform2D<float>::builder()
                                                   .position(spc.position)
                                                   .rotation(spc.rotation)
-                                                  .parent(&parent->transform())
+                                                  .parent(&parent->centroid_transform())
                                                   .build();
     switch (spc.shape)
     {
@@ -65,18 +66,14 @@ const aabb2D &collider2D::bounding_box() const
 {
     return shape().bounding_box();
 }
-const kit::transform2D<float> &collider2D::transform() const
+const kit::transform2D<float> &collider2D::ltransform() const
 {
-    return shape().transform();
+    return shape().ltransform();
 }
 
 const glm::vec2 &collider2D::lposition() const
 {
     return m_position;
-}
-glm::vec2 collider2D::gposition() const
-{
-    return m_parent->props().position + m_position;
 }
 
 void collider2D::begin_update()
@@ -107,59 +104,66 @@ bool collider2D::is_polygon() const
     return m_type == stype::POLYGON;
 }
 
-void collider2D::translate(const glm::vec2 &dpos)
+void collider2D::ltranslate(const glm::vec2 &dpos)
 {
-    mutable_shape().translate(dpos);
+    mutable_shape().ltranslate(dpos);
     m_position += dpos;
     update_parent();
 }
-void collider2D::rotate(float dangle)
+void collider2D::gtranslate(const glm::vec2 &dpos)
 {
-    mutable_shape().rotate(dangle);
+    mutable_shape().gtranslate(dpos);
+    m_position +=
+        glm::vec2(m_parent->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
+    update_parent();
+}
+void collider2D::lrotate(float dangle)
+{
+    mutable_shape().lrotate(dangle);
 }
 
 void collider2D::lposition(const glm::vec2 &position)
 {
-    mutable_shape().translate(position - m_position);
+    mutable_shape().ltranslate(position - m_position);
     m_position = position;
     update_parent();
-}
-void collider2D::gposition(const glm::vec2 &gposition)
-{
-    lposition(gposition - m_parent->props().position);
 }
 
 const glm::vec2 &collider2D::gcentroid() const
 {
-    return shape().centroid();
+    return shape().gcentroid();
 }
 glm::vec2 collider2D::lcentroid() const
 {
-    return gcentroid() - m_parent->centroid();
+    return shape().lcentroid();
 }
 
 void collider2D::gcentroid(const glm::vec2 &gcentroid)
 {
-    mutable_shape().centroid(gcentroid);
+    const glm::vec2 &gc = mutable_shape().gcentroid();
+    const glm::vec2 dpos = gcentroid - gc;
+    mutable_shape().gcentroid(gcentroid);
+    m_position +=
+        glm::vec2(m_parent->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
     update_parent();
 }
 void collider2D::lcentroid(const glm::vec2 &lcentroid)
 {
-    gcentroid(lcentroid + m_parent->centroid());
+    ltranslate(lcentroid - shape().lcentroid());
 }
 
-float collider2D::rotation() const
+float collider2D::lrotation() const
 {
-    return shape().transform().rotation;
+    return shape().lrotation();
 }
 const glm::vec2 &collider2D::origin() const
 {
-    return shape().transform().origin;
+    return shape().origin();
 }
 
-void collider2D::rotation(float rotation)
+void collider2D::lrotation(float lrotation)
 {
-    mutable_shape().rotation(rotation);
+    mutable_shape().lrotation(lrotation);
 }
 void collider2D::origin(const glm::vec2 &origin)
 {
