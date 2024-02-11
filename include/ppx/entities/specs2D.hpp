@@ -9,6 +9,7 @@ class body2D;
 class collider2D;
 class distance_joint2D;
 class spring2D;
+class joint_proxy2D;
 } // namespace ppx
 
 namespace ppx::specs
@@ -53,9 +54,10 @@ struct body2D
 
 struct joint_proxy2D
 {
-    ppx::body2D *body1 = nullptr;
-    ppx::body2D *body2 = nullptr;
+    std::size_t bindex1 = SIZE_MAX;
+    std::size_t bindex2 = SIZE_MAX;
     glm::vec2 anchor1{0.f}, anchor2{0.f};
+    static joint_proxy2D from_joint_proxy(const ppx::joint_proxy2D &jp);
 };
 
 struct distance_joint2D

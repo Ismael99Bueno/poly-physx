@@ -51,11 +51,12 @@ void contact_constraint2D::update(const collision2D *collision, const float slop
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
     m_body1 = &collision->collider1->parent();
     m_body2 = &collision->collider2->parent();
-    m_anchor1 = collision->touch1(m_index) - collision->collider1->gcentroid();
-    m_anchor2 = collision->touch2(m_index) - collision->collider2->gcentroid();
+    m_anchor1 = collision->touch1(m_index) - m_body1->centroid();
+    m_anchor2 = collision->touch2(m_index) - m_body2->centroid();
     m_normal = glm::normalize(collision->mtv);
     m_restitution = collision->restitution;
     m_slop = slop;
+    m_penetration = -glm::length(collision->mtv);
     m_friction.update(collision, m_normal, m_anchor1, m_anchor2);
     recently_updated = true;
 }

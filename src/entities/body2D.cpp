@@ -195,7 +195,9 @@ void body2D::update_inertia()
     m_props.nondynamic.inertia = 0.f;
     if (empty())
     {
-        m_props.dynamic.inertia = 0.f;
+        m_props.nondynamic.inv_inertia = 0.f;
+        m_props.dynamic.inertia = is_dynamic() ? 0.f : FLT_MAX;
+        m_props.dynamic.inv_inertia = 0.f;
         return;
     }
 
@@ -209,9 +211,13 @@ void body2D::update_inertia()
         m_props.nondynamic.inertia += cmass * (dist2 + shape.inertia());
         artificial_mass += cmass;
     }
-    m_props.nondynamic.inertia *= m_props.nondynamic.mass / artificial_mass;
+    m_props.nondynamic.inertia /= artificial_mass;
+    m_props.nondynamic.inv_inertia = 1.f / m_props.nondynamic.inertia;
     if (is_dynamic())
+    {
         m_props.dynamic.inertia = m_props.nondynamic.inertia;
+        m_props.dynamic.inv_inertia = m_props.nondynamic.inv_inertia;
+    }
 }
 
 void body2D::reset_simulation_forces()
@@ -307,6 +313,12 @@ const kit::transform2D<float> &body2D::centroid_transform() const
 {
     return m_centroid;
 }
+void body2D::centroid_transform(const kit::transform2D<float> &centroid)
+{
+    m_position += centroid.position - m_centroid.position;
+    m_centroid = centroid;
+    update_colliders();
+}
 
 const glm::vec2 &body2D::centroid() const
 {
@@ -363,15 +375,19 @@ void body2D::match_position_with_centroid()
 
 void body2D::mass(const float mass)
 {
-    if (!kit::approaches_zero(m_props.nondynamic.mass))
+    m_props.nondynamic.inv_mass = 1.f / mass;
+    if (kit::approaches_zero(m_props.nondynamic.inertia))
+    {
+        m_props.nondynamic.mass = mass;
+        update_inertia();
+    }
+    else if (!kit::approaches_zero(m_props.nondynamic.mass))
     {
         const float ratio = mass / m_props.nondynamic.mass;
+        m_props.nondynamic.mass = mass;
         m_props.nondynamic.inertia *= ratio;
         m_props.nondynamic.inv_inertia /= ratio;
     }
-
-    m_props.nondynamic.mass = mass;
-    m_props.nondynamic.inv_mass = 1.f / mass;
     reset_dynamic_properties();
 }
 

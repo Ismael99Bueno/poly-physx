@@ -49,68 +49,60 @@ template <> struct kit::yaml::codec<ppx::constraint2D>
     static YAML::Node encode(const ppx::constraint2D &ctr)
     {
         YAML::Node node;
-        node["UUID"] = (std::uint64_t)ctr.id;
+        node["Name"] = ctr.name;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::constraint2D &ctr)
     {
-        if (!node.IsMap() || node.size() == 0)
-            return false;
-        ctr.id = kit::uuid(node["UUID"].as<std::uint64_t>());
         return true;
     }
 };
 
-static void encode_joint(YAML::Node &node, const ppx::joint_proxy2D &joint)
+template <> struct kit::yaml::codec<ppx::joint_proxy2D::specs>
 {
-    node["Index1"] = joint.body1()->index;
-    node["Index2"] = joint.body2()->index;
-
-    node["Anchor1"] = joint.rotated_anchor1();
-    node["Anchor2"] = joint.rotated_anchor2();
-}
-static void decode_joint(const YAML::Node &node, ppx::joint_proxy2D &joint, ppx::body_manager2D &bodies)
-{
-    const std::size_t index1 = node["Index1"].as<std::size_t>();
-    const std::size_t index2 = node["Index2"].as<std::size_t>();
-
-    const glm::vec2 a1 = node["Anchor1"].as<glm::vec2>();
-    const glm::vec2 a2 = node["Anchor2"].as<glm::vec2>();
-
-    joint.body1(bodies.ptr(index1));
-    joint.body2(bodies.ptr(index2));
-
-    joint.anchor1(a1);
-    joint.anchor2(a2);
-}
-
-template <> struct kit::yaml::codec<ppx::distance_joint2D>
-{
-    static YAML::Node encode(const ppx::distance_joint2D &dj)
+    static YAML::Node encode(const ppx::joint_proxy2D::specs &joint)
     {
         YAML::Node node;
-        encode_joint(node, dj.joint);
-        node["Length"] = dj.length;
+        node["Index1"] = joint.bindex1;
+        node["Index2"] = joint.bindex2;
+
+        node["Anchor1"] = joint.anchor1;
+        node["Anchor2"] = joint.anchor2;
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::distance_joint2D &dj)
+    static bool decode(const YAML::Node &node, ppx::joint_proxy2D::specs &joint)
     {
-        if (!node.IsMap() || node.size() != 5)
+        if (!node.IsMap() || node.size() < 4)
             return false;
 
-        decode_joint(node, dj.joint, dj.world.bodies);
-        dj.length = node["Length"].as<float>();
+        joint.bindex1 = node["Index1"].as<std::size_t>();
+        joint.bindex2 = node["Index2"].as<std::size_t>();
+
+        joint.anchor1 = node["Anchor1"].as<glm::vec2>();
+        joint.anchor2 = node["Anchor2"].as<glm::vec2>();
+
         return true;
     }
 };
 
-template <> struct kit::yaml::codec<ppx::spring2D>
+template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
 {
-    static YAML::Node encode(const ppx::spring2D &sp)
+    static YAML::Node encode(const ppx::distance_joint2D::specs &dj)
+    {
+        return kit::yaml::codec<ppx::joint_proxy2D::specs>::encode(dj.joint);
+    }
+    static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
+    {
+        return kit::yaml::codec<ppx::joint_proxy2D::specs>::decode(node, dj.joint);
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::spring2D::specs>
+{
+    static YAML::Node encode(const ppx::spring2D::specs &sp)
     {
         YAML::Node node;
-        encode_joint(node, sp.joint);
-        node["UUID"] = (std::uint64_t)sp.id;
+        node["Joint"] = sp.joint;
         node["Stiffness"] = sp.stiffness;
         node["Damping"] = sp.damping;
         node["Length"] = sp.length;
@@ -118,14 +110,12 @@ template <> struct kit::yaml::codec<ppx::spring2D>
         node["Non linear contribution"] = sp.non_linear_contribution;
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::spring2D &sp)
+    static bool decode(const YAML::Node &node, ppx::spring2D::specs &sp)
     {
-        if (!node.IsMap() || node.size() != 10)
+        if (!node.IsMap() || node.size() != 6)
             return false;
 
-        decode_joint(node, sp.joint, sp.world.bodies);
-
-        sp.id = kit::uuid(node["UUID"].as<std::uint64_t>());
+        sp.joint = node["Joint"].as<ppx::joint_proxy2D::specs>();
         sp.stiffness = node["Stiffness"].as<float>();
         sp.damping = node["Damping"].as<float>();
         sp.length = node["Length"].as<float>();
@@ -135,90 +125,88 @@ template <> struct kit::yaml::codec<ppx::spring2D>
     }
 };
 
-template <> struct kit::yaml::codec<ppx::collider2D>
+template <> struct kit::yaml::codec<ppx::collider2D::specs>
 {
-    static YAML::Node encode(const ppx::collider2D &collider)
+    static YAML::Node encode(const ppx::collider2D::specs &collider)
     {
         YAML::Node node;
-        node["UUID"] = (std::uint64_t)collider.id;
-        node["Index"] = collider.index;
-        node["Parent"] = collider.parent().index;
-        node["Shape"] = collider.shape();
-        node["Charge density"] = collider.charge_density();
+        node["Position"] = collider.position;
+        node["Rotation"] = collider.rotation;
+        node["Density"] = collider.density;
+        node["Charge density"] = collider.charge_density;
         node["Restitution"] = collider.restitution;
         node["Friction"] = collider.friction;
+        switch (collider.shape)
+        {
+        case ppx::collider2D::stype::CIRCLE:
+            node["Radius"] = collider.radius;
+            break;
+        case ppx::collider2D::stype::POLYGON:
+            for (const glm::vec2 &v : collider.vertices)
+                node["Vertices"].push_back(v);
+        }
+
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::collider2D &collider)
+    static bool decode(const YAML::Node &node, ppx::collider2D::specs &collider)
     {
         if (!node.IsMap() || node.size() != 7)
             return false;
 
-        collider.id = kit::uuid(node["UUID"].as<std::uint64_t>());
-        collider.index = node["Index"].as<std::size_t>();
-        if (node["Shape"]["Radius"])
-            collider.set_shape<ppx::circle>(node["Shape"]["Radius"].as<ppx::circle>());
-        else
-            collider.set_shape<ppx::polygon>(node["Shape"].as<ppx::polygon>());
-        collider.charge_density(node["Charge density"].as<float>());
+        collider.position = node["Position"].as<glm::vec2>();
+        collider.rotation = node["Rotation"].as<float>();
+        collider.density = node["Density"].as<float>();
+        collider.charge_density = node["Charge density"].as<float>();
         collider.restitution = node["Restitution"].as<float>();
         collider.friction = node["Friction"].as<float>();
+        if (node["Radius"])
+        {
+            collider.radius = node["Radius"].as<float>();
+            collider.shape = ppx::collider2D::stype::CIRCLE;
+        }
+        else if (node["Vertices"])
+        {
+            collider.vertices.clear();
+            for (const YAML::Node &n : node["Vertices"])
+                collider.vertices.push_back(n.as<glm::vec2>());
+            collider.shape = ppx::collider2D::stype::POLYGON;
+        }
         return true;
     }
 };
 
-template <> struct kit::yaml::codec<ppx::body2D>
+template <> struct kit::yaml::codec<ppx::body2D::specs>
 {
-    static YAML::Node encode(const ppx::body2D &body)
+    static YAML::Node encode(const ppx::body2D::specs &body)
     {
         YAML::Node node;
-        node["UUID"] = (std::uint64_t)body.id;
-        node["Index"] = body.index;
+        node["Position"] = body.position;
         node["Velocity"] = body.velocity;
+        node["Rotation"] = body.rotation;
         node["Angular velocity"] = body.angular_velocity;
-        node["Mass"] = body.props().nondynamic.mass;
+        node["Mass"] = body.mass;
         node["Charge"] = body.charge;
-        node["Type"] = (int)body.type();
-        return node;
-    }
-    static bool decode(const YAML::Node &node, ppx::body2D &body)
-    {
-        if (!node.IsMap() || node.size() != 8)
-            return false;
-
-        body.id = kit::uuid(node["UUID"].as<std::uint64_t>());
-        body.index = node["Index"].as<std::size_t>();
-        body.velocity = node["Velocity"].as<glm::vec2>();
-        body.angular_velocity = node["Angular velocity"].as<float>();
-        body.mass(node["Mass"].as<float>());
-        body.charge = node["Charge"].as<float>();
-        body.type((ppx::body2D::btype)node["Type"].as<int>());
-
-        return true;
-    }
-};
-
-template <> struct kit::yaml::codec<ppx::collider_manager2D>
-{
-    static YAML::Node encode(const ppx::collider_manager2D &cm)
-    {
-        YAML::Node node;
-        for (const ppx::collider2D &collider : cm)
+        node["Type"] = (int)body.type;
+        for (const ppx::collider2D::specs &collider : body.colliders)
             node["Colliders"].push_back(collider);
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::collider_manager2D &cm)
+    static bool decode(const YAML::Node &node, ppx::body2D::specs &body)
     {
-        cm.clear();
+        if (!node.IsMap() || node.size() < 7)
+            return false;
+
+        body.position = node["Position"].as<glm::vec2>();
+        body.velocity = node["Velocity"].as<glm::vec2>();
+        body.rotation = node["Rotation"].as<float>();
+        body.angular_velocity = node["Angular velocity"].as<float>();
+        body.mass = node["Mass"].as<float>();
+        body.charge = node["Charge"].as<float>();
+        body.type = (ppx::body2D::btype)node["Type"].as<int>();
         if (node["Colliders"])
             for (const YAML::Node &n : node["Colliders"])
-            {
-                const ppx::body2D::ptr parent = cm.world.bodies[n["Parent"].as<std::size_t>()].as_ptr();
-                ppx::collider2D collider{cm.world, parent};
-                n.as<ppx::collider2D>(collider);
-                const auto specs = ppx::collider2D::specs::from_collider(collider);
-                cm.add(parent, specs);
-            }
+                body.colliders.push_back(n.as<ppx::collider2D::specs>());
+
         return true;
     }
 };
@@ -229,7 +217,7 @@ template <> struct kit::yaml::codec<ppx::body_manager2D>
     {
         YAML::Node node;
         for (const ppx::body2D &body : bm)
-            node["Bodies"].push_back(body);
+            node["Bodies"].push_back(ppx::body2D::specs::from_body(body));
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::body_manager2D &bm)
@@ -238,9 +226,7 @@ template <> struct kit::yaml::codec<ppx::body_manager2D>
         if (node["Bodies"])
             for (const YAML::Node &n : node["Bodies"])
             {
-                ppx::body2D body{bm.world};
-                n.as<ppx::body2D>(body);
-                const auto specs = ppx::body2D::specs::from_body(body);
+                const ppx::body2D::specs specs = n.as<ppx::body2D::specs>();
                 bm.add(specs);
             }
         return true;
@@ -275,7 +261,7 @@ template <> struct kit::yaml::codec<ppx::spring_manager2D>
     {
         YAML::Node node;
         for (const ppx::spring2D &sp : sm)
-            node["Springs"].push_back(sp);
+            node["Springs"].push_back(ppx::spring2D::specs::from_spring(sp));
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::spring_manager2D &sm)
@@ -284,9 +270,7 @@ template <> struct kit::yaml::codec<ppx::spring_manager2D>
         if (node["Springs"])
             for (const YAML::Node &n : node["Springs"])
             {
-                ppx::spring2D sp{sm.world};
-                n.as<ppx::spring2D>(sp);
-                const auto specs = ppx::spring2D::specs::from_spring(sp);
+                const ppx::spring2D::specs specs = n.as<ppx::spring2D::specs>();
                 sm.add(specs);
             }
         return true;
@@ -420,11 +404,7 @@ template <> struct kit::yaml::codec<ppx::constraint_manager2D>
         node["Baumgarte coef"] = cm.baumgarte_coef;
         node["Baumgarte threshold"] = cm.baumgarte_threshold;
         for (const auto &ctr : cm)
-        {
-            YAML::Node child;
-            child[ctr->name] = *ctr;
-            node["Constraints"].push_back(child);
-        }
+            node["Constraints"][ctr->name].push_back(*ctr);
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::constraint_manager2D &cm)
@@ -442,9 +422,7 @@ template <> struct kit::yaml::codec<ppx::constraint_manager2D>
             for (const YAML::Node &n : node["Constraints"])
                 if (n["Distance"])
                 {
-                    ppx::distance_joint2D dj{cm.world};
-                    n["Distance"].as<ppx::distance_joint2D>(dj);
-                    const auto specs = ppx::distance_joint2D::specs::from_distance_joint(dj);
+                    const ppx::distance_joint2D::specs specs = n.as<ppx::distance_joint2D::specs>();
                     cm.add<ppx::distance_joint2D>(specs);
                 }
         return true;

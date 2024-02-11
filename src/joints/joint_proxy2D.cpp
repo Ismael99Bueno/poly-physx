@@ -14,8 +14,8 @@ joint_proxy2D::joint_proxy2D(const body2D::ptr &body1, const body2D::ptr &body2,
     KIT_ASSERT_ERROR(body1->is_dynamic() || body2->is_dynamic(),
                      "Cannot create joint between two static bodies: {0}, {1}", body1->id, body2->id);
 }
-joint_proxy2D::joint_proxy2D(const specs &spc)
-    : joint_proxy2D(spc.body1->as_ptr(), spc.body2->as_ptr(), spc.anchor1, spc.anchor2)
+joint_proxy2D::joint_proxy2D(body_manager2D &bodies, const specs &spc)
+    : joint_proxy2D(bodies[spc.bindex1].as_ptr(), bodies[spc.bindex2].as_ptr(), spc.anchor1, spc.anchor2)
 {
 }
 

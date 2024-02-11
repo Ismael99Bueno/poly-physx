@@ -51,6 +51,7 @@ float collider2D::density() const
 void collider2D::density(float density)
 {
     m_density = density;
+    update_parent();
 }
 
 float collider2D::charge_density() const
@@ -69,6 +70,13 @@ const aabb2D &collider2D::bounding_box() const
 const kit::transform2D<float> &collider2D::ltransform() const
 {
     return shape().ltransform();
+}
+void collider2D::ltransform(const kit::transform2D<float> &ltransform)
+{
+    shape2D &shape = mutable_shape();
+    m_position += shape.lposition() - ltransform.position;
+    shape.ltransform(ltransform);
+    update_parent();
 }
 
 const glm::vec2 &collider2D::lposition() const

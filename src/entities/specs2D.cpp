@@ -11,16 +11,14 @@ collider2D collider2D::from_collider(const ppx::collider2D &collider)
 {
     if (const auto *poly = collider.shape_if<polygon>())
     {
-        const kit::transform2D<float> &transform = poly->ltransform();
-        return {transform.position,   transform.rotation, collider.density(),   collider.charge_density(),
-                collider.restitution, collider.friction,  poly->vertices.model, 0.f,
+        return {collider.lposition(), collider.lrotation(), collider.density(),   collider.charge_density(),
+                collider.restitution, collider.friction,    poly->vertices.model, 0.f,
                 collider.shape_type()};
     }
 
     const circle &circ = collider.shape<circle>();
-    const kit::transform2D<float> &transform = circ.ltransform();
-    return {transform.position,
-            transform.rotation,
+    return {collider.lposition(),
+            collider.lrotation(),
             collider.density(),
             collider.charge_density(),
             collider.restitution,
@@ -42,16 +40,18 @@ body2D body2D::from_body(const ppx::body2D &body)
             body.charge,     colliders,     body.type()};
 }
 
+joint_proxy2D joint_proxy2D::from_joint_proxy(const ppx::joint_proxy2D &jp)
+{
+    return {jp.body1()->index, jp.body2()->index, jp.rotated_anchor1(), jp.rotated_anchor2()};
+}
+
 spring2D spring2D::from_spring(const ppx::spring2D &sp)
 {
-    return {{sp.joint.body1().raw(), sp.joint.body2().raw(), sp.joint.rotated_anchor1(), sp.joint.rotated_anchor2()},
-            sp.stiffness,
-            sp.damping,
-            sp.length};
+    return {joint_proxy2D::from_joint_proxy(sp.joint), sp.stiffness, sp.damping, sp.length};
 }
 
 distance_joint2D distance_joint2D::from_distance_joint(const ppx::distance_joint2D &dj)
 {
-    return {{dj.joint.body1().raw(), dj.joint.body2().raw(), dj.joint.rotated_anchor1(), dj.joint.rotated_anchor2()}};
+    return {joint_proxy2D::from_joint_proxy(dj.joint)};
 }
 } // namespace ppx::specs

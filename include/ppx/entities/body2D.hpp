@@ -111,6 +111,7 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     void rotate(float dangle);
 
     const kit::transform2D<float> &centroid_transform() const;
+    void centroid_transform(const kit::transform2D<float> &centroid);
 
     const glm::vec2 &centroid() const;
     const glm::vec2 &position() const;

@@ -16,9 +16,9 @@ distance_joint2D::distance_joint2D(world2D &world, const body2D::ptr &body1, con
 {
 }
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : joint_constraint2D(world, "Distance"), joint(spc.joint),
-      length(glm::distance(spc.joint.body1->centroid() + spc.joint.anchor1,
-                           spc.joint.body2->centroid() + spc.joint.anchor2))
+    : joint_constraint2D(world, "Distance"), joint(world.bodies, spc.joint),
+      length(
+          glm::distance(joint.body1()->centroid() + spc.joint.anchor1, joint.body2()->centroid() + spc.joint.anchor2))
 {
 }
 
@@ -59,11 +59,14 @@ bool distance_joint2D::contains(const kit::uuid id) const
 #ifdef KIT_USE_YAML_CPP
 YAML::Node distance_joint2D::encode() const
 {
-    return kit::yaml::codec<distance_joint2D>::encode(*this);
+    YAML::Node node = joint_constraint2D::encode();
+    node["Joint"] = specs::from_distance_joint(*this);
+    return node;
 }
 bool distance_joint2D::decode(const YAML::Node &node)
 {
-    return kit::yaml::codec<distance_joint2D>::decode(node, *this);
+    *this = distance_joint2D(world, node["Joint"].as<specs>());
+    return true;
 }
 #endif
 } // namespace ppx

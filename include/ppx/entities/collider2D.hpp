@@ -51,6 +51,7 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
 
     const aabb2D &bounding_box() const;
     const kit::transform2D<float> &ltransform() const;
+    void ltransform(const kit::transform2D<float> &ltransform);
 
     const glm::vec2 &lposition() const;
 
