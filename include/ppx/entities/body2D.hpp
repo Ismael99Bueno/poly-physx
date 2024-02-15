@@ -14,16 +14,6 @@ class world2D;
 class collider2D;
 class body2D : public kit::identifiable<>, public kit::indexable, public worldref2D
 {
-    struct constraint_proxy
-    {
-        glm::vec2 velocity{0.f};
-        float angular_velocity = 0.f;
-        glm::vec2 velocity_at(const glm::vec2 &at) const
-        {
-            return velocity + angular_velocity * glm::vec2(-at.y, at.x);
-        } // v + cross(w, at)
-    };
-
   public:
     using ptr = kit::vector_ptr<body2D>;
     using const_ptr = kit::const_vector_ptr<body2D>;
@@ -56,7 +46,15 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     float angular_velocity;
     float charge;
 
-    constraint_proxy ctr_proxy;
+    struct
+    {
+        glm::vec2 velocity{0.f};
+        float angular_velocity = 0.f;
+        glm::vec2 velocity_at(const glm::vec2 &at) const
+        {
+            return velocity + angular_velocity * glm::vec2(-at.y, at.x);
+        } // v + cross(w, at)
+    } ctr_proxy;
 
     const collider2D &operator[](std::size_t index) const;
     collider2D &operator[](std::size_t index);
