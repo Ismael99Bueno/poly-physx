@@ -375,16 +375,15 @@ void body2D::match_position_with_centroid()
 
 void body2D::mass(const float mass)
 {
+    const float pmass = m_props.nondynamic.mass;
+
+    m_props.nondynamic.mass = mass;
     m_props.nondynamic.inv_mass = 1.f / mass;
     if (kit::approaches_zero(m_props.nondynamic.inertia))
-    {
-        m_props.nondynamic.mass = mass;
         update_inertia();
-    }
-    else if (!kit::approaches_zero(m_props.nondynamic.mass))
+    else if (!kit::approaches_zero(pmass))
     {
         const float ratio = mass / m_props.nondynamic.mass;
-        m_props.nondynamic.mass = mass;
         m_props.nondynamic.inertia *= ratio;
         m_props.nondynamic.inv_inertia /= ratio;
     }

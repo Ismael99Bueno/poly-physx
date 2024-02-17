@@ -95,12 +95,11 @@ bool collider_manager2D::remove(const std::size_t index)
         for (body2D &body : world.bodies)
             if (body.m_start > parent->m_start)
                 body.m_start--;
+    m_elements.erase(m_elements.begin() + index);
     parent->m_size--;
     parent->update_centroids();
     parent->update_inertia();
     parent->update_colliders();
-
-    m_elements.erase(m_elements.begin() + index);
 
     validate_indices();
 
@@ -117,7 +116,14 @@ void collider_manager2D::validate_indices()
 void collider_manager2D::validate_parents()
 {
     for (collider2D &collider : m_elements)
-        collider.mutable_shape().parent(&collider.parent()->centroid_transform());
+        if (collider.parent())
+            collider.mutable_shape().parent(&collider.parent()->centroid_transform());
+#ifdef DEBUG
+        else
+        {
+            KIT_ERROR("Collider with id {0} has no parent.", collider.id)
+        }
+#endif
 }
 
 void collider_manager2D::validate()

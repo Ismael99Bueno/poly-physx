@@ -88,10 +88,7 @@ static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
                     break;
                 }
             if (intersects)
-            {
                 in_area.push_back(&body);
-                break;
-            }
         }
     return in_area;
 }
