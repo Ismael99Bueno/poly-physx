@@ -48,7 +48,7 @@ collider2D::ptr collider_manager2D::ptr(const std::size_t index)
 template <typename Collider, typename C> static std::vector<Collider *> in_area(C &elements, const aabb2D &aabb)
 {
     std::vector<Collider *> in_area;
-    in_area.reserve(elements.size() / 2);
+    in_area.reserve(8);
 
     for (Collider &collider : elements)
         if (geo::intersects(collider.bounding_box(), aabb))

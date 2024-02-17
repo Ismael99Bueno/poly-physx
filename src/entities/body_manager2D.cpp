@@ -70,7 +70,7 @@ template <typename Body, typename Collider, typename C>
 static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
 {
     std::vector<Body *> in_area;
-    in_area.reserve(elements.size() / 2);
+    in_area.reserve(8);
 
     for (Body &body : elements)
         if (body.empty() && geo::intersects(aabb, body.centroid()))
@@ -79,12 +79,20 @@ static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
             break;
         }
         else
+        {
+            bool intersects = true;
             for (Collider &collider : body)
-                if (geo::intersects(collider.bounding_box(), aabb))
+                if (!geo::intersects(collider.bounding_box(), aabb))
                 {
-                    in_area.push_back(&body);
+                    intersects = false;
                     break;
                 }
+            if (intersects)
+            {
+                in_area.push_back(&body);
+                break;
+            }
+        }
     return in_area;
 }
 
