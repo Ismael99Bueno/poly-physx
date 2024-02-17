@@ -86,20 +86,20 @@ bool collider_manager2D::remove(const std::size_t index)
 {
     if (index >= m_elements.size())
         return false;
-    KIT_INFO("Removing collider with id {0}", m_elements[index].id)
+    KIT_INFO("Removing collider with index {0} and id {1}", index, m_elements[index].id)
 
     events.on_early_removal(m_elements[index]);
-    const body2D::ptr &parent = m_elements[index].parent();
+    body2D &parent = *m_elements[index].parent(); // Beware: taking the pointer would spurious the index
 
-    if (m_elements.size() - parent->m_start != parent->m_size)
+    if (m_elements.size() - parent.m_start != parent.m_size)
         for (body2D &body : world.bodies)
-            if (body.m_start > parent->m_start)
+            if (body.m_start > parent.m_start)
                 body.m_start--;
     m_elements.erase(m_elements.begin() + index);
-    parent->m_size--;
-    parent->update_centroids();
-    parent->update_inertia();
-    parent->update_colliders();
+    parent.m_size--;
+    parent.update_centroids();
+    parent.update_inertia();
+    parent.update_colliders();
 
     validate_indices();
 

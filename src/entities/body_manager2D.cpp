@@ -125,7 +125,7 @@ bool body_manager2D::remove(const std::size_t index)
     if (index >= m_elements.size())
         return false;
 
-    KIT_INFO("Removing body with id {0}", m_elements[index].id)
+    KIT_INFO("Removing body with index {0} and id {1}", index, m_elements[index].id)
 
     events.on_early_removal(m_elements[index]);
     m_elements[index].clear();

@@ -66,7 +66,7 @@ bool body2D::remove(const collider2D &collider)
 }
 void body2D::clear()
 {
-    for (std::size_t i = m_size - 1; i < m_size; i--)
+    for (std::size_t i = m_size - 1; i < m_size && i >= 0; i--)
         remove(i);
 }
 
