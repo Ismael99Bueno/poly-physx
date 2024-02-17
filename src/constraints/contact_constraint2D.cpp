@@ -7,8 +7,8 @@ namespace ppx
 {
 contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *collision,
                                            const std::size_t manifold_index, const float slop)
-    : joint_constraint2D(world, "Contact"), m_body1(&collision->collider1->parent()),
-      m_body2(&collision->collider2->parent()), m_anchor1(collision->touch1(manifold_index) - m_body1->centroid()),
+    : joint_constraint2D(world, "Contact"), m_body1(collision->collider1->parent().raw()),
+      m_body2(collision->collider2->parent().raw()), m_anchor1(collision->touch1(manifold_index) - m_body1->centroid()),
       m_anchor2(collision->touch2(manifold_index) - m_body2->centroid()), m_normal(glm::normalize(collision->mtv)),
       m_index(manifold_index), m_restitution(collision->restitution), m_slop(slop),
       m_penetration(-glm::length(collision->mtv)), m_friction(world, collision, manifold_index)
@@ -49,8 +49,8 @@ void contact_constraint2D::update(const collision2D *collision, const float slop
 {
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
-    m_body1 = &collision->collider1->parent();
-    m_body2 = &collision->collider2->parent();
+    m_body1 = collision->collider1->parent().raw();
+    m_body2 = collision->collider2->parent().raw();
     m_anchor1 = collision->touch1(m_index) - m_body1->centroid();
     m_anchor2 = collision->touch2(m_index) - m_body2->centroid();
     m_normal = glm::normalize(collision->mtv);

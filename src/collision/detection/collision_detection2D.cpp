@@ -85,7 +85,7 @@ void collision_detection2D::join_mt_collisions()
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
 
-static bool broad_collision_check(collider2D &collider1, collider2D &collider2)
+static bool broad_collision_check(const collider2D &collider1, const collider2D &collider2)
 {
     const body2D &p1 = collider1.parent();
     const body2D &p2 = collider2.parent();

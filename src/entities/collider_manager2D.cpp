@@ -89,16 +89,16 @@ bool collider_manager2D::remove(const std::size_t index)
     KIT_INFO("Removing collider with id {0}", m_elements[index].id)
 
     events.on_early_removal(m_elements[index]);
-    body2D &parent = m_elements[index].parent();
+    const body2D::ptr &parent = m_elements[index].parent();
 
-    if (m_elements.size() - parent.m_start != parent.m_size)
+    if (m_elements.size() - parent->m_start != parent->m_size)
         for (body2D &body : world.bodies)
-            if (body.m_start > parent.m_start)
+            if (body.m_start > parent->m_start)
                 body.m_start--;
-    parent.m_size--;
-    parent.update_centroids();
-    parent.update_inertia();
-    parent.update_colliders();
+    parent->m_size--;
+    parent->update_centroids();
+    parent->update_inertia();
+    parent->update_colliders();
 
     m_elements.erase(m_elements.begin() + index);
 
@@ -117,7 +117,7 @@ void collider_manager2D::validate_indices()
 void collider_manager2D::validate_parents()
 {
     for (collider2D &collider : m_elements)
-        collider.mutable_shape().parent(&collider.parent().centroid_transform());
+        collider.mutable_shape().parent(&collider.parent()->centroid_transform());
 }
 
 void collider_manager2D::validate()

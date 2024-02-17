@@ -73,7 +73,7 @@ static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
     in_area.reserve(elements.size() / 2);
 
     for (Body &body : elements)
-        if (geo::intersects(aabb, body.centroid()))
+        if (body.empty() && geo::intersects(aabb, body.centroid()))
         {
             in_area.push_back(&body);
             break;

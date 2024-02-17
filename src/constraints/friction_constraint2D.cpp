@@ -7,8 +7,8 @@ namespace ppx
 {
 friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision,
                                              const std::size_t manifold_index)
-    : joint_constraint2D(world, "Friction", false), m_body1(&collision->collider1->parent()),
-      m_body2(&collision->collider2->parent()), m_anchor1(collision->touch1(manifold_index) - m_body1->centroid()),
+    : joint_constraint2D(world, "Friction", false), m_body1(collision->collider1->parent().raw()),
+      m_body2(collision->collider2->parent().raw()), m_anchor1(collision->touch1(manifold_index) - m_body1->centroid()),
       m_anchor2(collision->touch2(manifold_index) - m_body2->centroid()),
       m_tangent(glm::normalize(glm::vec2(-collision->mtv.y, collision->mtv.x))), m_friction(collision->friction)
 {
@@ -36,8 +36,8 @@ void friction_constraint2D::solve()
 void friction_constraint2D::update(const collision2D *collision, const glm::vec2 &normal, const glm::vec2 &anchor1,
                                    const glm::vec2 &anchor2)
 {
-    m_body1 = &collision->collider1->parent();
-    m_body2 = &collision->collider2->parent();
+    m_body1 = collision->collider1->parent().raw();
+    m_body2 = collision->collider2->parent().raw();
     m_friction = collision->friction;
     m_anchor1 = anchor1;
     m_anchor2 = anchor2;

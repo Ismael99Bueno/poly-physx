@@ -28,7 +28,7 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
     stype shape_type() const;
 
     const body2D &parent() const;
-    body2D &parent();
+    body2D::ptr &parent();
 
     float area() const;
     float inertia() const;

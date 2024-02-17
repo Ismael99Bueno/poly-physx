@@ -39,9 +39,9 @@ const body2D &collider2D::parent() const
 {
     return *m_parent;
 }
-body2D &collider2D::parent()
+body2D::ptr &collider2D::parent()
 {
-    return *m_parent;
+    return m_parent;
 }
 
 float collider2D::density() const
