@@ -23,7 +23,11 @@ class collision_detection2D : public worldref2D
     virtual ~collision_detection2D() = default;
 
     float epa_threshold = 1.e-3f;
+#ifdef KIT_PROFILE
+    bool multithreaded = false;
+#else
     bool multithreaded = true;
+#endif
 
     template <kit::DerivedFrom<cc_manifold_algorithm2D> T = cc_manifold_algorithm2D>
     const T *cc_manifold_algorithm() const
