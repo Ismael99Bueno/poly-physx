@@ -211,7 +211,7 @@ void body2D::update_inertia()
         m_props.nondynamic.inertia += cmass * (dist2 + shape.inertia());
         artificial_mass += cmass;
     }
-    m_props.nondynamic.inertia /= artificial_mass;
+    m_props.nondynamic.inertia *= m_props.nondynamic.mass / artificial_mass;
     m_props.nondynamic.inv_inertia = 1.f / m_props.nondynamic.inertia;
     if (is_dynamic())
     {

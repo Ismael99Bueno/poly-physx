@@ -448,10 +448,9 @@ template <> struct kit::yaml::codec<ppx::world2D>
         if (!node.IsMap() || node.size() != 7)
             return false;
 
-        node["Integrator"].as<rk::integrator<float>>(world.integrator);
-        world.integrator.state.clear();
         world.semi_implicit_integration = node["Semi-implicit integration"].as<bool>();
         node["Body manager"].as<ppx::body_manager2D>(world.bodies);
+        node["Integrator"].as<rk::integrator<float>>(world.integrator);
         node["Behaviour manager"].as<ppx::behaviour_manager2D>(world.behaviours);
         node["Spring manager"].as<ppx::spring_manager2D>(world.springs);
         node["Collision manager"].as<ppx::collision_manager2D>(world.collisions);
