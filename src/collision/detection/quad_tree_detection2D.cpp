@@ -44,7 +44,7 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tr
                 process_collision_mt(collider1, collider2, thread_idx);
             }
     };
-    kit::mt::for_each<PPX_THREAD_COUNT>(partitions, exec);
+    kit::mt::for_each(partitions, m_pool, exec);
     join_mt_collisions();
 }
 void quad_tree_detection2D::update_quad_tree()

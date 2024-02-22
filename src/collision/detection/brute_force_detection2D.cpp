@@ -35,7 +35,7 @@ void brute_force_detection2D::detect_collisions_mt()
             process_collision_mt(collider1, collider2, thread_idx);
         }
     };
-    kit::mt::for_each<PPX_THREAD_COUNT>(world.colliders, exec);
+    kit::mt::for_each(world.colliders, m_pool, exec);
     join_mt_collisions();
 }
 } // namespace ppx

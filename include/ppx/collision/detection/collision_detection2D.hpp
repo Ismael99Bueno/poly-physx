@@ -4,10 +4,11 @@
 #include "ppx/collision/collision2D.hpp"
 
 #include "ppx/collision/manifold/manifold_algorithms2D.hpp"
+#include "ppx/internal/worldref.hpp"
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
 #include "kit/utility/type_constraints.hpp"
-#include "ppx/internal/worldref.hpp"
+#include "kit/multithreading/mt_for_each.hpp"
 
 #ifndef PPX_THREAD_COUNT
 #define PPX_THREAD_COUNT 16
@@ -104,6 +105,7 @@ class collision_detection2D : public worldref2D
   private:
     std::vector<collision2D> m_collisions;
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
+    kit::mt::feach_thread_pool<std::vector<collision2D>> m_pool{PPX_THREAD_COUNT};
 
     collision2D generate_collision(collider2D &collider1, collider2D &collider2) const;
     void cc_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
