@@ -188,6 +188,7 @@ const shape2D &collider2D::shape() const
     case stype::CIRCLE:
         return std::get<circle>(m_shape);
     }
+    throw std::bad_variant_access();
 }
 shape2D &collider2D::mutable_shape()
 {
