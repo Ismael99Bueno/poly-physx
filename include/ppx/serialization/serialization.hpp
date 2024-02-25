@@ -7,8 +7,8 @@
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
 #include "ppx/collision/detection/sort_sweep_detection2D.hpp"
 
-#include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 #include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
@@ -315,18 +315,19 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["P-P Algorithm"] = 1;
 
         YAML::Node nres = node["Resolution"];
-        if (auto colres = cm.resolution<ppx::spring_driven_resolution2D>())
+        if (auto colres = cm.resolution<ppx::constraint_driven_resolution2D>())
         {
             nres["Method"] = 0;
+            nres["Slop"] = colres->slop;
+        }
+        else if (auto colres = cm.resolution<ppx::spring_driven_resolution2D>())
+        {
+            nres["Method"] = 1;
             nres["Rigidity"] = colres->rigidity;
             nres["Normal damping"] = colres->normal_damping;
             nres["Tangent damping"] = colres->tangent_damping;
         }
-        else if (auto colres = cm.resolution<ppx::constraint_driven_resolution2D>())
-        {
-            nres["Method"] = 1;
-            nres["Slop"] = colres->slop;
-        }
+
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::collision_manager2D &cm)
@@ -383,11 +384,11 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             const int method = nres["Method"].as<int>();
             if (method == 0)
+                cm.set_resolution<ppx::constraint_driven_resolution2D>(nres["Slop"].as<float>());
+            else if (method == 1)
                 cm.set_resolution<ppx::spring_driven_resolution2D>(nres["Rigidity"].as<float>(),
                                                                    nres["Normal damping"].as<float>(),
                                                                    nres["Tangent damping"].as<float>());
-            else if (method == 1)
-                cm.set_resolution<ppx::constraint_driven_resolution2D>(nres["Slop"].as<float>());
         }
         return true;
     }
