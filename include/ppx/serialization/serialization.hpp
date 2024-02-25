@@ -10,6 +10,8 @@
 #include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
 #include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 
+#include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
+
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
 #include "ppx/collision/manifold/radius_distance_manifold2D.hpp"
@@ -284,7 +286,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         YAML::Node node;
         YAML::Node ndet = node["Detection"];
         YAML::Node nqt = ndet["Quad tree"];
-        ndet["EPA Threshold"] = cm.detection()->epa_threshold;
         nqt["Max colliders"] = ppx::quad_tree::max_colliders;
         nqt["Max depth"] = ppx::quad_tree::max_depth;
         nqt["Min size"] = ppx::quad_tree::min_size;
@@ -300,6 +301,17 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
         else if (cm.detection<ppx::sort_sweep_detection2D>())
             ndet["Method"] = 2;
+
+        if (auto narrow = cm.detection()->cp_narrow_detection<ppx::gjk_epa_detection2D>())
+        {
+            ndet["C-P Narrow"] = 0;
+            ndet["C-P EPA Threshold"] = narrow->epa_threshold;
+        }
+        if (auto narrow = cm.detection()->pp_narrow_detection<ppx::gjk_epa_detection2D>())
+        {
+            ndet["P-P Narrow"] = 0;
+            ndet["P-P EPA Threshold"] = narrow->epa_threshold;
+        }
 
         if (cm.detection()->cc_manifold_algorithm<ppx::radius_distance_manifold2D>())
             ndet["C-C Algorithm"] = 0;
@@ -337,7 +349,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
         const YAML::Node ndet = node["Detection"];
         const YAML::Node nqt = ndet["Quad tree"];
-        cm.detection()->epa_threshold = ndet["EPA Threshold"].as<float>();
         ppx::quad_tree::max_colliders = nqt["Max colliders"].as<std::size_t>();
         ppx::quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
         ppx::quad_tree::min_size = nqt["Min size"].as<float>();
@@ -353,6 +364,11 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             else if (method == 2)
                 cm.set_detection<ppx::sort_sweep_detection2D>();
         }
+
+        if (ndet["C-P Narrow"])
+            cm.detection()->set_cp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["C-P EPA Threshold"].as<float>());
+        if (ndet["P-P Narrow"])
+            cm.detection()->set_pp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["P-P EPA Threshold"].as<float>());
 
         if (ndet["C-C Algorithm"])
         {

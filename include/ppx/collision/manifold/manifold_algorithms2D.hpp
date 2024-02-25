@@ -5,7 +5,6 @@
 
 namespace ppx
 {
-class world2D;
 class cc_manifold_algorithm2D
 {
   public:

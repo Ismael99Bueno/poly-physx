@@ -4,6 +4,8 @@
 #include "ppx/collision/collision2D.hpp"
 
 #include "ppx/collision/manifold/manifold_algorithms2D.hpp"
+#include "ppx/collision/detection/narrow/narrow_detection2D.hpp"
+
 #include "ppx/internal/worldref.hpp"
 #include "kit/memory/scope.hpp"
 #include "kit/utility/utils.hpp"
@@ -23,12 +25,28 @@ class collision_detection2D : public worldref2D
     collision_detection2D(world2D &world);
     virtual ~collision_detection2D() = default;
 
-    float epa_threshold = 1.e-3f;
 #ifdef KIT_PROFILE
     bool multithreaded = false;
 #else
     bool multithreaded = true;
 #endif
+
+    template <kit::DerivedFrom<cp_narrow_detection2D> T = cp_narrow_detection2D> const T *cp_narrow_detection() const
+    {
+        return kit::const_get_casted_raw_ptr<T>(m_cp_narrow);
+    }
+    template <kit::DerivedFrom<cp_narrow_detection2D> T = cp_narrow_detection2D> T *cp_narrow_detection()
+    {
+        return kit::get_casted_raw_ptr<T>(m_cp_narrow);
+    }
+    template <kit::DerivedFrom<pp_narrow_detection2D> T = pp_narrow_detection2D> const T *pp_narrow_detection() const
+    {
+        return kit::const_get_casted_raw_ptr<T>(m_pp_narrow);
+    }
+    template <kit::DerivedFrom<pp_narrow_detection2D> T = pp_narrow_detection2D> T *pp_narrow_detection()
+    {
+        return kit::get_casted_raw_ptr<T>(m_pp_narrow);
+    }
 
     template <kit::DerivedFrom<cc_manifold_algorithm2D> T = cc_manifold_algorithm2D>
     const T *cc_manifold_algorithm() const
@@ -56,6 +74,25 @@ class collision_detection2D : public worldref2D
     template <kit::DerivedFrom<pp_manifold_algorithm2D> T = pp_manifold_algorithm2D> T *pp_manifold_algorithm()
     {
         return kit::get_casted_raw_ptr<T>(m_pp_manifold);
+    }
+
+    template <kit::DerivedFrom<cp_narrow_detection2D> T, class... NArgs>
+    const T *set_cp_narrow_detection(NArgs &&...args)
+    {
+        auto nalg = kit::make_scope<T>(std::forward<NArgs>(args)...);
+        T *ptr = nalg.get();
+
+        m_cp_narrow = std::move(nalg);
+        return ptr;
+    }
+    template <kit::DerivedFrom<pp_narrow_detection2D> T, class... NArgs>
+    const T *set_pp_narrow_detection(NArgs &&...args)
+    {
+        auto nalg = kit::make_scope<T>(std::forward<NArgs>(args)...);
+        T *ptr = nalg.get();
+
+        m_pp_narrow = std::move(nalg);
+        return ptr;
     }
 
     template <kit::DerivedFrom<cc_manifold_algorithm2D> T, class... ManifArgs>
@@ -114,6 +151,9 @@ class collision_detection2D : public worldref2D
 
     void try_enter_or_stay_callback(const collision2D &c) const;
     void try_exit_callback(collider2D &collider1, collider2D &collider2) const;
+
+    kit::scope<cp_narrow_detection2D> m_cp_narrow;
+    kit::scope<pp_narrow_detection2D> m_pp_narrow;
 
     kit::scope<cc_manifold_algorithm2D> m_cc_manifold;
     kit::scope<cp_manifold_algorithm2D> m_cp_manifold;
