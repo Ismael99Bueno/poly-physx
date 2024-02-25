@@ -27,8 +27,8 @@ struct collider2D
     {
         float density = 1.f;
         float charge_density = 1.f;
-        float restitution = 0.5f;
-        float friction = 0.5f;
+        float restitution = 0.2f;
+        float friction = 0.8f;
         kit::dynarray<glm::vec2, PPX_MAX_VERTICES> vertices = polygon::square(5.f);
         float radius = 2.5f;
         stype shape = stype::POLYGON;
