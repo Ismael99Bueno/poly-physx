@@ -18,42 +18,42 @@ class collision_manager2D : public kit::toggleable, public worldref2D
 
     auto begin() const
     {
-        return m_custom_detection->collisions().begin();
+        return m_detection->collisions().begin();
     }
     auto end() const
     {
-        return m_custom_detection->collisions().end();
+        return m_detection->collisions().end();
     }
 
     const collision2D &operator[](std::size_t index) const;
 
     template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> const T *detection() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_custom_detection);
+        return kit::const_get_casted_raw_ptr<T>(m_detection);
     }
     template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> T *detection()
     {
-        return kit::get_casted_raw_ptr<T>(m_custom_detection);
+        return kit::get_casted_raw_ptr<T>(m_detection);
     }
     template <kit::DerivedFrom<collision_resolution2D> T = collision_resolution2D> const T *resolution() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_custom_resolution);
+        return kit::const_get_casted_raw_ptr<T>(m_resolution);
     }
     template <kit::DerivedFrom<collision_resolution2D> T = collision_resolution2D> T *resolution()
     {
-        return kit::get_casted_raw_ptr<T>(m_custom_resolution);
+        return kit::get_casted_raw_ptr<T>(m_resolution);
     }
 
     template <kit::DerivedFrom<collision_detection2D> T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
     {
         auto coldet = kit::make_scope<T>(world, std::forward<ColDetArgs>(args)...);
-        if (m_custom_detection)
-            coldet->inherit(*m_custom_detection);
+        if (m_detection)
+            coldet->inherit(*m_detection);
 
         T *ptr = coldet.get();
 
-        m_custom_detection = std::move(coldet);
-        m_custom_detection->on_attach();
+        m_detection = std::move(coldet);
+        m_detection->on_attach();
         return ptr;
     }
     template <kit::DerivedFrom<collision_resolution2D> T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
@@ -61,8 +61,8 @@ class collision_manager2D : public kit::toggleable, public worldref2D
         auto colres = kit::make_scope<T>(world, std::forward<ColSolvArgs>(args)...);
         T *ptr = colres.get();
 
-        m_custom_resolution = std::move(colres);
-        m_custom_resolution->on_attach();
+        m_resolution = std::move(colres);
+        m_resolution->on_attach();
         return ptr;
     }
 
@@ -70,11 +70,8 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     bool empty() const;
 
   private:
-    kit::scope<collision_detection2D> m_custom_detection;
-    kit::scope<collision_resolution2D> m_custom_resolution;
-
-    collision_detection2D *m_current_detection;
-    collision_resolution2D *m_current_resolution;
+    kit::scope<collision_detection2D> m_detection;
+    kit::scope<collision_resolution2D> m_resolution;
 
     void solve();
     friend class world2D;
