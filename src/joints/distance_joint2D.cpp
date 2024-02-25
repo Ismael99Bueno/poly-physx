@@ -6,9 +6,6 @@
 
 namespace ppx
 {
-distance_joint2D::distance_joint2D(world2D &world) : joint_constraint2D(world, "Distance")
-{
-}
 distance_joint2D::distance_joint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2,
                                    const glm::vec2 &anchor1, const glm::vec2 &anchor2)
     : joint_constraint2D(world, "Distance"), joint(body1, body2, anchor1, anchor2),

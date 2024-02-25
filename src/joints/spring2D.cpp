@@ -5,12 +5,6 @@
 
 namespace ppx
 {
-spring2D::spring2D(world2D &world, const float stiffness, const float damping, const float length,
-                   const std::uint32_t non_linear_terms, const float non_linear_contribution)
-    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), stiffness(stiffness), damping(damping),
-      length(length), non_linear_terms(non_linear_terms)
-{
-}
 spring2D::spring2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1,
                    const glm::vec2 &anchor2, const float stiffness, const float damping, const float length,
                    const std::uint32_t non_linear_terms, const float non_linear_contribution)

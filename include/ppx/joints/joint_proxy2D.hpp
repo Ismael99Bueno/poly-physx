@@ -10,11 +10,9 @@ class joint_proxy2D
   public:
     using specs = specs::joint_proxy2D;
 
-    joint_proxy2D() = default;
     joint_proxy2D(const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &anchor1 = glm::vec2(0.f),
                   const glm::vec2 &anchor2 = glm::vec2(0.f));
     joint_proxy2D(body_manager2D &bodies, const specs &spc);
-    virtual ~joint_proxy2D() = default;
 
     std::tuple<glm::vec2, glm::vec2, glm::vec2> compute_anchors_and_direction() const;
     bool valid() const;
