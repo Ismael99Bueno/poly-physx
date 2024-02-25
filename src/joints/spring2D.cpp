@@ -20,8 +20,8 @@ spring2D::spring2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &
 }
 spring2D::spring2D(world2D &world, const specs &spc)
     : kit::identifiable<>(kit::uuid::random()), worldref2D(world), joint(world.bodies, spc.joint),
-      stiffness(spc.stiffness), damping(spc.damping), length(spc.length), non_linear_terms(spc.non_linear_terms),
-      non_linear_contribution(spc.non_linear_contribution)
+      stiffness(spc.props.stiffness), damping(spc.props.damping), length(spc.props.length),
+      non_linear_terms(spc.props.non_linear_terms), non_linear_contribution(spc.props.non_linear_contribution)
 {
 }
 

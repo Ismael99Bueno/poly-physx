@@ -9,12 +9,12 @@ namespace ppx
 {
 body2D::body2D(world2D &world, const body2D::specs &spc)
     : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(spc.velocity),
-      angular_velocity(spc.angular_velocity), charge(spc.charge),
+      angular_velocity(spc.angular_velocity), charge(spc.props.charge),
       m_centroid(kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()),
-      m_charge_centroid(spc.position), m_type(spc.type)
+      m_charge_centroid(spc.position), m_type(spc.props.type)
 {
     m_position = m_centroid.position;
-    mass(spc.mass);
+    mass(spc.props.mass);
 }
 
 const collider2D &body2D::operator[](const std::size_t index) const

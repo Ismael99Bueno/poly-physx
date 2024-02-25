@@ -10,6 +10,16 @@
 
 namespace ppx
 {
+void world2D::add(const specs::contraption2D &contraption)
+{
+    for (const body2D::specs &body : contraption.bodies)
+        bodies.add(body);
+    for (const spring2D::specs &spring : contraption.springs)
+        springs.add(spring);
+    for (const distance_joint2D::specs &joint : contraption.distance_joints)
+        constraints.add<distance_joint2D>(joint);
+}
+
 bool world2D::step()
 {
     pre_step_preparation();

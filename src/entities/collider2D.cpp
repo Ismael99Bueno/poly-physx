@@ -5,22 +5,22 @@
 namespace ppx
 {
 collider2D::collider2D(world2D &world, const body2D::ptr &parent, const specs &spc)
-    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), restitution(spc.restitution), friction(spc.friction),
-      m_position(spc.position), m_parent(parent), m_density(spc.density), m_charge_density(spc.charge_density),
-      m_type(spc.shape)
+    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), restitution(spc.props.restitution),
+      friction(spc.props.friction), m_position(spc.position), m_parent(parent), m_density(spc.props.density),
+      m_charge_density(spc.props.charge_density), m_type(spc.props.shape)
 {
     const kit::transform2D<float> transform = kit::transform2D<float>::builder()
                                                   .position(spc.position)
                                                   .rotation(spc.rotation)
                                                   .parent(&parent->centroid_transform())
                                                   .build();
-    switch (spc.shape)
+    switch (spc.props.shape)
     {
     case stype::POLYGON:
-        m_shape = polygon(transform, spc.vertices);
+        m_shape = polygon(transform, spc.props.vertices);
         break;
     case stype::CIRCLE:
-        m_shape = circle(transform, spc.radius);
+        m_shape = circle(transform, spc.props.radius);
         break;
     }
     update_parent();

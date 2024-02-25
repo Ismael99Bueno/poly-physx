@@ -11,7 +11,7 @@ body2D &body_manager2D::add(const body2D::specs &spc)
     body.index = m_elements.size() - 1;
 
     body.begin_density_update();
-    for (const auto &collider_spc : spc.colliders)
+    for (const auto &collider_spc : spc.props.colliders)
         body.add(collider_spc);
     body.end_density_update();
 

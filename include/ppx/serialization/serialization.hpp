@@ -103,11 +103,11 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
     {
         YAML::Node node;
         node["Joint"] = sp.joint;
-        node["Stiffness"] = sp.stiffness;
-        node["Damping"] = sp.damping;
-        node["Length"] = sp.length;
-        node["Non linear terms"] = sp.non_linear_terms;
-        node["Non linear contribution"] = sp.non_linear_contribution;
+        node["Stiffness"] = sp.props.stiffness;
+        node["Damping"] = sp.props.damping;
+        node["Length"] = sp.props.length;
+        node["Non linear terms"] = sp.props.non_linear_terms;
+        node["Non linear contribution"] = sp.props.non_linear_contribution;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::spring2D::specs &sp)
@@ -116,11 +116,11 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
             return false;
 
         sp.joint = node["Joint"].as<ppx::joint_proxy2D::specs>();
-        sp.stiffness = node["Stiffness"].as<float>();
-        sp.damping = node["Damping"].as<float>();
-        sp.length = node["Length"].as<float>();
-        sp.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
-        sp.non_linear_contribution = node["Non linear contribution"].as<float>();
+        sp.props.stiffness = node["Stiffness"].as<float>();
+        sp.props.damping = node["Damping"].as<float>();
+        sp.props.length = node["Length"].as<float>();
+        sp.props.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
+        sp.props.non_linear_contribution = node["Non linear contribution"].as<float>();
         return true;
     }
 };
@@ -132,17 +132,17 @@ template <> struct kit::yaml::codec<ppx::collider2D::specs>
         YAML::Node node;
         node["Position"] = collider.position;
         node["Rotation"] = collider.rotation;
-        node["Density"] = collider.density;
-        node["Charge density"] = collider.charge_density;
-        node["Restitution"] = collider.restitution;
-        node["Friction"] = collider.friction;
-        switch (collider.shape)
+        node["Density"] = collider.props.density;
+        node["Charge density"] = collider.props.charge_density;
+        node["Restitution"] = collider.props.restitution;
+        node["Friction"] = collider.props.friction;
+        switch (collider.props.shape)
         {
         case ppx::collider2D::stype::CIRCLE:
-            node["Radius"] = collider.radius;
+            node["Radius"] = collider.props.radius;
             break;
         case ppx::collider2D::stype::POLYGON:
-            for (const glm::vec2 &v : collider.vertices)
+            for (const glm::vec2 &v : collider.props.vertices)
                 node["Vertices"].push_back(v);
         }
 
@@ -155,21 +155,21 @@ template <> struct kit::yaml::codec<ppx::collider2D::specs>
 
         collider.position = node["Position"].as<glm::vec2>();
         collider.rotation = node["Rotation"].as<float>();
-        collider.density = node["Density"].as<float>();
-        collider.charge_density = node["Charge density"].as<float>();
-        collider.restitution = node["Restitution"].as<float>();
-        collider.friction = node["Friction"].as<float>();
+        collider.props.density = node["Density"].as<float>();
+        collider.props.charge_density = node["Charge density"].as<float>();
+        collider.props.restitution = node["Restitution"].as<float>();
+        collider.props.friction = node["Friction"].as<float>();
         if (node["Radius"])
         {
-            collider.radius = node["Radius"].as<float>();
-            collider.shape = ppx::collider2D::stype::CIRCLE;
+            collider.props.radius = node["Radius"].as<float>();
+            collider.props.shape = ppx::collider2D::stype::CIRCLE;
         }
         else if (node["Vertices"])
         {
-            collider.vertices.clear();
+            collider.props.vertices.clear();
             for (const YAML::Node &n : node["Vertices"])
-                collider.vertices.push_back(n.as<glm::vec2>());
-            collider.shape = ppx::collider2D::stype::POLYGON;
+                collider.props.vertices.push_back(n.as<glm::vec2>());
+            collider.props.shape = ppx::collider2D::stype::POLYGON;
         }
         return true;
     }
@@ -184,10 +184,10 @@ template <> struct kit::yaml::codec<ppx::body2D::specs>
         node["Velocity"] = body.velocity;
         node["Rotation"] = body.rotation;
         node["Angular velocity"] = body.angular_velocity;
-        node["Mass"] = body.mass;
-        node["Charge"] = body.charge;
-        node["Type"] = (int)body.type;
-        for (const ppx::collider2D::specs &collider : body.colliders)
+        node["Mass"] = body.props.mass;
+        node["Charge"] = body.props.charge;
+        node["Type"] = (int)body.props.type;
+        for (const ppx::collider2D::specs &collider : body.props.colliders)
             node["Colliders"].push_back(collider);
         return node;
     }
@@ -200,12 +200,12 @@ template <> struct kit::yaml::codec<ppx::body2D::specs>
         body.velocity = node["Velocity"].as<glm::vec2>();
         body.rotation = node["Rotation"].as<float>();
         body.angular_velocity = node["Angular velocity"].as<float>();
-        body.mass = node["Mass"].as<float>();
-        body.charge = node["Charge"].as<float>();
-        body.type = (ppx::body2D::btype)node["Type"].as<int>();
+        body.props.mass = node["Mass"].as<float>();
+        body.props.charge = node["Charge"].as<float>();
+        body.props.type = (ppx::body2D::btype)node["Type"].as<int>();
         if (node["Colliders"])
             for (const YAML::Node &n : node["Colliders"])
-                body.colliders.push_back(n.as<ppx::collider2D::specs>());
+                body.props.colliders.push_back(n.as<ppx::collider2D::specs>());
 
         return true;
     }

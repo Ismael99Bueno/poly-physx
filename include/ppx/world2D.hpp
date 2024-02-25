@@ -32,6 +32,8 @@ class world2D : kit::non_copyable
 
     bool semi_implicit_integration = false;
 
+    void add(const specs::contraption2D &contraption);
+
     bool step();
     float timestep_ratio() const;
 
