@@ -290,13 +290,14 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         nqt["Min size"] = ppx::quad_tree::min_size;
 
         ndet["Multithreading"] = cm.detection()->multithreaded;
-        if (auto coldet = cm.detection<ppx::quad_tree_detection2D>())
-        {
+        if (cm.detection<ppx::brute_force_detection2D>())
             ndet["Method"] = 0;
+        else if (auto coldet = cm.detection<ppx::quad_tree_detection2D>())
+        {
+            ndet["Method"] = 1;
             ndet["Force square"] = coldet->force_square_shape;
         }
-        else if (cm.detection<ppx::brute_force_detection2D>())
-            ndet["Method"] = 1;
+
         else if (cm.detection<ppx::sort_sweep_detection2D>())
             ndet["Method"] = 2;
 
@@ -345,9 +346,9 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             const int method = ndet["Method"].as<int>();
             if (method == 0)
-                cm.set_detection<ppx::quad_tree_detection2D>()->force_square_shape = ndet["Force square"].as<bool>();
-            else if (method == 1)
                 cm.set_detection<ppx::brute_force_detection2D>();
+            else if (method == 1)
+                cm.set_detection<ppx::quad_tree_detection2D>()->force_square_shape = ndet["Force square"].as<bool>();
             else if (method == 2)
                 cm.set_detection<ppx::sort_sweep_detection2D>();
         }
