@@ -77,6 +77,7 @@ void constraint_manager2D::delegate_collisions(const std::vector<collision2D> *c
 
 void constraint_manager2D::update_contacts()
 {
+    KIT_PERF_FUNCTION()
     const auto ctrres = world.collisions.resolution<constraint_driven_resolution2D>();
     for (const collision2D &collision : *m_collisions)
         if (collision.collided)
@@ -104,7 +105,7 @@ void constraint_manager2D::solve()
 {
     KIT_ASSERT_ERROR(baumgarte_coef >= 0.f, "Baumgarte coef must be non-negative: {0}", baumgarte_coef)
     KIT_ASSERT_ERROR(baumgarte_threshold >= 0.f, "Baumgarte threshold must be non-negative: {0}", baumgarte_threshold)
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("Constraints solve")
     if (m_elements.empty() && !m_collisions)
         return;
 
@@ -113,6 +114,7 @@ void constraint_manager2D::solve()
 
     if (warmup)
     {
+        KIT_PERF_SCOPE("Warmup")
         for (const auto &ctr : m_elements)
             ctr->warmup();
         if (m_collisions)
@@ -120,13 +122,16 @@ void constraint_manager2D::solve()
                 contact.warmup();
     }
 
-    for (std::size_t i = 0; i < iterations; i++)
     {
-        for (const auto &ctr : m_elements)
-            ctr->solve();
-        if (m_collisions)
-            for (auto &[hash, contact] : m_contacts)
-                contact.solve();
+        KIT_PERF_SCOPE("Solve")
+        for (std::size_t i = 0; i < iterations; i++)
+        {
+            for (const auto &ctr : m_elements)
+                ctr->solve();
+            if (m_collisions)
+                for (auto &[hash, contact] : m_contacts)
+                    contact.solve();
+        }
     }
     m_collisions = nullptr;
 }

@@ -33,6 +33,7 @@ const collision2D &collision_manager2D::operator[](const std::size_t index) cons
 
 void collision_manager2D::solve()
 {
+    KIT_PERF_SCOPE("Collision solve")
     const auto &collisions = m_detection->detect_collisions_cached();
     m_resolution->solve(collisions);
 }
