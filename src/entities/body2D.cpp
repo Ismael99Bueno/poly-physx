@@ -11,9 +11,9 @@ body2D::body2D(world2D &world, const body2D::specs &spc)
     : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(spc.velocity),
       angular_velocity(spc.angular_velocity), charge(spc.props.charge),
       m_centroid(kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()),
-      m_charge_centroid(spc.position), m_type(spc.props.type)
+      m_lposition(0.f), m_charge_centroid(spc.position), m_type(spc.props.type)
 {
-    m_position = m_centroid.position;
+    m_gposition = m_centroid.position;
     mass(spc.props.mass);
 }
 
@@ -157,8 +157,8 @@ void body2D::update_centroids()
         return;
     if (empty())
     {
-        m_charge_centroid = m_position;
-        m_centroid.position = m_position;
+        m_charge_centroid = m_gposition;
+        m_centroid.position = m_gposition;
         return;
     }
     glm::vec2 centroid{0.f};
@@ -186,6 +186,7 @@ void body2D::update_centroids()
     m_centroid.position = centroid;
     for (collider2D &collider : *this)
         collider.mutable_shape().gtranslate(diff);
+    m_lposition = local_centroid_point(m_gposition);
 }
 void body2D::update_inertia()
 {
@@ -264,10 +265,41 @@ float body2D::kinetic_energy() const
                    angular_velocity * angular_velocity * m_props.nondynamic.inertia);
 }
 
-void body2D::add_force_at(const glm::vec2 &force, const glm::vec2 &at)
+glm::vec2 body2D::local_centroid_point(const glm::vec2 &gpoint) const
+{
+    return m_centroid.inverse_center_scale_rotate_translate3() * glm::vec3(gpoint, 1.f);
+}
+glm::vec2 body2D::global_centroid_point(const glm::vec2 &lpoint) const
+{
+    return m_centroid.center_scale_rotate_translate3() * glm::vec3(lpoint, 1.f);
+}
+
+glm::vec2 body2D::local_position_point(const glm::vec2 &gpoint) const
+{
+    return local_centroid_point(gpoint) - m_lposition;
+}
+glm::vec2 body2D::global_position_point(const glm::vec2 &lpoint) const
+{
+    return global_centroid_point(lpoint + m_lposition);
+}
+
+glm::vec2 body2D::local_vector(const glm::vec2 &gvector) const
+{
+    return m_centroid.inverse_center_scale_rotate_translate3() * glm::vec3(gvector, 0.f);
+}
+glm::vec2 body2D::global_vector(const glm::vec2 &lvector) const
+{
+    return m_centroid.center_scale_rotate_translate3() * glm::vec3(lvector, 0.f);
+}
+
+void body2D::ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint)
+{
+    gadd_force_at(force, global_centroid_point(lpoint));
+}
+void body2D::gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint)
 {
     impulse_force += force;
-    impulse_torque += kit::cross2D(at, force);
+    impulse_torque += kit::cross2D(gpoint - m_centroid.position, force);
 }
 
 void body2D::apply_simulation_force(const glm::vec2 &force)
@@ -300,7 +332,7 @@ const glm::vec2 &body2D::charge_centroid() const
 void body2D::translate(const glm::vec2 &dpos)
 {
     m_centroid.position += dpos;
-    m_position += dpos;
+    m_gposition += dpos;
     update_colliders();
 }
 void body2D::rotate(const float dangle)
@@ -315,7 +347,7 @@ const kit::transform2D<float> &body2D::centroid_transform() const
 }
 void body2D::centroid_transform(const kit::transform2D<float> &centroid)
 {
-    m_position += centroid.position - m_centroid.position;
+    m_gposition += centroid.position - m_centroid.position;
     m_centroid = centroid;
     update_colliders();
 }
@@ -324,18 +356,29 @@ const glm::vec2 &body2D::centroid() const
 {
     return m_centroid.position;
 }
-const glm::vec2 &body2D::position() const
+
+const glm::vec2 &body2D::lposition() const
 {
-    return m_position;
+    return m_lposition;
 }
+const glm::vec2 &body2D::gposition() const
+{
+    return m_gposition;
+}
+
 const glm::vec2 &body2D::origin() const
 {
     return m_centroid.origin;
 }
 
-glm::vec2 body2D::velocity_at(const glm::vec2 &at) const
+glm::vec2 body2D::lvelocity_at(const glm::vec2 &lpoint) const
 {
-    return velocity + angular_velocity * glm::vec2(-at.y, at.x); // v + cross(w, at)
+    return gvelocity_at(global_centroid_point(lpoint));
+}
+glm::vec2 body2D::gvelocity_at(const glm::vec2 &gpoint) const
+{
+    const glm::vec2 at = gpoint - m_centroid.position;
+    return velocity + angular_velocity * glm::vec2(-at.y, at.x);
 }
 
 float body2D::rotation() const
@@ -345,14 +388,15 @@ float body2D::rotation() const
 
 void body2D::centroid(const glm::vec2 &centroid)
 {
-    m_position += centroid - m_centroid.position;
+    m_gposition += centroid - m_centroid.position;
     m_centroid.position = centroid;
     update_colliders();
 }
-void body2D::position(const glm::vec2 &position)
+
+void body2D::gposition(const glm::vec2 &gposition)
 {
-    m_centroid.position += position - m_position;
-    m_position = position;
+    m_centroid.position += gposition - m_gposition;
+    m_gposition = gposition;
     update_colliders();
 }
 void body2D::origin(const glm::vec2 &origin)
@@ -362,15 +406,10 @@ void body2D::origin(const glm::vec2 &origin)
 }
 void body2D::rotation(const float rotation)
 {
-    m_position = m_centroid.position + kit::transform2D<float>::rotation_matrix(rotation - m_centroid.rotation) *
-                                           (m_position - m_centroid.position);
+    m_gposition = m_centroid.position + kit::transform2D<float>::rotation_matrix(rotation - m_centroid.rotation) *
+                                            (m_gposition - m_centroid.position);
     m_centroid.rotation = rotation;
     update_colliders();
-}
-
-void body2D::match_position_with_centroid()
-{
-    m_position = m_centroid.position;
 }
 
 void body2D::mass(const float mass)

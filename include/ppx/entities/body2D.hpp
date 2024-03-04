@@ -50,9 +50,9 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     {
         glm::vec2 velocity{0.f};
         float angular_velocity = 0.f;
-        glm::vec2 velocity_at(const glm::vec2 &at) const
+        glm::vec2 lvelocity_at(const glm::vec2 &lpoint) const
         {
-            return velocity + angular_velocity * glm::vec2(-at.y, at.x);
+            return velocity + angular_velocity * glm::vec2(-lpoint.y, lpoint.x);
         } // v + cross(w, at)
     } ctr_proxy;
 
@@ -91,14 +91,25 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     void begin_spatial_update();
     void end_spatial_update();
 
-    void match_position_with_centroid();
-
     const_ptr as_ptr() const;
     ptr as_ptr();
 
     float kinetic_energy() const;
 
-    void add_force_at(const glm::vec2 &force, const glm::vec2 &at);
+    glm::vec2 local_centroid_point(const glm::vec2 &gpoint) const;
+    glm::vec2 global_centroid_point(const glm::vec2 &lpoint) const;
+
+    glm::vec2 local_position_point(const glm::vec2 &gpoint) const;
+    glm::vec2 global_position_point(const glm::vec2 &lpoint) const;
+
+    glm::vec2 local_vector(const glm::vec2 &gvector) const;
+    glm::vec2 global_vector(const glm::vec2 &lvector) const;
+
+    glm::vec2 local_vector(const glm::vec2 &gvector) const;
+    glm::vec2 global_vector(const glm::vec2 &lvector) const;
+
+    void ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint);
+    void gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint);
 
     const glm::vec2 &force() const;
     float torque() const;
@@ -112,23 +123,26 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     void centroid_transform(const kit::transform2D<float> &centroid);
 
     const glm::vec2 &centroid() const;
-    const glm::vec2 &position() const;
+    const glm::vec2 &lposition() const;
+    const glm::vec2 &gposition() const;
     const glm::vec2 &origin() const;
     float rotation() const;
 
     const glm::vec2 &charge_centroid() const;
 
-    glm::vec2 velocity_at(const glm::vec2 &at) const;
+    glm::vec2 lvelocity_at(const glm::vec2 &lpoint) const;
+    glm::vec2 gvelocity_at(const glm::vec2 &gpoint) const;
 
     void centroid(const glm::vec2 &centroid);
-    void position(const glm::vec2 &position);
+    void gposition(const glm::vec2 &gposition);
     void origin(const glm::vec2 &origin);
     void rotation(float rotation);
     void mass(float mass);
 
   private:
     kit::transform2D<float> m_centroid;
-    glm::vec2 m_position;
+    glm::vec2 m_gposition;
+    glm::vec2 m_lposition;
     properties m_props;
     glm::vec2 m_charge_centroid;
     glm::vec2 m_force{0.f};
