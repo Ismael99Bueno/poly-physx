@@ -8,6 +8,7 @@ namespace ppx
 class body2D;
 class collider2D;
 class distance_joint2D;
+class joint2D;
 class spring2D;
 class joint_proxy2D;
 } // namespace ppx
@@ -56,6 +57,13 @@ struct body2D
         btype type = btype::DYNAMIC;
     } props;
     static body2D from_body(const ppx::body2D &body);
+};
+
+struct joint2D
+{
+    std::size_t bindex1 = SIZE_MAX;
+    std::size_t bindex2 = SIZE_MAX;
+    static joint2D from_joint(const ppx::joint2D &joint);
 };
 
 struct joint_proxy2D
