@@ -35,5 +35,6 @@ class joint2D : public kit::identifiable<>
 
     glm::vec2 ganchor_offset1() const;
     glm::vec2 ganchor_offset2() const;
+    std::tuple<glm::vec2, glm::vec2, glm::vec2> dir_and_offsets() const;
 };
 } // namespace ppx

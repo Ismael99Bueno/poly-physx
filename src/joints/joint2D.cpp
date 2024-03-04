@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ppx/internal/pch.hpp"
 #include "ppx/joints/joint2D.hpp"
 #include "ppx/world2D.hpp"
 
@@ -47,11 +48,18 @@ glm::vec2 joint2D::ganchor2() const
 
 glm::vec2 joint2D::ganchor_offset1() const
 {
-    return m_body1->global_position_point(m_lanchor1) - m_body1->centroid();
+    return ganchor1() - m_body1->centroid();
 }
 glm::vec2 joint2D::ganchor_offset2() const
 {
-    return m_body2->global_position_point(m_lanchor2) - m_body2->centroid();
+    return ganchor2() - m_body2->centroid();
+}
+std::tuple<glm::vec2, glm::vec2, glm::vec2> joint2D::dir_and_offsets() const
+{
+    const glm::vec2 g1 = ganchor1();
+    const glm::vec2 g2 = ganchor2();
+    const glm::vec2 dir = g2 - g1;
+    return {dir, g1 - m_body1->centroid(), g2 - m_body2->centroid()};
 }
 
 bool joint2D::valid() const
