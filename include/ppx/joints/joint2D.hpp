@@ -2,10 +2,11 @@
 
 #include "ppx/entities/specs2D.hpp"
 #include "ppx/entities/body2D.hpp"
+#include "kit/interface/identifiable.hpp"
 
 namespace ppx
 {
-class joint2D : public worldref2D
+class joint2D : public kit::identifiable<>
 {
   public:
     using specs = specs::joint2D;
@@ -15,6 +16,9 @@ class joint2D : public worldref2D
 
     const glm::vec2 &lanchor1() const;
     const glm::vec2 &lanchor2() const;
+
+    glm::vec2 ganchor1() const;
+    glm::vec2 ganchor2() const;
 
     bool valid() const;
 
@@ -28,5 +32,8 @@ class joint2D : public worldref2D
 
     glm::vec2 m_lanchor1;
     glm::vec2 m_lanchor2;
+
+    glm::vec2 ganchor_offset1() const;
+    glm::vec2 ganchor_offset2() const;
 };
 } // namespace ppx
