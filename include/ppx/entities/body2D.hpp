@@ -163,7 +163,6 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
     void apply_simulation_force(const glm::vec2 &force);
-    void apply_simulation_force_at(const glm::vec2 &force, const glm::vec2 &at);
     void apply_simulation_torque(float torque);
 
     void reset_dynamic_properties();
@@ -171,6 +170,7 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     friend class collider2D;
     friend class spring2D;
     friend class behaviour2D;
+    friend class constraint2D;
     friend class body_manager2D;
     friend class collider_manager2D;
     friend class joint_constraint2D;
