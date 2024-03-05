@@ -10,8 +10,6 @@ namespace ppx
 class collider_manager2D final : public manager2D<collider2D>
 {
   public:
-    using manager2D<collider2D>::manager2D;
-
     struct
     {
         kit::event<collider2D &> on_addition;
@@ -34,8 +32,13 @@ class collider_manager2D final : public manager2D<collider2D>
     using manager2D<collider2D>::remove;
     bool remove(std::size_t index) override;
 
+  private:
+    using manager2D<collider2D>::manager2D;
+
     void validate();
     void validate_indices();
     void validate_parents();
+
+    friend class world2D;
 };
 } // namespace ppx

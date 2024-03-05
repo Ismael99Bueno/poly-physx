@@ -14,8 +14,6 @@ namespace ppx
 class behaviour_manager2D final : public manager2D<kit::scope<behaviour2D>>
 {
   public:
-    using manager2D<kit::scope<behaviour2D>>::manager2D;
-
     struct
     {
         kit::event<behaviour2D *> on_addition;
@@ -38,9 +36,10 @@ class behaviour_manager2D final : public manager2D<kit::scope<behaviour2D>>
     using manager2D<kit::scope<behaviour2D>>::remove;
     bool remove(std::size_t index) override;
 
-    void validate();
-
   private:
+    using manager2D<kit::scope<behaviour2D>>::manager2D;
+
+    void validate();
     void apply_forces();
 
     void process_addition(kit::scope<behaviour2D> &&bhv);

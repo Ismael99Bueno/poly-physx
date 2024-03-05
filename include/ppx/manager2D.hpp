@@ -35,7 +35,6 @@ class manager2D
     using id_type = typename value_type::id_type;
     static inline constexpr bool is_scope = type_wrapper<T>::is_scope;
 
-    manager2D(world2D &world);
     virtual ~manager2D() = default;
 
     auto begin() const
@@ -71,6 +70,7 @@ class manager2D
     void clear();
 
   protected:
+    manager2D(world2D &world);
     std::vector<T> m_elements;
 };
 } // namespace ppx

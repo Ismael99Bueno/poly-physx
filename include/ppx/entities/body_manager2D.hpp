@@ -10,8 +10,6 @@ namespace ppx
 class body_manager2D final : public manager2D<body2D>
 {
   public:
-    using manager2D<body2D>::manager2D;
-
     struct
     {
         kit::event<body2D &> on_addition;
@@ -35,6 +33,8 @@ class body_manager2D final : public manager2D<body2D>
     bool remove(std::size_t index) override;
 
   private:
+    using manager2D<body2D>::manager2D;
+
     void apply_impulse_and_persistent_forces();
     void reset_impulse_forces();
     void reset_simulation_forces();

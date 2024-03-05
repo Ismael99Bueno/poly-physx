@@ -14,8 +14,6 @@ class world2D;
 class collision_manager2D : public kit::toggleable, public worldref2D
 {
   public:
-    collision_manager2D(world2D &world);
-
     auto begin() const
     {
         return m_detection->collisions().begin();
@@ -70,6 +68,8 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     bool empty() const;
 
   private:
+    collision_manager2D(world2D &world);
+
     kit::scope<collision_detection2D> m_detection;
     kit::scope<collision_resolution2D> m_resolution;
 
