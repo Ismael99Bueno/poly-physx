@@ -18,7 +18,7 @@ class world2D : kit::non_copyable
     template <class... IntegArgs>
     world2D(IntegArgs &&...args)
         : integrator(std::forward<IntegArgs>(args)...), bodies(*this), colliders(*this), springs(*this),
-          behaviours(*this), collisions(*this), constraints(*this), m_previous_timestep(integrator.ts.value)
+          behaviours(*this), collisions(*this), m_previous_timestep(integrator.ts.value)
     {
     }
 
@@ -28,7 +28,15 @@ class world2D : kit::non_copyable
     spring_manager2D springs;
     behaviour_manager2D behaviours;
     collision_manager2D collisions;
-    constraint_manager2D constraints;
+    struct
+    {
+        std::uint32_t iterations = 10;
+        bool warmup = true;
+        bool baumgarte_correction = true;
+
+        float baumgarte_coef = 0.1f;
+        float baumgarte_threshold = 0.05f;
+    } constraints;
 
     bool semi_implicit_integration = false;
 
