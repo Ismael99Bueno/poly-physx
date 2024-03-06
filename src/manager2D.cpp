@@ -84,6 +84,15 @@ template <Identifiable T> bool manager2D<T>::remove(const id_type &id)
     return false;
 }
 
+template <Identifiable T> bool manager2D<T>::contains(const value_type &element) const
+{
+    return contains(element.id);
+}
+template <Identifiable T> bool manager2D<T>::contains(const id_type &id) const
+{
+    return (*this)[id] != nullptr;
+}
+
 template <Identifiable T> std::size_t manager2D<T>::size() const
 {
     return m_elements.size();

@@ -65,6 +65,9 @@ class manager2D
     bool remove(const value_type &element);
     bool remove(const id_type &id);
 
+    bool contains(const value_type &element) const;
+    bool contains(const id_type &id) const;
+
     std::size_t size() const;
     bool empty() const;
     void clear();

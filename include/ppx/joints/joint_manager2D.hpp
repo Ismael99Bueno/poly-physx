@@ -11,31 +11,34 @@ namespace ppx
 template <typename T>
 concept ValidJoint = requires(T t) {
     requires kit::DerivedFrom<T, joint2D>;
+    requires kit::Identifiable<T>;
     requires kit::Indexable<T>;
     typename T::ptr;
     typename T::const_ptr;
     typename T::specs;
 };
 
-class joint_solver2D
+class joint_solver2D : public kit::identifiable<>
 {
   public:
     virtual ~joint_solver2D() = default;
 
   private:
+    joint_solver2D(const kit::uuid &id);
     virtual void solve() = 0;
     virtual void validate() = 0;
 
     friend class joint_repository2D;
 };
 
-template <ValidJoint T> class joint_manager2D final : public manager2D<T>, public joint_solver2D
+template <ValidJoint T> class joint_manager2D : public manager2D<T>, public joint_solver2D
 {
   public:
     using ptr = typename T::ptr;
     using const_ptr = typename T::const_ptr;
     using specs = typename T::specs;
 
+    virtual ~joint_manager2D() = default;
     struct
     {
         kit::event<T &> on_addition;
@@ -43,7 +46,7 @@ template <ValidJoint T> class joint_manager2D final : public manager2D<T>, publi
         kit::event<std::size_t> on_late_removal;
     } events;
 
-    T &add(const specs &spc = {})
+    virtual T &add(const specs &spc = {})
     {
         T &joint = m_elements.emplace_back(world, spc);
         joint.index = m_elements.size() - 1;
@@ -69,7 +72,7 @@ template <ValidJoint T> class joint_manager2D final : public manager2D<T>, publi
     }
 
     using manager2D<T>::remove;
-    bool remove(std::size_t index)
+    virtual bool remove(std::size_t index) override
     {
         if (index >= m_elements.size())
             return false;
@@ -85,9 +88,13 @@ template <ValidJoint T> class joint_manager2D final : public manager2D<T>, publi
         return true;
     }
 
+  protected:
+    joint_manager2D(world2D &world) : manager2D<T>(world), joint_solver2D(s_id)
+    {
+    }
+
   private:
-    using manager2D<T>::manager2D;
-    static inline std::size_t s_index = SIZE_MAX;
+    static inline kit::uuid s_id = kit::uuid::random();
 
     void validate() override
     {
@@ -106,30 +113,69 @@ template <ValidJoint T> class joint_manager2D final : public manager2D<T>, publi
             }
     }
 
-    void solve() override
+    virtual void solve() override
     {
         if (m_elements.empty())
             return;
+
+        if constexpr (std::is_base_of_v<constraint2D, T>)
+        {
+            if (world.constraints.warmup)
+                for (T &joint)
+                    joint.warmup();
+            for (std::size_t i = 0; i < world.constraints.iterations; i++)
+                for (T &joint : m_elements)
+                    joint.solve();
+        }
+        else
+            for (T &joint : m_elements)
+                joint.solve();
     }
     friend class world2D;
 };
 
-class joint_repository2D
+class joint_repository2D final : public manager2D<kit::scope<joint_solver2D>>
 {
   public:
-    template <ValidJoint T, class... JointArgs> T *add(world2D &world, JointArgs &&...args)
+    template <ValidJoint T, kit::DerivedFrom<joint_manager2D<T>> Manager = joint_manager2D<T>> Manager *add_manager()
     {
-        KIT_ASSERT_ERROR(joint_manager2D<T>::s_index == SIZE_MAX,
-                         "There is already a solver of this type in the repository")
-        joint_manager2D<T>::s_index = m_solvers.size();
-        auto joint = kit::make_scope<joint_manager2D<T>>(world, std::forward<JointArgs>(args)...);
-        T *ptr = joint.get();
-        m_solvers.push_back(std::move(joint));
+        KIT_ASSERT_ERROR(!contains(Manager::s_id), "There is already a solver of this type in the repository")
+        auto manager = kit::make_scope<Manager>(world);
+        T *ptr = manager.get();
+        m_elements.push_back(std::move(manager));
         return ptr;
     }
 
+    template <ValidJoint T, kit::DerivedFrom<joint_manager2D<T>> Manager = joint_manager2D<T>>
+    const Manager *manager() const
+    {
+        const joint_solver2D *solver = (*this)[Manager::s_id];
+        return solver ? static_cast<const Manager *>(solver) : nullptr;
+    }
+    template <ValidJoint T, kit::DerivedFrom<joint_manager2D<T>> Manager = joint_manager2D<T>> Manager *manager()
+    {
+        joint_solver2D *solver = (*this)[Manager::s_id];
+        return solver ? static_cast<Manager *>(solver) : nullptr;
+    }
+
+    // wrappers around joint manager
+
+    using manager2D<kit::scope<joint_solver2D>>::remove;
+    bool remove(std::size_t index) override;
+    template <ValidJoint T> bool remove()
+    {
+        for (std::size_t i = 0; i < m_elements.size(); i++)
+            if (m_elements[i]->id == joint_manager2D<T>::s_id)
+                return remove(i);
+        return false;
+    }
+
   private:
-    std::vector<kit::scope<joint2D>> m_solvers;
+    joint_repository2D(world2D &world);
+    void solve() const;
+    void validate() const;
+
+    friend class world2D;
 };
 
 } // namespace ppx
