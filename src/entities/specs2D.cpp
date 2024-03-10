@@ -7,7 +7,7 @@
 
 namespace ppx::specs
 {
-collider2D collider2D::from_collider(const ppx::collider2D &collider)
+collider2D collider2D::from_instance(const ppx::collider2D &collider)
 {
     if (const auto *poly = collider.shape_if<polygon>())
     {
@@ -29,34 +29,32 @@ collider2D collider2D::from_collider(const ppx::collider2D &collider)
              collider.shape_type()}};
 }
 
-body2D body2D::from_body(const ppx::body2D &body)
+body2D body2D::from_instance(const ppx::body2D &body)
 {
     std::vector<collider2D> colliders;
     colliders.reserve(body.size());
 
     for (const ppx::collider2D &collider : body)
-        colliders.push_back(collider2D::from_collider(collider));
+        colliders.push_back(collider2D::from_instance(collider));
 
-    return {body.position(),
+    return {body.gposition(),
             body.velocity,
             body.rotation(),
             body.angular_velocity,
             {body.props().nondynamic.mass, body.charge, colliders, body.type()}};
 }
 
-joint_proxy2D joint_proxy2D::from_joint_proxy(const ppx::joint_proxy2D &jp)
+distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj)
 {
-    return {jp.body1()->index, jp.body2()->index, jp.rotated_anchor1(), jp.rotated_anchor2()};
+    return {{dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2()};
 }
 
-spring2D spring2D::from_spring(const ppx::spring2D &sp)
+spring2D spring2D::from_instance(const ppx::spring2D &sp)
 {
-    return {joint_proxy2D::from_joint_proxy(sp.joint), {sp.stiffness, sp.damping, sp.length}};
-}
-
-distance_joint2D distance_joint2D::from_distance_joint(const ppx::distance_joint2D &dj)
-{
-    return {joint_proxy2D::from_joint_proxy(dj.joint)};
+    return {{sp.body1()->index, sp.body2()->index},
+            sp.ganchor1(),
+            sp.ganchor2(),
+            {sp.stiffness, sp.damping, sp.length, sp.non_linear_terms, sp.non_linear_contribution}};
 }
 
 contraption2D contraption2D::rope(const glm::vec2 &start, const glm::vec2 &end, const std::uint32_t segments,
@@ -74,10 +72,10 @@ contraption2D contraption2D::rope(const glm::vec2 &start, const glm::vec2 &end, 
     contraption.bodies.push_back(body2D{.position = start, .props = node_props});
     for (std::size_t i = 1; i <= segments + 1; i++)
     {
+        const glm::vec2 curpos = start + dir * (float)i;
+        const glm::vec2 &prevpos = contraption.bodies.back().position;
         contraption.bodies.push_back(body2D{.position = start + dir * (float)i, .props = node_props});
-        contraption.springs.push_back(
-            spring2D{.joint = joint_proxy2D{.bindex1 = i - 1, .bindex2 = i, .anchor1 = spacing, .anchor2 = -spacing},
-                     .props = spring_props});
+        contraption.springs.push_back({{i - 1, i}, prevpos + spacing, curpos - spacing, spring_props});
     }
     return contraption;
 }
@@ -97,8 +95,7 @@ contraption2D contraption2D::chain(const glm::vec2 &start, const glm::vec2 &end,
     for (std::size_t i = 1; i <= segments + 1; i++)
     {
         contraption.bodies.push_back(body2D{.position = start + dir * (float)i, .props = node_props});
-        contraption.distance_joints.push_back(distance_joint2D{
-            .joint = joint_proxy2D{.bindex1 = i - 1, .bindex2 = i, .anchor1 = spacing, .anchor2 = -spacing}});
+        contraption.distance_joints.push_back({{i - 1, i}, spacing, -spacing});
     }
     return contraption;
 }

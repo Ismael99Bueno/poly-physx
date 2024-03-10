@@ -1,65 +1,94 @@
 #pragma once
 
-#include "ppx/constraints/contact_constraint2D.hpp"
-#include "ppx/manager2D.hpp"
-#include "kit/container/hashable_tuple.hpp"
-#include "kit/utility/type_constraints.hpp"
-#include "kit/events/event.hpp"
+#include "ppx/joints/joint_container2D.hpp"
+#include "ppx/constraints/constraint2D.hpp"
+#include "ppx/joints/meta_manager2D.hpp"
+#include "kit/serialization/yaml/codec.hpp"
 
 namespace ppx
 {
-class constraint_manager2D final : public manager2D<kit::scope<constraint2D>>
+template <typename T>
+concept Constraint = requires() {
+    requires Joint<T>;
+    requires kit::DerivedFrom<T, constraint2D>;
+};
+
+template <Constraint T> class constraint_manager2D;
+
+class constraint_solver2D : public kit::identifiable<std::string>, public kit::yaml::codecable
 {
   public:
-    using manager2D<kit::scope<constraint2D>>::manager2D;
+    template <Constraint T> using manager_t = constraint_manager2D<T>;
 
-    struct
-    {
-        kit::event<constraint2D *> on_addition;
-        kit::event<const constraint2D &> on_removal;
-    } events;
+    virtual ~constraint_solver2D() = default;
 
-    std::uint32_t iterations = 10;
-    bool warmup = true;
-    bool baumgarte_correction = true;
-
-    float baumgarte_coef = 0.1f;
-    float baumgarte_threshold = 0.05f;
-
-    template <kit::DerivedFrom<constraint2D> T, class... ConstraintArgs> T *add(ConstraintArgs &&...args)
-    {
-        static_assert(!std::is_same_v<T, contact_constraint2D> || !std::is_same_v<T, friction_constraint2D>,
-                      "Cannot add a contact or friction constraint directly");
-
-        auto ctr = kit::make_scope<T>(world, std::forward<ConstraintArgs>(args)...);
-        T *ptr = ctr.get();
-        KIT_ASSERT_ERROR(ptr->valid(), "The constraint must be valid before it can be added into the simulation")
-
-        process_addition(std::move(ctr));
-        return ptr;
-    }
-
-    using manager2D<kit::scope<constraint2D>>::remove;
-    bool remove(std::size_t index) override;
-
-    using manager2D<kit::scope<constraint2D>>::operator[];
-    std::vector<const constraint2D *> operator[](const std::vector<kit::uuid> &ids) const;
-    std::vector<constraint2D *> operator[](const std::vector<kit::uuid> &ids);
-
-    void validate();
+  protected:
+    constraint_solver2D(const std::string &name);
 
   private:
-    const std::vector<collision2D> *m_collisions = nullptr;
-    std::unordered_map<kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t>, contact_constraint2D> m_contacts;
+    virtual void startup() = 0;
+    virtual void solve() = 0;
+    virtual void validate() = 0;
 
-    void update_contacts();
-    void process_addition(kit::scope<constraint2D> &&ctr);
+    friend class constraint_meta_manager2D;
+};
 
-    void delegate_collisions(const std::vector<collision2D> *collisions);
+template <Constraint T> class constraint_manager2D : public joint_container2D<T>, public constraint_solver2D
+{
+  public:
+    virtual ~constraint_manager2D() = default;
 
+    constraint_manager2D(world2D &world, const std::string &name)
+        : joint_container2D<T>(world), constraint_solver2D(name)
+    {
+        joint_container2D<T>::s_name = name;
+    }
+
+  private:
+    void validate() override
+    {
+        joint_container2D<T>::validate();
+    }
+
+    virtual void startup() override
+    {
+        for (T &constraint : this->m_elements)
+        {
+            constraint.startup();
+            if (this->world.constraints.warmup)
+                constraint.warmup();
+        }
+    }
+
+    virtual void solve() override
+    {
+        for (std::size_t i = 0; i < this->world.constraints.iterations; i++)
+            for (T &constraint : this->m_elements)
+                constraint.solve();
+    }
+
+#ifdef KIT_USE_YAML_CPP
+    virtual YAML::Node encode() const override
+    {
+        return kit::yaml::codec<joint_container2D<T>>::encode(*this);
+    }
+    virtual bool decode(const YAML::Node &node) override
+    {
+        return kit::yaml::codec<joint_container2D<T>>::decode(node, *this);
+    }
+#endif
+};
+
+class constraint_meta_manager2D final : public meta_manager2D<constraint_solver2D>
+{
+    using meta_manager2D<constraint_solver2D>::meta_manager2D;
+
+    void startup();
     void solve();
+    void validate();
 
     friend class world2D;
-    friend class constraint_driven_resolution2D;
+    friend class joint_repository2D;
 };
+
 } // namespace ppx

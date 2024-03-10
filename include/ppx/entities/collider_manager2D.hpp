@@ -40,5 +40,6 @@ class collider_manager2D final : public manager2D<collider2D>
     void validate_parents();
 
     friend class world2D;
+    friend class body_manager2D;
 };
 } // namespace ppx

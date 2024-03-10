@@ -35,7 +35,8 @@ void collision_manager2D::solve()
 {
     KIT_PERF_SCOPE("Collision solve")
     const auto &collisions = m_detection->detect_collisions_cached();
-    m_resolution->solve(collisions);
+    if (!collisions.empty())
+        m_resolution->solve(collisions);
 }
 
 std::size_t collision_manager2D::size() const

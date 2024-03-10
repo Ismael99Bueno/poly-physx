@@ -13,6 +13,9 @@ class constraint2D : public joint2D, public worldref2D
     virtual float constraint_value() const = 0;
     virtual float constraint_velocity() const = 0;
 
+    void startup();
+    void warmup();
+
   protected:
     constraint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &ganchor1,
                  const glm::vec2 &ganchor2, bool m_allow_baumgarte = true);
@@ -20,15 +23,22 @@ class constraint2D : public joint2D, public worldref2D
                  bool m_allow_baumgarte = true);
     float m_cumlambda = 0.f;
 
-    float compute_lambda(const std::tuple<glm::vec2, glm::vec2, glm::vec2> &dir_and_offsets) const;
-    void apply_lambda(float lambda, const std::tuple<glm::vec2, glm::vec2, glm::vec2> &dir_and_offsets);
+    glm::vec2 m_offset1;
+    glm::vec2 m_offset2;
+    glm::vec2 m_dir;
 
     void solve_clamped(float min, float max);
     void solve_unclamped();
 
   private:
-    void warmup();
-    virtual void solve() = 0;
     bool m_allow_baumgarte;
+
+    virtual float inverse_mass() const = 0;
+    virtual glm::vec2 direction() const = 0;
+
+    float compute_lambda() const;
+    void apply_lambda(float lambda);
+
+    friend class constraint_driven_resolution2D;
 };
 } // namespace ppx

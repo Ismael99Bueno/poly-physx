@@ -7,10 +7,9 @@ namespace ppx
 {
 friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision,
                                              const std::size_t manifold_index)
-    : joint_constraint2D(world, "Friction", false), m_body1(collision->collider1->parent().raw()),
-      m_body2(collision->collider2->parent().raw()), m_anchor1(collision->touch1(manifold_index) - m_body1->centroid()),
-      m_anchor2(collision->touch2(manifold_index) - m_body2->centroid()),
-      m_tangent(glm::normalize(glm::vec2(-collision->mtv.y, collision->mtv.x))), m_friction(collision->friction)
+    : constraint2D(world, collision->collider1->parent(), collision->collider2->parent(),
+                   collision->manifold.contacts[manifold_index], false),
+      m_mtv(collision->mtv)
 {
 }
 
@@ -20,37 +19,38 @@ float friction_constraint2D::constraint_value() const
 }
 float friction_constraint2D::constraint_velocity() const
 {
-    return glm::dot(m_tangent, m_body2->ctr_proxy.velocity_at(m_anchor2) - m_body1->ctr_proxy.velocity_at(m_anchor1));
+    return glm::dot(m_dir, m_body2->ctr_proxy.velocity_at_centroid_offset(m_offset2) -
+                               m_body1->ctr_proxy.velocity_at_centroid_offset(m_offset1));
 }
 
-void friction_constraint2D::warmup()
-{
-    apply_warmup(*m_body1, *m_body2, m_anchor1, m_anchor2, m_tangent);
-}
 void friction_constraint2D::solve()
 {
     const float mu = m_friction * max_lambda;
-    solve_clamped(*m_body1, *m_body2, m_anchor1, m_anchor2, m_tangent, -mu, mu);
+    solve_clamped(-mu, mu);
 }
 
-void friction_constraint2D::update(const collision2D *collision, const glm::vec2 &normal, const glm::vec2 &anchor1,
-                                   const glm::vec2 &anchor2)
+void friction_constraint2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &lanchor2)
 {
-    m_body1 = collision->collider1->parent().raw();
-    m_body2 = collision->collider2->parent().raw();
+    m_body1 = collision->collider1->parent();
+    m_body2 = collision->collider2->parent();
     m_friction = collision->friction;
-    m_anchor1 = anchor1;
-    m_anchor2 = anchor2;
-    m_tangent = glm::vec2(-normal.y, normal.x);
+    m_lanchor1 = lanchor1;
+    m_lanchor2 = lanchor2;
+    m_mtv = collision->mtv;
 }
 
-bool friction_constraint2D::contains(kit::uuid id) const
+float friction_constraint2D::inverse_mass() const
 {
-    return m_body1->id == id || m_body2->id == id;
+    const float cross1 = kit::cross2D(m_offset1, m_dir);
+    const float cross2 = kit::cross2D(m_offset2, m_dir);
+    return m_body1->props().dynamic.inv_mass + m_body2->props().dynamic.inv_mass +
+           m_body1->props().dynamic.inv_inertia * cross1 * cross1 +
+           m_body2->props().dynamic.inv_inertia * cross2 * cross2;
 }
-bool friction_constraint2D::valid() const
+
+glm::vec2 friction_constraint2D::direction() const
 {
-    return m_body1 && m_body2;
+    return glm::normalize(glm::vec2(-m_mtv.y, m_mtv.x));
 }
 
 } // namespace ppx

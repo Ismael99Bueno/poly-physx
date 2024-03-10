@@ -6,6 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <unordered_set>
+#include <typeinfo>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

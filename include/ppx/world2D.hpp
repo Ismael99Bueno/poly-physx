@@ -4,9 +4,8 @@
 #include "ppx/entities/body_manager2D.hpp"
 #include "ppx/entities/collider_manager2D.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
-#include "ppx/constraints/constraint_manager2D.hpp"
 #include "ppx/behaviours/behaviour_manager2D.hpp"
-#include "ppx/joints/spring_manager2D.hpp"
+#include "ppx/joints/joint_repository2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/utility/utils.hpp"
 
@@ -17,7 +16,7 @@ class world2D : kit::non_copyable
   public:
     template <class... IntegArgs>
     world2D(IntegArgs &&...args)
-        : integrator(std::forward<IntegArgs>(args)...), bodies(*this), colliders(*this), springs(*this),
+        : integrator(std::forward<IntegArgs>(args)...), bodies(*this), colliders(*this), joints(*this),
           behaviours(*this), collisions(*this), m_previous_timestep(integrator.ts.value)
     {
     }
@@ -25,7 +24,7 @@ class world2D : kit::non_copyable
     rk::integrator<float> integrator;
     body_manager2D bodies;
     collider_manager2D colliders;
-    spring_manager2D springs;
+    joint_repository2D joints;
     behaviour_manager2D behaviours;
     collision_manager2D collisions;
     struct

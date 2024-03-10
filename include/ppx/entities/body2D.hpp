@@ -50,9 +50,9 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     {
         glm::vec2 velocity{0.f};
         float angular_velocity = 0.f;
-        glm::vec2 lvelocity_at(const glm::vec2 &lpoint) const
+        glm::vec2 velocity_at_centroid_offset(const glm::vec2 &offset) const
         {
-            return velocity + angular_velocity * glm::vec2(-lpoint.y, lpoint.x);
+            return velocity + angular_velocity * glm::vec2(-offset.y, offset.x);
         } // v + cross(w, at)
     } ctr_proxy;
 
@@ -105,9 +105,6 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     glm::vec2 local_vector(const glm::vec2 &gvector) const;
     glm::vec2 global_vector(const glm::vec2 &lvector) const;
 
-    glm::vec2 local_vector(const glm::vec2 &gvector) const;
-    glm::vec2 global_vector(const glm::vec2 &lvector) const;
-
     void ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint);
     void gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint);
 
@@ -130,8 +127,11 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
 
     const glm::vec2 &charge_centroid() const;
 
-    glm::vec2 lvelocity_at(const glm::vec2 &lpoint) const;
+    glm::vec2 lvelocity_at_from_centroid(const glm::vec2 &lpoint) const;
+    glm::vec2 lvelocity_at_from_position(const glm::vec2 &lpoint) const;
     glm::vec2 gvelocity_at(const glm::vec2 &gpoint) const;
+    glm::vec2 gvelocity_at_centroid_offset(const glm::vec2 &offset) const;
+    glm::vec2 gvelocity_at_position_offset(const glm::vec2 &offset) const;
 
     void centroid(const glm::vec2 &centroid);
     void gposition(const glm::vec2 &gposition);

@@ -17,8 +17,5 @@ struct collision2D
     manifold2D manifold;
 
     bool collided = false;
-
-    const glm::vec2 &touch1(std::size_t manifold_index) const;
-    glm::vec2 touch2(std::size_t manifold_index) const;
 };
 } // namespace ppx

@@ -366,14 +366,25 @@ const glm::vec2 &body2D::origin() const
     return m_centroid.origin;
 }
 
-glm::vec2 body2D::lvelocity_at(const glm::vec2 &lpoint) const
+glm::vec2 body2D::lvelocity_at_from_centroid(const glm::vec2 &lpoint) const
 {
     return gvelocity_at(global_centroid_point(lpoint));
 }
+glm::vec2 body2D::lvelocity_at_from_position(const glm::vec2 &lpoint) const
+{
+    return gvelocity_at(global_position_point(lpoint));
+}
 glm::vec2 body2D::gvelocity_at(const glm::vec2 &gpoint) const
 {
-    const glm::vec2 at = gpoint - m_centroid.position;
-    return velocity + angular_velocity * glm::vec2(-at.y, at.x);
+    return gvelocity_at_centroid_offset(gpoint - m_centroid.position);
+}
+glm::vec2 body2D::gvelocity_at_centroid_offset(const glm::vec2 &offset) const
+{
+    return velocity + angular_velocity * glm::vec2(-offset.y, offset.x);
+}
+glm::vec2 body2D::gvelocity_at_position_offset(const glm::vec2 &offset) const
+{
+    return gvelocity_at_centroid_offset(offset + m_lposition);
 }
 
 float body2D::rotation() const

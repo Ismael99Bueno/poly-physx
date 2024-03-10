@@ -2,6 +2,7 @@
 
 #include "ppx/world2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
+#include "ppx/joints/spring2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
@@ -42,87 +43,6 @@ template <> struct kit::yaml::codec<ppx::behaviour2D>
         bhv.enabled = node["Enabled"].as<bool>();
         for (const YAML::Node &n : node["Bodies"])
             bhv.add(bhv.world.bodies.ptr(n.as<std::size_t>()));
-        return true;
-    }
-};
-
-template <> struct kit::yaml::codec<ppx::constraint2D>
-{
-    static YAML::Node encode(const ppx::constraint2D &ctr)
-    {
-        YAML::Node node;
-        node["Name"] = ctr.name;
-        return node;
-    }
-    static bool decode(const YAML::Node &node, ppx::constraint2D &ctr)
-    {
-        return true;
-    }
-};
-
-template <> struct kit::yaml::codec<ppx::joint_proxy2D::specs>
-{
-    static YAML::Node encode(const ppx::joint_proxy2D::specs &joint)
-    {
-        YAML::Node node;
-        node["Index1"] = joint.bindex1;
-        node["Index2"] = joint.bindex2;
-
-        node["Anchor1"] = joint.anchor1;
-        node["Anchor2"] = joint.anchor2;
-        return node;
-    }
-    static bool decode(const YAML::Node &node, ppx::joint_proxy2D::specs &joint)
-    {
-        if (!node.IsMap() || node.size() < 4)
-            return false;
-
-        joint.bindex1 = node["Index1"].as<std::size_t>();
-        joint.bindex2 = node["Index2"].as<std::size_t>();
-
-        joint.anchor1 = node["Anchor1"].as<glm::vec2>();
-        joint.anchor2 = node["Anchor2"].as<glm::vec2>();
-
-        return true;
-    }
-};
-
-template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
-{
-    static YAML::Node encode(const ppx::distance_joint2D::specs &dj)
-    {
-        return kit::yaml::codec<ppx::joint_proxy2D::specs>::encode(dj.joint);
-    }
-    static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
-    {
-        return kit::yaml::codec<ppx::joint_proxy2D::specs>::decode(node, dj.joint);
-    }
-};
-
-template <> struct kit::yaml::codec<ppx::spring2D::specs>
-{
-    static YAML::Node encode(const ppx::spring2D::specs &sp)
-    {
-        YAML::Node node;
-        node["Joint"] = sp.joint;
-        node["Stiffness"] = sp.props.stiffness;
-        node["Damping"] = sp.props.damping;
-        node["Length"] = sp.props.length;
-        node["Non linear terms"] = sp.props.non_linear_terms;
-        node["Non linear contribution"] = sp.props.non_linear_contribution;
-        return node;
-    }
-    static bool decode(const YAML::Node &node, ppx::spring2D::specs &sp)
-    {
-        if (!node.IsMap() || node.size() != 6)
-            return false;
-
-        sp.joint = node["Joint"].as<ppx::joint_proxy2D::specs>();
-        sp.props.stiffness = node["Stiffness"].as<float>();
-        sp.props.damping = node["Damping"].as<float>();
-        sp.props.length = node["Length"].as<float>();
-        sp.props.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
-        sp.props.non_linear_contribution = node["Non linear contribution"].as<float>();
         return true;
     }
 };
@@ -213,13 +133,71 @@ template <> struct kit::yaml::codec<ppx::body2D::specs>
     }
 };
 
+template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
+{
+    static YAML::Node encode(const ppx::distance_joint2D::specs &dj)
+    {
+        YAML::Node node;
+        node["Index1"] = dj.bindex1;
+        node["Index2"] = dj.bindex2;
+        node["Anchor1"] = dj.ganchor1;
+        node["Anchor2"] = dj.ganchor2;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
+    {
+        if (!node.IsMap() || node.size() != 4)
+            return false;
+
+        dj.bindex1 = node["Index1"].as<std::size_t>();
+        dj.bindex2 = node["Index2"].as<std::size_t>();
+        dj.ganchor1 = node["Anchor1"].as<glm::vec2>();
+        dj.ganchor2 = node["Anchor2"].as<glm::vec2>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::spring2D::specs>
+{
+    static YAML::Node encode(const ppx::spring2D::specs &sp)
+    {
+        YAML::Node node;
+        node["Index1"] = sp.bindex1;
+        node["Index2"] = sp.bindex2;
+        node["Anchor1"] = sp.ganchor1;
+        node["Anchor2"] = sp.ganchor2;
+        node["Stiffness"] = sp.props.stiffness;
+        node["Damping"] = sp.props.damping;
+        node["Length"] = sp.props.length;
+        node["Non linear terms"] = sp.props.non_linear_terms;
+        node["Non linear contribution"] = sp.props.non_linear_contribution;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::spring2D::specs &sp)
+    {
+        if (!node.IsMap() || node.size() != 9)
+            return false;
+
+        sp.bindex1 = node["Index1"].as<std::size_t>();
+        sp.bindex2 = node["Index2"].as<std::size_t>();
+        sp.ganchor1 = node["Anchor1"].as<glm::vec2>();
+        sp.ganchor2 = node["Anchor2"].as<glm::vec2>();
+        sp.props.stiffness = node["Stiffness"].as<float>();
+        sp.props.damping = node["Damping"].as<float>();
+        sp.props.length = node["Length"].as<float>();
+        sp.props.non_linear_terms = node["Non linear terms"].as<bool>();
+        sp.props.non_linear_contribution = node["Non linear contribution"].as<bool>();
+        return true;
+    }
+};
+
 template <> struct kit::yaml::codec<ppx::body_manager2D>
 {
     static YAML::Node encode(const ppx::body_manager2D &bm)
     {
         YAML::Node node;
         for (const ppx::body2D &body : bm)
-            node["Bodies"].push_back(ppx::body2D::specs::from_body(body));
+            node["Bodies"].push_back(ppx::body2D::specs::from_instance(body));
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::body_manager2D &bm)
@@ -257,24 +235,71 @@ template <> struct kit::yaml::codec<ppx::behaviour_manager2D>
     }
 };
 
-template <> struct kit::yaml::codec<ppx::spring_manager2D>
+template <ppx::Joint T> struct kit::yaml::codec<ppx::joint_container2D<T>>
 {
-    static YAML::Node encode(const ppx::spring_manager2D &sm)
+    static YAML::Node encode(const ppx::joint_container2D<T> &jc)
     {
         YAML::Node node;
-        for (const ppx::spring2D &sp : sm)
-            node["Springs"].push_back(ppx::spring2D::specs::from_spring(sp));
+        using specs = typename T::specs;
+        for (const T &joint : jc)
+            node["Joints"].push_back(specs::from_instance(joint));
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::spring_manager2D &sm)
+    static bool decode(const YAML::Node &node, ppx::joint_container2D<T> &jc)
     {
-        sm.clear();
-        if (node["Springs"])
-            for (const YAML::Node &n : node["Springs"])
+        using specs = typename T::specs;
+        if (node["Joints"])
+            for (const YAML::Node &n : node)
+                jc.add(n.as<specs>());
+        return true;
+    }
+};
+
+template <ppx::Solver S> struct kit::yaml::codec<ppx::meta_manager2D<S>>
+{
+    static YAML::Node encode(const ppx::meta_manager2D<S> &mm)
+    {
+        YAML::Node node;
+        for (const auto &mng : mm)
+            node["Managers"][mng->id] = *mng;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::meta_manager2D<S> &mm)
+    {
+        if (node["Managers"])
+            for (auto it = node["Managers"].begin(); it != node["Managers"].end(); ++it)
             {
-                const ppx::spring2D::specs specs = n.as<ppx::spring2D::specs>();
-                sm.add(specs);
+                const auto solver = mm[it->first.as<std::string>()];
+                KIT_ASSERT_WARN(solver,
+                                "The joint manager {0} does not exist in the current simulation, so it will not be "
+                                "deserialized. Consider adding it before deserialization",
+                                it->first.as<std::string>())
+                if (solver)
+                    it->second.as<S>(*solver);
             }
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::joint_repository2D>
+{
+    static YAML::Node encode(const ppx::joint_repository2D &jr)
+    {
+        YAML::Node node;
+        node["Non constraint based"] =
+            kit::yaml::codec<ppx::meta_manager2D<ppx::joint_solver2D>>::encode(jr.non_constraint_based);
+        node["Constraint based"] =
+            kit::yaml::codec<ppx::meta_manager2D<ppx::constraint_solver2D>>::encode(jr.constraint_based);
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::joint_repository2D &jr)
+    {
+        if (!node.IsMap() || node.size() != 2)
+            return false;
+        kit::yaml::codec<ppx::meta_manager2D<ppx::joint_solver2D>>::decode(node["Non constraint based"],
+                                                                           jr.non_constraint_based);
+        kit::yaml::codec<ppx::meta_manager2D<ppx::constraint_solver2D>>::decode(node["Constraint based"],
+                                                                                jr.constraint_based);
         return true;
     }
 };
@@ -410,43 +435,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     }
 };
 
-template <> struct kit::yaml::codec<ppx::constraint_manager2D>
-{
-    static YAML::Node encode(const ppx::constraint_manager2D &cm)
-    {
-        YAML::Node node;
-        node["Iterations"] = cm.iterations;
-        node["Warmup"] = cm.warmup;
-
-        node["Baumgarte correction"] = cm.baumgarte_correction;
-        node["Baumgarte coef"] = cm.baumgarte_coef;
-        node["Baumgarte threshold"] = cm.baumgarte_threshold;
-        for (const auto &ctr : cm)
-            node["Constraints"][ctr->name].push_back(*ctr);
-        return node;
-    }
-    static bool decode(const YAML::Node &node, ppx::constraint_manager2D &cm)
-    {
-        if (!node.IsMap() || node.size() < 3)
-            return false;
-
-        cm.iterations = node["Iterations"].as<std::uint32_t>();
-        cm.warmup = node["Warmup"].as<bool>();
-        cm.baumgarte_correction = node["Baumgarte correction"].as<bool>();
-        cm.baumgarte_coef = node["Baumgarte coef"].as<float>();
-        cm.baumgarte_threshold = node["Baumgarte threshold"].as<float>();
-
-        if (node["Constraints"])
-            for (const YAML::Node &n : node["Constraints"])
-                if (n["Distance"])
-                {
-                    const ppx::distance_joint2D::specs specs = n.as<ppx::distance_joint2D::specs>();
-                    cm.add<ppx::distance_joint2D>(specs);
-                }
-        return true;
-    }
-};
-
 template <> struct kit::yaml::codec<ppx::world2D>
 {
     static YAML::Node encode(const ppx::world2D &world)
@@ -456,9 +444,16 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Semi-implicit integration"] = world.semi_implicit_integration;
         node["Body manager"] = world.bodies;
         node["Behaviour manager"] = world.behaviours;
-        node["Spring manager"] = world.springs;
         node["Collision manager"] = world.collisions;
-        node["Constraint manager"] = world.constraints;
+        node["Joints repository"] = world.joints;
+
+        YAML::Node ctrs = node["Constraint settings"];
+        ctrs["Iterations"] = world.constraints.iterations;
+        ctrs["Warmup"] = world.constraints.warmup;
+        ctrs["Baumgarte correction"] = world.constraints.baumgarte_correction;
+        ctrs["Baumgarte coef"] = world.constraints.baumgarte_coef;
+        ctrs["Baumgarte threshold"] = world.constraints.baumgarte_threshold;
+
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::world2D &world)
@@ -470,9 +465,15 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Body manager"].as<ppx::body_manager2D>(world.bodies);
         node["Integrator"].as<rk::integrator<float>>(world.integrator);
         node["Behaviour manager"].as<ppx::behaviour_manager2D>(world.behaviours);
-        node["Spring manager"].as<ppx::spring_manager2D>(world.springs);
         node["Collision manager"].as<ppx::collision_manager2D>(world.collisions);
-        node["Constraint manager"].as<ppx::constraint_manager2D>(world.constraints);
+        node["Joints repository"].as<ppx::joint_repository2D>(world.joints);
+
+        const YAML::Node ctrs = node["Constraint settings"];
+        world.constraints.iterations = ctrs["Iterations"].as<std::uint32_t>();
+        world.constraints.warmup = ctrs["Warmup"].as<bool>();
+        world.constraints.baumgarte_correction = ctrs["Baumgarte correction"].as<bool>();
+        world.constraints.baumgarte_coef = ctrs["Baumgarte coef"].as<float>();
+        world.constraints.baumgarte_threshold = ctrs["Baumgarte threshold"].as<float>();
 
         return true;
     }

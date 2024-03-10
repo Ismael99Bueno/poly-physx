@@ -1,7 +1,9 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/world2D.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
+#include "ppx/joints/spring2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
+#include "ppx/serialization/serialization.hpp"
 
 #include <cstring>
 #ifdef DEBUG
@@ -15,9 +17,9 @@ void world2D::add(const specs::contraption2D &contraption)
     for (const body2D::specs &body : contraption.bodies)
         bodies.add(body);
     for (const spring2D::specs &spring : contraption.springs)
-        springs.add(spring);
+        joints.add<spring2D>(spring);
     for (const distance_joint2D::specs &joint : contraption.distance_joints)
-        constraints.add<distance_joint2D>(joint);
+        joints.add<distance_joint2D>(joint);
 }
 
 bool world2D::step()
@@ -87,9 +89,9 @@ void world2D::validate()
 {
     bodies.validate();
     colliders.validate();
-    constraints.validate();
+    joints.constraint_based.validate();
+    joints.non_constraint_based.validate();
     behaviours.validate();
-    springs.validate();
 }
 
 float world2D::kinetic_energy() const
@@ -105,7 +107,7 @@ float world2D::potential_energy() const
     for (const auto &bhv : behaviours)
         if (bhv->enabled)
             pot += bhv->potential_energy();
-    for (const spring2D &sp : springs)
+    for (const spring2D &sp : *joints.manager<spring2D>())
         pot += sp.potential_energy();
     return pot;
 }
@@ -127,13 +129,13 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
 
     bodies.apply_impulse_and_persistent_forces();
     behaviours.apply_forces();
-    springs.apply_forces();
+    joints.non_constraint_based.solve();
 
     if (collisions.enabled)
         collisions.solve();
 
     bodies.prepare_constraint_velocities();
-    constraints.solve();
+    joints.constraint_based.solve();
     return create_state_derivative();
 }
 } // namespace ppx

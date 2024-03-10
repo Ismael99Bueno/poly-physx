@@ -1,26 +1,18 @@
 #pragma once
 
-#include "ppx/joints/joint_proxy2D.hpp"
-#include "ppx/internal/worldref.hpp"
+#include "ppx/joints/joint2D.hpp"
 
 namespace ppx
 {
-class world2D;
-class spring2D : public kit::identifiable<>, public kit::indexable, public worldref2D
+class spring2D : public joint2D, public worldref2D
 {
   public:
     using ptr = kit::vector_ptr<spring2D>;
     using const_ptr = kit::const_vector_ptr<spring2D>;
     using specs = specs::spring2D;
 
-    spring2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2,
-             const glm::vec2 &anchor1 = glm::vec2(0.f), const glm::vec2 &anchor2 = glm::vec2(0.f),
-             float stiffness = 1.f, float damping = 0.f, float length = 0.f, std::uint32_t non_linear_terms = 0,
-             float non_linear_contribution = 0.001f);
-
     spring2D(world2D &world, const specs &spc);
 
-    joint_proxy2D joint;
     float stiffness;
     float damping;
     float length;
@@ -37,7 +29,7 @@ class spring2D : public kit::identifiable<>, public kit::indexable, public world
     float potential_energy() const;
     float energy() const;
 
-    void apply_force_to_bodies();
+    void solve() override;
 
   private:
     glm::vec2 non_linear_displacement(const glm::vec2 &displacement) const;

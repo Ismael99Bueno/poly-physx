@@ -10,7 +10,6 @@ class collider2D;
 class distance_joint2D;
 class joint2D;
 class spring2D;
-class joint_proxy2D;
 } // namespace ppx
 
 namespace ppx::specs
@@ -34,7 +33,7 @@ struct collider2D
         float radius = 2.5f;
         stype shape = stype::POLYGON;
     } props;
-    static collider2D from_collider(const ppx::collider2D &collider);
+    static collider2D from_instance(const ppx::collider2D &collider);
 };
 
 struct body2D
@@ -56,33 +55,26 @@ struct body2D
         std::vector<collider2D> colliders{};
         btype type = btype::DYNAMIC;
     } props;
-    static body2D from_body(const ppx::body2D &body);
+    static body2D from_instance(const ppx::body2D &body);
 };
 
 struct joint2D
 {
     std::size_t bindex1 = SIZE_MAX;
     std::size_t bindex2 = SIZE_MAX;
-    static joint2D from_joint(const ppx::joint2D &joint);
 };
 
-struct joint_proxy2D
+struct distance_joint2D : joint2D
 {
-    std::size_t bindex1 = SIZE_MAX;
-    std::size_t bindex2 = SIZE_MAX;
-    glm::vec2 anchor1{0.f}, anchor2{0.f};
-    static joint_proxy2D from_joint_proxy(const ppx::joint_proxy2D &jp);
+    glm::vec2 ganchor1{FLT_MAX};
+    glm::vec2 ganchor2{FLT_MAX};
+    static distance_joint2D from_instance(const ppx::distance_joint2D &dj);
 };
 
-struct distance_joint2D
+struct spring2D : joint2D
 {
-    joint_proxy2D joint;
-    static distance_joint2D from_distance_joint(const ppx::distance_joint2D &dj);
-};
-
-struct spring2D
-{
-    joint_proxy2D joint;
+    glm::vec2 ganchor1{FLT_MAX};
+    glm::vec2 ganchor2{FLT_MAX};
     struct properties
     {
         float stiffness = 1.f;
@@ -93,7 +85,7 @@ struct spring2D
         float non_linear_contribution = 0.001f;
     } props;
 
-    static spring2D from_spring(const ppx::spring2D &sp);
+    static spring2D from_instance(const ppx::spring2D &sp);
 };
 
 struct contraption2D
@@ -129,7 +121,7 @@ struct contraption2D
         for (std::size_t i = 0; i < size; ++i)
             for (std::size_t j = i + 1; j < size; ++j)
                 contraption.springs.push_back(
-                    spring2D{.joint = joint_proxy2D{.bindex1 = i, .bindex2 = j}, .props = spring_props});
+                    {{i, j}, contraption.bodies[i].position, contraption.bodies[j].position, spring_props});
         return contraption;
     }
 };

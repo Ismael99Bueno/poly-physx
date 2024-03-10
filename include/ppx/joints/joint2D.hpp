@@ -3,13 +3,14 @@
 #include "ppx/entities/specs2D.hpp"
 #include "ppx/entities/body2D.hpp"
 #include "kit/interface/identifiable.hpp"
+#include "kit/interface/indexable.hpp"
 
 namespace ppx
 {
-class joint2D : public kit::identifiable<>
+class joint2D : public kit::identifiable<>, public kit::indexable
 {
   public:
-    using specs = specs::joint2D;
+    virtual ~joint2D() = default;
 
     const body2D::ptr &body1() const;
     const body2D::ptr &body2() const;
@@ -21,6 +22,7 @@ class joint2D : public kit::identifiable<>
     glm::vec2 ganchor2() const;
 
     bool valid() const;
+    virtual void solve() = 0;
 
   protected:
     joint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &ganchor1,
@@ -32,9 +34,5 @@ class joint2D : public kit::identifiable<>
 
     glm::vec2 m_lanchor1;
     glm::vec2 m_lanchor2;
-
-    glm::vec2 ganchor_offset1() const;
-    glm::vec2 ganchor_offset2() const;
-    std::tuple<glm::vec2, glm::vec2, glm::vec2> dir_and_offsets() const;
 };
 } // namespace ppx

@@ -141,11 +141,7 @@ bool body_manager2D::remove(const std::size_t index)
         state[6 * index + i] = state[state.size() - 6 + i];
     state.resize(6 * m_elements.size());
 
-    validate();
-    world.colliders.validate_parents();
-    world.constraints.validate();
-    world.behaviours.validate();
-    world.springs.validate();
+    world.validate();
     events.on_late_removal(index);
     return true;
 }

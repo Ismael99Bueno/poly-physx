@@ -12,7 +12,7 @@ spring_driven_resolution2D::spring_driven_resolution2D(world2D &world, const flo
       tangent_damping(tangent_damping)
 {
 }
-void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions) const
+void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions)
 {
     KIT_ASSERT_ERROR(rigidity >= 0.f, "Rigidity must be non-negative: {0}", rigidity)
     KIT_ASSERT_ERROR(tangent_damping >= 0.f, "Tangent damping must be non-negative: {0}", tangent_damping)
@@ -31,19 +31,22 @@ std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collisio
     const body2D &body1 = *colis.collider1->parent();
     const body2D &body2 = *colis.collider2->parent();
 
-    const glm::vec2 rel1 = colis.touch1(manifold_index) - body1.centroid();
-    const glm::vec2 rel2 = colis.touch2(manifold_index) - body2.centroid();
+    const glm::vec2 &touch1 = colis.manifold.contacts[manifold_index];
+    const glm::vec2 touch2 = colis.manifold.contacts[manifold_index] - colis.mtv;
 
-    const glm::vec2 relvel = (body2.velocity_at(rel2) - body1.velocity_at(rel1));
-    const glm::vec2 reltouch = colis.touch2(manifold_index) - colis.touch1(manifold_index);
+    const glm::vec2 offset1 = touch1 - body1.centroid();
+    const glm::vec2 offset2 = touch2 - body2.centroid();
+
+    const glm::vec2 relvel =
+        (body2.gvelocity_at_centroid_offset(offset2) - body1.gvelocity_at_centroid_offset(offset1));
 
     const glm::vec2 normal_dir = glm::normalize(colis.mtv);
 
     const glm::vec2 normal_vel = glm::dot(normal_dir, relvel) * normal_dir;
     const glm::vec2 tangent_vel = relvel - normal_vel;
 
-    const glm::vec2 force = reltouch * rigidity + normal_vel * normal_damping + tangent_vel * tangent_damping;
-    const float torque1 = kit::cross2D(rel1, force), torque2 = kit::cross2D(force, rel2);
+    const glm::vec2 force = -colis.mtv * rigidity + normal_vel * normal_damping + tangent_vel * tangent_damping;
+    const float torque1 = kit::cross2D(offset1, force), torque2 = kit::cross2D(force, offset2);
     return {force, torque1, torque2};
 }
 

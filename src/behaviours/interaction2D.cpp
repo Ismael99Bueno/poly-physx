@@ -9,12 +9,12 @@ interaction2D::interaction2D(world2D &world, const std::string &name) : behaviou
 }
 float interaction2D::potential(const body2D &body, const glm::vec2 &position) const
 {
-    m_unit.position(position);
+    m_unit.centroid(position);
     return potential_energy_pair(m_unit, body);
 }
 float interaction2D::potential(const glm::vec2 &position) const
 {
-    m_unit.position(position);
+    m_unit.centroid(position);
     float pot = 0.f;
     for (const auto &body : m_bodies)
         pot += potential_energy_pair(m_unit, *body);
