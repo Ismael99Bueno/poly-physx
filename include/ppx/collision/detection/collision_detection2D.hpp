@@ -142,7 +142,6 @@ class collision_detection2D : public worldref2D
   private:
     std::vector<collision2D> m_collisions;
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
-    kit::mt::feach_thread_pool<std::vector<collision2D>> m_pool{PPX_THREAD_COUNT};
 
     collision2D generate_collision(collider2D &collider1, collider2D &collider2) const;
     void cc_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;

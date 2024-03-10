@@ -14,7 +14,6 @@ class quad_tree_detection2D final : public collision_detection2D
 
   private:
     quad_tree m_quad_tree{{-10.f, -10.f}, {10.f, 10.f}};
-    kit::mt::feach_thread_pool<const std::vector<const quad_tree::partition *>> m_pool{PPX_THREAD_COUNT};
 
     void detect_collisions() override;
     void detect_collisions_st(const std::vector<const quad_tree::partition *> &partitions);

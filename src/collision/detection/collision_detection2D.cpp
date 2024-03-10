@@ -22,7 +22,7 @@ const std::vector<collision2D> &collision_detection2D::detect_collisions_cached(
     }
 
     if (multithreaded)
-        kit::mt::for_each(m_collisions, m_pool, [this](std::size_t thread_index, collision2D &colis) {
+        kit::mt::for_each(PPX_THREAD_COUNT, m_collisions, [this](std::size_t thread_index, collision2D &colis) {
             if (colis.collided)
                 colis = generate_collision(*colis.collider1, *colis.collider2);
         });

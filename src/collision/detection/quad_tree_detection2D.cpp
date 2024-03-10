@@ -35,16 +35,16 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tr
 }
 void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tree::partition *> &partitions)
 {
-    const auto exec = [this](const std::size_t thread_idx, const quad_tree::partition *partition) {
-        for (std::size_t i = 0; i < partition->size(); i++)
-            for (std::size_t j = i + 1; j < partition->size(); j++)
-            {
-                collider2D &collider1 = *(*partition)[i];
-                collider2D &collider2 = *(*partition)[j];
-                process_collision_mt(collider1, collider2, thread_idx);
-            }
-    };
-    kit::mt::for_each(partitions, m_pool, exec);
+    kit::mt::for_each(PPX_THREAD_COUNT, partitions,
+                      [this](const std::size_t thread_idx, const quad_tree::partition *partition) {
+                          for (std::size_t i = 0; i < partition->size(); i++)
+                              for (std::size_t j = i + 1; j < partition->size(); j++)
+                              {
+                                  collider2D &collider1 = *(*partition)[i];
+                                  collider2D &collider2 = *(*partition)[j];
+                                  process_collision_mt(collider1, collider2, thread_idx);
+                              }
+                      });
     join_mt_collisions();
 }
 void quad_tree_detection2D::update_quad_tree()
