@@ -19,21 +19,21 @@ class joint_repository2D
             return non_constraint_based.add<T>(spc);
     }
 
-    template <Joint T> auto add_manager()
+    template <Joint T> auto add_manager(const std::string &name)
     {
         if constexpr (std::is_base_of_v<constraint2D, T>)
-            return add_manager<T, constraint_manager2D<T>>();
+            return add_manager<T, constraint_manager2D<T>>(name);
         else
-            return add_manager<T, joint_manager2D<T>>();
+            return add_manager<T, joint_manager2D<T>>(name);
     }
 
-    template <Joint T, kit::DerivedFrom<joint_manager2D<T>> Manager> Manager *add_manager()
+    template <Joint T, kit::DerivedFrom<joint_manager2D<T>> Manager> Manager *add_manager(const std::string &name)
     {
-        return non_constraint_based.add_manager<T, Manager>();
+        return non_constraint_based.add_manager<T, Manager>(name);
     }
-    template <Joint T, kit::DerivedFrom<constraint_manager2D<T>> Manager> Manager *add_manager()
+    template <Joint T, kit::DerivedFrom<constraint_manager2D<T>> Manager> Manager *add_manager(const std::string &name)
     {
-        return constraint_based.add_manager<T, Manager>();
+        return constraint_based.add_manager<T, Manager>(name);
     }
 
     template <Joint T> auto manager() const

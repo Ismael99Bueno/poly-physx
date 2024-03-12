@@ -51,6 +51,7 @@ class world2D : kit::non_copyable
     std::vector<float> operator()(float time, float timestep, const std::vector<float> &vars);
 
     void validate();
+    void add_builtin_joint_managers();
 
   private:
     float m_previous_timestep = 0.f;

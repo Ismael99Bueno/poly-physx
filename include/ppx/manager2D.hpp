@@ -56,7 +56,7 @@ class manager2D
         return m_elements.end();
     }
 
-    const value_type &operator[](std::size_t index) const
+    const value_type &at(std::size_t index) const
     {
         KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                          m_elements.size())
@@ -66,7 +66,7 @@ class manager2D
         else
             return m_elements[index];
     }
-    value_type &operator[](std::size_t index)
+    value_type &at(std::size_t index)
     {
         KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                          m_elements.size())
@@ -75,35 +75,53 @@ class manager2D
             return *m_elements[index];
         else
             return m_elements[index];
+    }
+
+    const value_type *at(const id_type &id) const
+    {
+        if constexpr (is_scope)
+        {
+            for (const T &element : m_elements)
+                if (element->id == id)
+                    return element.get();
+        }
+        else
+            for (const T &element : m_elements)
+                if (element.id == id)
+                    return &element;
+        return nullptr;
+    }
+    value_type *at(const id_type &id)
+    {
+        if constexpr (is_scope)
+        {
+            for (T &element : m_elements)
+                if (element->id == id)
+                    return element.get();
+        }
+        else
+            for (T &element : m_elements)
+                if (element.id == id)
+                    return &element;
+        return nullptr;
+    }
+
+    const value_type &operator[](std::size_t index) const
+    {
+        return at(index);
+    }
+    value_type &operator[](std::size_t index)
+    {
+        return at(index);
     }
 
     const value_type *operator[](const id_type &id) const
     {
-        if constexpr (is_scope)
-        {
-            for (const T &element : m_elements)
-                if (element->id == id)
-                    return element.get();
-        }
-        else
-            for (const T &element : m_elements)
-                if (element.id == id)
-                    return &element;
-        return nullptr;
+        return at(id);
     }
     value_type *operator[](const id_type &id)
     {
-        if constexpr (is_scope)
-        {
-            for (T &element : m_elements)
-                if (element->id == id)
-                    return element.get();
-        }
-        else
-            for (T &element : m_elements)
-                if (element.id == id)
-                    return &element;
-        return nullptr;
+        return at(id);
     }
 
     virtual bool remove(std::size_t index) = 0;

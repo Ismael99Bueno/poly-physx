@@ -96,6 +96,12 @@ void world2D::validate()
     behaviours.validate();
 }
 
+void world2D::add_builtin_joint_managers()
+{
+    joints.add_manager<spring2D>("Springs");
+    joints.add_manager<distance_joint2D>("Distance joints");
+}
+
 float world2D::kinetic_energy() const
 {
     float ke = 0.f;
