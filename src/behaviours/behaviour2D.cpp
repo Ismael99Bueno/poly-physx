@@ -1,7 +1,9 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
-#include "ppx/serialization/serialization.hpp"
 #include "ppx/world2D.hpp"
+#ifdef KIT_USE_YAML_CPP
+#include "ppx/serialization/serialization.hpp"
+#endif
 
 namespace ppx
 {

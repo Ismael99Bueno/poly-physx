@@ -3,7 +3,9 @@
 #include "ppx/behaviours/behaviour2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
+#ifdef KIT_USE_YAML_CPP
 #include "ppx/serialization/serialization.hpp"
+#endif
 
 #include <cstring>
 #ifdef DEBUG

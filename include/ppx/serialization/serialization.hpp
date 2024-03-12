@@ -241,17 +241,41 @@ template <ppx::Joint T> struct kit::yaml::codec<ppx::joint_container2D<T>>
     {
         YAML::Node node;
         using specs = typename T::specs;
-        for (const T &joint : jc)
-            node["Joints"].push_back(specs::from_instance(joint));
-        return node;
+        if constexpr (kit::yaml::Encodeable<specs>)
+        {
+            for (const T &joint : jc)
+                node["Joints"].push_back(specs::from_instance(joint));
+            return node;
+        }
+        else
+        {
+            KIT_WARN("The joint type {0} specifications are not encodeable, so the joint instances will not be "
+                     "serialized. Consider "
+                     "implementing encoding "
+                     "functionality for the joint type",
+                     typeid(T).name())
+            return node;
+        }
     }
     static bool decode(const YAML::Node &node, ppx::joint_container2D<T> &jc)
     {
         using specs = typename T::specs;
-        if (node["Joints"])
-            for (const YAML::Node &n : node)
-                jc.add(n.as<specs>());
-        return true;
+        if constexpr (kit::yaml::Decodeable<specs>)
+        {
+            if (node["Joints"])
+                for (const YAML::Node &n : node)
+                    jc.add(n.as<specs>());
+            return true;
+        }
+        else
+        {
+            KIT_WARN("The joint type {0} specifications are not decodeable, so the joint instances will not be "
+                     "serialized. Consider "
+                     "implementing encoding "
+                     "functionality for the joint type",
+                     typeid(T).name())
+            return true;
+        }
     }
 };
 
