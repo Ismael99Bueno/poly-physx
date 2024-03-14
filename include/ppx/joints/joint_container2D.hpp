@@ -53,6 +53,15 @@ template <Joint T> class joint_container2D : public manager2D<T>
         return {&this->m_elements, index};
     }
 
+    std::vector<const T *> from_body_ids(const kit::uuid id1, const kit::uuid id2) const
+    {
+        return from_body_ids<const T>(id1, id2, this->m_elements);
+    }
+    std::vector<T *> from_body_ids(const kit::uuid id1, const kit::uuid id2)
+    {
+        return from_body_ids<T>(id1, id2, this->m_elements);
+    }
+
     using manager2D<T>::remove;
     virtual bool remove(std::size_t index) override
     {
@@ -94,6 +103,18 @@ template <Joint T> class joint_container2D : public manager2D<T>
                 it->index = index;
                 ++it;
             }
+    }
+
+  private:
+    template <typename U, typename C>
+    static std::vector<U *> from_body_ids(const kit::uuid id1, const kit::uuid id2, C &elements)
+    {
+        std::vector<U *> joints;
+        for (U &joint : elements)
+            if ((joint.body1()->id == id1 && joint.body2()->id == id2) ||
+                (joint.body1()->id == id2 && joint.body2()->id == id1))
+                joints.push_back(&joint);
+        return joints;
     }
 };
 
