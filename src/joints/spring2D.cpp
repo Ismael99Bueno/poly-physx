@@ -1,6 +1,9 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/world2D.hpp"
+#ifdef KIT_USE_YAML_CPP
+#include "ppx/serialization/serialization.hpp"
+#endif
 #include "kit/utility/utils.hpp"
 
 namespace ppx
