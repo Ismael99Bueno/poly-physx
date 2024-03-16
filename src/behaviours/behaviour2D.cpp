@@ -115,6 +115,8 @@ void behaviour2D::apply_force_to_bodies()
 {
     for (const auto &body : m_bodies)
     {
+        if (!body->is_dynamic())
+            continue;
         const glm::vec3 f = force(*body);
         body->apply_simulation_force(glm::vec2(f));
         body->apply_simulation_torque(f.z);

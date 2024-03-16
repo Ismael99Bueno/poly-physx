@@ -185,8 +185,8 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         sp.props.stiffness = node["Stiffness"].as<float>();
         sp.props.damping = node["Damping"].as<float>();
         sp.props.length = node["Length"].as<float>();
-        sp.props.non_linear_terms = node["Non linear terms"].as<bool>();
-        sp.props.non_linear_contribution = node["Non linear contribution"].as<bool>();
+        sp.props.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
+        sp.props.non_linear_contribution = node["Non linear contribution"].as<float>();
         return true;
     }
 };
@@ -263,7 +263,7 @@ template <ppx::Joint T> struct kit::yaml::codec<ppx::joint_container2D<T>>
         if constexpr (kit::yaml::Decodeable<specs>)
         {
             if (node["Joints"])
-                for (const YAML::Node &n : node)
+                for (const YAML::Node &n : node["Joints"])
                     jc.add(n.as<specs>());
             return true;
         }
