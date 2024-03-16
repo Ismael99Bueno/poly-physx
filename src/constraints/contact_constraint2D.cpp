@@ -14,6 +14,7 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
 {
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
+    startup();
     m_init_ctr_vel = constraint_velocity();
 }
 
@@ -37,6 +38,18 @@ void contact_constraint2D::solve()
     solve_clamped(0.f, FLT_MAX);
     m_friction.max_lambda = std::abs(m_cumlambda);
     m_friction.solve();
+}
+
+void contact_constraint2D::startup()
+{
+    constraint2D::startup();
+    m_friction.startup();
+}
+
+void contact_constraint2D::warmup()
+{
+    constraint2D::warmup();
+    m_friction.warmup();
 }
 
 void contact_constraint2D::update(const collision2D *collision, const float slop)

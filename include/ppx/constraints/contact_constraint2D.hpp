@@ -15,6 +15,8 @@ class contact_constraint2D final : public constraint2D
     float constraint_velocity() const override;
 
     void solve() override;
+    void startup() override;
+    void warmup() override;
 
     void update(const collision2D *collision, float slop);
 

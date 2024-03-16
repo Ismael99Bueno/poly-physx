@@ -26,7 +26,7 @@ distance_joint2D::ptr distance_joint2D::as_ptr()
 float distance_joint2D::constraint_value() const
 {
     KIT_ASSERT_ERROR(length >= 0.f, "Length must be non-negative: {0}", length)
-    return length - glm::distance(ganchor1(), ganchor2());
+    return glm::distance(ganchor1(), ganchor2()) - length;
 }
 float distance_joint2D::constraint_velocity() const
 {
@@ -45,7 +45,7 @@ float distance_joint2D::inverse_mass() const
 
 glm::vec2 distance_joint2D::direction() const
 {
-    return m_offset2 - m_offset1 + m_body2->centroid() - m_body1->centroid();
+    return glm::normalize(m_offset2 - m_offset1 + m_body2->centroid() - m_body1->centroid());
 }
 
 void distance_joint2D::solve()

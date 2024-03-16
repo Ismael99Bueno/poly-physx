@@ -9,7 +9,7 @@ friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *
                                              const std::size_t manifold_index)
     : constraint2D(world, collision->collider1->parent(), collision->collider2->parent(),
                    collision->manifold.contacts[manifold_index], false),
-      m_mtv(collision->mtv)
+      m_friction(collision->friction), m_mtv(collision->mtv)
 {
 }
 

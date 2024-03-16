@@ -13,8 +13,8 @@ class constraint2D : public joint2D, public worldref2D
     virtual float constraint_value() const = 0;
     virtual float constraint_velocity() const = 0;
 
-    void startup();
-    void warmup();
+    virtual void startup();
+    virtual void warmup();
 
   protected:
     constraint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &ganchor1,
