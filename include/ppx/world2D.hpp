@@ -33,8 +33,8 @@ class world2D : kit::non_copyable
         bool warmup = true;
         bool baumgarte_correction = true;
 
-        float baumgarte_coef = 0.1f;
-        float baumgarte_threshold = 0.05f;
+        float baumgarte_coef = 0.04f;
+        float baumgarte_threshold = 0.005f;
     } constraints;
 
     bool semi_implicit_integration = false;

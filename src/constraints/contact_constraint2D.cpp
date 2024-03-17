@@ -58,8 +58,8 @@ void contact_constraint2D::update(const collision2D *collision, const float slop
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
     m_body1 = collision->collider1->parent();
     m_body2 = collision->collider2->parent();
-    m_lanchor1 = m_body1->local_centroid_point(collision->manifold.contacts[m_manifold_index]);
-    m_lanchor2 = m_body2->local_centroid_point(collision->manifold.contacts[m_manifold_index]);
+    m_lanchor1 = m_body1->local_position_point(collision->manifold.contacts[m_manifold_index]);
+    m_lanchor2 = m_body2->local_position_point(collision->manifold.contacts[m_manifold_index]);
     m_mtv = collision->mtv;
     m_restitution = collision->restitution;
     m_slop = slop;
