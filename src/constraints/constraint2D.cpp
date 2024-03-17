@@ -75,8 +75,10 @@ void constraint2D::solve_unclamped()
 
 void constraint2D::startup()
 {
-    m_offset1 = ganchor1() - m_body1->centroid();
-    m_offset2 = ganchor2() - m_body2->centroid();
+    m_ganchor1 = ganchor1();
+    m_ganchor2 = ganchor2();
+    m_offset1 = m_ganchor1 - m_body1->centroid();
+    m_offset2 = m_ganchor2 - m_body2->centroid();
     m_dir = direction();
 }
 

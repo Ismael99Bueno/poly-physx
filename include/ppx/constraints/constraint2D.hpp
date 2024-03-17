@@ -23,8 +23,12 @@ class constraint2D : public joint2D, public worldref2D
                  bool m_allow_baumgarte = true);
     float m_cumlambda = 0.f;
 
+    glm::vec2 m_ganchor1;
+    glm::vec2 m_ganchor2;
+
     glm::vec2 m_offset1;
     glm::vec2 m_offset2;
+
     glm::vec2 m_dir;
 
     void solve_clamped(float min, float max);

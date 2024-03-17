@@ -142,17 +142,21 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
         node["Index2"] = dj.bindex2;
         node["Anchor1"] = dj.ganchor1;
         node["Anchor2"] = dj.ganchor2;
+        node["Min distance"] = dj.min_distance;
+        node["Max distance"] = dj.max_distance;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
     {
-        if (!node.IsMap() || node.size() != 4)
+        if (!node.IsMap() || node.size() != 6)
             return false;
 
         dj.bindex1 = node["Index1"].as<std::size_t>();
         dj.bindex2 = node["Index2"].as<std::size_t>();
         dj.ganchor1 = node["Anchor1"].as<glm::vec2>();
         dj.ganchor2 = node["Anchor2"].as<glm::vec2>();
+        dj.min_distance = node["Min distance"].as<float>();
+        dj.max_distance = node["Max distance"].as<float>();
         return true;
     }
 };

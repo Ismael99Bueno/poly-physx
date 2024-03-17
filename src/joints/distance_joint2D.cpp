@@ -9,9 +9,14 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : constraint2D(world, world.bodies.ptr(spc.bindex1), world.bodies.ptr(spc.bindex2), spc.ganchor1, spc.ganchor2),
-      length(glm::distance(ganchor1(), ganchor2()))
+    : constraint2D(world, world.bodies.ptr(spc.bindex1), world.bodies.ptr(spc.bindex2), spc.ganchor1, spc.ganchor2)
 {
+    if (kit::approximately(spc.min_distance, spc.max_distance))
+    {
+        const float length = glm::distance(ganchor1(), ganchor2());
+        min_distance = length;
+        max_distance = length;
+    }
 }
 
 distance_joint2D::const_ptr distance_joint2D::as_ptr() const
@@ -25,8 +30,14 @@ distance_joint2D::ptr distance_joint2D::as_ptr()
 
 float distance_joint2D::constraint_value() const
 {
-    KIT_ASSERT_ERROR(length >= 0.f, "Length must be non-negative: {0}", length)
-    return glm::distance(ganchor1(), ganchor2()) - length;
+    KIT_ASSERT_ERROR(min_distance <= max_distance,
+                     "Minimum distance must be less than or equal to maximum distance: {0} <= {1}", min_distance,
+                     max_distance)
+    if (m_length < min_distance)
+        return m_length - min_distance;
+    if (m_length > max_distance)
+        return m_length - max_distance;
+    return 0.f;
 }
 float distance_joint2D::constraint_velocity() const
 {
@@ -45,11 +56,29 @@ float distance_joint2D::inverse_mass() const
 
 glm::vec2 distance_joint2D::direction() const
 {
-    return glm::normalize(m_offset2 - m_offset1 + m_body2->centroid() - m_body1->centroid());
+    return glm::normalize(m_ganchor2 - m_ganchor1);
 }
 
 void distance_joint2D::solve()
 {
-    solve_unclamped();
+    if (legal_length())
+        return;
+    if (kit::approximately(min_distance, max_distance))
+        solve_unclamped();
+    else if (m_length < min_distance)
+        solve_clamped(0.f, FLT_MAX);
+    else
+        solve_clamped(-FLT_MAX, 0.f);
+}
+
+bool distance_joint2D::legal_length() const
+{
+    return m_length >= min_distance && m_length <= max_distance;
+}
+
+void distance_joint2D::startup()
+{
+    constraint2D::startup();
+    m_length = glm::distance(m_ganchor1, m_ganchor2);
 }
 } // namespace ppx

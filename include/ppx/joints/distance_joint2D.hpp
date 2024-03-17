@@ -17,15 +17,21 @@ class distance_joint2D final : public constraint2D
     const_ptr as_ptr() const;
     ptr as_ptr();
 
-    float length = 0.f;
+    float min_distance;
+    float max_distance;
 
     float constraint_value() const override;
     float constraint_velocity() const override;
 
+    void startup() override;
     void solve() override;
 
   private:
     float inverse_mass() const override;
     glm::vec2 direction() const override;
+
+    bool legal_length() const;
+
+    float m_length;
 };
 } // namespace ppx

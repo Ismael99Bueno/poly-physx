@@ -68,6 +68,8 @@ struct distance_joint2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
+    float min_distance = 0.f;
+    float max_distance = 0.f;
     static distance_joint2D from_instance(const ppx::distance_joint2D &dj);
 };
 
