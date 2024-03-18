@@ -23,15 +23,13 @@ constraint2D::constraint2D(world2D &world, const body2D::ptr &body1, const body2
 float constraint2D::compute_lambda() const
 {
     const float cvel = constraint_velocity();
-    const float inv_mass = inverse_mass();
-
     if (m_allow_baumgarte && world.constraints.baumgarte_correction)
     {
         const float c = constraint_value();
         if (std::abs(c) > world.constraints.baumgarte_threshold)
-            return -(cvel + world.constraints.baumgarte_coef * c / world.integrator.ts.value) / inv_mass;
+            return -(cvel + world.constraints.baumgarte_coef * c / world.integrator.ts.value) / m_inv_mass;
     }
-    return -cvel / inv_mass;
+    return -cvel / m_inv_mass;
 }
 void constraint2D::apply_lambda(const float lambda)
 {
@@ -79,6 +77,7 @@ void constraint2D::startup()
     m_ganchor2 = ganchor2();
     m_offset1 = m_ganchor1 - m_body1->centroid();
     m_offset2 = m_ganchor2 - m_body2->centroid();
+    m_inv_mass = inverse_mass();
     m_dir = direction();
 }
 

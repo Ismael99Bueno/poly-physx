@@ -30,6 +30,7 @@ class constraint2D : public joint2D, public worldref2D
     glm::vec2 m_offset2;
 
     glm::vec2 m_dir;
+    float m_inv_mass;
 
     void solve_clamped(float min, float max);
     void solve_unclamped();
