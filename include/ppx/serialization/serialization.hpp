@@ -338,10 +338,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     {
         YAML::Node node;
         YAML::Node ndet = node["Detection"];
-        YAML::Node nqt = ndet["Quad tree"];
-        nqt["Max colliders"] = ppx::quad_tree::max_colliders;
-        nqt["Max depth"] = ppx::quad_tree::max_depth;
-        nqt["Min size"] = ppx::quad_tree::min_size;
 
         ndet["Multithreading"] = cm.detection()->multithreaded;
         if (cm.detection<ppx::brute_force_detection2D>())
@@ -350,6 +346,11 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             ndet["Method"] = 1;
             ndet["Force square"] = coldet->force_square_shape;
+
+            const auto &props = coldet->quad_tree().props();
+            ndet["Max colliders"] = props.elements_per_quad;
+            ndet["Max depth"] = props.max_depth;
+            ndet["Min size"] = props.min_quad_size;
         }
 
         else if (cm.detection<ppx::sort_sweep_detection2D>())
@@ -401,10 +402,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             return false;
 
         const YAML::Node ndet = node["Detection"];
-        const YAML::Node nqt = ndet["Quad tree"];
-        ppx::quad_tree::max_colliders = nqt["Max colliders"].as<std::size_t>();
-        ppx::quad_tree::max_depth = nqt["Max depth"].as<std::uint32_t>();
-        ppx::quad_tree::min_size = nqt["Min size"].as<float>();
 
         cm.detection()->multithreaded = ndet["Multithreading"].as<bool>();
         if (ndet["Method"])
@@ -413,7 +410,15 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             if (method == 0)
                 cm.set_detection<ppx::brute_force_detection2D>();
             else if (method == 1)
-                cm.set_detection<ppx::quad_tree_detection2D>()->force_square_shape = ndet["Force square"].as<bool>();
+            {
+                auto qtdet = cm.set_detection<ppx::quad_tree_detection2D>();
+                qtdet->force_square_shape = ndet["Force square"].as<bool>();
+
+                auto &props = qtdet->quad_tree().props();
+                props.elements_per_quad = ndet["Max colliders"].as<std::size_t>();
+                props.max_depth = ndet["Max depth"].as<std::uint32_t>();
+                props.min_quad_size = ndet["Min size"].as<float>();
+            }
             else if (method == 2)
                 cm.set_detection<ppx::sort_sweep_detection2D>();
         }

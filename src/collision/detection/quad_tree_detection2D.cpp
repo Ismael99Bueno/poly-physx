@@ -11,9 +11,7 @@ void quad_tree_detection2D::detect_collisions()
     KIT_PERF_FUNCTION()
     update_quad_tree();
 
-    std::vector<const quad_tree::partition *> partitions;
-    partitions.reserve(20);
-    m_quad_tree.collect_partitions(partitions);
+    const auto partitions = m_quad_tree.collect_partitions();
 
     if (multithreaded)
         detect_collisions_mt(partitions);
@@ -21,9 +19,9 @@ void quad_tree_detection2D::detect_collisions()
         detect_collisions_st(partitions);
 }
 
-void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tree::partition *> &partitions)
+void quad_tree_detection2D::detect_collisions_st(const std::vector<const qtpartition *> &partitions)
 {
-    for (const quad_tree::partition *partition : partitions)
+    for (const qtpartition *partition : partitions)
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
@@ -33,24 +31,24 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const quad_tr
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
-void quad_tree_detection2D::detect_collisions_mt(const std::vector<const quad_tree::partition *> &partitions)
+void quad_tree_detection2D::detect_collisions_mt(const std::vector<const qtpartition *> &partitions)
 {
-    kit::mt::for_each(PPX_THREAD_COUNT, partitions,
-                      [this](const std::size_t thread_idx, const quad_tree::partition *partition) {
-                          for (std::size_t i = 0; i < partition->size(); i++)
-                              for (std::size_t j = i + 1; j < partition->size(); j++)
-                              {
-                                  collider2D &collider1 = *(*partition)[i];
-                                  collider2D &collider2 = *(*partition)[j];
-                                  process_collision_mt(collider1, collider2, thread_idx);
-                              }
-                      });
+    kit::mt::for_each(PPX_THREAD_COUNT, partitions, [this](const std::size_t thread_idx, const qtpartition *partition) {
+        for (std::size_t i = 0; i < partition->size(); i++)
+            for (std::size_t j = i + 1; j < partition->size(); j++)
+            {
+                collider2D &collider1 = *(*partition)[i];
+                collider2D &collider2 = *(*partition)[j];
+                process_collision_mt(collider1, collider2, thread_idx);
+            }
+    });
     join_mt_collisions();
 }
 void quad_tree_detection2D::update_quad_tree()
 {
     m_quad_tree.clear();
-    aabb2D aabb({-10.f, -10.f}, {10.f, 10.f});
+
+    aabb2D aabb;
     for (const collider2D &collider : world.colliders)
         if (collider.parent().is_dynamic())
             aabb += collider.bounding_box();
@@ -70,12 +68,17 @@ void quad_tree_detection2D::update_quad_tree()
         }
     }
 
-    m_quad_tree.aabb = aabb;
+    m_quad_tree.bounds(aabb);
     for (collider2D &collider : world.colliders)
-        m_quad_tree.insert(&collider);
+        m_quad_tree.insert(&collider,
+                           [](const collider2D *collider) -> const geo::aabb2D & { return collider->bounding_box(); });
 }
 
-const quad_tree &quad_tree_detection2D::qtree() const
+const kit::quad_tree<collider2D *> &quad_tree_detection2D::quad_tree() const
+{
+    return m_quad_tree;
+}
+kit::quad_tree<collider2D *> &quad_tree_detection2D::quad_tree()
 {
     return m_quad_tree;
 }
