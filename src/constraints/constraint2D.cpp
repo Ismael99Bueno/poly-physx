@@ -77,8 +77,8 @@ void constraint2D::startup()
     m_ganchor2 = ganchor2();
     m_offset1 = m_ganchor1 - m_body1->centroid();
     m_offset2 = m_ganchor2 - m_body2->centroid();
-    m_inv_mass = inverse_mass();
     m_dir = direction();
+    m_inv_mass = inverse_mass();
 }
 
 void constraint2D::warmup()

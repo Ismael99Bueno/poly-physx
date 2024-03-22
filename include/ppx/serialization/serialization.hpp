@@ -349,7 +349,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
             const auto &props = coldet->quad_tree().props();
             ndet["Max colliders"] = props.elements_per_quad;
-            ndet["Max depth"] = props.max_depth;
             ndet["Min size"] = props.min_quad_size;
         }
 
@@ -416,7 +415,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
                 auto &props = qtdet->quad_tree().props();
                 props.elements_per_quad = ndet["Max colliders"].as<std::size_t>();
-                props.max_depth = ndet["Max depth"].as<std::uint32_t>();
                 props.min_quad_size = ndet["Min size"].as<float>();
             }
             else if (method == 2)

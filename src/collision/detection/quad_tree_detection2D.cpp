@@ -49,9 +49,19 @@ void quad_tree_detection2D::update_quad_tree()
     m_quad_tree.clear();
 
     aabb2D aabb;
+    bool first = true;
     for (const collider2D &collider : world.colliders)
-        if (collider.parent().is_dynamic())
+    {
+        if (!collider.parent().is_dynamic())
+            continue;
+        if (first)
+        {
+            aabb = collider.bounding_box();
+            first = false;
+        }
+        else
             aabb += collider.bounding_box();
+    }
 
     if (force_square_shape)
     {
