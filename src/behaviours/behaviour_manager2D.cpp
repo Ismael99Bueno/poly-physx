@@ -22,10 +22,10 @@ template <> behaviour2D *behaviour_manager2D::from_name(const std::string &name)
     return nullptr;
 }
 
-void behaviour_manager2D::validate()
+void behaviour_manager2D::on_body_removal_validation()
 {
     for (const auto &bhv : m_elements)
-        bhv->validate();
+        bhv->on_body_removal_validation();
 }
 
 void behaviour_manager2D::apply_forces()

@@ -64,7 +64,7 @@ class behaviour2D : kit::non_copyable,
     void clear();
     std::size_t size() const;
 
-    void validate();
+    void on_body_removal_validation();
 
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const;

@@ -21,7 +21,7 @@ body2D &body_manager2D::add(const body2D::specs &spc)
     state.append({transform.position.x, transform.position.y, transform.rotation, body.velocity.x, body.velocity.y,
                   body.angular_velocity});
 
-    world.colliders.validate_parents();
+    world.on_body_addition_validation();
     events.on_addition(body);
     KIT_INFO("Added body with index {0} and id {1}.", body.index, body.id)
     return body;
@@ -141,16 +141,16 @@ bool body_manager2D::remove(const std::size_t index)
         state[6 * index + i] = state[state.size() - 6 + i];
     state.resize(6 * m_elements.size());
 
-    world.validate();
+    world.on_body_removal_validation();
     events.on_late_removal(index);
     return true;
 }
 
-void body_manager2D::validate()
+void body_manager2D::on_body_removal_validation()
 {
     std::size_t index = 0;
-    for (auto it = m_elements.begin(); it != m_elements.end(); index++, ++it)
-        it->index = index;
+    for (body2D &body : m_elements)
+        body.index = index++;
 }
 
 void body_manager2D::send_data_to_state(rk::state<float> &state)

@@ -88,7 +88,7 @@ template <Joint T> class joint_container2D : public manager2D<T>
     using manager2D<T>::manager2D;
     static inline std::string s_name;
 
-    void validate()
+    void on_body_removal_validation()
     {
         std::size_t index = 0;
         for (auto it = this->m_elements.begin(); it != this->m_elements.end(); index++)

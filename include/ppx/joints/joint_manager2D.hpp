@@ -19,7 +19,7 @@ class joint_solver2D : public kit::identifiable<std::string>, public kit::yaml::
 
   private:
     virtual void solve() = 0;
-    virtual void validate() = 0;
+    virtual void on_body_removal_validation() = 0;
 
     friend class joint_meta_manager2D;
 };
@@ -35,9 +35,9 @@ template <Joint T> class joint_manager2D : public joint_container2D<T>, public j
     }
 
   private:
-    void validate() override
+    void on_body_removal_validation() override
     {
-        joint_container2D<T>::validate();
+        joint_container2D<T>::on_body_removal_validation();
     }
 
     virtual void solve() override
@@ -63,7 +63,7 @@ class joint_meta_manager2D final : public meta_manager2D<joint_solver2D>
     using meta_manager2D<joint_solver2D>::meta_manager2D;
 
     void solve();
-    void validate();
+    void on_body_removal_validation();
 
     friend class world2D;
     friend class joint_repository2D;

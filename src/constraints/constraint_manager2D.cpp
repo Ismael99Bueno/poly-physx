@@ -25,10 +25,10 @@ void constraint_meta_manager2D::solve()
         solver->solve();
 }
 
-void constraint_meta_manager2D::validate()
+void constraint_meta_manager2D::on_body_removal_validation()
 {
     for (const auto &solver : m_elements)
-        solver->validate();
+        solver->on_body_removal_validation();
 }
 
 } // namespace ppx

@@ -39,7 +39,7 @@ class behaviour_manager2D final : public manager2D<kit::scope<behaviour2D>>
   private:
     using manager2D<kit::scope<behaviour2D>>::manager2D;
 
-    void validate();
+    void on_body_removal_validation();
     void apply_forces();
 
     void process_addition(kit::scope<behaviour2D> &&bhv);

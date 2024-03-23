@@ -126,7 +126,12 @@ void collider_manager2D::validate_parents()
 #endif
 }
 
-void collider_manager2D::validate()
+void collider_manager2D::on_body_addition_validation()
+{
+    validate_parents();
+}
+
+void collider_manager2D::on_body_removal_validation()
 {
     validate_indices();
     validate_parents();

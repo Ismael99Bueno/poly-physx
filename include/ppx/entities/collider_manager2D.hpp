@@ -35,11 +35,12 @@ class collider_manager2D final : public manager2D<collider2D>
   private:
     using manager2D<collider2D>::manager2D;
 
-    void validate();
+    void on_body_addition_validation();
+    void on_body_removal_validation();
+
     void validate_indices();
     void validate_parents();
 
     friend class world2D;
-    friend class body_manager2D;
 };
 } // namespace ppx

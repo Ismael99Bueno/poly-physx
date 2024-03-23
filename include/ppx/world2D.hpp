@@ -50,7 +50,8 @@ class world2D : kit::non_copyable
 
     std::vector<float> operator()(float time, float timestep, const std::vector<float> &vars);
 
-    void validate();
+    void on_body_addition_validation();
+    void on_body_removal_validation();
     void add_builtin_joint_managers();
 
   private:

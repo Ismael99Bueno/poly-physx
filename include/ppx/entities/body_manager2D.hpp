@@ -43,7 +43,7 @@ class body_manager2D final : public manager2D<body2D>
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
     void prepare_constraint_velocities();
-    void validate();
+    void on_body_removal_validation();
 
     friend class world2D;
 };

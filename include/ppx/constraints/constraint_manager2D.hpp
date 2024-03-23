@@ -28,7 +28,7 @@ class constraint_solver2D : public kit::identifiable<std::string>, public kit::y
   private:
     virtual void startup() = 0;
     virtual void solve() = 0;
-    virtual void validate() = 0;
+    virtual void on_body_removal_validation() = 0;
 
     friend class constraint_meta_manager2D;
 };
@@ -45,9 +45,9 @@ template <Constraint T> class constraint_manager2D : public joint_container2D<T>
     }
 
   private:
-    void validate() override
+    void on_body_removal_validation() override
     {
-        joint_container2D<T>::validate();
+        joint_container2D<T>::on_body_removal_validation();
     }
 
     virtual void startup() override
@@ -85,7 +85,7 @@ class constraint_meta_manager2D final : public meta_manager2D<constraint_solver2
 
     void startup();
     void solve();
-    void validate();
+    void on_body_removal_validation();
 
     friend class world2D;
     friend class joint_repository2D;

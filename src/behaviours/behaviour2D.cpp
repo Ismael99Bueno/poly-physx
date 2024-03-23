@@ -12,7 +12,7 @@ behaviour2D::behaviour2D(world2D &world, const std::string &name)
 {
 }
 
-void behaviour2D::validate()
+void behaviour2D::on_body_removal_validation()
 {
     for (auto it = m_bodies.begin(); it != m_bodies.end();)
         if (!(*it))

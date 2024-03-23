@@ -87,13 +87,18 @@ std::vector<float> world2D::create_state_derivative() const
     return state_derivative;
 }
 
-void world2D::validate()
+void world2D::on_body_addition_validation()
 {
-    bodies.validate();
-    colliders.validate();
-    joints.constraint_based.validate();
-    joints.non_constraint_based.validate();
-    behaviours.validate();
+    colliders.on_body_addition_validation();
+}
+
+void world2D::on_body_removal_validation()
+{
+    bodies.on_body_removal_validation();
+    colliders.on_body_removal_validation();
+    joints.constraint_based.on_body_removal_validation();
+    joints.non_constraint_based.on_body_removal_validation();
+    behaviours.on_body_removal_validation();
 }
 
 void world2D::add_builtin_joint_managers()
