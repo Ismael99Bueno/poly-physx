@@ -14,7 +14,7 @@ collider2D collider2D::from_instance(const ppx::collider2D &collider)
         return {collider.lposition(),
                 collider.lrotation(),
                 {collider.density(), collider.charge_density(), collider.restitution, collider.friction,
-                 poly->vertices.model, 0.f, collider.shape_type()}};
+                 poly->vertices.model, 0.f, collider.shape_type(), collider.collision_filter}};
     }
 
     const circle &circ = collider.shape<circle>();

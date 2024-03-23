@@ -19,6 +19,7 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
 
     float restitution;
     float friction;
+    filter collision_filter;
 
     collider_events2D events;
 

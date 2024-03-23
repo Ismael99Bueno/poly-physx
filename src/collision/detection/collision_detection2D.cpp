@@ -90,8 +90,10 @@ static bool broad_collision_check(const collider2D &collider1, const collider2D 
 {
     const body2D &p1 = collider1.parent();
     const body2D &p2 = collider2.parent();
-    return collider1 != collider2 && p1 != p2 && (p1.is_dynamic() || p2.is_dynamic()) &&
-           geo::may_intersect(collider1.shape(), collider2.shape());
+    return collider1 != collider2 && p1 != p2 &&
+           (collider1.collision_filter.cgroup & collider2.collision_filter.collides_with) &&
+           (collider2.collision_filter.cgroup & collider1.collision_filter.collides_with) &&
+           (p1.is_dynamic() || p2.is_dynamic()) && geo::may_intersect(collider1.shape(), collider2.shape());
 }
 
 collision2D collision_detection2D::generate_collision(collider2D &collider1, collider2D &collider2) const

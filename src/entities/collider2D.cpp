@@ -6,8 +6,9 @@ namespace ppx
 {
 collider2D::collider2D(world2D &world, const body2D::ptr &parent, const specs &spc)
     : kit::identifiable<>(kit::uuid::random()), worldref2D(world), restitution(spc.props.restitution),
-      friction(spc.props.friction), m_position(spc.position), m_parent(parent), m_density(spc.props.density),
-      m_charge_density(spc.props.charge_density), m_type(spc.props.shape)
+      friction(spc.props.friction), collision_filter(spc.props.collision_filter), m_position(spc.position),
+      m_parent(parent), m_density(spc.props.density), m_charge_density(spc.props.charge_density),
+      m_type(spc.props.shape)
 {
     const kit::transform2D<float> transform = kit::transform2D<float>::builder()
                                                   .position(spc.position)

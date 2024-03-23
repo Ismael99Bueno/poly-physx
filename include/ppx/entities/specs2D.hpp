@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ppx/entities/shapes2D.hpp"
+#include "ppx/collision/filter.hpp"
 #include "kit/container/dynarray.hpp"
 
 namespace ppx
@@ -32,6 +33,7 @@ struct collider2D
         kit::dynarray<glm::vec2, PPX_MAX_VERTICES> vertices = polygon::square(5.f);
         float radius = 2.5f;
         stype shape = stype::POLYGON;
+        filter collision_filter{};
     } props;
     static collider2D from_instance(const ppx::collider2D &collider);
 };
