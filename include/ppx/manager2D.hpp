@@ -42,7 +42,7 @@ template <typename T> class manager2D : public worldref2D, kit::non_copyable
     struct
     {
         kit::event<value_t *> on_addition;
-        kit::event<const value_t &> on_removal;
+        kit::event<value_t &> on_removal;
     } events;
 
     auto begin() const

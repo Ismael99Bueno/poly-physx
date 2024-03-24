@@ -3,18 +3,19 @@
 #include "ppx/entities/body2D.hpp"
 #include "ppx/events/collider_events2D.hpp"
 #include "kit/interface/non_copyable.hpp"
+#include "kit/interface/indexable.hpp"
 #include <variant>
 
 namespace ppx
 {
 class body2D;
-class collider2D : kit::non_copyable
+class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
     using specs = specs::collider2D;
     using stype = specs::stype;
 
-    collider2D(body2D *body, const specs &spc = {});
+    collider2D(world2D &world, body2D *body, const specs &spc = {});
 
     float restitution;
     float friction;

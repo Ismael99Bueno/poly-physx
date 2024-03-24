@@ -8,7 +8,7 @@ namespace ppx
 {
 collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc)
 {
-    collider2D *collider = m_allocator.create(parent, spc);
+    collider2D *collider = m_allocator.create(world, parent, spc);
     parent->m_colliders.push_back(collider);
 
     events.on_addition(collider);
@@ -66,7 +66,12 @@ bool collider_manager2D::remove(const std::size_t index)
     body2D *parent = collider->body();
     parent->m_colliders.erase(std::find(parent->m_colliders.begin(), parent->m_colliders.end(), collider));
 
-    m_elements.erase(m_elements.begin() + index);
+    if (index != m_elements.size() - 1)
+    {
+        m_elements[index] = m_elements.back();
+        m_elements[index]->index = index;
+    }
+    m_elements.pop_back();
     parent->update_centroids();
     parent->update_inertia();
     parent->update_colliders();

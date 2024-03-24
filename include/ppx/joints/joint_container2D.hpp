@@ -25,18 +25,19 @@ template <Joint T> class joint_container2D : public manager2D<T>
     virtual T *add(const specs &spc)
     {
         T *joint = m_allocator.create(this->world, spc);
+        joint->index = this->m_elements.size();
         this->m_elements.push_back(joint);
         this->events.on_addition(joint);
         return joint;
     }
 
-    std::vector<const T *> from_body_ids(const kit::uuid id1, const kit::uuid id2) const
+    std::vector<const T *> from_bodies(const body2D *body1, const body2D *body2) const
     {
-        return from_body_ids<const T>(id1, id2, this->m_elements);
+        return from_bodies<const T>(body1, body2, this->m_elements);
     }
-    std::vector<T *> from_body_ids(const kit::uuid id1, const kit::uuid id2)
+    std::vector<T *> from_bodies(const body2D *body1, const body2D *body2)
     {
-        return from_body_ids<T>(id1, id2, this->m_elements);
+        return from_bodies<T>(body1, body2, this->m_elements);
     }
 
     using manager2D<T>::remove;
@@ -48,7 +49,13 @@ template <Joint T> class joint_container2D : public manager2D<T>
         T *joint = this->m_elements[index];
         this->events.on_removal(*joint);
 
-        this->m_elements.erase(this->m_elements.begin() + index);
+        if (index != this->m_elements.size() - 1)
+        {
+            this->m_elements[index] = this->m_elements.back();
+            this->m_elements[index]->index = index;
+        }
+        this->m_elements.pop_back();
+
         m_allocator.destroy(joint);
         return true;
     }
@@ -73,13 +80,13 @@ template <Joint T> class joint_container2D : public manager2D<T>
 
   private:
     template <typename U, typename C>
-    static std::vector<U *> from_body_ids(const kit::uuid id1, const kit::uuid id2, C &elements)
+    static std::vector<U *> from_bodies(const body2D *body1, const body2D *body2, C &elements)
     {
         std::vector<U *> joints;
-        for (U &joint : elements)
-            if ((joint.body1()->id == id1 && joint.body2()->id == id2) ||
-                (joint.body1()->id == id2 && joint.body2()->id == id1))
-                joints.push_back(&joint);
+        for (U *joint : elements)
+            if ((joint->body1() == body1 && joint->body2() == body2) ||
+                (joint->body1() == body2 && joint->body2() == body1))
+                joints.push_back(joint);
         return joints;
     }
 };
