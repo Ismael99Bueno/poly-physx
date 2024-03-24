@@ -4,11 +4,9 @@
 
 namespace ppx
 {
-class spring2D : public joint2D, public worldref2D
+class spring2D : public joint2D
 {
   public:
-    using ptr = kit::vector_ptr<spring2D>;
-    using const_ptr = kit::const_vector_ptr<spring2D>;
     using specs = specs::spring2D;
 
     spring2D(world2D &world, const specs &spc);
@@ -19,9 +17,6 @@ class spring2D : public joint2D, public worldref2D
 
     std::uint32_t non_linear_terms;
     float non_linear_contribution;
-
-    const_ptr as_ptr() const;
-    ptr as_ptr();
 
     glm::vec4 force() const;
 

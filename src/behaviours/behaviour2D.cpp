@@ -12,16 +12,7 @@ behaviour2D::behaviour2D(world2D &world, const std::string &name)
 {
 }
 
-void behaviour2D::on_body_removal_validation()
-{
-    for (auto it = m_bodies.begin(); it != m_bodies.end();)
-        if (!(*it))
-            it = m_bodies.erase(it);
-        else
-            ++it;
-}
-
-void behaviour2D::add(const body2D::ptr &body)
+void behaviour2D::add(body2D *body)
 {
     m_bodies.push_back(body);
 }
@@ -32,30 +23,21 @@ bool behaviour2D::remove(std::size_t index)
     m_bodies.erase(m_bodies.begin() + index);
     return true;
 }
-bool behaviour2D::remove(kit::uuid id)
+
+bool behaviour2D::remove(const body2D *body)
 {
-    for (auto it = m_bodies.begin(); it != m_bodies.end(); ++it)
-        if ((*it)->id == id)
+    for (std::size_t i = 0; i < m_bodies.size(); i++)
+        if (m_bodies[i] == body)
         {
-            m_bodies.erase(it);
+            m_bodies.erase(m_bodies.begin() + i);
             return true;
         }
     return false;
 }
-bool behaviour2D::remove(const body2D &body)
+bool behaviour2D::contains(const body2D *body) const
 {
-    for (auto it = m_bodies.begin(); it != m_bodies.end(); ++it)
-        if (*(*it) == body)
-        {
-            m_bodies.erase(it);
-            return true;
-        }
-    return false;
-}
-bool behaviour2D::contains(const body2D &body) const
-{
-    for (const body2D::ptr &bdptr : m_bodies)
-        if (*bdptr == body)
+    for (body2D *b : m_bodies)
+        if (b == body)
             return true;
     return false;
 }
@@ -76,21 +58,6 @@ body2D &behaviour2D::operator[](std::size_t index)
 {
     KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds container size: {0}", index)
     return *m_bodies[index];
-}
-
-const body2D *behaviour2D::operator[](const kit::uuid id) const
-{
-    for (const auto &body : m_bodies)
-        if (body->id == id)
-            return body.raw();
-    return nullptr;
-}
-body2D *behaviour2D::operator[](const kit::uuid id)
-{
-    for (const auto &body : m_bodies)
-        if (body->id == id)
-            return body.raw();
-    return nullptr;
 }
 
 float behaviour2D::energy(const body2D &body) const

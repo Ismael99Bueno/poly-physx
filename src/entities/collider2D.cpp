@@ -4,16 +4,15 @@
 
 namespace ppx
 {
-collider2D::collider2D(world2D &world, const body2D::ptr &parent, const specs &spc)
-    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), restitution(spc.props.restitution),
-      friction(spc.props.friction), collision_filter(spc.props.collision_filter), m_position(spc.position),
-      m_parent(parent), m_density(spc.props.density), m_charge_density(spc.props.charge_density),
+collider2D::collider2D(body2D *body, const specs &spc)
+    : restitution(spc.props.restitution), friction(spc.props.friction), collision_filter(spc.props.collision_filter),
+      m_position(spc.position), m_body(body), m_density(spc.props.density), m_charge_density(spc.props.charge_density),
       m_type(spc.props.shape)
 {
     const kit::transform2D<float> transform = kit::transform2D<float>::builder()
                                                   .position(spc.position)
                                                   .rotation(spc.rotation)
-                                                  .parent(&parent->centroid_transform())
+                                                  .parent(&body->centroid_transform())
                                                   .build();
     switch (spc.props.shape)
     {
@@ -27,22 +26,13 @@ collider2D::collider2D(world2D &world, const body2D::ptr &parent, const specs &s
     update_parent();
 }
 
-collider2D::const_ptr collider2D::as_ptr() const
+const body2D *collider2D::body() const
 {
-    return world.colliders.ptr(index);
+    return m_body;
 }
-collider2D::ptr collider2D::as_ptr()
+body2D *collider2D::body()
 {
-    return world.colliders.ptr(index);
-}
-
-const body2D &collider2D::parent() const
-{
-    return *m_parent;
-}
-body2D::ptr &collider2D::parent()
-{
-    return m_parent;
+    return m_body;
 }
 
 float collider2D::density() const
@@ -87,7 +77,7 @@ const glm::vec2 &collider2D::lposition() const
 
 void collider2D::begin_update()
 {
-    KIT_ASSERT_ERROR(m_parent->m_spatial_update, "Cannot begin update collider while parent is not spatially updating")
+    KIT_ASSERT_ERROR(m_body->m_spatial_update, "Cannot begin update collider while parent is not spatially updating")
     mutable_shape().begin_update();
 }
 void collider2D::end_update()
@@ -123,7 +113,7 @@ void collider2D::gtranslate(const glm::vec2 &dpos)
 {
     mutable_shape().gtranslate(dpos);
     m_position +=
-        glm::vec2(m_parent->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
+        glm::vec2(m_body->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
     update_parent();
 }
 void collider2D::lrotate(float dangle)
@@ -153,7 +143,7 @@ void collider2D::gcentroid(const glm::vec2 &gcentroid)
     const glm::vec2 dpos = gcentroid - gc;
     mutable_shape().gcentroid(gcentroid);
     m_position +=
-        glm::vec2(m_parent->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
+        glm::vec2(m_body->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
     update_parent();
 }
 void collider2D::lcentroid(const glm::vec2 &lcentroid)
@@ -204,9 +194,9 @@ shape2D &collider2D::mutable_shape()
 
 void collider2D::update_parent()
 {
-    m_parent->update_centroids();
-    m_parent->update_inertia();
-    m_parent->update_colliders();
+    m_body->update_centroids();
+    m_body->update_inertia();
+    m_body->update_colliders();
 }
 
 collider2D::stype collider2D::shape_type() const

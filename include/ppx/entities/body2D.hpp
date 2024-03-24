@@ -1,22 +1,20 @@
 #pragma once
 
-#include "kit/interface/identifiable.hpp"
-#include "kit/interface/indexable.hpp"
-#include "kit/memory/vector_ptr.hpp"
-#include "kit/utility/type_constraints.hpp"
 #include "ppx/internal/worldref.hpp"
 #include "ppx/entities/specs2D.hpp"
+#include "kit/memory/vector_ptr.hpp"
+#include "kit/utility/type_constraints.hpp"
+#include "kit/interface/non_copyable.hpp"
+#include "kit/interface/indexable.hpp"
 #include <variant>
 
 namespace ppx
 {
 class world2D;
 class collider2D;
-class body2D : public kit::identifiable<>, public kit::indexable, public worldref2D
+class body2D : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
-    using ptr = kit::vector_ptr<body2D>;
-    using const_ptr = kit::const_vector_ptr<body2D>;
     using specs = specs::body2D;
     using btype = specs::btype;
 
@@ -56,24 +54,34 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
         } // v + cross(w, at)
     } ctr_proxy;
 
-    const collider2D &operator[](std::size_t index) const;
-    collider2D &operator[](std::size_t index);
+    const collider2D *operator[](std::size_t index) const;
+    collider2D *operator[](std::size_t index);
 
-    const collider2D *operator[](kit::uuid id) const;
-    collider2D *operator[](kit::uuid id);
-
-    collider2D &add(const ppx::specs::collider2D &spc);
+    collider2D *add(const ppx::specs::collider2D &spc);
 
     bool remove(std::size_t index);
-    bool remove(kit::uuid id);
-    bool remove(const collider2D &collider);
+    bool remove(const collider2D *collider);
+
+    bool contains(const collider2D *collider) const;
     void clear();
 
-    std::vector<collider2D>::const_iterator begin() const;
-    std::vector<collider2D>::const_iterator end() const;
+    auto begin() const
+    {
+        return m_colliders.begin();
+    }
+    auto end() const
+    {
+        return m_colliders.end();
+    }
 
-    std::vector<collider2D>::iterator begin();
-    std::vector<collider2D>::iterator end();
+    auto begin()
+    {
+        return m_colliders.begin();
+    }
+    auto end()
+    {
+        return m_colliders.end();
+    }
 
     bool empty() const;
     std::size_t size() const;
@@ -90,9 +98,6 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
 
     void begin_spatial_update();
     void end_spatial_update();
-
-    const_ptr as_ptr() const;
-    ptr as_ptr();
 
     float kinetic_energy() const;
 
@@ -148,8 +153,7 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
     glm::vec2 m_force{0.f};
     float m_torque = 0.f;
 
-    std::size_t m_start = 0;
-    std::size_t m_size = 0;
+    std::vector<collider2D *> m_colliders;
     btype m_type;
 
     bool m_density_update = false;
@@ -167,8 +171,8 @@ class body2D : public kit::identifiable<>, public kit::indexable, public worldre
 
     void reset_dynamic_properties();
 
-    friend class collider2D;
     friend class spring2D;
+    friend class collider2D;
     friend class behaviour2D;
     friend class constraint2D;
     friend class body_manager2D;

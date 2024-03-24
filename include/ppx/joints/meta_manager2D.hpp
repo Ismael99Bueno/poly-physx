@@ -11,12 +11,12 @@ class constraint_solver2D;
 template <typename T>
 concept Solver = std::is_same_v<T, joint_solver2D> || std::is_same_v<T, constraint_solver2D>;
 
-template <Solver S> class meta_manager2D : public manager2D<kit::scope<S>>
+template <Solver S> class meta_manager2D : public idmanager2D<kit::scope<S>>
 {
   public:
-    using manager2D<kit::scope<S>>::manager2D;
+    using idmanager2D<kit::scope<S>>::idmanager2D;
 
-    template <typename T> T &add(const typename T::specs &spc)
+    template <typename T> T *add(const typename T::specs &spc)
     {
         using Manager = typename S::template manager_t<T>;
         Manager *mng = manager<T>();
@@ -51,7 +51,7 @@ template <Solver S> class meta_manager2D : public manager2D<kit::scope<S>>
         return solver ? static_cast<Manager *>(solver) : nullptr;
     }
 
-    using manager2D<kit::scope<S>>::remove;
+    using idmanager2D<kit::scope<S>>::remove;
     bool remove(std::size_t index) override;
 
     template <typename T> bool remove()

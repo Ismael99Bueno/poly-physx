@@ -1,26 +1,16 @@
 #pragma once
 
+#include "rk/integration/state.hpp"
 #include "ppx/manager2D.hpp"
 #include "ppx/entities/body2D.hpp"
-#include "rk/integration/state.hpp"
-#include "kit/events/event.hpp"
+#include "kit/memory/block_allocator.hpp"
 
 namespace ppx
 {
 class body_manager2D final : public manager2D<body2D>
 {
   public:
-    struct
-    {
-        kit::event<body2D &> on_addition;
-        kit::event<const body2D &> on_early_removal;
-        kit::event<std::size_t> on_late_removal;
-    } events;
-
-    body2D &add(const body2D::specs &spc = {});
-
-    body2D::const_ptr ptr(std::size_t index) const;
-    body2D::ptr ptr(std::size_t index);
+    body2D *add(const body2D::specs &spc = {});
 
     using manager2D<body2D>::operator[];
     std::vector<const body2D *> operator[](const aabb2D &aabb) const;
@@ -35,6 +25,8 @@ class body_manager2D final : public manager2D<body2D>
   private:
     using manager2D<body2D>::manager2D;
 
+    kit::block_allocator<body2D> m_allocator{1024};
+
     void apply_impulse_and_persistent_forces();
     void reset_impulse_forces();
     void reset_simulation_forces();
@@ -43,7 +35,6 @@ class body_manager2D final : public manager2D<body2D>
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
     void prepare_constraint_velocities();
-    void on_body_removal_validation();
 
     friend class world2D;
 };

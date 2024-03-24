@@ -28,7 +28,7 @@ class constraint_solver2D : public kit::identifiable<std::string>, public kit::y
   private:
     virtual void startup() = 0;
     virtual void solve() = 0;
-    virtual void on_body_removal_validation() = 0;
+    virtual void on_body_removal_validation(const body2D *body) = 0;
 
     friend class constraint_meta_manager2D;
 };
@@ -45,26 +45,26 @@ template <Constraint T> class constraint_manager2D : public joint_container2D<T>
     }
 
   private:
-    void on_body_removal_validation() override
+    void on_body_removal_validation(const body2D *body) override
     {
-        joint_container2D<T>::on_body_removal_validation();
+        joint_container2D<T>::on_body_removal_validation(body);
     }
 
     virtual void startup() override
     {
-        for (T &constraint : this->m_elements)
+        for (T *constraint : this->m_elements)
         {
-            constraint.startup();
+            constraint->startup();
             if (this->world.constraints.warmup)
-                constraint.warmup();
+                constraint->warmup();
         }
     }
 
     virtual void solve() override
     {
         for (std::size_t i = 0; i < this->world.constraints.iterations; i++)
-            for (T &constraint : this->m_elements)
-                constraint.solve();
+            for (T *constraint : this->m_elements)
+                constraint->solve();
     }
 
 #ifdef KIT_USE_YAML_CPP
@@ -85,7 +85,7 @@ class constraint_meta_manager2D final : public meta_manager2D<constraint_solver2
 
     void startup();
     void solve();
-    void on_body_removal_validation();
+    void on_body_removal_validation(const body2D *body);
 
     friend class world2D;
     friend class joint_repository2D;

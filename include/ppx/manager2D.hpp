@@ -5,6 +5,7 @@
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/indexable.hpp"
 #include "kit/memory/scope.hpp"
+#include "kit/events/event.hpp"
 #include <vector>
 
 namespace ppx
@@ -13,30 +14,36 @@ class world2D;
 
 template <typename T> struct type_wrapper
 {
-    using value = T;
-    static inline constexpr bool is_scope = false;
+    using value_t = T;
+    using element_t = T *;
+    static inline value_t *ptr(const element_t element)
+    {
+        return element;
+    }
 };
 template <typename T> struct type_wrapper<kit::scope<T>>
 {
-    using value = T;
-    static inline constexpr bool is_scope = true;
+    using value_t = T;
+    using element_t = kit::scope<T>;
+    static inline value_t *ptr(const element_t &element)
+    {
+        return element.get();
+    }
 };
 
-template <typename T>
-concept Identifiable = kit::Identifiable<typename type_wrapper<T>::value>;
-
-template <Identifiable T>
-class manager2D
-
-    : kit::non_copyable,
-      public worldref2D
+template <typename T> class manager2D : public worldref2D, kit::non_copyable
 {
   public:
-    using value_type = typename type_wrapper<T>::value;
-    using id_type = typename value_type::id_type;
-    static inline constexpr bool is_scope = type_wrapper<T>::is_scope;
+    using value_t = typename type_wrapper<T>::value_t;
+    using element_t = typename type_wrapper<T>::element_t;
 
     virtual ~manager2D() = default;
+
+    struct
+    {
+        kit::event<value_t *> on_addition;
+        kit::event<const value_t &> on_removal;
+    } events;
 
     auto begin() const
     {
@@ -56,104 +63,42 @@ class manager2D
         return m_elements.end();
     }
 
-    const value_type &at(std::size_t index) const
+    const value_t *at(std::size_t index) const
     {
         KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                          m_elements.size())
-
-        if constexpr (is_scope)
-            return *m_elements[index];
-        else
-            return m_elements[index];
+        return type_wrapper<T>::ptr(m_elements[index]);
     }
-    value_type &at(std::size_t index)
+    value_t *at(std::size_t index)
     {
         KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
                          m_elements.size())
-
-        if constexpr (is_scope)
-            return *m_elements[index];
-        else
-            return m_elements[index];
+        return type_wrapper<T>::ptr(m_elements[index]);
     }
 
-    const value_type *at(const id_type &id) const
-    {
-        if constexpr (is_scope)
-        {
-            for (const T &element : m_elements)
-                if (element->id == id)
-                    return element.get();
-        }
-        else
-            for (const T &element : m_elements)
-                if (element.id == id)
-                    return &element;
-        return nullptr;
-    }
-    value_type *at(const id_type &id)
-    {
-        if constexpr (is_scope)
-        {
-            for (T &element : m_elements)
-                if (element->id == id)
-                    return element.get();
-        }
-        else
-            for (T &element : m_elements)
-                if (element.id == id)
-                    return &element;
-        return nullptr;
-    }
-
-    const value_type &operator[](std::size_t index) const
+    const value_t *operator[](std::size_t index) const
     {
         return at(index);
     }
-    value_type &operator[](std::size_t index)
+    value_t *operator[](std::size_t index)
     {
         return at(index);
-    }
-
-    const value_type *operator[](const id_type &id) const
-    {
-        return at(id);
-    }
-    value_type *operator[](const id_type &id)
-    {
-        return at(id);
     }
 
     virtual bool remove(std::size_t index) = 0;
-    bool remove(const value_type &element)
+    bool remove(const value_t *element)
     {
-        if constexpr (kit::Indexable<T>)
-            return remove(element.index);
-        else
-            return remove(element.id);
-    }
-    bool remove(const id_type &id)
-    {
-        if constexpr (is_scope)
-        {
-            for (std::size_t i = 0; i < m_elements.size(); ++i)
-                if (m_elements[i]->id == id)
-                    return remove(i);
-        }
-        else
-            for (std::size_t i = 0; i < m_elements.size(); ++i)
-                if (m_elements[i].id == id)
-                    return remove(i);
+        for (std::size_t i = 0; i < m_elements.size(); i++)
+            if (element == type_wrapper<T>::ptr(m_elements[i]))
+                return remove(i);
         return false;
     }
-
-    bool contains(const value_type &element) const
+    bool contains(const value_t *element) const
     {
-        return contains(element.id);
-    }
-    bool contains(const id_type &id) const
-    {
-        return (*this)[id] != nullptr;
+        for (const element_t &e : m_elements)
+            if (element == type_wrapper<T>::ptr(e))
+                return true;
+        return false;
     }
 
     std::size_t size() const
@@ -174,6 +119,59 @@ class manager2D
     manager2D(world2D &world) : worldref2D(world)
     {
     }
-    std::vector<T> m_elements;
+    std::vector<element_t> m_elements;
 };
+
+template <typename T>
+concept Identifiable = kit::Identifiable<typename type_wrapper<T>::value_t>;
+
+template <Identifiable T> class idmanager2D : public manager2D<T>
+{
+  public:
+    using value_t = typename type_wrapper<T>::value_t;
+    using element_t = typename type_wrapper<T>::element_t;
+    using id_t = typename value_t::id_type;
+
+    const value_t *at(const id_t &id) const
+    {
+        for (const element_t &element : this->m_elements)
+            if (element->id == id)
+                return type_wrapper<T>::ptr(element);
+        return nullptr;
+    }
+    value_t *at(const id_t &id)
+    {
+        for (const element_t &element : this->m_elements)
+            if (element->id == id)
+                return type_wrapper<T>::ptr(element);
+        return nullptr;
+    }
+
+    const value_t *operator[](const id_t &id) const
+    {
+        return at(id);
+    }
+    value_t *operator[](const id_t &id)
+    {
+        return at(id);
+    }
+
+    using manager2D<T>::remove;
+    bool remove(const id_t &id)
+    {
+        for (std::size_t i = 0; i < this->m_elements.size(); i++)
+            if (this->m_elements[i]->id == id)
+                return remove(i);
+        return false;
+    }
+
+    bool contains(const id_t &id) const
+    {
+        return (*this)[id] != nullptr;
+    }
+
+  protected:
+    using manager2D<T>::manager2D;
+};
+
 } // namespace ppx

@@ -26,17 +26,17 @@ void spring_driven_resolution2D::solve(const std::vector<collision2D> &collision
 std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collision_forces(
     const collision2D &colis, std::size_t manifold_index) const
 {
-    const body2D &body1 = *colis.collider1->parent();
-    const body2D &body2 = *colis.collider2->parent();
+    const body2D *body1 = colis.collider1->body();
+    const body2D *body2 = colis.collider2->body();
 
     const glm::vec2 &touch1 = colis.manifold.contacts[manifold_index];
     const glm::vec2 touch2 = colis.manifold.contacts[manifold_index] - colis.mtv;
 
-    const glm::vec2 offset1 = touch1 - body1.centroid();
-    const glm::vec2 offset2 = touch2 - body2.centroid();
+    const glm::vec2 offset1 = touch1 - body1->centroid();
+    const glm::vec2 offset2 = touch2 - body2->centroid();
 
     const glm::vec2 relvel =
-        (body2.gvelocity_at_centroid_offset(offset2) - body1.gvelocity_at_centroid_offset(offset1));
+        (body2->gvelocity_at_centroid_offset(offset2) - body1->gvelocity_at_centroid_offset(offset1));
 
     const glm::vec2 normal_dir = glm::normalize(colis.mtv);
 
@@ -66,8 +66,8 @@ void spring_driven_resolution2D::solve_and_apply_collision_forces(const collisio
     torque1 /= colis.manifold.size;
     torque2 /= colis.manifold.size;
 
-    body2D::ptr &body1 = colis.collider1->parent();
-    body2D::ptr &body2 = colis.collider2->parent();
+    body2D *body1 = colis.collider1->body();
+    body2D *body2 = colis.collider2->body();
 
     body1->apply_simulation_force(force);
     body1->apply_simulation_torque(torque1);

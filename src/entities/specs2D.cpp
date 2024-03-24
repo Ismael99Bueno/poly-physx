@@ -34,8 +34,8 @@ body2D body2D::from_instance(const ppx::body2D &body)
     std::vector<collider2D> colliders;
     colliders.reserve(body.size());
 
-    for (const ppx::collider2D &collider : body)
-        colliders.push_back(collider2D::from_instance(collider));
+    for (const ppx::collider2D *collider : body)
+        colliders.push_back(collider2D::from_instance(*collider));
 
     return {body.gposition(),
             body.velocity,

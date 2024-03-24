@@ -135,18 +135,18 @@ class collision_detection2D : public worldref2D
     void inherit(collision_detection2D &coldet);
 
   protected:
-    void process_collision_st(collider2D &collider1, collider2D &collider2);
-    void process_collision_mt(collider2D &collider1, collider2D &collider2, std::size_t thread_idx);
+    void process_collision_st(collider2D *collider1, collider2D *collider2);
+    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t thread_idx);
     void join_mt_collisions();
 
   private:
     std::vector<collision2D> m_collisions;
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
 
-    collision2D generate_collision(collider2D &collider1, collider2D &collider2) const;
-    void cc_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
-    void cp_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
-    void pp_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
+    collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
+    void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
+    void cp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
+    void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
 
     kit::scope<cp_narrow_detection2D> m_cp_narrow;
     kit::scope<pp_narrow_detection2D> m_pp_narrow;

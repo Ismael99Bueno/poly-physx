@@ -8,92 +8,75 @@
 namespace ppx
 {
 body2D::body2D(world2D &world, const body2D::specs &spc)
-    : kit::identifiable<>(kit::uuid::random()), worldref2D(world), velocity(spc.velocity),
+    : kit::indexable(world.bodies.size()), worldref2D(world), velocity(spc.velocity),
       angular_velocity(spc.angular_velocity), charge(spc.props.charge),
       m_centroid(kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()),
       m_gposition(spc.position), m_lposition(0.f), m_charge_centroid(spc.position), m_type(spc.props.type)
 {
     mass(spc.props.mass);
+    begin_density_update();
+    for (const auto &collider_spc : spc.props.colliders)
+        add(collider_spc);
+    end_density_update();
+
+    rk::state<float> &state = world.integrator.state;
+    state.append(
+        {m_centroid.position.x, m_centroid.position.y, m_centroid.rotation, velocity.x, velocity.y, angular_velocity});
 }
 
-const collider2D &body2D::operator[](const std::size_t index) const
+const collider2D *body2D::operator[](const std::size_t index) const
 {
-    KIT_ASSERT_ERROR(index < m_size, "Index exceeds array bounds - index: {0}, size: {1}", index, m_size);
-    return world.colliders[m_start + index];
+    KIT_ASSERT_ERROR(index < m_colliders.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
+                     m_colliders.size());
+    return m_colliders[index];
 }
-collider2D &body2D::operator[](const std::size_t index)
+collider2D *body2D::operator[](const std::size_t index)
 {
-    KIT_ASSERT_ERROR(index < m_size, "Index exceeds array bounds - index: {0}, size: {1}", index, m_size);
-    return world.colliders[m_start + index];
-}
-
-const collider2D *body2D::operator[](const kit::uuid id) const
-{
-    return world.colliders[id];
-}
-collider2D *body2D::operator[](const kit::uuid id)
-{
-    return world.colliders[id];
+    KIT_ASSERT_ERROR(index < m_colliders.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
+                     m_colliders.size());
+    return m_colliders[index];
 }
 
-collider2D &body2D::add(const ppx::specs::collider2D &spc)
+collider2D *body2D::add(const ppx::specs::collider2D &spc)
 {
-    return world.colliders.add(as_ptr(), spc);
+    return world.colliders.add(this, spc);
 }
 
 bool body2D::remove(const std::size_t index)
 {
-    if (index >= m_size)
+    if (index >= m_colliders.size())
         return false;
+    return world.colliders.remove(m_colliders[index]);
+}
 
-    return world.colliders.remove(m_start + index);
-}
-bool body2D::remove(const kit::uuid id)
+bool body2D::remove(const collider2D *collider)
 {
-    std::size_t index = SIZE_MAX;
-    for (const collider2D &collider : *this)
-        if (collider.id == id)
-        {
-            index = collider.index;
-            break;
-        }
-    return world.colliders.remove(index);
+    for (const collider2D *c : *this)
+        if (c == collider)
+            return world.colliders.remove(collider);
+    return false;
 }
-bool body2D::remove(const collider2D &collider)
+bool body2D::contains(const collider2D *collider) const
 {
-    return remove(collider.index);
+    for (const collider2D *c : *this)
+        if (c == collider)
+            return true;
+    return false;
 }
+
 void body2D::clear()
 {
-    for (std::size_t i = m_size - 1; i < m_size && i >= 0; i--)
+    for (std::size_t i = m_colliders.size() - 1; i < m_colliders.size() && i >= 0; i--)
         remove(i);
-}
-
-std::vector<collider2D>::const_iterator body2D::begin() const
-{
-    return world.colliders.begin() + m_start;
-}
-std::vector<collider2D>::const_iterator body2D::end() const
-{
-    return world.colliders.begin() + m_start + m_size;
-}
-
-std::vector<collider2D>::iterator body2D::begin()
-{
-    return world.colliders.begin() + m_start;
-}
-std::vector<collider2D>::iterator body2D::end()
-{
-    return world.colliders.begin() + m_start + m_size;
 }
 
 bool body2D::empty() const
 {
-    return m_size == 0;
+    return m_colliders.empty();
 }
 std::size_t body2D::size() const
 {
-    return m_size;
+    return m_colliders.size();
 }
 
 const body2D::properties &body2D::props() const
@@ -129,7 +112,6 @@ void body2D::end_spatial_update()
 void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
 {
     const std::size_t idx = 6 * index;
-
     begin_spatial_update();
     centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});
     rotation(vars_buffer[idx + 2]);
@@ -143,9 +125,9 @@ void body2D::update_colliders()
 {
     if (m_spatial_update)
         return;
-    for (collider2D &collider : *this)
+    for (collider2D *collider : *this)
     {
-        shape2D &shape = collider.mutable_shape();
+        shape2D &shape = collider->mutable_shape();
         KIT_ASSERT_ERROR(!shape.updating(), "Cannot update collider while it is already being updated")
         shape.update();
     }
@@ -166,15 +148,15 @@ void body2D::update_centroids()
     glm::vec2 charge_centroid{0.f};
     float artificial_charge = 0.f;
 
-    for (const collider2D &collider : *this)
+    for (const collider2D *collider : *this)
     {
-        const shape2D &shape = collider.shape();
+        const shape2D &shape = collider->shape();
 
-        const float cmass = collider.density() * shape.area();
+        const float cmass = collider->density() * shape.area();
         centroid += cmass * shape.gcentroid();
         artificial_mass += cmass;
 
-        const float ccharge = collider.charge_density() * shape.area();
+        const float ccharge = collider->charge_density() * shape.area();
         charge_centroid += ccharge * shape.gcentroid();
         artificial_charge += ccharge;
     }
@@ -183,8 +165,8 @@ void body2D::update_centroids()
 
     const glm::vec2 diff = m_centroid.position - centroid;
     m_centroid.position = centroid;
-    for (collider2D &collider : *this)
-        collider.mutable_shape().gtranslate(diff);
+    for (collider2D *collider : *this)
+        collider->mutable_shape().gtranslate(diff);
     m_lposition = local_centroid_point(m_gposition);
 }
 void body2D::update_inertia()
@@ -202,10 +184,10 @@ void body2D::update_inertia()
     }
 
     float artificial_mass = 0.f;
-    for (const collider2D &collider : *this)
+    for (const collider2D *collider : *this)
     {
-        const shape2D &shape = collider.shape();
-        const float cmass = collider.density() * shape.area();
+        const shape2D &shape = collider->shape();
+        const float cmass = collider->density() * shape.area();
         const float dist2 = glm::length2(shape.gcentroid() - m_centroid.position);
 
         m_props.nondynamic.inertia += cmass * (dist2 + shape.inertia());
@@ -247,15 +229,6 @@ void body2D::type(btype type)
 {
     m_type = type;
     reset_dynamic_properties();
-}
-
-body2D::const_ptr body2D::as_ptr() const
-{
-    return world.bodies.ptr(index);
-}
-body2D::ptr body2D::as_ptr()
-{
-    return world.bodies.ptr(index);
 }
 
 float body2D::kinetic_energy() const

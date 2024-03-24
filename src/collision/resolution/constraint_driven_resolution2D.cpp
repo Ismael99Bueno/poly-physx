@@ -15,8 +15,8 @@ void constraint_driven_resolution2D::update_contacts(const std::vector<collision
     for (const collision2D &collision : collisions)
         for (std::size_t i = 0; i < collision.manifold.size; i++)
         {
-            const kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t> hash{collision.collider1->id,
-                                                                                 collision.collider2->id, i};
+            const kit::commutative_tuple<const collider2D *, const collider2D *, std::size_t> hash{
+                collision.collider1, collision.collider2, i};
             const auto old_contact = m_contacts.find(hash);
             if (old_contact != m_contacts.end())
                 old_contact->second.update(&collision, slop);

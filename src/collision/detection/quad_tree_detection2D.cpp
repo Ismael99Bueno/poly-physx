@@ -25,8 +25,8 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const qtparti
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
-                collider2D &collider1 = *(*partition)[i];
-                collider2D &collider2 = *(*partition)[j];
+                collider2D *collider1 = (*partition)[i];
+                collider2D *collider2 = (*partition)[j];
                 process_collision_st(collider1, collider2);
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
@@ -37,8 +37,8 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const qtparti
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {
-                collider2D &collider1 = *(*partition)[i];
-                collider2D &collider2 = *(*partition)[j];
+                collider2D *collider1 = (*partition)[i];
+                collider2D *collider2 = (*partition)[j];
                 process_collision_mt(collider1, collider2, thread_idx);
             }
     });
@@ -50,17 +50,17 @@ void quad_tree_detection2D::update_quad_tree()
 
     aabb2D aabb;
     bool first = true;
-    for (const collider2D &collider : world.colliders)
+    for (const collider2D *collider : world.colliders)
     {
-        if (!collider.parent().is_dynamic())
+        if (!collider->body()->is_dynamic())
             continue;
         if (first)
         {
-            aabb = collider.bounding_box();
+            aabb = collider->bounding_box();
             first = false;
         }
         else
-            aabb += collider.bounding_box();
+            aabb += collider->bounding_box();
     }
 
     if (force_square_shape)
@@ -79,8 +79,8 @@ void quad_tree_detection2D::update_quad_tree()
     }
 
     m_quad_tree.bounds(aabb);
-    for (collider2D &collider : world.colliders)
-        m_quad_tree.insert(&collider,
+    for (collider2D *collider : world.colliders)
+        m_quad_tree.insert(collider,
                            [](const collider2D *collider) -> const geo::aabb2D & { return collider->bounding_box(); });
 }
 

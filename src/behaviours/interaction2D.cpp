@@ -16,7 +16,7 @@ float interaction2D::potential(const glm::vec2 &position) const
 {
     m_unit.centroid(position);
     float pot = 0.f;
-    for (const auto &body : m_bodies)
+    for (const body2D *body : m_bodies)
         pot += potential_energy_pair(m_unit, *body);
     return pot;
 }
@@ -24,9 +24,9 @@ float interaction2D::potential(const glm::vec2 &position) const
 float interaction2D::potential_energy(const body2D &body) const
 {
     float pot = 0.f;
-    for (const auto &bdptr : m_bodies)
-        if (*bdptr != body)
-            pot += potential_energy_pair(body, *bdptr);
+    for (const body2D *b : m_bodies)
+        if (b != &body)
+            pot += potential_energy_pair(body, *b);
     return pot;
 }
 float interaction2D::potential_energy() const
@@ -41,8 +41,8 @@ float interaction2D::potential_energy() const
 glm::vec3 interaction2D::force(const body2D &body1) const
 {
     glm::vec3 total_force{0.f};
-    for (const auto &body2 : m_bodies)
-        if (body1 != *body2)
+    for (const body2D *body2 : m_bodies)
+        if (&body1 != body2)
             total_force += force_pair(body1, *body2);
 
     return total_force;

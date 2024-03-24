@@ -1,22 +1,19 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/world2D.hpp"
-#ifdef KIT_USE_YAML_CPP
-#include "ppx/serialization/serialization.hpp"
-#endif
 #include "kit/utility/utils.hpp"
 
 namespace ppx
 {
-constraint2D::constraint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2,
-                           const glm::vec2 &ganchor1, const glm::vec2 &ganchor2, const bool m_allow_baumgarte)
-    : joint2D(world, body1, body2, ganchor1, ganchor2), worldref2D(world), m_allow_baumgarte(m_allow_baumgarte)
+constraint2D::constraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1,
+                           const glm::vec2 &ganchor2, const bool allow_baumgarte)
+    : joint2D(world, body1, body2, ganchor1, ganchor2), m_allow_baumgarte(allow_baumgarte)
 {
 }
 
-constraint2D::constraint2D(world2D &world, const body2D::ptr &body1, const body2D::ptr &body2, const glm::vec2 &ganchor,
-                           const bool m_allow_baumgarte)
-    : joint2D(world, body1, body2, ganchor), worldref2D(world), m_allow_baumgarte(m_allow_baumgarte)
+constraint2D::constraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor,
+                           const bool allow_baumgarte)
+    : joint2D(world, body1, body2, ganchor), m_allow_baumgarte(allow_baumgarte)
 {
 }
 

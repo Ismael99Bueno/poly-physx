@@ -5,52 +5,29 @@
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/indexable.hpp"
+#include "kit/memory/block_allocator.hpp"
 
 namespace ppx
 {
 template <typename T>
 concept Joint = requires() {
     requires kit::DerivedFrom<T, joint2D>;
-    typename T::ptr;
-    typename T::const_ptr;
     typename T::specs;
 };
 
 template <Joint T> class joint_container2D : public manager2D<T>
 {
   public:
-    using ptr_t = typename T::ptr;
-    using const_ptr_t = typename T::const_ptr;
     using specs = typename T::specs;
 
     virtual ~joint_container2D() = default;
-    struct
-    {
-        kit::event<T &> on_addition;
-        kit::event<const T &> on_early_removal;
-        kit::event<std::size_t> on_late_removal;
-    } events;
 
-    virtual T &add(const specs &spc)
+    virtual T *add(const specs &spc)
     {
-        T &joint = this->m_elements.emplace_back(this->world, spc);
-        joint.index = this->m_elements.size() - 1;
-        KIT_ASSERT_ERROR(joint.valid(), "The joint must be valid to be able to add it into the simulation")
-        events.on_addition(joint);
+        T *joint = m_allocator.create(this->world, spc);
+        this->m_elements.push_back(joint);
+        this->events.on_addition(joint);
         return joint;
-    }
-
-    const_ptr_t ptr(std::size_t index) const
-    {
-        KIT_ASSERT_ERROR(index < this->m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
-                         this->m_elements.size())
-        return {&this->m_elements, index};
-    }
-    ptr_t ptr(std::size_t index)
-    {
-        KIT_ASSERT_ERROR(index < this->m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
-                         this->m_elements.size())
-        return {&this->m_elements, index};
     }
 
     std::vector<const T *> from_body_ids(const kit::uuid id1, const kit::uuid id2) const
@@ -68,14 +45,11 @@ template <Joint T> class joint_container2D : public manager2D<T>
         if (index >= this->m_elements.size())
             return false;
 
-        events.on_early_removal(this->m_elements[index]);
-        if (index != this->m_elements.size() - 1)
-        {
-            this->m_elements[index] = this->m_elements.back();
-            this->m_elements[index].index = index;
-        }
-        this->m_elements.pop_back();
-        events.on_late_removal(index);
+        T *joint = this->m_elements[index];
+        this->events.on_removal(*joint);
+
+        this->m_elements.erase(this->m_elements.begin() + index);
+        m_allocator.destroy(joint);
         return true;
     }
 
@@ -86,23 +60,15 @@ template <Joint T> class joint_container2D : public manager2D<T>
 
   protected:
     using manager2D<T>::manager2D;
+    kit::block_allocator<T> m_allocator;
+
     static inline std::string s_name;
 
-    void on_body_removal_validation()
+    void on_body_removal_validation(const body2D *body)
     {
-        std::size_t index = 0;
-        for (auto it = this->m_elements.begin(); it != this->m_elements.end(); index++)
-            if (!it->valid())
-            {
-                events.on_early_removal(*it);
-                it = this->m_elements.erase(it);
-                events.on_late_removal(index);
-            }
-            else
-            {
-                it->index = index;
-                ++it;
-            }
+        for (std::size_t i = this->m_elements.size() - 1; i < this->m_elements.size() && i >= 0; i--)
+            if (this->m_elements[i]->body1() == body || this->m_elements[i]->body2() == body)
+                remove(i);
     }
 
   private:

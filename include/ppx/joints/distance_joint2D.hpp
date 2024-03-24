@@ -8,14 +8,9 @@ namespace ppx
 class distance_joint2D final : public constraint2D
 {
   public:
-    using ptr = kit::vector_ptr<distance_joint2D>;
-    using const_ptr = kit::const_vector_ptr<distance_joint2D>;
     using specs = specs::distance_joint2D;
 
     distance_joint2D(world2D &world, const specs &spc);
-
-    const_ptr as_ptr() const;
-    ptr as_ptr();
 
     float min_distance;
     float max_distance;

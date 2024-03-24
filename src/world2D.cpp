@@ -64,17 +64,18 @@ std::vector<float> world2D::create_state_derivative() const
     KIT_PERF_FUNCTION()
     std::vector<float> state_derivative(6 * bodies.size(), 0.f);
 
-    for (const body2D &body : bodies)
+    for (const body2D *body : bodies)
     {
-        const std::size_t index = 6 * body.index;
+        const std::size_t index = 6 * body->index;
 
-        const glm::vec2 &accel = body.force() * body.props().dynamic.inv_mass;
-        const float angaccel = body.torque() * body.props().dynamic.inv_inertia;
+        const glm::vec2 &accel = body->force() * body->props().dynamic.inv_mass;
+        const float angaccel = body->torque() * body->props().dynamic.inv_inertia;
 
         const glm::vec2 velocity =
-            semi_implicit_integration ? body.velocity + accel * integrator.ts.value : body.velocity;
-        const float angular_velocity =
-            semi_implicit_integration ? body.angular_velocity + angaccel * integrator.ts.value : body.angular_velocity;
+            semi_implicit_integration ? body->velocity + accel * integrator.ts.value : body->velocity;
+        const float angular_velocity = semi_implicit_integration
+                                           ? body->angular_velocity + angaccel * integrator.ts.value
+                                           : body->angular_velocity;
 
         state_derivative[index] = velocity.x;
         state_derivative[index + 1] = velocity.y;
@@ -87,18 +88,11 @@ std::vector<float> world2D::create_state_derivative() const
     return state_derivative;
 }
 
-void world2D::on_body_addition_validation()
+void world2D::on_body_removal_validation(const body2D *body)
 {
-    colliders.on_body_addition_validation();
-}
-
-void world2D::on_body_removal_validation()
-{
-    bodies.on_body_removal_validation();
-    colliders.on_body_removal_validation();
-    joints.constraint_based.on_body_removal_validation();
-    joints.non_constraint_based.on_body_removal_validation();
-    behaviours.on_body_removal_validation();
+    joints.constraint_based.on_body_removal_validation(body);
+    joints.non_constraint_based.on_body_removal_validation(body);
+    behaviours.on_body_removal_validation(body);
 }
 
 void world2D::add_builtin_joint_managers()
@@ -110,8 +104,8 @@ void world2D::add_builtin_joint_managers()
 float world2D::kinetic_energy() const
 {
     float ke = 0.f;
-    for (const body2D &body : bodies)
-        ke += body.kinetic_energy();
+    for (const body2D *body : bodies)
+        ke += body->kinetic_energy();
     return ke;
 }
 float world2D::potential_energy() const
@@ -120,8 +114,8 @@ float world2D::potential_energy() const
     for (const auto &bhv : behaviours)
         if (bhv->enabled)
             pot += bhv->potential_energy();
-    for (const spring2D &sp : *joints.manager<spring2D>())
-        pot += sp.potential_energy();
+    for (const spring2D *sp : *joints.manager<spring2D>())
+        pot += sp->potential_energy();
     return pot;
 }
 float world2D::energy() const

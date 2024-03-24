@@ -9,7 +9,7 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : constraint2D(world, world.bodies.ptr(spc.bindex1), world.bodies.ptr(spc.bindex2), spc.ganchor1, spc.ganchor2)
+    : constraint2D(world, world.bodies[spc.bindex1], world.bodies[spc.bindex2], spc.ganchor1, spc.ganchor2)
 {
     if (kit::approximately(spc.min_distance, spc.max_distance))
     {
@@ -17,15 +17,6 @@ distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
         min_distance = length;
         max_distance = length;
     }
-}
-
-distance_joint2D::const_ptr distance_joint2D::as_ptr() const
-{
-    return world.joints.manager<distance_joint2D>()->ptr(index);
-}
-distance_joint2D::ptr distance_joint2D::as_ptr()
-{
-    return world.joints.manager<distance_joint2D>()->ptr(index);
 }
 
 float distance_joint2D::constraint_value() const

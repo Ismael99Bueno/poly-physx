@@ -5,65 +5,39 @@
 
 namespace ppx
 {
-body2D &body_manager2D::add(const body2D::specs &spc)
+body2D *body_manager2D::add(const body2D::specs &spc)
 {
-    body2D &body = m_elements.emplace_back(world, spc);
-    body.index = m_elements.size() - 1;
-
-    body.begin_density_update();
-    for (const auto &collider_spc : spc.props.colliders)
-        body.add(collider_spc);
-    body.end_density_update();
-
-    const kit::transform2D<float> &transform = body.centroid_transform();
-
-    rk::state<float> &state = world.integrator.state;
-    state.append({transform.position.x, transform.position.y, transform.rotation, body.velocity.x, body.velocity.y,
-                  body.angular_velocity});
-
-    world.on_body_addition_validation();
+    body2D *body = m_allocator.create(world, spc);
+    m_elements.push_back(body);
     events.on_addition(body);
-    KIT_INFO("Added body with index {0} and id {1}.", body.index, body.id)
+    KIT_INFO("Added body with index {0}.", m_elements.size() - 1)
     return body;
 }
 
 void body_manager2D::apply_impulse_and_persistent_forces()
 {
     KIT_PERF_FUNCTION()
-    for (body2D &body : m_elements)
+    for (body2D *body : m_elements)
     {
-        body.apply_simulation_force(body.impulse_force + body.persistent_force);
-        body.apply_simulation_torque(body.impulse_torque + body.persistent_torque);
+        body->apply_simulation_force(body->impulse_force + body->persistent_force);
+        body->apply_simulation_torque(body->impulse_torque + body->persistent_torque);
     }
 }
 
 void body_manager2D::reset_impulse_forces()
 {
     KIT_PERF_FUNCTION()
-    for (body2D &body : m_elements)
+    for (body2D *body : m_elements)
     {
-        body.impulse_force = glm::vec2(0.f);
-        body.impulse_torque = 0.f;
+        body->impulse_force = glm::vec2(0.f);
+        body->impulse_torque = 0.f;
     }
 }
 void body_manager2D::reset_simulation_forces()
 {
     KIT_PERF_FUNCTION()
-    for (body2D &body : m_elements)
-        body.reset_simulation_forces();
-}
-
-body2D::const_ptr body_manager2D::ptr(const std::size_t index) const
-{
-    KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
-                     m_elements.size())
-    return {&m_elements, index};
-}
-body2D::ptr body_manager2D::ptr(const std::size_t index)
-{
-    KIT_ASSERT_ERROR(index < m_elements.size(), "Index exceeds array bounds - index: {0}, size: {1}", index,
-                     m_elements.size())
-    return {&m_elements, index};
+    for (body2D *body : m_elements)
+        body->reset_simulation_forces();
 }
 
 template <typename Body, typename Collider, typename C>
@@ -72,23 +46,23 @@ static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
     std::vector<Body *> in_area;
     in_area.reserve(8);
 
-    for (Body &body : elements)
-        if (body.empty() && geo::intersects(aabb, body.centroid()))
+    for (Body *body : elements)
+        if (body->empty() && geo::intersects(aabb, body->centroid()))
         {
-            in_area.push_back(&body);
+            in_area.push_back(body);
             break;
         }
         else
         {
             bool intersects = true;
-            for (Collider &collider : body)
-                if (!geo::intersects(collider.bounding_box(), aabb))
+            for (Collider *collider : *body)
+                if (!geo::intersects(collider->bounding_box(), aabb))
                 {
                     intersects = false;
                     break;
                 }
             if (intersects)
-                in_area.push_back(&body);
+                in_area.push_back(body);
         }
     return in_area;
 }
@@ -104,10 +78,10 @@ std::vector<body2D *> body_manager2D::operator[](const aabb2D &aabb)
 
 template <typename Body, typename Collider, typename C> static Body *at_point(C &elements, const glm::vec2 &point)
 {
-    for (Body &body : elements)
-        for (Collider &collider : body)
-            if (geo::intersects(collider.bounding_box(), point))
-                return &body;
+    for (Body *body : elements)
+        for (Collider *collider : *body)
+            if (geo::intersects(collider->bounding_box(), point))
+                return body;
     return nullptr;
 }
 
@@ -125,68 +99,62 @@ bool body_manager2D::remove(const std::size_t index)
     if (index >= m_elements.size())
         return false;
 
-    KIT_INFO("Removing body with index {0} and id {1}", index, m_elements[index].id)
+    body2D *body = m_elements[index];
+    KIT_INFO("Removing body with index {0}.", index)
 
-    events.on_early_removal(m_elements[index]);
-    m_elements[index].clear();
-    if (index != m_elements.size() - 1)
-    {
-        m_elements[index] = m_elements.back();
-        m_elements[index].index = index;
-    }
-    m_elements.pop_back();
+    events.on_removal(*body);
+    body->clear();
 
     rk::state<float> &state = world.integrator.state;
-    for (std::size_t i = 0; i < 6; i++)
-        state[6 * index + i] = state[state.size() - 6 + i];
+    if (index != m_elements.size())
+    {
+        for (std::size_t i = 0; i < 6; i++)
+            state[6 * index + i] = state[state.size() - 6 + i];
+        m_elements[index] = m_elements.back();
+        m_elements[index]->index = index;
+    }
+    m_elements.pop_back();
     state.resize(6 * m_elements.size());
 
-    world.on_body_removal_validation();
-    events.on_late_removal(index);
+    world.on_body_removal_validation(body);
+    m_allocator.destroy(body);
     return true;
-}
-
-void body_manager2D::on_body_removal_validation()
-{
-    std::size_t index = 0;
-    for (body2D &body : m_elements)
-        body.index = index++;
 }
 
 void body_manager2D::send_data_to_state(rk::state<float> &state)
 {
     KIT_PERF_FUNCTION()
-    for (body2D &body : m_elements)
+    for (body2D *body : m_elements)
     {
-        const std::size_t index = 6 * body.index;
-        const glm::vec2 &centroid = body.centroid();
-        if (body.is_static())
-            body.velocity = glm::vec2(0.f);
+        const std::size_t index = 6 * body->index;
+        const glm::vec2 &centroid = body->centroid();
+        if (body->is_static())
+            body->velocity = glm::vec2(0.f);
 
         state[index] = centroid.x;
         state[index + 1] = centroid.y;
-        state[index + 2] = body.rotation();
-        state[index + 3] = body.velocity.x;
-        state[index + 4] = body.velocity.y;
-        state[index + 5] = body.angular_velocity;
+        state[index + 2] = body->rotation();
+        state[index + 3] = body->velocity.x;
+        state[index + 4] = body->velocity.y;
+        state[index + 5] = body->angular_velocity;
     }
 }
 
 void body_manager2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()
-    for (body2D &body : m_elements)
-        body.retrieve_data_from_state_variables(vars_buffer);
+    for (body2D *body : m_elements)
+        body->retrieve_data_from_state_variables(vars_buffer);
 }
 
 void body_manager2D::prepare_constraint_velocities()
 {
-    for (body2D &body : m_elements)
+    for (body2D *body : m_elements)
     {
-        body.ctr_proxy.velocity =
-            body.velocity + body.props().dynamic.inv_mass * body.force() * world.integrator.ts.value;
-        body.ctr_proxy.angular_velocity =
-            body.angular_velocity + body.props().dynamic.inv_inertia * body.torque() * world.integrator.ts.value;
+        body->ctr_proxy.velocity =
+            body->velocity + body->props().dynamic.inv_mass * body->force() * world.integrator.ts.value;
+        body->ctr_proxy.angular_velocity =
+            body->angular_velocity + body->props().dynamic.inv_inertia * body->torque() * world.integrator.ts.value;
     }
 }
 

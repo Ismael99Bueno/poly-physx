@@ -6,30 +6,29 @@ namespace ppx
 {
 void sort_sweep_detection2D::on_attach()
 {
-    m_add_edge = kit::callback<collider2D &>([this](collider2D &collider) {
-        const collider2D::ptr bptr = collider.as_ptr();
-        m_edges.push_back({bptr, end_side::LEFT, FLT_MAX});
-        m_edges.push_back({bptr, end_side::RIGHT, FLT_MAX});
+    m_add_edge = kit::callback<collider2D *>([this](collider2D *collider) {
+        m_edges.push_back({collider, end_side::LEFT, FLT_MAX});
+        m_edges.push_back({collider, end_side::RIGHT, FLT_MAX});
     });
-    m_remove_edge = kit::callback<std::size_t>([this](std::size_t index) {
+    m_remove_edge = kit::callback<const collider2D &>([this](const collider2D &collider) {
         for (auto it = m_edges.begin(); it != m_edges.end();)
-            if (!it->collider)
+            if (it->collider == &collider)
                 it = m_edges.erase(it);
             else
                 ++it;
     });
 
     world.colliders.events.on_addition += m_add_edge;
-    world.colliders.events.on_late_removal += m_remove_edge;
+    world.colliders.events.on_removal += m_remove_edge;
 
-    for (collider2D &collider : world.colliders)
+    for (collider2D *collider : world.colliders)
         m_add_edge(collider);
 }
 
 sort_sweep_detection2D::~sort_sweep_detection2D()
 {
     world.colliders.events.on_addition -= m_add_edge;
-    world.colliders.events.on_late_removal -= m_remove_edge;
+    world.colliders.events.on_removal -= m_remove_edge;
 }
 
 void sort_sweep_detection2D::detect_collisions()
@@ -43,15 +42,11 @@ void sort_sweep_detection2D::detect_collisions()
         if (edg.end == end_side::LEFT)
         {
             for (collider2D *collider : m_eligible)
-            {
-                collider2D &collider1 = *collider;
-                collider2D &collider2 = *edg.collider;
-                process_collision_st(collider1, collider2);
-            }
-            m_eligible.insert(edg.collider.raw());
+                process_collision_st(collider, edg.collider);
+            m_eligible.insert(edg.collider);
         }
         else
-            m_eligible.erase(edg.collider.raw());
+            m_eligible.erase(edg.collider);
 }
 
 void sort_sweep_detection2D::update_edges()

@@ -19,7 +19,7 @@ class joint_solver2D : public kit::identifiable<std::string>, public kit::yaml::
 
   private:
     virtual void solve() = 0;
-    virtual void on_body_removal_validation() = 0;
+    virtual void on_body_removal_validation(const body2D *body) = 0;
 
     friend class joint_meta_manager2D;
 };
@@ -35,15 +35,15 @@ template <Joint T> class joint_manager2D : public joint_container2D<T>, public j
     }
 
   private:
-    void on_body_removal_validation() override
+    void on_body_removal_validation(const body2D *body) override
     {
-        joint_container2D<T>::on_body_removal_validation();
+        joint_container2D<T>::on_body_removal_validation(body);
     }
 
     virtual void solve() override
     {
-        for (T &joint : this->m_elements)
-            joint.solve();
+        for (T *joint : this->m_elements)
+            joint->solve();
     }
 
 #ifdef KIT_USE_YAML_CPP
@@ -63,7 +63,7 @@ class joint_meta_manager2D final : public meta_manager2D<joint_solver2D>
     using meta_manager2D<joint_solver2D>::meta_manager2D;
 
     void solve();
-    void on_body_removal_validation();
+    void on_body_removal_validation(const body2D *body);
 
     friend class world2D;
     friend class joint_repository2D;

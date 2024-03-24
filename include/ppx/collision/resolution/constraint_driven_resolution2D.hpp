@@ -17,6 +17,8 @@ class constraint_driven_resolution2D : public collision_resolution2D
     void update_contacts(const std::vector<collision2D> &collisions);
     void solve(const std::vector<collision2D> &collisions) override;
 
-    std::unordered_map<kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t>, contact_constraint2D> m_contacts;
+    std::unordered_map<kit::commutative_tuple<const collider2D *, const collider2D *, std::size_t>,
+                       contact_constraint2D>
+        m_contacts;
 };
 } // namespace ppx

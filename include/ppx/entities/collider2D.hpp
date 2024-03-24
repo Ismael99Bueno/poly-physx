@@ -1,21 +1,20 @@
 #pragma once
 
-#include "ppx/entities/shapes2D.hpp"
-#include "ppx/events/collider_events2D.hpp"
 #include "ppx/entities/body2D.hpp"
+#include "ppx/events/collider_events2D.hpp"
+#include "kit/interface/non_copyable.hpp"
 #include <variant>
 
 namespace ppx
 {
-class collider2D : public kit::identifiable<>, public kit::indexable, public worldref2D
+class body2D;
+class collider2D : kit::non_copyable
 {
   public:
-    using ptr = kit::vector_ptr<collider2D>;
-    using const_ptr = kit::const_vector_ptr<collider2D>;
     using specs = specs::collider2D;
     using stype = specs::stype;
 
-    collider2D(world2D &world, const body2D::ptr &body, const specs &spc = {});
+    collider2D(body2D *body, const specs &spc = {});
 
     float restitution;
     float friction;
@@ -23,13 +22,10 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
 
     collider_events2D events;
 
-    const_ptr as_ptr() const;
-    ptr as_ptr();
-
     stype shape_type() const;
 
-    const body2D &parent() const;
-    body2D::ptr &parent();
+    const body2D *body() const;
+    body2D *body();
 
     float area() const;
     float inertia() const;
@@ -83,7 +79,7 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
     template <kit::DerivedFrom<shape2D> T, class... ShapeArgs> void set_shape(ShapeArgs &&...args)
     {
         T shape{std::forward<ShapeArgs>(args)...};
-        shape.parent(&m_parent->centroid_transform());
+        shape.parent(&m_body->centroid_transform());
         m_shape = shape;
         if constexpr (std::is_same_v<T, polygon>)
             m_type = stype::POLYGON;
@@ -95,7 +91,7 @@ class collider2D : public kit::identifiable<>, public kit::indexable, public wor
   private:
     std::variant<polygon, circle> m_shape;
     glm::vec2 m_position;
-    body2D::ptr m_parent;
+    body2D *m_body;
     float m_density;
     float m_charge_density;
 

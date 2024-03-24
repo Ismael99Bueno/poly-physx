@@ -10,19 +10,10 @@ namespace ppx
 {
 
 spring2D::spring2D(world2D &world, const specs &spc)
-    : joint2D(world, world.bodies.ptr(spc.bindex1), world.bodies.ptr(spc.bindex2), spc.ganchor1, spc.ganchor2),
-      worldref2D(world), stiffness(spc.props.stiffness), damping(spc.props.damping), length(spc.props.length),
+    : joint2D(world, world.bodies[spc.bindex1], world.bodies[spc.bindex2], spc.ganchor1, spc.ganchor2),
+      stiffness(spc.props.stiffness), damping(spc.props.damping), length(spc.props.length),
       non_linear_terms(spc.props.non_linear_terms), non_linear_contribution(spc.props.non_linear_contribution)
 {
-}
-
-spring2D::const_ptr spring2D::as_ptr() const
-{
-    return world.joints.manager<spring2D>()->ptr(index);
-}
-spring2D::ptr spring2D::as_ptr()
-{
-    return world.joints.manager<spring2D>()->ptr(index);
 }
 
 glm::vec2 spring2D::non_linear_displacement(const glm::vec2 &displacement) const

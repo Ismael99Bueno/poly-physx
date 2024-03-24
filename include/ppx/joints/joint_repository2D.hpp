@@ -11,7 +11,7 @@ class joint_repository2D
     joint_meta_manager2D non_constraint_based;
     constraint_meta_manager2D constraint_based;
 
-    template <Joint T> T &add(const typename T::specs &spc)
+    template <Joint T> T *add(const typename T::specs &spc)
     {
         if constexpr (std::is_base_of_v<constraint2D, T>)
             return constraint_based.add<T>(spc);

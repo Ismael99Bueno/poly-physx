@@ -42,7 +42,7 @@ template <> struct kit::yaml::codec<ppx::behaviour2D>
 
         bhv.enabled = node["Enabled"].as<bool>();
         for (const YAML::Node &n : node["Bodies"])
-            bhv.add(bhv.world.bodies.ptr(n.as<std::size_t>()));
+            bhv.add(bhv.world.bodies[n.as<std::size_t>()]);
         return true;
     }
 };
@@ -200,8 +200,8 @@ template <> struct kit::yaml::codec<ppx::body_manager2D>
     static YAML::Node encode(const ppx::body_manager2D &bm)
     {
         YAML::Node node;
-        for (const ppx::body2D &body : bm)
-            node["Bodies"].push_back(ppx::body2D::specs::from_instance(body));
+        for (const ppx::body2D *body : bm)
+            node["Bodies"].push_back(ppx::body2D::specs::from_instance(*body));
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::body_manager2D &bm)
@@ -247,8 +247,8 @@ template <ppx::Joint T> struct kit::yaml::codec<ppx::joint_container2D<T>>
         using specs = typename T::specs;
         if constexpr (kit::yaml::Encodeable<specs>)
         {
-            for (const T &joint : jc)
-                node["Joints"].push_back(specs::from_instance(joint));
+            for (const T *joint : jc)
+                node["Joints"].push_back(specs::from_instance(*joint));
             return node;
         }
         else

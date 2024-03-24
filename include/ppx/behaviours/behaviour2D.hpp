@@ -3,7 +3,6 @@
 #include "ppx/entities/body2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/identifiable.hpp"
-#include "kit/interface/nameable.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/serialization/yaml/codec.hpp"
 #include "ppx/internal/worldref.hpp"
@@ -21,12 +20,11 @@ class behaviour2D : kit::non_copyable,
     behaviour2D(world2D &world, const std::string &name);
     virtual ~behaviour2D() = default;
 
-    void add(const body2D::ptr &body);
-    bool contains(const body2D &body) const;
+    void add(body2D *body);
+    bool contains(const body2D *body) const;
 
     bool remove(std::size_t index);
-    bool remove(kit::uuid id);
-    bool remove(const body2D &body);
+    bool remove(const body2D *body);
 
     auto begin() const
     {
@@ -49,9 +47,6 @@ class behaviour2D : kit::non_copyable,
     const body2D &operator[](std::size_t index) const;
     body2D &operator[](std::size_t index);
 
-    const body2D *operator[](kit::uuid id) const;
-    body2D *operator[](kit::uuid id);
-
     virtual glm::vec3 force(const body2D &body) const = 0;
 
     float kinetic_energy() const;
@@ -64,15 +59,13 @@ class behaviour2D : kit::non_copyable,
     void clear();
     std::size_t size() const;
 
-    void on_body_removal_validation();
-
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const;
     virtual bool decode(const YAML::Node &node);
 #endif
 
   protected:
-    std::vector<body2D::ptr> m_bodies;
+    std::vector<body2D *> m_bodies;
 
   private:
     void apply_force_to_bodies();
