@@ -14,14 +14,6 @@ body2D::body2D(world2D &world, const body2D::specs &spc)
       m_gposition(spc.position), m_lposition(0.f), m_charge_centroid(spc.position), m_type(spc.props.type)
 {
     mass(spc.props.mass);
-    begin_density_update();
-    for (const auto &collider_spc : spc.props.colliders)
-        add(collider_spc);
-    end_density_update();
-
-    rk::state<float> &state = world.integrator.state;
-    state.append(
-        {m_centroid.position.x, m_centroid.position.y, m_centroid.rotation, velocity.x, velocity.y, angular_velocity});
 }
 
 const collider2D *body2D::operator[](const std::size_t index) const

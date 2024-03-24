@@ -8,6 +8,16 @@ namespace ppx
 body2D *body_manager2D::add(const body2D::specs &spc)
 {
     body2D *body = m_allocator.create(world, spc);
+    body->begin_density_update();
+    for (const auto &collider_spc : spc.props.colliders)
+        body->add(collider_spc);
+    body->end_density_update();
+
+    const kit::transform2D<float> &centroid = body->centroid_transform();
+    rk::state<float> &state = world.integrator.state;
+    state.append({centroid.position.x, centroid.position.y, centroid.rotation, body->velocity.x, body->velocity.y,
+                  body->angular_velocity});
+
     m_elements.push_back(body);
     events.on_addition(body);
     KIT_INFO("Added body with index {0}.", m_elements.size() - 1)
