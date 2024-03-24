@@ -148,9 +148,6 @@ class collision_detection2D : public worldref2D
     void cp_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
     void pp_narrow_collision_check(collider2D &collider1, collider2D &collider2, collision2D &collision) const;
 
-    void try_enter_or_stay_callback(const collision2D &c) const;
-    void try_exit_callback(collider2D &collider1, collider2D &collider2) const;
-
     kit::scope<cp_narrow_detection2D> m_cp_narrow;
     kit::scope<pp_narrow_detection2D> m_pp_narrow;
 

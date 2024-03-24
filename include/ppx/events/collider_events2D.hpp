@@ -13,19 +13,20 @@ class collider2D;
 class collider_events2D
 {
   public:
-    void try_enter_or_stay(const collision2D &c, const collider2D &outcoming) const;
-    void try_exit(collider2D &current, collider2D &outcoming) const;
-
-    kit::event<const collision2D &> on_collision_enter, on_collision_stay;
+    kit::event<const collision2D &> on_collision_enter, on_collision_pre_solve, on_collision_post_solve;
     kit::event<collider2D &, collider2D &> on_collision_exit;
 
   private:
-    mutable std::unordered_set<kit::uuid> m_collided_ids;
+    std::unordered_set<kit::uuid> m_collided_ids;
+
+    bool just_collided(const collision2D &collision, const collider2D &incoming);
+    bool just_separated(const collider2D &current, const collider2D &incoming);
 
     collider_events2D() = default;
     collider_events2D(const collider_events2D &) = default;
     collider_events2D &operator=(const collider_events2D &) = default;
 
     friend class collider2D;
+    friend class collision_detection2D;
 };
 } // namespace ppx

@@ -21,15 +21,15 @@ const std::vector<collision2D> &collision_detection2D::detect_collisions_cached(
         return m_collisions;
     }
 
-    if (multithreaded)
-        kit::mt::for_each(PPX_THREAD_COUNT, m_collisions, [this](std::size_t thread_index, collision2D &colis) {
-            if (colis.collided)
-                colis = generate_collision(*colis.collider1, *colis.collider2);
-        });
-    else
-        for (collision2D &colis : m_collisions)
-            if (colis.collided)
-                colis = generate_collision(*colis.collider1, *colis.collider2);
+    for (auto it = m_collisions.begin(); it != m_collisions.end();)
+    {
+        if (it->collided)
+            *it = generate_collision(*it->collider1, *it->collider2);
+        if (!it->collided)
+            it = m_collisions.erase(it);
+        else
+            ++it;
+    }
 
     return m_collisions;
 }
@@ -61,24 +61,14 @@ void collision_detection2D::process_collision_st(collider2D &collider1, collider
 {
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
-    {
-        try_enter_or_stay_callback(colis);
         m_collisions.push_back(colis);
-    }
-    else
-        try_exit_callback(collider1, collider2);
 }
 void collision_detection2D::process_collision_mt(collider2D &collider1, collider2D &collider2,
                                                  const std::size_t thread_idx)
 {
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
-    {
-        try_enter_or_stay_callback(colis);
         m_mt_collisions[thread_idx].push_back(colis);
-    }
-    else
-        try_exit_callback(collider1, collider2);
 }
 void collision_detection2D::join_mt_collisions()
 {
@@ -162,17 +152,6 @@ void collision_detection2D::pp_narrow_collision_check(collider2D &collider1, col
         return;
     fill_collision_data(collision, collider1, collider2, nres.mtv,
                         m_pp_manifold->polygon_polygon_contacts(poly1, poly2, nres.mtv));
-}
-
-void collision_detection2D::try_enter_or_stay_callback(const collision2D &c) const
-{
-    c.collider1->events.try_enter_or_stay(c, *c.collider2);
-    c.collider2->events.try_enter_or_stay(c, *c.collider1);
-}
-void collision_detection2D::try_exit_callback(collider2D &collider1, collider2D &collider2) const
-{
-    collider1.events.try_exit(collider1, collider2);
-    collider2.events.try_exit(collider2, collider1);
 }
 
 } // namespace ppx

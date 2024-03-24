@@ -13,17 +13,16 @@ void constraint_driven_resolution2D::update_contacts(const std::vector<collision
 {
     KIT_PERF_FUNCTION()
     for (const collision2D &collision : collisions)
-        if (collision.collided)
-            for (std::size_t i = 0; i < collision.manifold.size; i++)
-            {
-                const kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t> hash{collision.collider1->id,
-                                                                                     collision.collider2->id, i};
-                const auto old_contact = m_contacts.find(hash);
-                if (old_contact != m_contacts.end())
-                    old_contact->second.update(&collision, slop);
-                else
-                    m_contacts.emplace(hash, contact_constraint2D(world, &collision, i, slop));
-            }
+        for (std::size_t i = 0; i < collision.manifold.size; i++)
+        {
+            const kit::commutative_tuple<kit::uuid, kit::uuid, std::size_t> hash{collision.collider1->id,
+                                                                                 collision.collider2->id, i};
+            const auto old_contact = m_contacts.find(hash);
+            if (old_contact != m_contacts.end())
+                old_contact->second.update(&collision, slop);
+            else
+                m_contacts.emplace(hash, contact_constraint2D(world, &collision, i, slop));
+        }
     for (auto it = m_contacts.begin(); it != m_contacts.end();)
         if (!it->second.recently_updated)
             it = m_contacts.erase(it);

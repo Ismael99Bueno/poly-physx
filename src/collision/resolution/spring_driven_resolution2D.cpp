@@ -20,8 +20,7 @@ void spring_driven_resolution2D::solve(const std::vector<collision2D> &collision
 
     KIT_PERF_FUNCTION()
     for (const collision2D &colis : collisions)
-        if (colis.collided)
-            solve_and_apply_collision_forces(colis);
+        solve_and_apply_collision_forces(colis);
 #
 }
 
