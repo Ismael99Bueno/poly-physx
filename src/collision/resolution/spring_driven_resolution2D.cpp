@@ -21,7 +21,6 @@ void spring_driven_resolution2D::solve(const std::vector<collision2D> &collision
     KIT_PERF_FUNCTION()
     for (const collision2D &colis : collisions)
         solve_and_apply_collision_forces(colis);
-#
 }
 
 std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collision_forces(
