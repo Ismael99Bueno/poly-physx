@@ -81,8 +81,8 @@ struct spring2D : joint2D
     glm::vec2 ganchor2{FLT_MAX};
     struct properties
     {
-        float stiffness = 1.f;
-        float damping = 0.f;
+        float frequency = 1.f;
+        float damping_ratio = 0.f;
         float length = 0.f;
 
         std::uint32_t non_linear_terms = 0;

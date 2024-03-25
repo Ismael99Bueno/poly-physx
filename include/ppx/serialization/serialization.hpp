@@ -170,8 +170,8 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         node["Index2"] = sp.bindex2;
         node["Anchor1"] = sp.ganchor1;
         node["Anchor2"] = sp.ganchor2;
-        node["Stiffness"] = sp.props.stiffness;
-        node["Damping"] = sp.props.damping;
+        node["Frequency"] = sp.props.frequency;
+        node["Damping ratio"] = sp.props.damping_ratio;
         node["Length"] = sp.props.length;
         node["Non linear terms"] = sp.props.non_linear_terms;
         node["Non linear contribution"] = sp.props.non_linear_contribution;
@@ -186,8 +186,8 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         sp.bindex2 = node["Index2"].as<std::size_t>();
         sp.ganchor1 = node["Anchor1"].as<glm::vec2>();
         sp.ganchor2 = node["Anchor2"].as<glm::vec2>();
-        sp.props.stiffness = node["Stiffness"].as<float>();
-        sp.props.damping = node["Damping"].as<float>();
+        sp.props.frequency = node["Frequency"].as<float>();
+        sp.props.damping_ratio = node["Damping ratio"].as<float>();
         sp.props.length = node["Length"].as<float>();
         sp.props.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
         sp.props.non_linear_contribution = node["Non linear contribution"].as<float>();

@@ -54,7 +54,7 @@ spring2D spring2D::from_instance(const ppx::spring2D &sp)
     return {{sp.body1()->index, sp.body2()->index},
             sp.ganchor1(),
             sp.ganchor2(),
-            {sp.stiffness, sp.damping, sp.length, sp.non_linear_terms, sp.non_linear_contribution}};
+            {sp.frequency, sp.damping_ratio, sp.length, sp.non_linear_terms, sp.non_linear_contribution}};
 }
 
 contraption2D contraption2D::rope(const glm::vec2 &start, const glm::vec2 &end, const std::uint32_t segments,
