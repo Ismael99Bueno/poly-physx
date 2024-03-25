@@ -1,15 +1,15 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
 #include "ppx/world2D.hpp"
 
 namespace ppx
 {
-constraint_driven_resolution2D::constraint_driven_resolution2D(world2D &world, const float slop)
+sequential_impulses_resolution2D::sequential_impulses_resolution2D(world2D &world, const float slop)
     : collision_resolution2D(world), slop(slop)
 {
 }
 
-void constraint_driven_resolution2D::update_contacts(const collision_detection2D::collision_map &collisions)
+void sequential_impulses_resolution2D::update_contacts(const collision_detection2D::collision_map &collisions)
 {
     KIT_PERF_FUNCTION()
     for (const auto &pair : collisions)
@@ -38,7 +38,7 @@ void constraint_driven_resolution2D::update_contacts(const collision_detection2D
         }
 }
 
-void constraint_driven_resolution2D::solve(const collision_detection2D::collision_map &collisions)
+void sequential_impulses_resolution2D::solve(const collision_detection2D::collision_map &collisions)
 {
     KIT_ASSERT_ERROR(slop >= 0.f, "Slop must be non-negative: {0}", slop)
     KIT_PERF_SCOPE("Collisions solve")

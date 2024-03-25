@@ -8,7 +8,7 @@
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
 #include "ppx/collision/detection/sort_sweep_detection2D.hpp"
 
-#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
 #include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 
 #include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
@@ -380,7 +380,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["P-P Algorithm"] = 1;
 
         YAML::Node nres = node["Resolution"];
-        if (auto colres = cm.resolution<ppx::constraint_driven_resolution2D>())
+        if (auto colres = cm.resolution<ppx::sequential_impulses_resolution2D>())
         {
             nres["Method"] = 0;
             nres["Slop"] = colres->slop;
@@ -456,7 +456,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             const int method = nres["Method"].as<int>();
             if (method == 0)
-                cm.set_resolution<ppx::constraint_driven_resolution2D>(nres["Slop"].as<float>());
+                cm.set_resolution<ppx::sequential_impulses_resolution2D>(nres["Slop"].as<float>());
             else if (method == 1)
                 cm.set_resolution<ppx::spring_driven_resolution2D>(nres["Rigidity"].as<float>(),
                                                                    nres["Normal damping"].as<float>(),

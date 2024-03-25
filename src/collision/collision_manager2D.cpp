@@ -2,7 +2,7 @@
 #include "ppx/collision/collision_manager2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
-#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
 
 #include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
 
@@ -15,7 +15,7 @@ namespace ppx
 collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
 {
     set_detection<quad_tree_detection2D>();
-    set_resolution<constraint_driven_resolution2D>();
+    set_resolution<sequential_impulses_resolution2D>();
 
     m_detection->set_cp_narrow_detection<gjk_epa_detection2D>();
     m_detection->set_pp_narrow_detection<gjk_epa_detection2D>();

@@ -6,10 +6,10 @@
 
 namespace ppx
 {
-class constraint_driven_resolution2D : public collision_resolution2D
+class sequential_impulses_resolution2D : public collision_resolution2D
 {
   public:
-    constraint_driven_resolution2D(world2D &world, float slop = 0.f);
+    sequential_impulses_resolution2D(world2D &world, float slop = 0.f);
 
     float slop;
 

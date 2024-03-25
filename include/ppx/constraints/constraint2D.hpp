@@ -43,6 +43,6 @@ class constraint2D : public joint2D
     float compute_lambda() const;
     void apply_lambda(float lambda);
 
-    friend class constraint_driven_resolution2D;
+    friend class sequential_impulses_resolution2D;
 };
 } // namespace ppx
