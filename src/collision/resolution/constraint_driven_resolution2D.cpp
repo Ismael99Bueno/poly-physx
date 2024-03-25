@@ -9,10 +9,14 @@ constraint_driven_resolution2D::constraint_driven_resolution2D(world2D &world, c
 {
 }
 
-void constraint_driven_resolution2D::update_contacts(const std::vector<collision2D> &collisions)
+void constraint_driven_resolution2D::update_contacts(const collision_detection2D::collision_map &collisions)
 {
     KIT_PERF_FUNCTION()
-    for (const collision2D &collision : collisions)
+    for (const auto &pair : collisions)
+    {
+        const collision2D &collision = pair.second;
+        if (!collision.enabled)
+            continue;
         for (std::size_t i = 0; i < collision.manifold.size; i++)
         {
             const kit::commutative_tuple<const collider2D *, const collider2D *, std::size_t> hash{
@@ -23,6 +27,7 @@ void constraint_driven_resolution2D::update_contacts(const std::vector<collision
             else
                 m_contacts.emplace(hash, contact_constraint2D(world, &collision, i, slop));
         }
+    }
     for (auto it = m_contacts.begin(); it != m_contacts.end();)
         if (!it->second.recently_updated)
             it = m_contacts.erase(it);
@@ -33,7 +38,7 @@ void constraint_driven_resolution2D::update_contacts(const std::vector<collision
         }
 }
 
-void constraint_driven_resolution2D::solve(const std::vector<collision2D> &collisions)
+void constraint_driven_resolution2D::solve(const collision_detection2D::collision_map &collisions)
 {
     KIT_ASSERT_ERROR(slop >= 0.f, "Slop must be non-negative: {0}", slop)
     KIT_PERF_SCOPE("Collisions solve")

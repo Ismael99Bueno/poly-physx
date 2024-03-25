@@ -16,12 +16,9 @@ class collider_events2D
     kit::event<const collision2D &> on_collision_enter, on_collision_pre_solve, on_collision_post_solve;
     kit::event<collider2D *, collider2D *> on_collision_exit;
 
+    bool empty() const;
+
   private:
-    std::unordered_set<const collider2D *> m_collided;
-
-    bool just_collided(const collision2D &collision, const collider2D *incoming);
-    bool just_separated(const collider2D *incoming);
-
     collider_events2D() = default;
     collider_events2D(const collider_events2D &) = default;
     collider_events2D &operator=(const collider_events2D &) = default;

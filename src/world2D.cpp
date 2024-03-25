@@ -39,7 +39,7 @@ void world2D::pre_step_preparation()
 #endif
 
     m_timestep_ratio = kit::approaches_zero(integrator.ts.value) ? 1.f : m_previous_timestep / integrator.ts.value;
-    collisions.detection()->clear_cached_collisions();
+    collisions.detection()->flag_new_frame();
 
     bodies.send_data_to_state(integrator.state);
 }

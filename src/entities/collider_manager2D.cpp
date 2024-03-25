@@ -62,7 +62,9 @@ bool collider_manager2D::remove(const std::size_t index)
     collider2D *collider = m_elements[index];
     KIT_INFO("Removing collider with index {0}.", index)
 
+    world.collisions.detection()->remove_any_collisions_with(collider);
     events.on_removal(*collider);
+
     body2D *parent = collider->body();
     parent->m_colliders.erase(std::find(parent->m_colliders.begin(), parent->m_colliders.end(), collider));
 

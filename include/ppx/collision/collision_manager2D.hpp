@@ -23,7 +23,12 @@ class collision_manager2D : public kit::toggleable, public worldref2D
         return m_detection->collisions().end();
     }
 
-    const collision2D &operator[](std::size_t index) const;
+    const collision2D &operator[](const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const;
+    const collision2D &at(const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const;
+    const collision2D &at(const collider2D *collider1, const collider2D *collider2) const;
+
+    bool contains(const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const;
+    bool contains(const collider2D *collider1, const collider2D *collider2) const;
 
     template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> const T *detection() const
     {
@@ -46,7 +51,7 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     {
         auto coldet = kit::make_scope<T>(world, std::forward<ColDetArgs>(args)...);
         if (m_detection)
-            coldet->inherit(*m_detection);
+            coldet->inherit(std::move(*m_detection));
 
         T *ptr = coldet.get();
 

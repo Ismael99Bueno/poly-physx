@@ -17,5 +17,6 @@ struct collision2D
     manifold2D manifold;
 
     bool collided = false;
+    mutable bool enabled = true;
 };
 } // namespace ppx

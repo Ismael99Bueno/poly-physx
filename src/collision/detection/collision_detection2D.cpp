@@ -9,23 +9,24 @@ namespace ppx
 collision_detection2D::collision_detection2D(world2D &world) : worldref2D(world)
 {
 }
-const std::vector<collision2D> &collision_detection2D::detect_collisions_cached()
+const collision_detection2D::collision_map &collision_detection2D::detect_collisions_cached()
 {
     KIT_PERF_FUNCTION()
 #ifdef KIT_PROFILE
     KIT_ASSERT_ERROR(!multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
 #endif
-    if (m_collisions.empty())
+    if (m_new_frame)
     {
         detect_collisions();
+        handle_collision_enter_exit_events();
         return m_collisions;
     }
 
     for (auto it = m_collisions.begin(); it != m_collisions.end();)
     {
-        if (it->collided)
-            *it = generate_collision(it->collider1, it->collider2);
-        if (!it->collided)
+        if (it->second.collided)
+            it->second = generate_collision(it->second.collider1, it->second.collider2);
+        if (!it->second.collided)
             it = m_collisions.erase(it);
         else
             ++it;
@@ -33,20 +34,68 @@ const std::vector<collision2D> &collision_detection2D::detect_collisions_cached(
 
     return m_collisions;
 }
-void collision_detection2D::clear_cached_collisions()
+
+void collision_detection2D::handle_collision_enter_exit_events() const
 {
-    m_collisions.clear();
-    if (multithreaded)
-        for (auto &collisions : m_mt_collisions)
-            collisions.clear();
+    KIT_PERF_FUNCTION()
+    for (auto &[hash, collision] : m_collisions)
+        if (!m_last_collisions.contains(hash))
+        {
+            collision.collider1->events.on_collision_enter(collision);
+            collision.collider2->events.on_collision_enter(collision);
+        }
+
+    for (auto &[hash, collision] : m_last_collisions)
+        if (!m_collisions.contains(hash))
+        {
+            collision.collider1->events.on_collision_exit(collision.collider1, collision.collider2);
+            collision.collider2->events.on_collision_exit(collision.collider2, collision.collider1);
+        }
 }
 
-const std::vector<collision2D> &collision_detection2D::collisions() const
+void collision_detection2D::remove_any_collisions_with(collider2D *collider)
+{
+    for (auto it = m_collisions.begin(); it != m_collisions.end();)
+    {
+        if (it->second.collider1 == collider)
+        {
+            collider->events.on_collision_exit(collider, it->second.collider2);
+            it->second.collider2->events.on_collision_exit(it->second.collider2, collider);
+            it = m_collisions.erase(it);
+        }
+        else if (it->second.collider2 == collider)
+        {
+            collider->events.on_collision_exit(collider, it->second.collider1);
+            it->second.collider1->events.on_collision_exit(it->second.collider1, collider);
+            it = m_collisions.erase(it);
+        }
+        else
+            ++it;
+    }
+    for (auto it = m_last_collisions.begin(); it != m_last_collisions.end();)
+    {
+        if (it->second.collider1 == collider || it->second.collider2 == collider)
+            it = m_last_collisions.erase(it);
+        else
+            ++it;
+    }
+}
+
+const collision_detection2D::collision_map &collision_detection2D::collisions() const
 {
     return m_collisions;
 }
 
-void collision_detection2D::inherit(collision_detection2D &coldet)
+void collision_detection2D::flag_new_frame()
+{
+    m_new_frame = true;
+    m_last_collisions.swap(m_collisions);
+    m_collisions.clear();
+    for (auto &pairs : m_mt_collisions)
+        pairs.clear();
+}
+
+void collision_detection2D::inherit(collision_detection2D &&coldet)
 {
     multithreaded = coldet.multithreaded;
     m_cp_narrow = std::move(coldet.m_cp_narrow);
@@ -55,25 +104,34 @@ void collision_detection2D::inherit(collision_detection2D &coldet)
     m_cc_manifold = std::move(coldet.m_cc_manifold);
     m_cp_manifold = std::move(coldet.m_cp_manifold);
     m_pp_manifold = std::move(coldet.m_pp_manifold);
+
+    m_collisions = std::move(coldet.m_collisions);
+    m_last_collisions = std::move(coldet.m_last_collisions);
 }
 
 void collision_detection2D::process_collision_st(collider2D *collider1, collider2D *collider2)
 {
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
-        m_collisions.push_back(colis);
+    {
+        kit::non_commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
+        m_collisions.emplace(hash, colis);
+    }
 }
 void collision_detection2D::process_collision_mt(collider2D *collider1, collider2D *collider2,
                                                  const std::size_t thread_idx)
 {
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
-        m_mt_collisions[thread_idx].push_back(colis);
+    {
+        kit::non_commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
+        m_mt_collisions[thread_idx].emplace(hash, colis);
+    }
 }
 void collision_detection2D::join_mt_collisions()
 {
     for (const auto &pairs : m_mt_collisions)
-        m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
+        m_collisions.insert(pairs.begin(), pairs.end());
 }
 
 static bool broad_collision_check(const collider2D *collider1, const collider2D *collider2)

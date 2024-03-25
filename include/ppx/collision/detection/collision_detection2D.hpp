@@ -11,6 +11,7 @@
 #include "kit/utility/utils.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/multithreading/mt_for_each.hpp"
+#include "kit/container/hashable_tuple.hpp"
 
 #ifndef PPX_THREAD_COUNT
 #define PPX_THREAD_COUNT 16
@@ -22,6 +23,9 @@ class world2D;
 class collision_detection2D : public worldref2D
 {
   public:
+    using collision_map =
+        std::unordered_map<kit::non_commutative_tuple<const collider2D *, const collider2D *>, collision2D>;
+
     collision_detection2D(world2D &world);
     virtual ~collision_detection2D() = default;
 
@@ -123,16 +127,17 @@ class collision_detection2D : public worldref2D
         return ptr;
     }
 
-    const std::vector<collision2D> &detect_collisions_cached();
-    void clear_cached_collisions();
+    void remove_any_collisions_with(collider2D *collider);
 
-    const std::vector<collision2D> &collisions() const;
+    const collision_map &detect_collisions_cached();
+    const collision_map &collisions() const;
+    void flag_new_frame();
 
     virtual void on_attach()
     {
     }
 
-    void inherit(collision_detection2D &coldet);
+    void inherit(collision_detection2D &&coldet);
 
   protected:
     void process_collision_st(collider2D *collider1, collider2D *collider2);
@@ -140,13 +145,18 @@ class collision_detection2D : public worldref2D
     void join_mt_collisions();
 
   private:
-    std::vector<collision2D> m_collisions;
-    std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
+    collision_map m_collisions;
+    collision_map m_last_collisions;
+    std::array<collision_map, PPX_THREAD_COUNT> m_mt_collisions;
+
+    bool m_new_frame = true;
 
     collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
     void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
     void cp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
     void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
+
+    void handle_collision_enter_exit_events() const;
 
     kit::scope<cp_narrow_detection2D> m_cp_narrow;
     kit::scope<pp_narrow_detection2D> m_pp_narrow;

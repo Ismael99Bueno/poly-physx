@@ -4,12 +4,9 @@
 
 namespace ppx
 {
-bool collider_events2D::just_collided(const collision2D &c, const collider2D *incoming)
+bool collider_events2D::empty() const
 {
-    return m_collided.insert(incoming).second;
-}
-bool collider_events2D::just_separated(const collider2D *incoming)
-{
-    return m_collided.erase(incoming) == 1;
+    return on_collision_enter.empty() && on_collision_pre_solve.empty() && on_collision_post_solve.empty() &&
+           on_collision_exit.empty();
 }
 } // namespace ppx

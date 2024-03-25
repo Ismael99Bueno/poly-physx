@@ -12,15 +12,16 @@ spring_driven_resolution2D::spring_driven_resolution2D(world2D &world, const flo
       tangent_damping(tangent_damping)
 {
 }
-void spring_driven_resolution2D::solve(const std::vector<collision2D> &collisions)
+void spring_driven_resolution2D::solve(const collision_detection2D::collision_map &collisions)
 {
     KIT_ASSERT_ERROR(rigidity >= 0.f, "Rigidity must be non-negative: {0}", rigidity)
     KIT_ASSERT_ERROR(tangent_damping >= 0.f, "Tangent damping must be non-negative: {0}", tangent_damping)
     KIT_ASSERT_ERROR(normal_damping >= 0.f, "Normal damping must be non-negative: {0}", normal_damping)
 
-    KIT_PERF_FUNCTION()
-    for (const collision2D &colis : collisions)
-        solve_and_apply_collision_forces(colis);
+    KIT_PERF_SCOPE("Spring driven solve")
+    for (const auto &colis : collisions)
+        if (colis.second.enabled)
+            solve_and_apply_collision_forces(colis.second);
 }
 
 std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collision_forces(
