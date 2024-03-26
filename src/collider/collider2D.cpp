@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/entities/collider2D.hpp"
+#include "ppx/collider/collider2D.hpp"
 #include "ppx/world2D.hpp"
 
 namespace ppx

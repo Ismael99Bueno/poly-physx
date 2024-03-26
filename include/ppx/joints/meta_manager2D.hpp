@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ppx/manager2D.hpp"
-#include "ppx/entities/body2D.hpp"
+#include "ppx/body/body2D.hpp"
 #include <typeinfo>
 
 namespace ppx

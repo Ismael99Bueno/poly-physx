@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ppx/constraints/pvconstraint2D.hpp"
-#include "ppx/entities/specs2D.hpp"
+#include "ppx/common/specs2D.hpp"
 
 namespace ppx
 {

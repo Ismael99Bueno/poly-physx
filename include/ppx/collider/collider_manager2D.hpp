@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rk/integration/state.hpp"
-#include "ppx/entities/collider2D.hpp"
+#include "ppx/collider/collider2D.hpp"
 #include "ppx/manager2D.hpp"
 #include "kit/events/event.hpp"
 #include "kit/memory/block_allocator.hpp"

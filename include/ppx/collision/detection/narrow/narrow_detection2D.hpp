@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/entities/shapes2D.hpp"
+#include "ppx/common/shapes2D.hpp"
 
 namespace ppx
 {

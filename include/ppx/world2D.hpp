@@ -1,8 +1,8 @@
 #pragma once
 
 #include "rk/integration/integrator.hpp"
-#include "ppx/entities/body_manager2D.hpp"
-#include "ppx/entities/collider_manager2D.hpp"
+#include "ppx/body/body_manager2D.hpp"
+#include "ppx/collider/collider_manager2D.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/behaviours/behaviour_manager2D.hpp"
 #include "ppx/joints/joint_repository2D.hpp"

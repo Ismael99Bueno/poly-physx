@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ppx/collision/detection/collision_detection2D.hpp"
-#include "ppx/entities/collider_manager2D.hpp"
+#include "ppx/collider/collider_manager2D.hpp"
 
 namespace ppx
 {

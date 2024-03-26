@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/entities/body2D.hpp"
+#include "ppx/body/body2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/indexable.hpp"
 #include "kit/events/event.hpp"
