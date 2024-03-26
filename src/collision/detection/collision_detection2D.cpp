@@ -18,7 +18,8 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
     if (m_new_frame)
     {
         detect_collisions();
-        handle_collision_enter_exit_events();
+        if (world.collisions.enable_events)
+            handle_collision_enter_exit_events();
         return m_collisions;
     }
 
@@ -139,8 +140,8 @@ static bool broad_collision_check(const collider2D *collider1, const collider2D 
     const body2D *p1 = collider1->body();
     const body2D *p2 = collider2->body();
     return collider1 != collider2 && p1 != p2 &&
-           (collider1->collision_filter.cgroup & collider2->collision_filter.collides_with) &&
-           (collider2->collision_filter.cgroup & collider1->collision_filter.collides_with) &&
+           (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
+           (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
            (p1->is_dynamic() || p2->is_dynamic()) && geo::may_intersect(collider1->shape(), collider2->shape());
 }
 

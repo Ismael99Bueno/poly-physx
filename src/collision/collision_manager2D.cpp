@@ -55,17 +55,19 @@ void collision_manager2D::solve()
     const auto &collisions = m_detection->detect_collisions_cached();
     if (!collisions.empty())
     {
-        for (const auto &collision : collisions)
-        {
-            collision.second.collider1->events.on_collision_pre_solve(collision.second);
-            collision.second.collider2->events.on_collision_pre_solve(collision.second);
-        }
+        if (enable_events)
+            for (const auto &collision : collisions)
+            {
+                collision.second.collider1->events.on_collision_pre_solve(collision.second);
+                collision.second.collider2->events.on_collision_pre_solve(collision.second);
+            }
         m_resolution->solve(collisions);
-        for (const auto &collision : collisions)
-        {
-            collision.second.collider1->events.on_collision_post_solve(collision.second);
-            collision.second.collider2->events.on_collision_post_solve(collision.second);
-        }
+        if (enable_events)
+            for (const auto &collision : collisions)
+            {
+                collision.second.collider1->events.on_collision_post_solve(collision.second);
+                collision.second.collider2->events.on_collision_post_solve(collision.second);
+            }
     }
 }
 
