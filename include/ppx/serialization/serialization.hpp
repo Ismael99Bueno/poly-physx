@@ -481,7 +481,8 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Joints repository"] = world.joints;
 
         YAML::Node ctrs = node["Constraint settings"];
-        ctrs["Iterations"] = world.constraints.iterations;
+        ctrs["Velocity iterations"] = world.constraints.velocity_iterations;
+        ctrs["Position iterations"] = world.constraints.position_iterations;
         ctrs["Warmup"] = world.constraints.warmup;
         ctrs["Baumgarte correction"] = world.constraints.baumgarte_correction;
         ctrs["Baumgarte coef"] = world.constraints.baumgarte_coef;
@@ -502,7 +503,8 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Joints repository"].as<ppx::joint_repository2D>(world.joints);
 
         const YAML::Node ctrs = node["Constraint settings"];
-        world.constraints.iterations = ctrs["Iterations"].as<std::uint32_t>();
+        world.constraints.velocity_iterations = ctrs["Velocity iterations"].as<std::uint32_t>();
+        world.constraints.position_iterations = ctrs["Position iterations"].as<std::uint32_t>();
         world.constraints.warmup = ctrs["Warmup"].as<bool>();
         world.constraints.baumgarte_correction = ctrs["Baumgarte correction"].as<bool>();
         world.constraints.baumgarte_coef = ctrs["Baumgarte coef"].as<float>();

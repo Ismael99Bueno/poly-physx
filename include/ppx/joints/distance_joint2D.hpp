@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ppx/constraints/constraint2D.hpp"
+#include "ppx/constraints/pvconstraint2D.hpp"
 #include "ppx/entities/specs2D.hpp"
 
 namespace ppx
 {
-class distance_joint2D final : public constraint2D
+class distance_joint2D final : public pvconstraint2D
 {
   public:
     using specs = specs::distance_joint2D;
@@ -15,7 +15,7 @@ class distance_joint2D final : public constraint2D
     float min_distance;
     float max_distance;
 
-    float constraint_value() const override;
+    float constraint_position() const override;
     float constraint_velocity() const override;
 
     void startup() override;

@@ -21,7 +21,7 @@ class joint_solver2D : public kit::identifiable<std::string>, public kit::yaml::
     virtual void solve() = 0;
     virtual void on_body_removal_validation(const body2D *body) = 0;
 
-    friend class joint_meta_manager2D;
+    friend class meta_manager2D<joint_solver2D>;
 };
 
 template <Joint T> class joint_manager2D : public joint_container2D<T>, public joint_solver2D
@@ -58,15 +58,6 @@ template <Joint T> class joint_manager2D : public joint_container2D<T>, public j
 #endif
 };
 
-class joint_meta_manager2D final : public meta_manager2D<joint_solver2D>
-{
-    using meta_manager2D<joint_solver2D>::meta_manager2D;
-
-    void solve();
-    void on_body_removal_validation(const body2D *body);
-
-    friend class world2D;
-    friend class joint_repository2D;
-};
+using joint_meta_manager2D = meta_manager2D<joint_solver2D>;
 
 } // namespace ppx

@@ -13,7 +13,7 @@ class joint_repository2D
 
     template <Joint T> T *add(const typename T::specs &spc)
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.add<T>(spc);
         else
             return non_constraint_based.add<T>(spc);
@@ -21,7 +21,7 @@ class joint_repository2D
 
     template <Joint T> auto add_manager(const std::string &name)
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return add_manager<T, constraint_manager2D<T>>(name);
         else
             return add_manager<T, joint_manager2D<T>>(name);
@@ -38,14 +38,14 @@ class joint_repository2D
 
     template <Joint T> auto manager() const
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.manager<T>();
         else
             return non_constraint_based.manager<T>();
     }
     template <Joint T> auto manager()
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.manager<T>();
         else
             return non_constraint_based.manager<T>();
@@ -53,28 +53,28 @@ class joint_repository2D
 
     template <Joint T> bool remove()
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.remove<T>();
         else
             return non_constraint_based.remove<T>();
     }
     template <Joint T> bool remove(const std::size_t index)
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.remove<T>(index);
         else
             return non_constraint_based.remove<T>(index);
     }
     template <Joint T> bool remove(const T &joint)
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.remove(joint);
         else
             return non_constraint_based.remove(joint);
     }
     template <Joint T> bool remove(const typename T::id_type &id)
     {
-        if constexpr (std::is_base_of_v<constraint2D, T>)
+        if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.remove(id);
         else
             return non_constraint_based.remove(id);

@@ -29,7 +29,8 @@ class world2D : kit::non_copyable
     collision_manager2D collisions;
     struct
     {
-        std::uint32_t iterations = 10;
+        std::uint32_t velocity_iterations = 8;
+        std::uint32_t position_iterations = 3;
         bool warmup = true;
         bool baumgarte_correction = true;
 

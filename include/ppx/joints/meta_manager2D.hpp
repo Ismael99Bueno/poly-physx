@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ppx/manager2D.hpp"
+#include "ppx/entities/body2D.hpp"
 #include <typeinfo>
 
 namespace ppx
@@ -77,6 +78,45 @@ template <Solver S> class meta_manager2D : public idmanager2D<kit::scope<S>>
         using Manager = typename S::template manager_t<T>;
         Manager *mng = manager<T>();
         return mng ? mng->remove(id) : false;
+    }
+
+    void solve()
+    {
+        if constexpr (std::is_same_v<S, joint_solver2D>)
+        {
+            KIT_PERF_SCOPE("Joints solve")
+            for (const auto &solver : this->m_elements)
+                solver->solve();
+        }
+        else
+        {
+            KIT_ASSERT_ERROR(this->world.constraints.baumgarte_coef >= 0.f, "Baumgarte coef must be non-negative: {0}",
+                             this->world.constraints.baumgarte_coef)
+            KIT_ASSERT_ERROR(this->world.constraints.baumgarte_threshold >= 0.f,
+                             "Baumgarte threshold must be non-negative: {0}",
+                             this->world.constraints.baumgarte_threshold)
+            KIT_ASSERT_ERROR(this->world.constraints.iterations > 0, "Iterations must be positive: {0}",
+                             this->world.constraints.iterations)
+
+            KIT_PERF_SCOPE("Constraints solve")
+            for (std::size_t i = 0; i < this->world.constraints.velocity_iterations; i++)
+                for (const auto &solver : this->m_elements)
+                    solver->solve();
+            for (std::size_t i = 0; i < this->world.constraints.position_iterations; i++)
+            {
+                bool fully_adjusted = true;
+                for (const auto &solver : this->m_elements)
+                    fully_adjusted &= solver->adjust_positions();
+                if (fully_adjusted)
+                    return;
+            }
+        }
+    }
+
+    void on_body_removal_validation(const body2D *body)
+    {
+        for (const auto &solver : this->m_elements)
+            solver->on_body_removal_validation(body);
     }
 };
 } // namespace ppx

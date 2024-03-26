@@ -9,7 +9,7 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : constraint2D(world, world.bodies[spc.bindex1], world.bodies[spc.bindex2], spc.ganchor1, spc.ganchor2)
+    : pvconstraint2D(world, world.bodies[spc.bindex1], world.bodies[spc.bindex2], spc.ganchor1, spc.ganchor2)
 {
     if (kit::approximately(spc.min_distance, spc.max_distance))
     {
@@ -19,7 +19,7 @@ distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
     }
 }
 
-float distance_joint2D::constraint_value() const
+float distance_joint2D::constraint_position() const
 {
     KIT_ASSERT_ERROR(min_distance <= max_distance,
                      "Minimum distance must be less than or equal to maximum distance: {0} <= {1}", min_distance,
@@ -69,7 +69,7 @@ bool distance_joint2D::legal_length() const
 
 void distance_joint2D::startup()
 {
-    constraint2D::startup();
+    pvconstraint2D::startup();
     m_length = glm::distance(m_ganchor1, m_ganchor2);
 }
 } // namespace ppx

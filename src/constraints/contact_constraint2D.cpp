@@ -7,8 +7,8 @@ namespace ppx
 {
 contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *collision,
                                            const std::size_t manifold_index, const float slop)
-    : constraint2D(world, collision->collider1->body(), collision->collider2->body(),
-                   collision->manifold.contacts[manifold_index]),
+    : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
+                     collision->manifold.contacts[manifold_index]),
       m_manifold_index(manifold_index), m_restitution(collision->restitution), m_slop(slop),
       m_penetration(-glm::length(collision->mtv)), m_mtv(collision->mtv), m_friction(world, collision, manifold_index)
 {
@@ -18,7 +18,7 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
     m_init_ctr_vel = constraint_velocity();
 }
 
-float contact_constraint2D::constraint_value() const
+float contact_constraint2D::constraint_position() const
 {
     return m_penetration;
 }
@@ -42,13 +42,13 @@ void contact_constraint2D::solve()
 
 void contact_constraint2D::startup()
 {
-    constraint2D::startup();
+    pvconstraint2D::startup();
     m_friction.startup();
 }
 
 void contact_constraint2D::warmup()
 {
-    constraint2D::warmup();
+    pvconstraint2D::warmup();
     m_friction.warmup();
 }
 

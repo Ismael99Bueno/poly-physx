@@ -1,34 +1,27 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/constraints/constraint2D.hpp"
+#include "ppx/constraints/vconstraint2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
 namespace ppx
 {
-constraint2D::constraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1,
-                           const glm::vec2 &ganchor2, const bool allow_baumgarte)
-    : joint2D(world, body1, body2, ganchor1, ganchor2), m_allow_baumgarte(allow_baumgarte)
+vconstraint2D::vconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1,
+                             const glm::vec2 &ganchor2)
+    : joint2D(world, body1, body2, ganchor1, ganchor2)
 {
 }
 
-constraint2D::constraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor,
-                           const bool allow_baumgarte)
-    : joint2D(world, body1, body2, ganchor), m_allow_baumgarte(allow_baumgarte)
+vconstraint2D::vconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor)
+    : joint2D(world, body1, body2, ganchor)
 {
 }
 
-float constraint2D::compute_lambda() const
+float vconstraint2D::compute_velocity_lambda() const
 {
-    const float cvel = constraint_velocity();
-    if (m_allow_baumgarte && world.constraints.baumgarte_correction)
-    {
-        const float c = constraint_value();
-        if (std::abs(c) > world.constraints.baumgarte_threshold)
-            return -(cvel + world.constraints.baumgarte_coef * c / world.integrator.ts.value) / m_inv_mass;
-    }
-    return -cvel / m_inv_mass;
+    return -constraint_velocity() / m_inv_mass;
 }
-void constraint2D::apply_lambda(const float lambda)
+
+void vconstraint2D::apply_velocity_lambda(const float lambda)
 {
     const glm::vec2 imp2 = lambda * m_dir;
     const glm::vec2 imp1 = -imp2;
@@ -50,25 +43,25 @@ void constraint2D::apply_lambda(const float lambda)
     m_body2->apply_simulation_torque(torque2);
 }
 
-void constraint2D::solve_clamped(const float min, const float max)
+void vconstraint2D::solve_clamped(const float min, const float max)
 {
-    const float lambda = compute_lambda();
+    const float lambda = compute_velocity_lambda();
     const float old_lambda = m_cumlambda;
     m_cumlambda = std::clamp(m_cumlambda + lambda, min, max);
 
     const float delta_lambda = m_cumlambda - old_lambda;
     if (!kit::approaches_zero(delta_lambda))
-        apply_lambda(delta_lambda);
+        apply_velocity_lambda(delta_lambda);
 }
 
-void constraint2D::solve_unclamped()
+void vconstraint2D::solve_unclamped()
 {
-    const float lambda = compute_lambda();
+    const float lambda = compute_velocity_lambda();
     m_cumlambda += lambda;
-    apply_lambda(lambda);
+    apply_velocity_lambda(lambda);
 }
 
-void constraint2D::startup()
+void vconstraint2D::startup()
 {
     m_ganchor1 = ganchor1();
     m_ganchor2 = ganchor2();
@@ -78,12 +71,17 @@ void constraint2D::startup()
     m_inv_mass = inverse_mass();
 }
 
-void constraint2D::warmup()
+void vconstraint2D::warmup()
 {
     if (kit::approaches_zero(m_cumlambda))
         return;
     m_cumlambda *= world.timestep_ratio();
-    apply_lambda(m_cumlambda);
+    apply_velocity_lambda(m_cumlambda);
+}
+
+void vconstraint2D::reset_impulse()
+{
+    m_cumlambda = 0.f;
 }
 
 } // namespace ppx

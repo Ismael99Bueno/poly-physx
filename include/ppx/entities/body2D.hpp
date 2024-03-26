@@ -174,7 +174,8 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     friend class spring2D;
     friend class collider2D;
     friend class behaviour2D;
-    friend class constraint2D;
+    friend class vconstraint2D;
+    friend class pvconstraint2D;
     friend class body_manager2D;
     friend class collider_manager2D;
     friend class joint_constraint2D;

@@ -4,7 +4,6 @@
 #include "kit/utility/uuid.hpp"
 #include <vector>
 #include <functional>
-#include <unordered_set>
 
 namespace ppx
 {
