@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ppx/entities/body2D.hpp"
-#include "ppx/events/collider_events2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/indexable.hpp"
+#include "kit/events/event.hpp"
 #include <variant>
 
 namespace ppx
@@ -21,7 +21,19 @@ class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
     float friction;
     filter collision_filter;
 
-    collider_events2D events;
+    struct
+    {
+        kit::event<const collision2D &> on_collision_enter;
+        kit::event<const collision2D &> on_collision_pre_solve;
+        kit::event<const collision2D &> on_collision_post_solve;
+        kit::event<collider2D *, collider2D *> on_collision_exit;
+
+        bool empty() const
+        {
+            return on_collision_enter.empty() && on_collision_pre_solve.empty() && on_collision_post_solve.empty() &&
+                   on_collision_exit.empty();
+        }
+    } events;
 
     stype shape_type() const;
 
