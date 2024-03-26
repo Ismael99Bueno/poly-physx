@@ -2,6 +2,7 @@
 
 #include "ppx/internal/worldref.hpp"
 #include "ppx/common/specs2D.hpp"
+#include "ppx/body/state2D.hpp"
 #include "kit/memory/vector_ptr.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/non_copyable.hpp"
@@ -40,19 +41,9 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     float impulse_torque = 0.f;
     float persistent_torque = 0.f;
 
-    glm::vec2 velocity;
-    float angular_velocity;
     float charge;
 
-    struct
-    {
-        glm::vec2 velocity{0.f};
-        float angular_velocity = 0.f;
-        glm::vec2 velocity_at_centroid_offset(const glm::vec2 &offset) const
-        {
-            return velocity + angular_velocity * glm::vec2(-offset.y, offset.x);
-        } // v + cross(w, at)
-    } ctr_proxy;
+    state2D ctr_state;
 
     const collider2D *operator[](std::size_t index) const;
     collider2D *operator[](std::size_t index);
@@ -145,9 +136,7 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     void mass(float mass);
 
   private:
-    kit::transform2D<float> m_centroid;
-    glm::vec2 m_gposition;
-    glm::vec2 m_lposition;
+    state2D m_state;
     properties m_props;
     glm::vec2 m_charge_centroid;
     glm::vec2 m_force{0.f};

@@ -157,7 +157,7 @@ void body_manager2D::retrieve_data_from_state_variables(const std::vector<float>
         body->retrieve_data_from_state_variables(vars_buffer);
 }
 
-void body_manager2D::prepare_constraint_proxies()
+void body_manager2D::prepare_constraint_states()
 {
     for (body2D *body : m_elements)
     {
