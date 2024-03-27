@@ -2,7 +2,6 @@
 
 #include "ppx/joints/joint_container2D.hpp"
 #include "ppx/constraints/pvconstraint2D.hpp"
-#include "ppx/joints/meta_manager2D.hpp"
 #include "kit/serialization/yaml/codec.hpp"
 
 namespace ppx
@@ -15,32 +14,29 @@ concept Constraint = requires() {
 
 template <Constraint T> class constraint_manager2D;
 
-class constraint_solver2D : public kit::identifiable<std::string>, public kit::yaml::codecable
+class iconstraint_manager2D : public kit::identifiable<std::string>, public kit::yaml::codecable
 {
   public:
     template <Constraint T> using manager_t = constraint_manager2D<T>;
 
-    virtual ~constraint_solver2D() = default;
+    virtual ~iconstraint_manager2D() = default;
 
-  protected:
-    constraint_solver2D(const std::string &name);
-
-  private:
     virtual void startup() = 0;
     virtual void solve() = 0;
     virtual bool adjust_positions() = 0;
     virtual void on_body_removal_validation(const body2D *body) = 0;
 
-    friend class meta_manager2D<constraint_solver2D>;
+  protected:
+    iconstraint_manager2D(const std::string &name);
 };
 
-template <Constraint T> class constraint_manager2D : public joint_container2D<T>, public constraint_solver2D
+template <Constraint T> class constraint_manager2D : public joint_container2D<T>, public iconstraint_manager2D
 {
   public:
     virtual ~constraint_manager2D() = default;
 
     constraint_manager2D(world2D &world, const std::string &name)
-        : joint_container2D<T>(world), constraint_solver2D(name)
+        : joint_container2D<T>(world), iconstraint_manager2D(name)
     {
         joint_container2D<T>::s_name = name;
     }
@@ -92,7 +88,5 @@ template <Constraint T> class constraint_manager2D : public joint_container2D<T>
     }
 #endif
 };
-
-using constraint_meta_manager2D = meta_manager2D<constraint_solver2D>;
 
 } // namespace ppx

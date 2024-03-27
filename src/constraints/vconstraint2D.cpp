@@ -26,11 +26,11 @@ void vconstraint2D::apply_velocity_lambda(const float lambda)
     const glm::vec2 imp2 = lambda * m_dir;
     const glm::vec2 imp1 = -imp2;
 
-    m_body1->ctr_proxy.velocity += m_body1->props().dynamic.inv_mass * imp1;
-    m_body2->ctr_proxy.velocity += m_body2->props().dynamic.inv_mass * imp2;
+    m_body1->ctr_state.velocity += m_body1->props().dynamic.inv_mass * imp1;
+    m_body2->ctr_state.velocity += m_body2->props().dynamic.inv_mass * imp2;
 
-    m_body1->ctr_proxy.angular_velocity += m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, imp1);
-    m_body2->ctr_proxy.angular_velocity += m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, imp2);
+    m_body1->ctr_state.angular_velocity += m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, imp1);
+    m_body2->ctr_state.angular_velocity += m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, imp2);
 
     const glm::vec2 f1 = imp1 / world.integrator.ts.value;
     const glm::vec2 f2 = imp2 / world.integrator.ts.value;
@@ -63,10 +63,10 @@ void vconstraint2D::solve_unclamped()
 
 void vconstraint2D::startup()
 {
-    m_ganchor1 = ganchor1();
-    m_ganchor2 = ganchor2();
-    m_offset1 = m_ganchor1 - m_body1->centroid();
-    m_offset2 = m_ganchor2 - m_body2->centroid();
+    m_ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
+    m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
+    m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position;
+    m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position;
     m_dir = direction();
     m_inv_mass = inverse_mass();
 }

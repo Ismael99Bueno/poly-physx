@@ -46,8 +46,8 @@ glm::vec4 spring2D::force() const
 
     const glm::vec2 relpos = ga2 - ga1;
     const glm::vec2 direction = glm::normalize(relpos);
-    const glm::vec2 relvel = direction * glm::dot(m_body2->gvelocity_at_centroid_offset(offset2) -
-                                                      m_body1->gvelocity_at_centroid_offset(offset1),
+    const glm::vec2 relvel = direction * glm::dot(m_body2->velocity_at_centroid_offset(offset2) -
+                                                      m_body1->velocity_at_centroid_offset(offset1),
                                                   direction);
     const glm::vec2 vlen = length * direction;
     const glm::vec2 displacement = relpos - vlen;

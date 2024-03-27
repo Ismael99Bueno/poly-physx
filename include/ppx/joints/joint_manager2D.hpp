@@ -1,35 +1,30 @@
 #pragma once
 
 #include "ppx/joints/joint_container2D.hpp"
-#include "ppx/joints/meta_manager2D.hpp"
 
 namespace ppx
 {
 template <Joint T> class joint_manager2D;
 
-class joint_solver2D : public kit::identifiable<std::string>, public kit::yaml::codecable
+class ijoint_manager2D : public kit::identifiable<std::string>, public kit::yaml::codecable
 {
   public:
     template <Joint T> using manager_t = joint_manager2D<T>;
 
-    virtual ~joint_solver2D() = default;
-
-  protected:
-    joint_solver2D(const std::string &name);
-
-  private:
+    virtual ~ijoint_manager2D() = default;
     virtual void solve() = 0;
     virtual void on_body_removal_validation(const body2D *body) = 0;
 
-    friend class meta_manager2D<joint_solver2D>;
+  protected:
+    ijoint_manager2D(const std::string &name);
 };
 
-template <Joint T> class joint_manager2D : public joint_container2D<T>, public joint_solver2D
+template <Joint T> class joint_manager2D : public joint_container2D<T>, public ijoint_manager2D
 {
   public:
     virtual ~joint_manager2D() = default;
 
-    joint_manager2D(world2D &world, const std::string &name) : joint_container2D<T>(world), joint_solver2D(name)
+    joint_manager2D(world2D &world, const std::string &name) : joint_container2D<T>(world), ijoint_manager2D(name)
     {
         joint_container2D<T>::s_name = name;
     }
@@ -57,7 +52,5 @@ template <Joint T> class joint_manager2D : public joint_container2D<T>, public j
     }
 #endif
 };
-
-using joint_meta_manager2D = meta_manager2D<joint_solver2D>;
 
 } // namespace ppx

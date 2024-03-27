@@ -38,9 +38,9 @@ body2D body2D::from_instance(const ppx::body2D &body)
         colliders.push_back(collider2D::from_instance(*collider));
 
     return {body.gposition(),
-            body.velocity,
+            body.velocity(),
             body.rotation(),
-            body.angular_velocity,
+            body.angular_velocity(),
             {body.props().nondynamic.mass, body.charge, colliders, body.type()}};
 }
 

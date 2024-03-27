@@ -40,14 +40,14 @@ glm::vec2 state2D::lvelocity_at_from_position(const glm::vec2 &lpoint) const
 }
 glm::vec2 state2D::gvelocity_at(const glm::vec2 &gpoint) const
 {
-    return gvelocity_at_centroid_offset(gpoint - centroid.position);
+    return velocity_at_centroid_offset(gpoint - centroid.position);
 }
-glm::vec2 state2D::gvelocity_at_centroid_offset(const glm::vec2 &offset) const
+glm::vec2 state2D::velocity_at_centroid_offset(const glm::vec2 &offset) const
 {
     return velocity + angular_velocity * glm::vec2(-offset.y, offset.x);
 }
-glm::vec2 state2D::gvelocity_at_position_offset(const glm::vec2 &offset) const
+glm::vec2 state2D::velocity_at_position_offset(const glm::vec2 &offset) const
 {
-    return gvelocity_at_centroid_offset(offset + lposition);
+    return velocity_at_centroid_offset(offset + lposition);
 }
 } // namespace ppx

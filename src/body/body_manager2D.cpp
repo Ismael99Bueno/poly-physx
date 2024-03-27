@@ -14,9 +14,11 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     body->end_density_update();
 
     const kit::transform2D<float> &centroid = body->centroid_transform();
+    const glm::vec2 &velocity = body->velocity();
+
     rk::state<float> &state = world.integrator.state;
-    state.append({centroid.position.x, centroid.position.y, centroid.rotation, body->velocity.x, body->velocity.y,
-                  body->angular_velocity});
+    state.append({centroid.position.x, centroid.position.y, centroid.rotation, velocity.x, velocity.y,
+                  body->angular_velocity()});
 
     m_elements.push_back(body);
     events.on_addition(body);
@@ -138,15 +140,16 @@ void body_manager2D::send_data_to_state(rk::state<float> &state)
     {
         const std::size_t index = 6 * body->index;
         const glm::vec2 &centroid = body->centroid();
+        glm::vec2 &velocity = body->velocity();
         if (body->is_static())
-            body->velocity = glm::vec2(0.f);
+            velocity = glm::vec2(0.f);
 
         state[index] = centroid.x;
         state[index + 1] = centroid.y;
         state[index + 2] = body->rotation();
-        state[index + 3] = body->velocity.x;
-        state[index + 4] = body->velocity.y;
-        state[index + 5] = body->angular_velocity;
+        state[index + 3] = velocity.x;
+        state[index + 4] = velocity.y;
+        state[index + 5] = body->angular_velocity();
     }
 }
 
@@ -160,12 +163,7 @@ void body_manager2D::retrieve_data_from_state_variables(const std::vector<float>
 void body_manager2D::prepare_constraint_states()
 {
     for (body2D *body : m_elements)
-    {
-        body->ctr_proxy.velocity =
-            body->velocity + body->props().dynamic.inv_mass * body->force() * world.integrator.ts.value;
-        body->ctr_proxy.angular_velocity =
-            body->angular_velocity + body->props().dynamic.inv_inertia * body->torque() * world.integrator.ts.value;
-    }
+        body->ctr_state = body->m_state;
 }
 
 } // namespace ppx

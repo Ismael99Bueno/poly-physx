@@ -288,6 +288,33 @@ const glm::vec2 &body2D::charge_centroid() const
     return m_charge_centroid;
 }
 
+const glm::vec2 &body2D::velocity() const
+{
+    return m_state.velocity;
+}
+glm::vec2 &body2D::velocity()
+{
+    return m_state.velocity;
+}
+float body2D::angular_velocity() const
+{
+    return m_state.angular_velocity;
+}
+
+float &body2D::angular_velocity()
+{
+    return m_state.angular_velocity;
+}
+
+void body2D::velocity(const glm::vec2 &velocity)
+{
+    m_state.velocity = velocity;
+}
+void body2D::angular_velocity(const float angular_velocity)
+{
+    m_state.angular_velocity = angular_velocity;
+}
+
 void body2D::translate(const glm::vec2 &dpos)
 {
     m_state.centroid.position += dpos;
@@ -344,13 +371,13 @@ glm::vec2 body2D::gvelocity_at(const glm::vec2 &gpoint) const
 {
     return m_state.gvelocity_at(gpoint);
 }
-glm::vec2 body2D::gvelocity_at_centroid_offset(const glm::vec2 &offset) const
+glm::vec2 body2D::velocity_at_centroid_offset(const glm::vec2 &offset) const
 {
-    return m_state.gvelocity_at_centroid_offset(offset);
+    return m_state.velocity_at_centroid_offset(offset);
 }
-glm::vec2 body2D::gvelocity_at_position_offset(const glm::vec2 &offset) const
+glm::vec2 body2D::velocity_at_position_offset(const glm::vec2 &offset) const
 {
-    return m_state.gvelocity_at_position_offset(offset);
+    return m_state.velocity_at_position_offset(offset);
 }
 
 float body2D::rotation() const

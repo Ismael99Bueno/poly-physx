@@ -37,7 +37,7 @@ std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collisio
     const glm::vec2 offset2 = touch2 - body2->centroid();
 
     const glm::vec2 relvel =
-        (body2->gvelocity_at_centroid_offset(offset2) - body1->gvelocity_at_centroid_offset(offset1));
+        (body2->velocity_at_centroid_offset(offset2) - body1->velocity_at_centroid_offset(offset1));
 
     const glm::vec2 normal_dir = glm::normalize(colis.mtv);
 

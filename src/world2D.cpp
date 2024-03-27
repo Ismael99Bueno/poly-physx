@@ -72,10 +72,10 @@ std::vector<float> world2D::create_state_derivative() const
         const float angaccel = body->torque() * body->props().dynamic.inv_inertia;
 
         const glm::vec2 velocity =
-            semi_implicit_integration ? body->velocity + accel * integrator.ts.value : body->velocity;
+            semi_implicit_integration ? body->velocity() + accel * integrator.ts.value : body->velocity();
         const float angular_velocity = semi_implicit_integration
-                                           ? body->angular_velocity + angaccel * integrator.ts.value
-                                           : body->angular_velocity;
+                                           ? body->angular_velocity() + angaccel * integrator.ts.value
+                                           : body->angular_velocity();
 
         state_derivative[index] = velocity.x;
         state_derivative[index + 1] = velocity.y;

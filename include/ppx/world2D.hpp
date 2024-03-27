@@ -36,6 +36,7 @@ class world2D : kit::non_copyable
 
         float baumgarte_coef = 0.04f;
         float baumgarte_threshold = 0.005f;
+        float slop = 0.01f;
     } constraints;
 
     bool semi_implicit_integration = false;

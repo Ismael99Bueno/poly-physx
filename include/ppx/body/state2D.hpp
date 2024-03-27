@@ -25,7 +25,8 @@ struct state2D
     glm::vec2 lvelocity_at_from_centroid(const glm::vec2 &lpoint) const;
     glm::vec2 lvelocity_at_from_position(const glm::vec2 &lpoint) const;
     glm::vec2 gvelocity_at(const glm::vec2 &gpoint) const;
-    glm::vec2 gvelocity_at_centroid_offset(const glm::vec2 &offset) const;
-    glm::vec2 gvelocity_at_position_offset(const glm::vec2 &offset) const;
+
+    glm::vec2 velocity_at_centroid_offset(const glm::vec2 &offset) const;
+    glm::vec2 velocity_at_position_offset(const glm::vec2 &offset) const;
 };
 } // namespace ppx

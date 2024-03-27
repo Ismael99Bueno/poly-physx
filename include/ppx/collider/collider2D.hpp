@@ -9,6 +9,7 @@
 namespace ppx
 {
 class body2D;
+struct collision2D;
 class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:

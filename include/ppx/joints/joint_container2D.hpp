@@ -41,7 +41,7 @@ template <Joint T> class joint_container2D : public manager2D<T>
     }
 
     using manager2D<T>::remove;
-    virtual bool remove(std::size_t index) override
+    virtual bool remove(const std::size_t index) override
     {
         if (index >= this->m_elements.size())
             return false;

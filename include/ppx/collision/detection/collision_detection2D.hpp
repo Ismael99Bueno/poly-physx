@@ -20,7 +20,7 @@
 namespace ppx
 {
 class world2D;
-class collision_detection2D : public worldref2D
+class collision_detection2D : public worldref2D, kit::non_copyable
 {
   public:
     using collision_map =

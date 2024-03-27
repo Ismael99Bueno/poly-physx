@@ -4,21 +4,8 @@
 
 namespace ppx
 {
-joint_solver2D::joint_solver2D(const std::string &name) : kit::identifiable<std::string>(name)
+ijoint_manager2D::ijoint_manager2D(const std::string &name) : kit::identifiable<std::string>(name)
 {
-}
-
-void joint_meta_manager2D::solve()
-{
-    KIT_PERF_SCOPE("Joints solve")
-    for (const auto &solver : m_elements)
-        solver->solve();
-}
-
-void joint_meta_manager2D::on_body_removal_validation(const body2D *body)
-{
-    for (const auto &solver : m_elements)
-        solver->on_body_removal_validation(body);
 }
 
 } // namespace ppx

@@ -6,10 +6,10 @@
 namespace ppx
 {
 contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *collision,
-                                           const std::size_t manifold_index, const float slop)
+                                           const std::size_t manifold_index)
     : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
                      collision->manifold.contacts[manifold_index]),
-      m_manifold_index(manifold_index), m_restitution(collision->restitution), m_slop(slop),
+      m_manifold_index(manifold_index), m_restitution(collision->restitution),
       m_penetration(-glm::length(collision->mtv)), m_mtv(collision->mtv), m_friction(world, collision, manifold_index)
 {
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
@@ -24,13 +24,9 @@ float contact_constraint2D::constraint_position() const
 }
 float contact_constraint2D::constraint_velocity() const
 {
-    const float cdot =
-        m_restitution * m_init_ctr_vel + glm::dot(m_dir, m_body2->ctr_proxy.velocity_at_centroid_offset(m_offset2) -
-                                                             m_body1->ctr_proxy.velocity_at_centroid_offset(m_offset1));
-    const float abs_cdot = std::abs(cdot);
-    if (abs_cdot < m_slop)
-        return cdot * abs_cdot / m_slop;
-    return cdot;
+    return m_restitution * m_init_ctr_vel +
+           glm::dot(m_dir, m_body2->ctr_state.velocity_at_centroid_offset(m_offset2) -
+                               m_body1->ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
 void contact_constraint2D::solve()
@@ -52,7 +48,12 @@ void contact_constraint2D::warmup()
     m_friction.warmup();
 }
 
-void contact_constraint2D::update(const collision2D *collision, const float slop)
+bool contact_constraint2D::adjust_positions()
+{
+    return adjust_unclamped();
+}
+
+void contact_constraint2D::update(const collision2D *collision)
 {
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
@@ -62,7 +63,6 @@ void contact_constraint2D::update(const collision2D *collision, const float slop
     m_lanchor2 = m_body2->local_position_point(collision->manifold.contacts[m_manifold_index]);
     m_mtv = collision->mtv;
     m_restitution = collision->restitution;
-    m_slop = slop;
     m_penetration = -glm::length(collision->mtv);
     m_friction.update(collision, m_lanchor1, m_lanchor2);
     recently_updated = true;

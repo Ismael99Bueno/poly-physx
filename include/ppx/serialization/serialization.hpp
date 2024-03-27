@@ -283,16 +283,16 @@ template <ppx::Joint T> struct kit::yaml::codec<ppx::joint_container2D<T>>
     }
 };
 
-template <ppx::Solver S> struct kit::yaml::codec<ppx::meta_manager2D<S>>
+template <ppx::IManager IM> struct kit::yaml::codec<ppx::meta_manager2D<IM>>
 {
-    static YAML::Node encode(const ppx::meta_manager2D<S> &mm)
+    static YAML::Node encode(const ppx::meta_manager2D<IM> &mm)
     {
         YAML::Node node;
         for (const auto &mng : mm)
             node["Managers"][mng->id] = *mng;
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::meta_manager2D<S> &mm)
+    static bool decode(const YAML::Node &node, ppx::meta_manager2D<IM> &mm)
     {
         if (node["Managers"])
             for (auto it = node["Managers"].begin(); it != node["Managers"].end(); ++it)
@@ -303,7 +303,7 @@ template <ppx::Solver S> struct kit::yaml::codec<ppx::meta_manager2D<S>>
                                 "deserialized. Consider adding it before deserialization",
                                 it->first.as<std::string>())
                 if (solver)
-                    it->second.as<S>(*solver);
+                    it->second.as<IM>(*solver);
             }
         return true;
     }
@@ -315,19 +315,19 @@ template <> struct kit::yaml::codec<ppx::joint_repository2D>
     {
         YAML::Node node;
         node["Non constraint based"] =
-            kit::yaml::codec<ppx::meta_manager2D<ppx::joint_solver2D>>::encode(jr.non_constraint_based);
+            kit::yaml::codec<ppx::meta_manager2D<ppx::ijoint_manager2D>>::encode(jr.non_constraint_based);
         node["Constraint based"] =
-            kit::yaml::codec<ppx::meta_manager2D<ppx::constraint_solver2D>>::encode(jr.constraint_based);
+            kit::yaml::codec<ppx::meta_manager2D<ppx::iconstraint_manager2D>>::encode(jr.constraint_based);
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::joint_repository2D &jr)
     {
         if (!node.IsMap() || node.size() != 2)
             return false;
-        kit::yaml::codec<ppx::meta_manager2D<ppx::joint_solver2D>>::decode(node["Non constraint based"],
-                                                                           jr.non_constraint_based);
-        kit::yaml::codec<ppx::meta_manager2D<ppx::constraint_solver2D>>::decode(node["Constraint based"],
-                                                                                jr.constraint_based);
+        kit::yaml::codec<ppx::meta_manager2D<ppx::ijoint_manager2D>>::decode(node["Non constraint based"],
+                                                                             jr.non_constraint_based);
+        kit::yaml::codec<ppx::meta_manager2D<ppx::iconstraint_manager2D>>::decode(node["Constraint based"],
+                                                                                  jr.constraint_based);
         return true;
     }
 };
@@ -382,10 +382,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
         YAML::Node nres = node["Resolution"];
         if (auto colres = cm.resolution<ppx::sequential_impulses_resolution2D>())
-        {
             nres["Method"] = 0;
-            nres["Slop"] = colres->slop;
-        }
         else if (auto colres = cm.resolution<ppx::spring_driven_resolution2D>())
         {
             nres["Method"] = 1;
@@ -458,7 +455,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             const int method = nres["Method"].as<int>();
             if (method == 0)
-                cm.set_resolution<ppx::sequential_impulses_resolution2D>(nres["Slop"].as<float>());
+                cm.set_resolution<ppx::sequential_impulses_resolution2D>();
             else if (method == 1)
                 cm.set_resolution<ppx::spring_driven_resolution2D>(nres["Rigidity"].as<float>(),
                                                                    nres["Normal damping"].as<float>(),
@@ -483,6 +480,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
         YAML::Node ctrs = node["Constraint settings"];
         ctrs["Velocity iterations"] = world.constraints.velocity_iterations;
         ctrs["Position iterations"] = world.constraints.position_iterations;
+        ctrs["Slop"] = world.constraints.slop;
         ctrs["Warmup"] = world.constraints.warmup;
         ctrs["Baumgarte correction"] = world.constraints.baumgarte_correction;
         ctrs["Baumgarte coef"] = world.constraints.baumgarte_coef;
@@ -505,6 +503,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
         const YAML::Node ctrs = node["Constraint settings"];
         world.constraints.velocity_iterations = ctrs["Velocity iterations"].as<std::uint32_t>();
         world.constraints.position_iterations = ctrs["Position iterations"].as<std::uint32_t>();
+        world.constraints.slop = ctrs["Slop"].as<float>();
         world.constraints.warmup = ctrs["Warmup"].as<bool>();
         world.constraints.baumgarte_correction = ctrs["Baumgarte correction"].as<bool>();
         world.constraints.baumgarte_coef = ctrs["Baumgarte coef"].as<float>();

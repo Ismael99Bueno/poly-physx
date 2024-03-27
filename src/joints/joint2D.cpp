@@ -7,11 +7,11 @@ joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &
     : worldref2D(world), m_body1(body1), m_body2(body2), m_lanchor1(body1->local_position_point(ganchor1)),
       m_lanchor2(body2->local_position_point(ganchor2))
 {
+    KIT_ASSERT_ERROR(body1 != body2, "Cannot create joint between the same body: {0}", body1->index);
 }
 
 joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor)
-    : worldref2D(world), m_body1(body1), m_body2(body2), m_lanchor1(body1->local_position_point(ganchor)),
-      m_lanchor2(body2->local_position_point(ganchor))
+    : joint2D(world, body1, body2, ganchor, ganchor)
 {
 }
 

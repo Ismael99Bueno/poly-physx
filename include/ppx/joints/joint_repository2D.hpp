@@ -1,7 +1,6 @@
 #pragma once
 
-#include "ppx/joints/joint_manager2D.hpp"
-#include "ppx/constraints/constraint_manager2D.hpp"
+#include "ppx/joints/meta_manager2D.hpp"
 
 namespace ppx
 {
@@ -65,19 +64,12 @@ class joint_repository2D
         else
             return non_constraint_based.remove<T>(index);
     }
-    template <Joint T> bool remove(const T &joint)
+    template <Joint T> bool remove(const T *joint)
     {
         if constexpr (std::is_base_of_v<vconstraint2D, T>)
             return constraint_based.remove(joint);
         else
             return non_constraint_based.remove(joint);
-    }
-    template <Joint T> bool remove(const typename T::id_type &id)
-    {
-        if constexpr (std::is_base_of_v<vconstraint2D, T>)
-            return constraint_based.remove(id);
-        else
-            return non_constraint_based.remove(id);
     }
 
   private:

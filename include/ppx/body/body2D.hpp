@@ -123,17 +123,25 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
 
     const glm::vec2 &charge_centroid() const;
 
+    const glm::vec2 &velocity() const;
+    glm::vec2 &velocity();
+    float angular_velocity() const;
+    float &angular_velocity();
+
     glm::vec2 lvelocity_at_from_centroid(const glm::vec2 &lpoint) const;
     glm::vec2 lvelocity_at_from_position(const glm::vec2 &lpoint) const;
     glm::vec2 gvelocity_at(const glm::vec2 &gpoint) const;
-    glm::vec2 gvelocity_at_centroid_offset(const glm::vec2 &offset) const;
-    glm::vec2 gvelocity_at_position_offset(const glm::vec2 &offset) const;
+    glm::vec2 velocity_at_centroid_offset(const glm::vec2 &offset) const;
+    glm::vec2 velocity_at_position_offset(const glm::vec2 &offset) const;
 
     void centroid(const glm::vec2 &centroid);
     void gposition(const glm::vec2 &gposition);
     void origin(const glm::vec2 &origin);
     void rotation(float rotation);
     void mass(float mass);
+
+    void velocity(const glm::vec2 &velocity);
+    void angular_velocity(float angular_velocity);
 
   private:
     state2D m_state;
