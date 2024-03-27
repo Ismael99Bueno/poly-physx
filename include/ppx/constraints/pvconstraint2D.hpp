@@ -15,8 +15,7 @@ class pvconstraint2D : public vconstraint2D
     virtual void startup() override;
 
   protected:
-    pvconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2);
-    pvconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor);
+    using vconstraint2D::vconstraint2D;
     float m_c;
 
     bool adjust_clamped(float min, float max);

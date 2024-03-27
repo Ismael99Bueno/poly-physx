@@ -13,11 +13,9 @@ class vconstraint2D : public joint2D
 
     virtual void startup();
     virtual void warmup();
-    void reset_impulse();
 
   protected:
-    vconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2);
-    vconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor);
+    using joint2D::joint2D;
     float m_cumlambda = 0.f;
 
     glm::vec2 m_ganchor1;

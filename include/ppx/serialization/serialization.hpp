@@ -133,30 +133,64 @@ template <> struct kit::yaml::codec<ppx::body2D::specs>
     }
 };
 
+template <> struct kit::yaml::codec<ppx::specs::joint2D>
+{
+    static YAML::Node encode(const ppx::specs::joint2D &joint)
+    {
+        YAML::Node node;
+        if (joint.bindex1 != SIZE_MAX)
+            node["Index1"] = joint.bindex1;
+        else
+            node["Body1"] = joint.bspecs1;
+        if (joint.bindex2 != SIZE_MAX)
+            node["Index2"] = joint.bindex2;
+        else
+            node["Body2"] = joint.bspecs2;
+
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::specs::joint2D &joint)
+    {
+        if (!node.IsMap() || node.size() != 2)
+            return false;
+
+        if (node["Index1"])
+            joint.bindex1 = node["Index1"].as<std::size_t>();
+        else
+            joint.bspecs1 = node["Body1"].as<ppx::body2D::specs>();
+
+        if (node["Index2"])
+            joint.bindex2 = node["Index2"].as<std::size_t>();
+        else
+            joint.bspecs2 = node["Body2"].as<ppx::body2D::specs>();
+
+        return true;
+    }
+};
+
 template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
 {
     static YAML::Node encode(const ppx::distance_joint2D::specs &dj)
     {
         YAML::Node node;
-        node["Index1"] = dj.bindex1;
-        node["Index2"] = dj.bindex2;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(dj);
         node["Anchor1"] = dj.ganchor1;
         node["Anchor2"] = dj.ganchor2;
-        node["Min distance"] = dj.min_distance;
-        node["Max distance"] = dj.max_distance;
+        node["Min distance"] = dj.props.min_distance;
+        node["Max distance"] = dj.props.max_distance;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
     {
-        if (!node.IsMap() || node.size() != 6)
+        if (!node.IsMap() || node.size() != 5)
             return false;
 
-        dj.bindex1 = node["Index1"].as<std::size_t>();
-        dj.bindex2 = node["Index2"].as<std::size_t>();
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], dj))
+            return false;
         dj.ganchor1 = node["Anchor1"].as<glm::vec2>();
         dj.ganchor2 = node["Anchor2"].as<glm::vec2>();
-        dj.min_distance = node["Min distance"].as<float>();
-        dj.max_distance = node["Max distance"].as<float>();
+        dj.props.min_distance = node["Min distance"].as<float>();
+        dj.props.max_distance = node["Max distance"].as<float>();
         return true;
     }
 };
@@ -166,8 +200,7 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
     static YAML::Node encode(const ppx::spring2D::specs &sp)
     {
         YAML::Node node;
-        node["Index1"] = sp.bindex1;
-        node["Index2"] = sp.bindex2;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(sp);
         node["Anchor1"] = sp.ganchor1;
         node["Anchor2"] = sp.ganchor2;
         node["Frequency"] = sp.props.frequency;
@@ -182,8 +215,8 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         if (!node.IsMap() || node.size() != 9)
             return false;
 
-        sp.bindex1 = node["Index1"].as<std::size_t>();
-        sp.bindex2 = node["Index2"].as<std::size_t>();
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], sp))
+            return false;
         sp.ganchor1 = node["Anchor1"].as<glm::vec2>();
         sp.ganchor2 = node["Anchor2"].as<glm::vec2>();
         sp.props.frequency = node["Frequency"].as<float>();

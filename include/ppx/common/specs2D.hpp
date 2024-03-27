@@ -28,7 +28,7 @@ struct collider2D
     {
         float density = 1.f;
         float charge_density = 1.f;
-        float restitution = 0.2f;
+        float restitution = 0.f;
         float friction = 0.8f;
         kit::dynarray<glm::vec2, PPX_MAX_VERTICES> vertices = polygon::square(5.f);
         float radius = 2.5f;
@@ -64,14 +64,20 @@ struct joint2D
 {
     std::size_t bindex1 = SIZE_MAX;
     std::size_t bindex2 = SIZE_MAX;
+
+    body2D bspecs1{};
+    body2D bspecs2{};
 };
 
 struct distance_joint2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
-    float min_distance = 0.f;
-    float max_distance = 0.f;
+    struct properties
+    {
+        float min_distance = 0.f;
+        float max_distance = 0.f;
+    } props;
     static distance_joint2D from_instance(const ppx::distance_joint2D &dj);
 };
 
@@ -82,7 +88,7 @@ struct spring2D : joint2D
     struct properties
     {
         float frequency = 1.f;
-        float damping_ratio = 0.f;
+        float damping_ratio = 0.2f;
         float length = 0.f;
 
         std::uint32_t non_linear_terms = 0;
@@ -104,28 +110,33 @@ struct contraption2D
                               bool fixed_end = true);
     static contraption2D chain(const glm::vec2 &start, const glm::vec2 &end, std::uint32_t segments,
                                float spring_anchor_spacing, const body2D::properties &node_props = {},
-                               bool fixed_start = true, bool fixed_end = true);
+                               const distance_joint2D::properties &dj_props = {}, bool fixed_start = true,
+                               bool fixed_end = true);
 
     static contraption2D soft_body(const std::vector<glm::vec2> &anchors, const body2D::properties &body_props = {},
                                    const spring2D::properties &spring_props = {});
     static contraption2D soft_body(float radius, std::uint32_t segments, const body2D::properties &body_props = {},
                                    const spring2D::properties &spring_props = {});
 
-    template <std::input_iterator AnchorIt>
+    template <std::random_access_iterator AnchorIt>
     static contraption2D soft_body(AnchorIt it1, AnchorIt it2, const body2D::properties &body_props = {},
                                    const spring2D::properties &spring_props = {})
     {
         const std::size_t size = std::distance(it1, it2);
         KIT_ASSERT_ERROR(size > 1, "Soft body must have at least 2 anchors");
+
         contraption2D contraption;
-        contraption.bodies.reserve(size);
         contraption.springs.reserve(size * (size - 1) / 2);
-        for (auto it = it1; it != it2; ++it)
-            contraption.bodies.push_back(body2D{.position = *it, .props = body_props});
+
         for (std::size_t i = 0; i < size; ++i)
             for (std::size_t j = i + 1; j < size; ++j)
-                contraption.springs.push_back(
-                    {{i, j}, contraption.bodies[i].position, contraption.bodies[j].position, spring_props});
+            {
+                auto p1 = it1 + i;
+                auto p2 = it1 + j;
+                const body2D spc1 = {.position = *p1, .props = body_props};
+                const body2D spc2 = {.position = *p2, .props = body_props};
+                contraption.springs.push_back({{.bspecs1 = spc1, .bspecs2 = spc2}, *p1, *p2, spring_props});
+            }
         return contraption;
     }
 };

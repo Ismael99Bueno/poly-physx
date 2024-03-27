@@ -5,17 +5,6 @@
 
 namespace ppx
 {
-vconstraint2D::vconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1,
-                             const glm::vec2 &ganchor2)
-    : joint2D(world, body1, body2, ganchor1, ganchor2)
-{
-}
-
-vconstraint2D::vconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor)
-    : joint2D(world, body1, body2, ganchor)
-{
-}
-
 float vconstraint2D::compute_velocity_lambda() const
 {
     return -constraint_velocity() / m_inv_mass;
@@ -77,11 +66,6 @@ void vconstraint2D::warmup()
         return;
     m_cumlambda *= world.timestep_ratio();
     apply_velocity_lambda(m_cumlambda);
-}
-
-void vconstraint2D::reset_impulse()
-{
-    m_cumlambda = 0.f;
 }
 
 } // namespace ppx

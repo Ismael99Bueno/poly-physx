@@ -4,17 +4,6 @@
 
 namespace ppx
 {
-pvconstraint2D::pvconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1,
-                               const glm::vec2 &ganchor2)
-    : vconstraint2D(world, body1, body2, ganchor1, ganchor2)
-{
-}
-
-pvconstraint2D::pvconstraint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor)
-    : vconstraint2D(world, body1, body2, ganchor)
-{
-}
-
 float pvconstraint2D::compute_velocity_lambda() const
 {
     const float cvel = constraint_velocity();
@@ -35,7 +24,7 @@ bool pvconstraint2D::adjust_unclamped()
 
 bool pvconstraint2D::apply_corrections(const float c)
 {
-    if (c < world.constraints.slop)
+    if (std::abs(c) < world.constraints.slop)
         return true;
 
     const float lambda = -c / m_inv_mass;

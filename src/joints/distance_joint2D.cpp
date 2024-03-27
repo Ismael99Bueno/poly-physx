@@ -6,9 +6,10 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : pvconstraint2D(world, world.bodies[spc.bindex1], world.bodies[spc.bindex2], spc.ganchor1, spc.ganchor2)
+    : pvconstraint2D(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
+      max_distance(spc.props.max_distance)
 {
-    if (kit::approximately(spc.min_distance, spc.max_distance))
+    if (kit::approximately(min_distance, max_distance))
     {
         const float length = glm::distance(ganchor1(), ganchor2());
         min_distance = length;

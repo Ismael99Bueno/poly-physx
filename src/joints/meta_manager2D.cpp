@@ -59,4 +59,7 @@ void constraint_meta_manager2D::solve()
     m_si_solver = nullptr;
 }
 
+template class meta_manager2D<ijoint_manager2D>;
+template class meta_manager2D<iconstraint_manager2D>;
+
 } // namespace ppx

@@ -10,9 +10,9 @@ namespace ppx
 {
 
 spring2D::spring2D(world2D &world, const specs &spc)
-    : joint2D(world, world.bodies[spc.bindex1], world.bodies[spc.bindex2], spc.ganchor1, spc.ganchor2),
-      frequency(spc.props.frequency), damping_ratio(spc.props.damping_ratio), length(spc.props.length),
-      non_linear_terms(spc.props.non_linear_terms), non_linear_contribution(spc.props.non_linear_contribution)
+    : joint2D(world, spc, spc.ganchor1, spc.ganchor2), frequency(spc.props.frequency),
+      damping_ratio(spc.props.damping_ratio), length(spc.props.length), non_linear_terms(spc.props.non_linear_terms),
+      non_linear_contribution(spc.props.non_linear_contribution)
 {
 }
 

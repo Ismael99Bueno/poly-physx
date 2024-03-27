@@ -12,8 +12,6 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
       m_manifold_index(manifold_index), m_restitution(collision->restitution),
       m_penetration(-glm::length(collision->mtv)), m_mtv(collision->mtv), m_friction(world, collision, manifold_index)
 {
-    KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
-    KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
     startup();
     m_init_ctr_vel = constraint_velocity();
 }

@@ -49,8 +49,6 @@ void sequential_impulses_resolution2D::startup()
         contact.startup();
         if (world.constraints.warmup)
             contact.warmup();
-        else
-            contact.reset_impulse();
     }
 }
 

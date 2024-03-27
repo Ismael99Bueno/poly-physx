@@ -54,8 +54,6 @@ template <Constraint T> class constraint_manager2D : public joint_container2D<T>
             constraint->startup();
             if (this->world.constraints.warmup)
                 constraint->warmup();
-            else
-                constraint->reset_impulse();
         }
     }
 

@@ -46,7 +46,7 @@ body2D body2D::from_instance(const ppx::body2D &body)
 
 distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj)
 {
-    return {{dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2()};
+    return {{dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), {dj.min_distance, dj.max_distance}};
 }
 
 spring2D spring2D::from_instance(const ppx::spring2D &sp)
@@ -63,39 +63,42 @@ contraption2D contraption2D::rope(const glm::vec2 &start, const glm::vec2 &end, 
                                   const bool fixed_end)
 {
     contraption2D contraption;
-    contraption.bodies.reserve(segments + 2);
     contraption.springs.reserve(segments + 1);
 
     const glm::vec2 dir = (end - start) / (float)(segments + 1);
     const glm::vec2 spacing = 0.5f * spring_anchor_spacing * glm::normalize(dir);
 
-    contraption.bodies.push_back(body2D{.position = start, .props = node_props});
+    body2D previous = {.position = start, .props = node_props};
     for (std::size_t i = 1; i <= segments + 1; i++)
     {
         const glm::vec2 curpos = start + dir * (float)i;
-        const glm::vec2 &prevpos = contraption.bodies.back().position;
-        contraption.bodies.push_back(body2D{.position = start + dir * (float)i, .props = node_props});
-        contraption.springs.push_back({{i - 1, i}, prevpos + spacing, curpos - spacing, spring_props});
+        const body2D current = {.position = curpos, .props = node_props};
+        contraption.springs.push_back(
+            {{.bspecs1 = previous, .bspecs2 = current}, previous.position + spacing, curpos - spacing, spring_props});
+        previous = current;
     }
     return contraption;
 }
 
 contraption2D contraption2D::chain(const glm::vec2 &start, const glm::vec2 &end, const std::uint32_t segments,
                                    const float spring_anchor_spacing, const body2D::properties &node_props,
-                                   const bool fixed_start, const bool fixed_end)
+                                   const distance_joint2D::properties &dj_props, const bool fixed_start,
+                                   const bool fixed_end)
 {
     contraption2D contraption;
-    contraption.bodies.reserve(segments + 2);
     contraption.distance_joints.reserve(segments + 1);
 
     const glm::vec2 dir = (end - start) / (float)(segments + 1);
     const glm::vec2 spacing = 0.5f * spring_anchor_spacing * glm::normalize(dir);
 
-    contraption.bodies.push_back(body2D{.position = start, .props = node_props});
+    body2D previous = {.position = start, .props = node_props};
     for (std::size_t i = 1; i <= segments + 1; i++)
     {
-        contraption.bodies.push_back(body2D{.position = start + dir * (float)i, .props = node_props});
-        contraption.distance_joints.push_back({{i - 1, i}, spacing, -spacing});
+        const glm::vec2 curpos = start + dir * (float)i;
+        const body2D current = {.position = curpos, .props = node_props};
+        contraption.distance_joints.push_back(
+            {{.bspecs1 = previous, .bspecs2 = current}, previous.position + spacing, curpos - spacing, dj_props});
+        previous = current;
     }
     return contraption;
 }
