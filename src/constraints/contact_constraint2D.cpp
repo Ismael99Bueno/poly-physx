@@ -12,9 +12,10 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
       m_manifold_index(manifold_index), m_restitution(collision->restitution),
       m_penetration(-glm::length(collision->mtv)), m_mtv(collision->mtv), m_friction(world, collision, manifold_index)
 {
-    m_init_ctr_vel = glm::dot(glm::normalize(collision->mtv),
-                              m_body2->gvelocity_at(collision->manifold.contacts[manifold_index]) -
-                                  m_body1->gvelocity_at(collision->manifold.contacts[manifold_index]));
+    if (!kit::approaches_zero(m_restitution))
+        m_init_ctr_vel = glm::dot(glm::normalize(collision->mtv),
+                                  m_body2->gvelocity_at(collision->manifold.contacts[manifold_index]) -
+                                      m_body1->gvelocity_at(collision->manifold.contacts[manifold_index]));
 }
 
 float contact_constraint2D::constraint_position() const
