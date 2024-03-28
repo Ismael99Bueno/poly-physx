@@ -14,7 +14,7 @@
 #include "kit/container/hashable_tuple.hpp"
 
 #ifndef PPX_THREAD_COUNT
-#define PPX_THREAD_COUNT 16
+#define PPX_THREAD_COUNT 8
 #endif
 
 namespace ppx
