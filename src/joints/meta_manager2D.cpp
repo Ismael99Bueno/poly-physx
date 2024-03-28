@@ -27,11 +27,6 @@ void constraint_meta_manager2D::delegate_contacts_resolution(sequential_impulses
 
 void constraint_meta_manager2D::solve()
 {
-    KIT_ASSERT_ERROR(this->world.constraints.baumgarte_coef >= 0.f, "Baumgarte coef must be non-negative: {0}",
-                     this->world.constraints.baumgarte_coef)
-    KIT_ASSERT_ERROR(this->world.constraints.baumgarte_threshold >= 0.f,
-                     "Baumgarte threshold must be non-negative: {0}", this->world.constraints.baumgarte_threshold)
-
     KIT_PERF_SCOPE("Constraints solve")
     if (m_si_solver)
         m_si_solver->startup();

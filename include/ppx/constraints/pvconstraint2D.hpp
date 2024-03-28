@@ -10,19 +10,14 @@ class pvconstraint2D : public vconstraint2D
     virtual ~pvconstraint2D() = default;
 
     virtual float constraint_position() const = 0;
-    virtual bool adjust_positions() = 0;
-
     virtual void startup() override;
+    bool adjust_positions();
 
   protected:
     using vconstraint2D::vconstraint2D;
-    float m_c;
-
-    bool adjust_clamped(float min, float max);
-    bool adjust_unclamped();
+    float m_c = 0.f;
 
   private:
     float compute_velocity_lambda() const override;
-    bool apply_corrections(float c);
 };
 } // namespace ppx

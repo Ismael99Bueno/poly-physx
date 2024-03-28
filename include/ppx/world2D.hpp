@@ -34,9 +34,12 @@ class world2D : kit::non_copyable
         bool warmup = true;
         bool baumgarte_correction = true;
 
-        float baumgarte_coef = 0.04f;
+        float baumgarte_coef = 0.015f;
         float baumgarte_threshold = 0.005f;
         float slop = 0.01f;
+
+        float max_position_correction = 0.12f;
+        float overlap_resolution_speed = 0.02f;
     } constraints;
 
     bool semi_implicit_integration = false;
@@ -44,6 +47,8 @@ class world2D : kit::non_copyable
     void add(const specs::contraption2D &contraption);
 
     bool step();
+
+    float rk_substep_timestep() const;
     float timestep_ratio() const;
 
     float kinetic_energy() const;
@@ -57,6 +62,7 @@ class world2D : kit::non_copyable
 
   private:
     float m_previous_timestep = 0.f;
+    float m_rk_substep_timestep = integrator.ts.value;
     float m_timestep_ratio = 1.f;
 
     void pre_step_preparation();

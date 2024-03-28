@@ -27,8 +27,8 @@ class body_manager2D final : public manager2D<body2D>
 
     kit::block_allocator<body2D> m_allocator{1024};
 
-    void apply_impulse_and_persistent_forces();
-    void reset_impulse_forces();
+    void apply_instant_and_persistent_forces();
+    void reset_instant_forces();
     void reset_simulation_forces();
 
     void send_data_to_state(rk::state<float> &state);

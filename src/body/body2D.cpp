@@ -262,8 +262,8 @@ void body2D::ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint)
 }
 void body2D::gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint)
 {
-    impulse_force += force;
-    impulse_torque += kit::cross2D(gpoint - m_state.centroid.position, force);
+    instant_force += force;
+    instant_torque += kit::cross2D(gpoint - m_state.centroid.position, force);
 }
 
 void body2D::apply_simulation_force(const glm::vec2 &force)

@@ -19,8 +19,6 @@ class contact_constraint2D final : public pvconstraint2D
     void startup() override;
     void warmup() override;
 
-    bool adjust_positions() override;
-
     void update(const collision2D *collision);
 
   private:
@@ -30,6 +28,7 @@ class contact_constraint2D final : public pvconstraint2D
     float m_penetration;
     glm::vec2 m_mtv;
     friction_constraint2D m_friction;
+    bool m_is_adjusting_positions = false;
 
     float m_init_ctr_vel = 0.f;
 

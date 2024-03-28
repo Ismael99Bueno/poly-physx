@@ -21,8 +21,6 @@ class distance_joint2D final : public pvconstraint2D
     void startup() override;
     void solve() override;
 
-    bool adjust_positions() override;
-
   private:
     float inverse_mass() const override;
     glm::vec2 direction() const override;

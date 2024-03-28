@@ -29,26 +29,22 @@ float contact_constraint2D::constraint_velocity() const
 
 void contact_constraint2D::solve()
 {
-    solve_clamped(0.f, FLT_MAX);
     m_friction.max_lambda = std::abs(m_cumlambda);
     m_friction.solve();
+    solve_clamped(0.f, FLT_MAX);
 }
 
 void contact_constraint2D::startup()
 {
     pvconstraint2D::startup();
-    m_friction.startup();
+    if (!m_is_adjusting_positions)
+        m_friction.startup();
 }
 
 void contact_constraint2D::warmup()
 {
     pvconstraint2D::warmup();
     m_friction.warmup();
-}
-
-bool contact_constraint2D::adjust_positions()
-{
-    return adjust_unclamped();
 }
 
 void contact_constraint2D::update(const collision2D *collision)
@@ -64,6 +60,7 @@ void contact_constraint2D::update(const collision2D *collision)
     m_penetration = -glm::length(collision->mtv);
     m_friction.update(collision, m_lanchor1, m_lanchor2);
     recently_updated = true;
+    m_is_adjusting_positions = false;
 }
 
 float contact_constraint2D::inverse_mass() const

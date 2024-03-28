@@ -21,8 +21,8 @@ void vconstraint2D::apply_velocity_lambda(const float lambda)
     m_body1->ctr_state.angular_velocity += m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, imp1);
     m_body2->ctr_state.angular_velocity += m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, imp2);
 
-    const glm::vec2 f1 = imp1 / world.integrator.ts.value;
-    const glm::vec2 f2 = imp2 / world.integrator.ts.value;
+    const glm::vec2 f1 = imp1 / world.rk_substep_timestep();
+    const glm::vec2 f2 = imp2 / world.rk_substep_timestep();
     const float torque1 = kit::cross2D(m_offset1, f1);
     const float torque2 = kit::cross2D(m_offset2, f2);
 

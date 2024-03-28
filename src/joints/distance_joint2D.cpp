@@ -22,14 +22,10 @@ float distance_joint2D::constraint_position() const
     KIT_ASSERT_ERROR(min_distance <= max_distance,
                      "Minimum distance must be less than or equal to maximum distance: {0} <= {1}", min_distance,
                      max_distance)
-    const glm::vec2 ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
-    const glm::vec2 ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
-    const float length = glm::distance(ganchor1, ganchor2);
-
-    if (length < min_distance)
-        return length - min_distance;
-    if (length > max_distance)
-        return length - max_distance;
+    if (m_length < min_distance)
+        return m_length - min_distance;
+    if (m_length > max_distance)
+        return m_length - max_distance;
     return 0.f;
 }
 float distance_joint2D::constraint_velocity() const
@@ -62,11 +58,6 @@ void distance_joint2D::solve()
         solve_clamped(0.f, FLT_MAX);
     else
         solve_clamped(-FLT_MAX, 0.f);
-}
-
-bool distance_joint2D::adjust_positions()
-{
-    return adjust_unclamped();
 }
 
 bool distance_joint2D::legal_length() const

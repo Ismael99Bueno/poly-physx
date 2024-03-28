@@ -26,23 +26,23 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     return body;
 }
 
-void body_manager2D::apply_impulse_and_persistent_forces()
+void body_manager2D::apply_instant_and_persistent_forces()
 {
     KIT_PERF_FUNCTION()
     for (body2D *body : m_elements)
     {
-        body->apply_simulation_force(body->impulse_force + body->persistent_force);
-        body->apply_simulation_torque(body->impulse_torque + body->persistent_torque);
+        body->apply_simulation_force(body->instant_force + body->persistent_force);
+        body->apply_simulation_torque(body->instant_torque + body->persistent_torque);
     }
 }
 
-void body_manager2D::reset_impulse_forces()
+void body_manager2D::reset_instant_forces()
 {
     KIT_PERF_FUNCTION()
     for (body2D *body : m_elements)
     {
-        body->impulse_force = glm::vec2(0.f);
-        body->impulse_torque = 0.f;
+        body->instant_force = glm::vec2(0.f);
+        body->instant_torque = 0.f;
     }
 }
 void body_manager2D::reset_simulation_forces()
@@ -163,7 +163,15 @@ void body_manager2D::retrieve_data_from_state_variables(const std::vector<float>
 void body_manager2D::prepare_constraint_states()
 {
     for (body2D *body : m_elements)
+    {
         body->ctr_state = body->m_state;
+        if (world.semi_implicit_integration)
+        {
+            body->ctr_state.velocity += body->props().dynamic.inv_mass * body->force() * world.rk_substep_timestep();
+            body->ctr_state.angular_velocity +=
+                body->props().dynamic.inv_inertia * body->torque() * world.rk_substep_timestep();
+        }
+    }
 }
 
 } // namespace ppx

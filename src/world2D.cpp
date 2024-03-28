@@ -45,13 +45,18 @@ void world2D::pre_step_preparation()
 }
 void world2D::post_step_setup()
 {
-    bodies.reset_impulse_forces();
+    bodies.reset_instant_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     m_previous_timestep = integrator.ts.value;
 
 #ifdef DEBUG
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
+}
+
+float world2D::rk_substep_timestep() const
+{
+    return m_rk_substep_timestep;
 }
 
 float world2D::timestep_ratio() const
@@ -72,9 +77,9 @@ std::vector<float> world2D::create_state_derivative() const
         const float angaccel = body->torque() * body->props().dynamic.inv_inertia;
 
         const glm::vec2 velocity =
-            semi_implicit_integration ? body->velocity() + accel * integrator.ts.value : body->velocity();
+            semi_implicit_integration ? body->velocity() + accel * m_rk_substep_timestep : body->velocity();
         const float angular_velocity = semi_implicit_integration
-                                           ? body->angular_velocity() + angaccel * integrator.ts.value
+                                           ? body->angular_velocity() + angaccel * m_rk_substep_timestep
                                            : body->angular_velocity();
 
         state_derivative[index] = velocity.x;
@@ -131,10 +136,11 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         "State vector size must be exactly 6 times greater than the body array size - vars: {0}, body array: {1}",
         vars.size(), bodies.size())
 
+    m_rk_substep_timestep = timestep;
     bodies.reset_simulation_forces();
     bodies.retrieve_data_from_state_variables(vars);
 
-    bodies.apply_impulse_and_persistent_forces();
+    bodies.apply_instant_and_persistent_forces();
     behaviours.apply_forces();
     joints.non_constraint_based.solve();
 

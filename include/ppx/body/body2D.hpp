@@ -35,10 +35,10 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
 
     body2D(world2D &world, const specs &spc = {});
 
-    glm::vec2 impulse_force{0.f};
+    glm::vec2 instant_force{0.f};
     glm::vec2 persistent_force{0.f};
 
-    float impulse_torque = 0.f;
+    float instant_torque = 0.f;
     float persistent_torque = 0.f;
 
     float charge;

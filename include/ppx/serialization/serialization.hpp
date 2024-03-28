@@ -513,11 +513,13 @@ template <> struct kit::yaml::codec<ppx::world2D>
         YAML::Node ctrs = node["Constraint settings"];
         ctrs["Velocity iterations"] = world.constraints.velocity_iterations;
         ctrs["Position iterations"] = world.constraints.position_iterations;
-        ctrs["Slop"] = world.constraints.slop;
         ctrs["Warmup"] = world.constraints.warmup;
         ctrs["Baumgarte correction"] = world.constraints.baumgarte_correction;
         ctrs["Baumgarte coef"] = world.constraints.baumgarte_coef;
         ctrs["Baumgarte threshold"] = world.constraints.baumgarte_threshold;
+        ctrs["Slop"] = world.constraints.slop;
+        ctrs["Max position correction"] = world.constraints.max_position_correction;
+        ctrs["Overlap resolution speed"] = world.constraints.overlap_resolution_speed;
 
         return node;
     }
@@ -536,11 +538,13 @@ template <> struct kit::yaml::codec<ppx::world2D>
         const YAML::Node ctrs = node["Constraint settings"];
         world.constraints.velocity_iterations = ctrs["Velocity iterations"].as<std::uint32_t>();
         world.constraints.position_iterations = ctrs["Position iterations"].as<std::uint32_t>();
-        world.constraints.slop = ctrs["Slop"].as<float>();
         world.constraints.warmup = ctrs["Warmup"].as<bool>();
         world.constraints.baumgarte_correction = ctrs["Baumgarte correction"].as<bool>();
         world.constraints.baumgarte_coef = ctrs["Baumgarte coef"].as<float>();
         world.constraints.baumgarte_threshold = ctrs["Baumgarte threshold"].as<float>();
+        world.constraints.slop = ctrs["Slop"].as<float>();
+        world.constraints.max_position_correction = ctrs["Max position correction"].as<float>();
+        world.constraints.overlap_resolution_speed = ctrs["Overlap resolution speed"].as<float>();
 
         return true;
     }
