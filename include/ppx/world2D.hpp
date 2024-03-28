@@ -34,7 +34,7 @@ class world2D : kit::non_copyable
         bool warmup = true;
         bool baumgarte_correction = true;
 
-        float baumgarte_coef = 0.015f;
+        float baumgarte_coef = 0.2f;
         float baumgarte_threshold = 0.005f;
         float slop = 0.01f;
 
