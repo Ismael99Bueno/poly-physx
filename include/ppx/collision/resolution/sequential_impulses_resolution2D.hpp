@@ -9,8 +9,9 @@ namespace ppx
 class sequential_impulses_resolution2D : public collision_resolution2D
 {
   public:
-    using contact_map = std::unordered_map<kit::commutative_tuple<const collider2D *, const collider2D *, std::size_t>,
-                                           contact_constraint2D>;
+    using contact_map =
+        std::unordered_map<kit::non_commutative_tuple<const collider2D *, const collider2D *, std::size_t>,
+                           contact_constraint2D>;
     using collision_resolution2D::collision_resolution2D;
 
   private:
