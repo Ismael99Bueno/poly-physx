@@ -1,10 +1,10 @@
 #pragma once
 
 #include "ppx/collider/collider2D.hpp"
-#include "ppx/collision/manifold/manifold2D.hpp"
 
 namespace ppx
 {
+using manifold2D = kit::dynarray<glm::vec2, 2>;
 struct collision2D
 {
     collider2D *collider1 = nullptr;

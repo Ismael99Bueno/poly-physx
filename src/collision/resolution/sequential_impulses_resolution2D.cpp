@@ -13,7 +13,7 @@ void sequential_impulses_resolution2D::update_contacts(const collision_detection
         const collision2D &collision = pair.second;
         if (!collision.enabled)
             continue;
-        for (std::size_t i = 0; i < collision.manifold.size; i++)
+        for (std::size_t i = 0; i < collision.manifold.size(); i++)
         {
             const kit::non_commutative_tuple<const collider2D *, const collider2D *, std::size_t> hash{
                 collision.collider1, collision.collider2, i};

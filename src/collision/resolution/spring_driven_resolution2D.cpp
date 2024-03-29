@@ -30,8 +30,8 @@ std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collisio
     const body2D *body1 = colis.collider1->body();
     const body2D *body2 = colis.collider2->body();
 
-    const glm::vec2 &touch1 = colis.manifold.contacts[manifold_index];
-    const glm::vec2 touch2 = colis.manifold.contacts[manifold_index] - colis.mtv;
+    const glm::vec2 &touch1 = colis.manifold[manifold_index];
+    const glm::vec2 touch2 = colis.manifold[manifold_index] - colis.mtv;
 
     const glm::vec2 offset1 = touch1 - body1->centroid();
     const glm::vec2 offset2 = touch2 - body2->centroid();
@@ -56,16 +56,16 @@ void spring_driven_resolution2D::solve_and_apply_collision_forces(const collisio
     glm::vec2 force{0.f};
     float torque1 = 0.f;
     float torque2 = 0.f;
-    for (std::size_t i = 0; i < colis.manifold.size; i++)
+    for (std::size_t i = 0; i < colis.manifold.size(); i++)
     {
         const auto [f, t1, t2] = compute_collision_forces(colis, i);
         force += f;
         torque1 += t1;
         torque2 += t2;
     }
-    force /= colis.manifold.size;
-    torque1 /= colis.manifold.size;
-    torque2 /= colis.manifold.size;
+    force /= colis.manifold.size();
+    torque1 /= colis.manifold.size();
+    torque2 /= colis.manifold.size();
 
     body2D *body1 = colis.collider1->body();
     body2D *body2 = colis.collider2->body();

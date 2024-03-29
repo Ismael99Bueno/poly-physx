@@ -32,6 +32,15 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     bool contains(const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const;
     bool contains(const collider2D *collider1, const collider2D *collider2) const;
 
+    auto find(const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const
+    {
+        return m_detection->collisions().find(key);
+    }
+    auto find(const collider2D *collider1, const collider2D *collider2) const
+    {
+        return m_detection->collisions().find({collider1, collider2});
+    }
+
     template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> const T *detection() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_detection);

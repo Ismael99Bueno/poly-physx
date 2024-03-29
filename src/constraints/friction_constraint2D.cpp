@@ -8,7 +8,7 @@ namespace ppx
 friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision,
                                              const std::size_t manifold_index)
     : vconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
-                    collision->manifold.contacts[manifold_index]),
+                    collision->manifold[manifold_index]),
       m_friction(collision->friction), m_mtv(collision->mtv)
 {
 }
