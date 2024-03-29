@@ -212,7 +212,7 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::spring2D::specs &sp)
     {
-        if (!node.IsMap() || node.size() != 9)
+        if (!node.IsMap() || node.size() != 8)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], sp))
