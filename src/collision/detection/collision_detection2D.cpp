@@ -115,7 +115,7 @@ void collision_detection2D::process_collision_st(collider2D *collider1, collider
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
     {
-        kit::non_commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
+        kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
         m_collisions.emplace(hash, colis);
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
@@ -127,7 +127,7 @@ void collision_detection2D::process_collision_mt(collider2D *collider1, collider
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
     {
-        kit::non_commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
+        kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
         m_mt_collisions[thread_idx].emplace(hash, colis);
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)

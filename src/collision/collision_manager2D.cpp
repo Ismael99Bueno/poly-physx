@@ -26,12 +26,12 @@ collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
 }
 
 const collision2D &collision_manager2D::operator[](
-    const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const
+    const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
 {
     return m_detection->collisions().at(key);
 }
 const collision2D &collision_manager2D::at(
-    const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const
+    const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
 {
     return m_detection->collisions().at(key);
 }
@@ -40,7 +40,7 @@ const collision2D &collision_manager2D::at(const collider2D *collider1, const co
     return m_detection->collisions().at({collider1, collider2});
 }
 
-bool collision_manager2D::contains(const kit::non_commutative_tuple<const collider2D *, const collider2D *> &key) const
+bool collision_manager2D::contains(const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
 {
     return m_detection->collisions().contains(key);
 }
