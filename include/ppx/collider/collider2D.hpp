@@ -61,8 +61,8 @@ class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
     void lrotate(float dangle);
 
     const aabb2D &bounding_box() const;
-    const kit::transform2D<float> &ltransform() const;
-    void ltransform(const kit::transform2D<float> &ltransform);
+    const transform2D &ltransform() const;
+    void ltransform(const transform2D &ltransform);
 
     const glm::vec2 &lposition() const;
 

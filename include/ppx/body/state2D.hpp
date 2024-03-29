@@ -1,12 +1,13 @@
 #pragma once
 
+#include "ppx/common/shapes2D.hpp"
 #include "kit/utility/transform.hpp"
 
 namespace ppx
 {
 struct state2D
 {
-    kit::transform2D<float> centroid;
+    transform2D centroid;
     glm::vec2 gposition;
     glm::vec2 lposition;
 

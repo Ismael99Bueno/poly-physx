@@ -5,11 +5,11 @@ namespace ppx
 {
 glm::vec2 state2D::local_centroid_point(const glm::vec2 &gpoint) const
 {
-    return centroid.inverse_center_scale_rotate_translate3() * glm::vec3(gpoint, 1.f);
+    return centroid.inv_ltransform() * glm::vec3(gpoint, 1.f);
 }
 glm::vec2 state2D::global_centroid_point(const glm::vec2 &lpoint) const
 {
-    return centroid.center_scale_rotate_translate3() * glm::vec3(lpoint, 1.f);
+    return centroid.ltransform() * glm::vec3(lpoint, 1.f);
 }
 
 glm::vec2 state2D::local_position_point(const glm::vec2 &gpoint) const
@@ -23,11 +23,11 @@ glm::vec2 state2D::global_position_point(const glm::vec2 &lpoint) const
 
 glm::vec2 state2D::local_vector(const glm::vec2 &gvector) const
 {
-    return centroid.inverse_center_scale_rotate_translate3() * glm::vec3(gvector, 0.f);
+    return centroid.inv_ltransform() * glm::vec3(gvector, 0.f);
 }
 glm::vec2 state2D::global_vector(const glm::vec2 &lvector) const
 {
-    return centroid.center_scale_rotate_translate3() * glm::vec3(lvector, 0.f);
+    return centroid.ltransform() * glm::vec3(lvector, 0.f);
 }
 
 glm::vec2 state2D::lvelocity_at_from_centroid(const glm::vec2 &lpoint) const
@@ -40,7 +40,7 @@ glm::vec2 state2D::lvelocity_at_from_position(const glm::vec2 &lpoint) const
 }
 glm::vec2 state2D::gvelocity_at(const glm::vec2 &gpoint) const
 {
-    return velocity_at_centroid_offset(gpoint - centroid.position);
+    return velocity_at_centroid_offset(gpoint - centroid.position());
 }
 glm::vec2 state2D::velocity_at_centroid_offset(const glm::vec2 &offset) const
 {

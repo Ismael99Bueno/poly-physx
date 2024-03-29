@@ -9,11 +9,9 @@ collider2D::collider2D(world2D &world, body2D *body, const specs &spc)
       friction(spc.props.friction), collision_filter(spc.props.collision_filter), m_position(spc.position),
       m_body(body), m_density(spc.props.density), m_charge_density(spc.props.charge_density), m_type(spc.props.shape)
 {
-    const kit::transform2D<float> transform = kit::transform2D<float>::builder()
-                                                  .position(spc.position)
-                                                  .rotation(spc.rotation)
-                                                  .parent(&body->centroid_transform())
-                                                  .build();
+    transform2D transform{kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()};
+    transform.parent(&body->centroid_transform());
+
     switch (spc.props.shape)
     {
     case stype::POLYGON:
@@ -58,14 +56,14 @@ const aabb2D &collider2D::bounding_box() const
 {
     return shape().bounding_box();
 }
-const kit::transform2D<float> &collider2D::ltransform() const
+const transform2D &collider2D::ltransform() const
 {
     return shape().ltransform();
 }
-void collider2D::ltransform(const kit::transform2D<float> &ltransform)
+void collider2D::ltransform(const transform2D &ltransform)
 {
     shape2D &shape = mutable_shape();
-    m_position += shape.lposition() - ltransform.position;
+    m_position += shape.lposition() - ltransform.position();
     shape.ltransform(ltransform);
     update_parent();
 }
@@ -112,8 +110,7 @@ void collider2D::ltranslate(const glm::vec2 &dpos)
 void collider2D::gtranslate(const glm::vec2 &dpos)
 {
     mutable_shape().gtranslate(dpos);
-    m_position +=
-        glm::vec2(m_body->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
+    m_position += glm::vec2(m_body->centroid_transform().inv_ltransform() * glm::vec3(dpos, 0.f));
     update_parent();
 }
 void collider2D::lrotate(float dangle)
@@ -142,8 +139,7 @@ void collider2D::gcentroid(const glm::vec2 &gcentroid)
     const glm::vec2 &gc = mutable_shape().gcentroid();
     const glm::vec2 dpos = gcentroid - gc;
     mutable_shape().gcentroid(gcentroid);
-    m_position +=
-        glm::vec2(m_body->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
+    m_position += glm::vec2(m_body->centroid_transform().inv_ltransform() * glm::vec3(dpos, 0.f));
     update_parent();
 }
 void collider2D::lcentroid(const glm::vec2 &lcentroid)

@@ -13,11 +13,8 @@ body2D *body_manager2D::add(const body2D::specs &spc)
         body->add(collider_spc);
     body->end_density_update();
 
-    const kit::transform2D<float> &centroid = body->centroid_transform();
-    const glm::vec2 &velocity = body->velocity();
-
     rk::state<float> &state = world.integrator.state;
-    state.append({centroid.position.x, centroid.position.y, centroid.rotation, velocity.x, velocity.y,
+    state.append({body->centroid().x, body->centroid().y, body->rotation(), body->velocity().x, body->velocity().y,
                   body->angular_velocity()});
 
     m_elements.push_back(body);

@@ -112,8 +112,8 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
 
-    const kit::transform2D<float> &centroid_transform() const;
-    void centroid_transform(const kit::transform2D<float> &centroid);
+    const transform2D &centroid_transform() const;
+    void centroid_transform(const transform2D &centroid);
 
     const glm::vec2 &centroid() const;
     const glm::vec2 &lposition() const;

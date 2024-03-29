@@ -34,11 +34,11 @@ bool pvconstraint2D::adjust_positions()
     const float da1 = m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, imp1);
     const float da2 = m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, imp2);
 
-    m_body1->ctr_state.centroid.position += dpos1;
-    m_body2->ctr_state.centroid.position += dpos2;
+    m_body1->ctr_state.centroid.translate(dpos1);
+    m_body2->ctr_state.centroid.translate(dpos2);
 
-    m_body1->ctr_state.centroid.rotation += da1;
-    m_body2->ctr_state.centroid.rotation += da2;
+    m_body1->ctr_state.centroid.rotate(da1);
+    m_body2->ctr_state.centroid.rotate(da2);
 
     m_body1->ctr_state.gposition = m_body1->ctr_state.global_centroid_point(m_body1->ctr_state.lposition);
     m_body2->ctr_state.gposition = m_body2->ctr_state.global_centroid_point(m_body2->ctr_state.lposition);
