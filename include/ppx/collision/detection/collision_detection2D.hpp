@@ -24,7 +24,7 @@ class collision_detection2D : public worldref2D, kit::non_copyable
 {
   public:
     using collision_map =
-        std::unordered_map<kit::non_commutative_tuple<const collider2D *, const collider2D *>, collision2D>;
+        std::unordered_map<kit::commutative_tuple<const collider2D *, const collider2D *>, collision2D>;
 
     collision_detection2D(world2D &world);
     virtual ~collision_detection2D() = default;
