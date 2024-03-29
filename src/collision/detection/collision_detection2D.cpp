@@ -188,6 +188,10 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
     const geo::mtv_result mres = geo::mtv(circ1, circ2);
     if (!mres.valid)
         return;
+
+    const manifold2D manifold = m_cc_manifold->circle_circle_contacts(circ1, circ2, mres.mtv);
+    if (manifold.empty())
+        return;
     fill_collision_data(collision, collider1, collider2, mres.mtv,
                         m_cc_manifold->circle_circle_contacts(circ1, circ2, mres.mtv));
 }
@@ -199,6 +203,9 @@ void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, col
 
     const narrow_result nres = m_cp_narrow->circle_polygon(circ, poly);
     if (!nres.valid)
+        return;
+    const manifold2D manifold = m_cp_manifold->circle_polygon_contacts(circ, poly, nres.mtv);
+    if (manifold.empty())
         return;
 
     fill_collision_data(collision, collider1, collider2, nres.mtv,
@@ -213,6 +220,11 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     const narrow_result nres = m_pp_narrow->polygon_polygon(poly1, poly2);
     if (!nres.valid)
         return;
+
+    const manifold2D manifold = m_pp_manifold->polygon_polygon_contacts(poly1, poly2, nres.mtv);
+    if (manifold.empty())
+        return;
+
     fill_collision_data(collision, collider1, collider2, nres.mtv,
                         m_pp_manifold->polygon_polygon_contacts(poly1, poly2, nres.mtv));
 }

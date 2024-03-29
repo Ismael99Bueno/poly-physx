@@ -408,8 +408,11 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         if (cm.detection()->cp_manifold_algorithm<ppx::mtv_support_manifold2D>())
             ndet["C-P Algorithm"] = 0;
 
-        if (cm.detection()->pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>())
+        if (auto clip = cm.detection()->pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>())
+        {
             ndet["P-P Algorithm"] = 0;
+            ndet["Allow intersections"] = clip->allow_intersections;
+        }
         else if (cm.detection()->pp_manifold_algorithm<ppx::mtv_support_manifold2D>())
             ndet["P-P Algorithm"] = 1;
 
@@ -478,7 +481,8 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             const int alg = ndet["P-P Algorithm"].as<int>();
             if (alg == 0)
-                cm.detection()->set_pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>();
+                cm.detection()->set_pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>(
+                    ndet["Allow intersections"].as<bool>());
             else if (alg == 1)
                 cm.detection()->set_pp_manifold_algorithm<ppx::mtv_support_manifold2D>();
         }
