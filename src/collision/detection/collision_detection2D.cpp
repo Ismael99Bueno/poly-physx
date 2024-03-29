@@ -190,10 +190,7 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
         return;
 
     const manifold2D manifold = m_cc_manifold->circle_circle_contacts(circ1, circ2, mres.mtv);
-    if (manifold.empty())
-        return;
-    fill_collision_data(collision, collider1, collider2, mres.mtv,
-                        m_cc_manifold->circle_circle_contacts(circ1, circ2, mres.mtv));
+    fill_collision_data(collision, collider1, collider2, mres.mtv, manifold);
 }
 void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
                                                       collision2D &collision) const
@@ -205,11 +202,7 @@ void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, col
     if (!nres.valid)
         return;
     const manifold2D manifold = m_cp_manifold->circle_polygon_contacts(circ, poly, nres.mtv);
-    if (manifold.empty())
-        return;
-
-    fill_collision_data(collision, collider1, collider2, nres.mtv,
-                        m_cp_manifold->circle_polygon_contacts(circ, poly, nres.mtv));
+    fill_collision_data(collision, collider1, collider2, nres.mtv, manifold);
 }
 void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
                                                       collision2D &collision) const
@@ -221,12 +214,15 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     if (!nres.valid)
         return;
 
-    const manifold2D manifold = m_pp_manifold->polygon_polygon_contacts(poly1, poly2, nres.mtv);
-    if (manifold.empty())
-        return;
-
-    fill_collision_data(collision, collider1, collider2, nres.mtv,
-                        m_pp_manifold->polygon_polygon_contacts(poly1, poly2, nres.mtv));
+    manifold2D manifold = m_pp_manifold->polygon_polygon_contacts(poly1, poly2, nres.mtv);
+    if (manifold.size() != manifold.capacity())
+    {
+        const auto last_contact = m_last_collisions.find({collider1, collider2});
+        if (last_contact != m_last_collisions.end() &&
+            glm::distance2(last_contact->second.manifold[0], manifold[0]) > 0.04f)
+            manifold.push_back(last_contact->second.manifold[0]);
+    }
+    fill_collision_data(collision, collider1, collider2, nres.mtv, manifold);
 }
 
 } // namespace ppx
