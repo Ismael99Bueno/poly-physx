@@ -34,12 +34,12 @@ class world2D : kit::non_copyable
         bool warmup = true;
         bool baumgarte_correction = true;
 
-        float baumgarte_coef = 0.015f;
+        float baumgarte_coef = 0.035f;
         float baumgarte_threshold = 0.005f;
         float slop = 0.01f;
 
-        float max_position_correction = 0.12f;
-        float overlap_resolution_speed = 0.02f;
+        float max_position_correction = 0.2f;
+        float overlap_resolution_speed = 0.2f;
     } constraints;
 
     bool semi_implicit_integration = false;
