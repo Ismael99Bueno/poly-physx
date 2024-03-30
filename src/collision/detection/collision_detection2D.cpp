@@ -102,7 +102,6 @@ void collision_detection2D::inherit(collision_detection2D &&coldet)
     m_cp_narrow = std::move(coldet.m_cp_narrow);
     m_pp_narrow = std::move(coldet.m_pp_narrow);
 
-    m_cc_manifold = std::move(coldet.m_cc_manifold);
     m_cp_manifold = std::move(coldet.m_cp_manifold);
     m_pp_manifold = std::move(coldet.m_pp_manifold);
 
@@ -189,7 +188,7 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
     if (!mres.valid)
         return;
 
-    const manifold2D manifold = m_cc_manifold->circle_circle_contacts(circ1, circ2, mres.mtv);
+    const manifold2D manifold{{geo::radius_distance_contact_point(circ1, circ2)}};
     fill_collision_data(collision, collider1, collider2, mres.mtv, manifold);
 }
 void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
@@ -219,7 +218,7 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     {
         const auto last_contact = m_last_collisions.find({collider1, collider2});
         if (last_contact != m_last_collisions.end() &&
-            glm::distance2(last_contact->second.manifold[0], manifold[0]) > 0.04f)
+            glm::distance2(last_contact->second.manifold[0].point, manifold[0].point) > 0.04f)
             manifold.push_back(last_contact->second.manifold[0]);
     }
     fill_collision_data(collision, collider1, collider2, nres.mtv, manifold);
