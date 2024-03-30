@@ -19,11 +19,9 @@ class contact_constraint2D final : public pvconstraint2D
     void startup() override;
     void warmup() override;
 
-    void update(const collision2D *collision);
+    void update(const collision2D *collision, std::size_t manifold_index);
 
   private:
-    std::size_t m_manifold_index;
-
     float m_restitution;
     float m_penetration;
     glm::vec2 m_mtv;

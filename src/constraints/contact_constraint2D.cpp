@@ -9,8 +9,8 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
                                            const std::size_t manifold_index)
     : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
                      collision->manifold[manifold_index].point),
-      m_manifold_index(manifold_index), m_restitution(collision->restitution),
-      m_penetration(-glm::length(collision->mtv)), m_mtv(collision->mtv), m_friction(world, collision, manifold_index)
+      m_restitution(collision->restitution), m_penetration(-glm::length(collision->mtv)), m_mtv(collision->mtv),
+      m_friction(world, collision, manifold_index)
 {
     if (!kit::approaches_zero(m_restitution))
         m_init_ctr_vel = glm::dot(glm::normalize(collision->mtv),
@@ -49,14 +49,14 @@ void contact_constraint2D::warmup()
     m_friction.warmup();
 }
 
-void contact_constraint2D::update(const collision2D *collision)
+void contact_constraint2D::update(const collision2D *collision, const std::size_t manifold_index)
 {
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
     m_body1 = collision->collider1->body();
     m_body2 = collision->collider2->body();
-    m_lanchor1 = m_body1->local_position_point(collision->manifold[m_manifold_index].point);
-    m_lanchor2 = m_body2->local_position_point(collision->manifold[m_manifold_index].point);
+    m_lanchor1 = m_body1->local_position_point(collision->manifold[manifold_index].point);
+    m_lanchor2 = m_body2->local_position_point(collision->manifold[manifold_index].point);
     m_mtv = collision->mtv;
     m_restitution = collision->restitution;
     m_penetration = -glm::length(collision->mtv);

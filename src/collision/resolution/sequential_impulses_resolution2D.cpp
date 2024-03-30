@@ -19,7 +19,7 @@ void sequential_impulses_resolution2D::update_contacts(const collision_detection
                 collision.collider1, collision.collider2, collision.manifold[i].id.key};
             const auto old_contact = m_contacts.find(hash);
             if (old_contact != m_contacts.end())
-                old_contact->second.update(&collision);
+                old_contact->second.update(&collision, i);
             else
                 m_contacts.emplace(hash, contact_constraint2D(world, &collision, i));
         }

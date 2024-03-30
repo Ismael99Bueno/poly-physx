@@ -164,17 +164,18 @@ collision2D collision_detection2D::generate_collision(collider2D *collider1, col
 }
 
 static void fill_collision_data(collision2D &collision, collider2D *collider1, collider2D *collider2,
-                                const glm::vec2 &mtv, const manifold2D &manifold)
+                                const glm::vec2 &mtv)
 {
     collision.collided = true;
     collision.collider1 = collider1;
     collision.collider2 = collider2;
-    collision.rel_velocity = collider2->body()->velocity() - collider1->body()->velocity();
-    collision.rel_angular_velocity = collider2->body()->angular_velocity() - collider1->body()->angular_velocity();
+    collision.velocity1 = collider1->body()->velocity();
+    collision.velocity2 = collider2->body()->velocity();
+    collision.angular_velocity1 = collider1->body()->angular_velocity();
+    collision.angular_velocity2 = collider2->body()->angular_velocity();
     collision.friction = sqrtf(collider1->friction * collider2->friction);
     collision.restitution = sqrtf(collider1->restitution * collider2->restitution);
     collision.mtv = mtv;
-    collision.manifold = manifold;
 }
 
 void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, collider2D *collider2,
@@ -189,8 +190,8 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
     if (!mres.valid)
         return;
 
-    const manifold2D manifold{{geo::radius_distance_contact_point(circ1, circ2), {}}};
-    fill_collision_data(collision, collider1, collider2, mres.mtv, manifold);
+    fill_collision_data(collision, collider1, collider2, mres.mtv);
+    collision.manifold = {{geo::radius_distance_contact_point(circ1, circ2), {}}};
 }
 void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
                                                       collision2D &collision) const
@@ -201,8 +202,9 @@ void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, col
     const narrow_result nres = m_cp_narrow->circle_polygon(circ, poly);
     if (!nres.valid)
         return;
-    const manifold2D manifold = {{geo::radius_penetration_contact_point(circ, poly, nres.mtv), {}}};
-    fill_collision_data(collision, collider1, collider2, nres.mtv, manifold);
+
+    fill_collision_data(collision, collider1, collider2, nres.mtv);
+    collision.manifold = {{geo::radius_penetration_contact_point(circ, poly, nres.mtv), {}}};
 }
 void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
                                                       collision2D &collision) const
@@ -214,15 +216,11 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     if (!nres.valid)
         return;
 
-    manifold2D manifold = m_pp_manifold->polygon_polygon_contacts(poly1, poly2, nres.mtv);
-    if (manifold.size() != manifold.capacity())
-    {
-        const auto last_contact = m_last_collisions.find({collider1, collider2});
-        if (last_contact != m_last_collisions.end() &&
-            glm::distance2(last_contact->second.manifold[0].point, manifold[0].point) > 0.04f)
-            manifold.push_back(last_contact->second.manifold[0]);
-    }
-    fill_collision_data(collision, collider1, collider2, nres.mtv, manifold);
+    fill_collision_data(collision, collider1, collider2, nres.mtv);
+
+    const auto pcontact = m_last_collisions.find({collider1, collider2});
+    collision.manifold = m_pp_manifold->polygon_polygon_contacts(
+        collision, pcontact != m_last_collisions.end() ? &pcontact->second : nullptr);
 }
 
 } // namespace ppx

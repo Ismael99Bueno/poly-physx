@@ -84,7 +84,7 @@ class collision_detection2D : public worldref2D, kit::non_copyable
     template <kit::DerivedFrom<pp_manifold_algorithm2D> T, class... ManifArgs>
     const T *set_pp_manifold_algorithm(ManifArgs &&...args)
     {
-        auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
+        auto manalg = kit::make_scope<T>(world, std::forward<ManifArgs>(args)...);
         T *ptr = manalg.get();
 
         m_pp_manifold = std::move(manalg);
