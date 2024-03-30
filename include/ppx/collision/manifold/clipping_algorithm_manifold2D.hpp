@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/collision/manifold/manifold_algorithms2D.hpp"
+#include "ppx/collision/manifold/pp_manifold_algorithm2D.hpp"
 
 namespace ppx
 {

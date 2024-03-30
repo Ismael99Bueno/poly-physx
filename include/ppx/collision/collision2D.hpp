@@ -11,6 +11,9 @@ struct collision2D
     collider2D *collider1 = nullptr;
     collider2D *collider2 = nullptr;
 
+    glm::vec2 rel_velocity;
+    float rel_angular_velocity;
+
     float restitution;
     float friction;
 

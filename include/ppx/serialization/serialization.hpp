@@ -398,9 +398,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["P-P EPA Threshold"] = narrow->epa_threshold;
         }
 
-        if (cm.detection()->cp_manifold_algorithm<ppx::mtv_support_manifold2D>())
-            ndet["C-P Algorithm"] = 0;
-
         if (auto clip = cm.detection()->pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>())
         {
             ndet["P-P Algorithm"] = 0;
@@ -453,9 +450,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             cm.detection()->set_cp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["C-P EPA Threshold"].as<float>());
         if (ndet["P-P Narrow"])
             cm.detection()->set_pp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["P-P EPA Threshold"].as<float>());
-
-        if (ndet["C-P Algorithm"])
-            cm.detection()->set_cp_manifold_algorithm<ppx::mtv_support_manifold2D>();
 
         if (ndet["P-P Algorithm"])
         {

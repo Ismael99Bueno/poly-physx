@@ -30,8 +30,8 @@ std::tuple<glm::vec2, float, float> spring_driven_resolution2D::compute_collisio
     const body2D *body1 = colis.collider1->body();
     const body2D *body2 = colis.collider2->body();
 
-    const glm::vec2 &touch1 = colis.manifold[manifold_index];
-    const glm::vec2 touch2 = colis.manifold[manifold_index] - colis.mtv;
+    const glm::vec2 &touch1 = colis.manifold[manifold_index].point;
+    const glm::vec2 touch2 = colis.manifold[manifold_index].point - colis.mtv;
 
     const glm::vec2 offset1 = touch1 - body1->centroid();
     const glm::vec2 offset2 = touch2 - body2->centroid();

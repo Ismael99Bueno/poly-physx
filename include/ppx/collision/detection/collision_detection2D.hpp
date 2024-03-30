@@ -3,7 +3,7 @@
 #include "ppx/collider/collider2D.hpp"
 #include "ppx/collision/collision2D.hpp"
 
-#include "ppx/collision/manifold/manifold_algorithms2D.hpp"
+#include "ppx/collision/manifold/pp_manifold_algorithm2D.hpp"
 #include "ppx/collision/detection/narrow/narrow_detection2D.hpp"
 
 #include "ppx/internal/worldref.hpp"
@@ -52,15 +52,6 @@ class collision_detection2D : public worldref2D, kit::non_copyable
         return kit::get_casted_raw_ptr<T>(m_pp_narrow);
     }
 
-    template <kit::DerivedFrom<cp_manifold_algorithm2D> T = cp_manifold_algorithm2D>
-    const T *cp_manifold_algorithm() const
-    {
-        return kit::const_get_casted_raw_ptr<T>(m_cp_manifold);
-    }
-    template <kit::DerivedFrom<cp_manifold_algorithm2D> T = cp_manifold_algorithm2D> T *cp_manifold_algorithm()
-    {
-        return kit::get_casted_raw_ptr<T>(m_cp_manifold);
-    }
     template <kit::DerivedFrom<pp_manifold_algorithm2D> T = pp_manifold_algorithm2D>
     const T *pp_manifold_algorithm() const
     {
@@ -90,15 +81,6 @@ class collision_detection2D : public worldref2D, kit::non_copyable
         return ptr;
     }
 
-    template <kit::DerivedFrom<cp_manifold_algorithm2D> T, class... ManifArgs>
-    const T *set_cp_manifold_algorithm(ManifArgs &&...args)
-    {
-        auto manalg = kit::make_scope<T>(std::forward<ManifArgs>(args)...);
-        T *ptr = manalg.get();
-
-        m_cp_manifold = std::move(manalg);
-        return ptr;
-    }
     template <kit::DerivedFrom<pp_manifold_algorithm2D> T, class... ManifArgs>
     const T *set_pp_manifold_algorithm(ManifArgs &&...args)
     {
@@ -143,7 +125,6 @@ class collision_detection2D : public worldref2D, kit::non_copyable
     kit::scope<cp_narrow_detection2D> m_cp_narrow;
     kit::scope<pp_narrow_detection2D> m_pp_narrow;
 
-    kit::scope<cp_manifold_algorithm2D> m_cp_manifold;
     kit::scope<pp_manifold_algorithm2D> m_pp_manifold;
 
     virtual void detect_collisions() = 0;
