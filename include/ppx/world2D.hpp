@@ -42,7 +42,7 @@ class world2D : kit::non_copyable
         float overlap_resolution_speed = 0.2f;
     } constraints;
 
-    bool semi_implicit_integration = false;
+    bool semi_implicit_integration = true;
 
     void add(const specs::contraption2D &contraption);
 
