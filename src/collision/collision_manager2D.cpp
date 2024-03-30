@@ -6,7 +6,6 @@
 
 #include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
 
-#include "ppx/collision/manifold/radius_distance_manifold2D.hpp"
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 
@@ -20,7 +19,6 @@ collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
     m_detection->set_cp_narrow_detection<gjk_epa_detection2D>();
     m_detection->set_pp_narrow_detection<gjk_epa_detection2D>();
 
-    m_detection->set_cc_manifold_algorithm<radius_distance_manifold2D>();
     m_detection->set_cp_manifold_algorithm<mtv_support_manifold2D>();
     m_detection->set_pp_manifold_algorithm<clipping_algorithm_manifold2D>();
 }

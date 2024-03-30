@@ -15,7 +15,6 @@
 
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
-#include "ppx/collision/manifold/radius_distance_manifold2D.hpp"
 
 #include "rk/serialization/serialization.hpp"
 
@@ -374,10 +373,10 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
         ndet["Multithreading"] = cm.detection()->multithreaded;
         if (cm.detection<ppx::brute_force_detection2D>())
-            ndet["Method"] = 0;
+            ndet["Detection method"] = 0;
         else if (auto coldet = cm.detection<ppx::quad_tree_detection2D>())
         {
-            ndet["Method"] = 1;
+            ndet["Detection method"] = 1;
             ndet["Force square"] = coldet->force_square_shape;
 
             const auto &props = coldet->quad_tree().props();
@@ -385,9 +384,8 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["Max depth"] = props.max_depth;
             ndet["Min size"] = props.min_quad_size;
         }
-
         else if (cm.detection<ppx::sort_sweep_detection2D>())
-            ndet["Method"] = 2;
+            ndet["Detection method"] = 2;
 
         if (auto narrow = cm.detection()->cp_narrow_detection<ppx::gjk_epa_detection2D>())
         {
@@ -399,11 +397,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["P-P Narrow"] = 0;
             ndet["P-P EPA Threshold"] = narrow->epa_threshold;
         }
-
-        if (cm.detection()->cc_manifold_algorithm<ppx::radius_distance_manifold2D>())
-            ndet["C-C Algorithm"] = 0;
-        else if (cm.detection()->cc_manifold_algorithm<ppx::mtv_support_manifold2D>())
-            ndet["C-C Algorithm"] = 1;
 
         if (cm.detection()->cp_manifold_algorithm<ppx::mtv_support_manifold2D>())
             ndet["C-P Algorithm"] = 0;
@@ -418,10 +411,10 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
         YAML::Node nres = node["Resolution"];
         if (auto colres = cm.resolution<ppx::sequential_impulses_resolution2D>())
-            nres["Method"] = 0;
+            nres["Detection method"] = 0;
         else if (auto colres = cm.resolution<ppx::spring_driven_resolution2D>())
         {
-            nres["Method"] = 1;
+            nres["Detection method"] = 1;
             nres["Rigidity"] = colres->rigidity;
             nres["Normal damping"] = colres->normal_damping;
             nres["Tangent damping"] = colres->tangent_damping;
@@ -437,9 +430,9 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         const YAML::Node ndet = node["Detection"];
 
         cm.detection()->multithreaded = ndet["Multithreading"].as<bool>();
-        if (ndet["Method"])
+        if (ndet["Detection method"])
         {
-            const int method = ndet["Method"].as<int>();
+            const int method = ndet["Detection method"].as<int>();
             if (method == 0)
                 cm.set_detection<ppx::brute_force_detection2D>();
             else if (method == 1)
@@ -456,26 +449,13 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 cm.set_detection<ppx::sort_sweep_detection2D>();
         }
 
-        if (ndet["C-P Narrow"])
+        if (ndet["C-P Narrow"]) // bc there is only one for now
             cm.detection()->set_cp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["C-P EPA Threshold"].as<float>());
         if (ndet["P-P Narrow"])
             cm.detection()->set_pp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["P-P EPA Threshold"].as<float>());
 
-        if (ndet["C-C Algorithm"])
-        {
-            const int alg = ndet["C-C Algorithm"].as<int>();
-            if (alg == 0)
-                cm.detection()->set_pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>();
-            else if (alg == 1)
-                cm.detection()->set_pp_manifold_algorithm<ppx::mtv_support_manifold2D>();
-        }
-
         if (ndet["C-P Algorithm"])
-        {
-            const int alg = ndet["C-P Algorithm"].as<int>();
-            if (alg == 0)
-                cm.detection()->set_cp_manifold_algorithm<ppx::mtv_support_manifold2D>();
-        }
+            cm.detection()->set_cp_manifold_algorithm<ppx::mtv_support_manifold2D>();
 
         if (ndet["P-P Algorithm"])
         {
@@ -488,9 +468,9 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         }
 
         const YAML::Node nres = node["Resolution"];
-        if (nres["Method"])
+        if (nres["Detection method"])
         {
-            const int method = nres["Method"].as<int>();
+            const int method = nres["Detection method"].as<int>();
             if (method == 0)
                 cm.set_resolution<ppx::sequential_impulses_resolution2D>();
             else if (method == 1)

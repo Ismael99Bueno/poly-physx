@@ -1,10 +1,11 @@
 #pragma once
 
 #include "ppx/collider/collider2D.hpp"
+#include "geo/algorithm/intersection.hpp"
 
 namespace ppx
 {
-using manifold2D = kit::dynarray<glm::vec2, 2>;
+using manifold2D = kit::dynarray<geo::contact_point2D, 2>;
 struct collision2D
 {
     collider2D *collider1 = nullptr;

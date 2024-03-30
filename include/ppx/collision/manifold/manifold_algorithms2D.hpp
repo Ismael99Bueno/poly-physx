@@ -5,13 +5,6 @@
 
 namespace ppx
 {
-class cc_manifold_algorithm2D
-{
-  public:
-    virtual ~cc_manifold_algorithm2D() = default;
-    virtual manifold2D circle_circle_contacts(const circle &circ1, const circle &circ2, const glm::vec2 &mtv) const = 0;
-};
-
 class cp_manifold_algorithm2D
 {
   public:

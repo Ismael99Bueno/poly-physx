@@ -185,7 +185,7 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
 
     if (!geo::intersects(circ1, circ2))
         return;
-    const geo::mtv_result mres = geo::mtv(circ1, circ2);
+    const geo::mtv_result2D mres = geo::mtv(circ1, circ2);
     if (!mres.valid)
         return;
 
