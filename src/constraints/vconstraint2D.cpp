@@ -64,7 +64,6 @@ void vconstraint2D::warmup()
 {
     if (kit::approaches_zero(m_cumlambda))
         return;
-    m_cumlambda *= world.timestep_ratio();
     apply_velocity_lambda(m_cumlambda);
 }
 
