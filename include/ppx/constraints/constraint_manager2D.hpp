@@ -65,7 +65,7 @@ template <Constraint T> class constraint_manager2D : public joint_container2D<T>
 
     virtual bool adjust_positions() override
     {
-        if constexpr (std::is_same_v<T, pvconstraint2D>)
+        if constexpr (std::is_base_of_v<pvconstraint2D, T>)
         {
             bool fully_adjusted = true;
             for (T *constraint : this->m_elements)
