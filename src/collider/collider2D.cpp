@@ -21,7 +21,7 @@ collider2D::collider2D(world2D &world, body2D *body, const specs &spc)
         m_shape = circle(transform, spc.props.radius);
         break;
     }
-    update_parent();
+    // Parent must be updated (happens outside)
 }
 
 const body2D *collider2D::body() const

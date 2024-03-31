@@ -10,10 +10,12 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
 {
     collider2D *collider = m_allocator.create(world, parent, spc);
     parent->m_colliders.push_back(collider);
+    collider->update_parent();
+    m_elements.push_back(collider);
 
     events.on_addition(collider);
     KIT_INFO("Added collider with index {0}.", m_elements.size())
-    m_elements.push_back(collider);
+
     return collider;
 }
 
