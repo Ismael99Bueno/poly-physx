@@ -85,8 +85,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
     {
         std::vector<U *> joints;
         for (U *joint : elements)
-            if ((joint->body1() == body1 && joint->body2() == body2) ||
-                (joint->body1() == body2 && joint->body2() == body1))
+            if (joint->contains(body1) && joint->contains(body2))
                 joints.push_back(joint);
         return joints;
     }

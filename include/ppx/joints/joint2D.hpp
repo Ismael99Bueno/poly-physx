@@ -19,6 +19,8 @@ class joint2D : public kit::indexable, public worldref2D
     glm::vec2 ganchor1() const;
     glm::vec2 ganchor2() const;
 
+    bool contains(const body2D *body) const;
+
     virtual void solve() = 0;
 
   protected:

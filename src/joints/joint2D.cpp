@@ -54,4 +54,9 @@ glm::vec2 joint2D::ganchor2() const
     return m_body2->global_position_point(m_lanchor2);
 }
 
+bool joint2D::contains(const body2D *body) const
+{
+    return body == m_body1 || body == m_body2;
+}
+
 } // namespace ppx
