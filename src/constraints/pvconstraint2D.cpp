@@ -21,7 +21,7 @@ bool pvconstraint2D::adjust_positions()
 
     const float signed_slop = m_c > 0.f ? -world.constraints.slop : world.constraints.slop;
     const float lambda =
-        -std::clamp(world.constraints.overlap_resolution_speed * (m_c + signed_slop),
+        -std::clamp(world.constraints.position_resolution_speed * (m_c + signed_slop),
                     -world.constraints.max_position_correction, world.constraints.max_position_correction) /
         m_inv_mass;
 

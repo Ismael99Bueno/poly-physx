@@ -493,7 +493,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
         ctrs["Baumgarte threshold"] = world.constraints.baumgarte_threshold;
         ctrs["Slop"] = world.constraints.slop;
         ctrs["Max position correction"] = world.constraints.max_position_correction;
-        ctrs["Overlap resolution speed"] = world.constraints.overlap_resolution_speed;
+        ctrs["Position resolution speed"] = world.constraints.position_resolution_speed;
 
         return node;
     }
@@ -518,7 +518,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
         world.constraints.baumgarte_threshold = ctrs["Baumgarte threshold"].as<float>();
         world.constraints.slop = ctrs["Slop"].as<float>();
         world.constraints.max_position_correction = ctrs["Max position correction"].as<float>();
-        world.constraints.overlap_resolution_speed = ctrs["Overlap resolution speed"].as<float>();
+        world.constraints.position_resolution_speed = ctrs["Position resolution speed"].as<float>();
 
         return true;
     }

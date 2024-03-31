@@ -35,11 +35,11 @@ class world2D : kit::non_copyable
         bool baumgarte_correction = true;
 
         float baumgarte_coef = 0.035f;
-        float baumgarte_threshold = 0.005f;
-        float slop = 0.01f;
+        float baumgarte_threshold = 0.1f;
+        float slop = 0.05f;
 
         float max_position_correction = 0.2f;
-        float overlap_resolution_speed = 0.2f;
+        float position_resolution_speed = 0.2f;
     } constraints;
 
     bool semi_implicit_integration = true;
@@ -62,7 +62,6 @@ class world2D : kit::non_copyable
   private:
     float m_previous_timestep = 0.f;
     float m_rk_substep_timestep = integrator.ts.value;
-    float m_timestep_ratio = 1.f;
 
     void pre_step_preparation();
     void post_step_setup();
