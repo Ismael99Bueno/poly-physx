@@ -65,6 +65,11 @@ struct joint2D
     std::size_t bindex1 = SIZE_MAX;
     std::size_t bindex2 = SIZE_MAX;
 
+    struct properties
+    {
+        bool bodies_collide = true;
+    } props;
+
     body2D bspecs1{};
     body2D bspecs2{};
 };
@@ -73,7 +78,7 @@ struct distance_joint2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
-    struct properties
+    struct properties : joint2D::properties
     {
         float min_distance = 0.f;
         float max_distance = 0.f;
@@ -85,7 +90,7 @@ struct spring2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
-    struct properties
+    struct properties : joint2D::properties
     {
         float frequency = 1.f;
         float damping_ratio = 0.2f;

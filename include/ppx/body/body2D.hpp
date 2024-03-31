@@ -13,6 +13,7 @@ namespace ppx
 {
 class world2D;
 class collider2D;
+class joint2D;
 class body2D : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
@@ -80,6 +81,10 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     bool is_dynamic() const;
     bool is_kinematic() const;
     bool is_static() const;
+
+    bool joint_prevents_collision(const body2D *body) const;
+    bool attached_to(const body2D *body) const;
+    bool attached_to(const joint2D *joint) const;
 
     btype type() const;
     void type(btype type);
@@ -151,6 +156,7 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     float m_torque = 0.f;
 
     std::vector<collider2D *> m_colliders;
+    std::vector<joint2D *> m_joints;
     btype m_type;
 
     bool m_density_update = false;

@@ -213,6 +213,25 @@ bool body2D::is_static() const
     return m_type == btype::STATIC;
 }
 
+bool body2D::joint_prevents_collision(const body2D *body) const
+{
+    for (const joint2D *joint : body->m_joints)
+        if (joint->bodies_collide && joint->contains(this))
+            return true;
+    return false;
+}
+bool body2D::attached_to(const body2D *body) const
+{
+    for (const joint2D *joint : body->m_joints)
+        if (joint->contains(this))
+            return true;
+    return false;
+}
+bool body2D::attached_to(const joint2D *joint) const
+{
+    return joint->contains(this);
+}
+
 body2D::btype body2D::type() const
 {
     return m_type;

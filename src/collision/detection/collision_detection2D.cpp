@@ -141,10 +141,10 @@ static bool broad_collision_check(const collider2D *collider1, const collider2D 
 {
     const body2D *p1 = collider1->body();
     const body2D *p2 = collider2->body();
-    return collider1 != collider2 && p1 != p2 &&
+    return collider1 != collider2 && p1 != p2 && (p1->is_dynamic() || p2->is_dynamic()) &&
            (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
            (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
-           (p1->is_dynamic() || p2->is_dynamic()) && geo::may_intersect(collider1->shape(), collider2->shape());
+           geo::may_intersect(collider1->shape(), collider2->shape()) && !p1->joint_prevents_collision(p2);
 }
 
 collision2D collision_detection2D::generate_collision(collider2D *collider1, collider2D *collider2) const
