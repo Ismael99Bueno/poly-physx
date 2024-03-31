@@ -7,7 +7,7 @@ namespace ppx
 joint2D::joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2)
     : joint2D(world, spc.bindex1 != SIZE_MAX ? world.bodies[spc.bindex1] : world.bodies.add(spc.bspecs1),
               spc.bindex2 != SIZE_MAX ? world.bodies[spc.bindex2] : world.bodies.add(spc.bspecs2), ganchor1, ganchor2,
-              spc.props.bodies_collide)
+              spc.bodies_collide)
 {
 }
 
@@ -29,11 +29,19 @@ joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &
 {
 }
 
-body2D *joint2D::body1() const
+const body2D *joint2D::body1() const
 {
     return m_body1;
 }
-body2D *joint2D::body2() const
+const body2D *joint2D::body2() const
+{
+    return m_body2;
+}
+body2D *joint2D::body1()
+{
+    return m_body1;
+}
+body2D *joint2D::body2()
 {
     return m_body2;
 }
@@ -59,6 +67,16 @@ glm::vec2 joint2D::ganchor2() const
 bool joint2D::contains(const body2D *body) const
 {
     return body == m_body1 || body == m_body2;
+}
+
+void joint2D::add_to_bodies()
+{
+    m_body1->m_joints.push_back(this);
+    m_body2->m_joints.push_back(this);
+}
+
+void joint2D::remove_from_bodies()
+{
 }
 
 } // namespace ppx

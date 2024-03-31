@@ -1,11 +1,11 @@
 #pragma once
 
 #include "ppx/constraints/pvconstraint2D.hpp"
-#include "ppx/common/specs2D.hpp"
+#include "kit/interface/non_copyable.hpp"
 
 namespace ppx
 {
-class distance_joint2D final : public pvconstraint2D
+class distance_joint2D final : public pvconstraint2D, kit::non_copyable
 {
   public:
     using specs = specs::distance_joint2D;

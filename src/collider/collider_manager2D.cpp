@@ -10,7 +10,7 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
 {
     collider2D *collider = m_allocator.create(world, parent, spc);
     parent->m_colliders.push_back(collider);
-    collider->update_parent();
+    collider->body()->full_update();
     m_elements.push_back(collider);
 
     events.on_addition(collider);
@@ -76,9 +76,7 @@ bool collider_manager2D::remove(const std::size_t index)
         m_elements[index]->index = index;
     }
     m_elements.pop_back();
-    parent->update_centroids();
-    parent->update_inertia();
-    parent->update_colliders();
+    parent->full_update();
 
     m_allocator.destroy(collider);
     return true;

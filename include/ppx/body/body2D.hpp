@@ -108,6 +108,7 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
 
     void ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint);
     void gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint);
+    void add_force(const glm::vec2 &force);
 
     const glm::vec2 &force() const;
     float torque() const;
@@ -148,6 +149,17 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     void velocity(const glm::vec2 &velocity);
     void angular_velocity(float angular_velocity);
 
+    void apply_simulation_force(const glm::vec2 &force);
+    void apply_simulation_torque(float torque);
+
+    void full_update();
+    void update_colliders();
+    void update_centroids();
+    void update_inertia();
+
+    bool density_updating() const;
+    bool spatial_updating() const;
+
   private:
     state2D m_state;
     properties m_props;
@@ -162,26 +174,13 @@ class body2D : public kit::indexable, public worldref2D, kit::non_copyable
     bool m_density_update = false;
     bool m_spatial_update = false;
 
-    void update_colliders();
-    void update_centroids();
-    void update_inertia();
-
     void reset_simulation_forces();
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
-    void apply_simulation_force(const glm::vec2 &force);
-    void apply_simulation_torque(float torque);
-
     void reset_dynamic_properties();
 
-    friend class spring2D;
-    friend class collider2D;
-    friend class behaviour2D;
-    friend class vconstraint2D;
-    friend class pvconstraint2D;
-    friend class body_manager2D;
+    friend class joint2D;
     friend class collider_manager2D;
-    friend class joint_constraint2D;
-    friend class spring_driven_resolution2D;
+    friend class body_manager2D;
 };
 } // namespace ppx

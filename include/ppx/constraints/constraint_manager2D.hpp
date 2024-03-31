@@ -6,15 +6,6 @@
 
 namespace ppx
 {
-template <typename T>
-concept VConstraint2D = requires() {
-    requires Joint2D<T>;
-    requires kit::DerivedFrom<T, vconstraint2D>;
-};
-
-template <typename T>
-concept PVConstraint2D = requires() { requires kit::DerivedFrom<T, pvconstraint2D>; };
-
 template <VConstraint2D T> class constraint_manager2D;
 
 class iconstraint_manager2D : public kit::identifiable<std::string>, public kit::yaml::codecable

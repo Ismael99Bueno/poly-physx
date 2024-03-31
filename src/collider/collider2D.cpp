@@ -40,7 +40,7 @@ float collider2D::density() const
 void collider2D::density(float density)
 {
     m_density = density;
-    update_parent();
+    m_body->full_update();
 }
 
 float collider2D::charge_density() const
@@ -65,7 +65,7 @@ void collider2D::ltransform(const transform2D &ltransform)
     shape2D &shape = mutable_shape();
     m_position += shape.lposition() - ltransform.position();
     shape.ltransform(ltransform);
-    update_parent();
+    m_body->full_update();
 }
 
 const glm::vec2 &collider2D::lposition() const
@@ -75,7 +75,7 @@ const glm::vec2 &collider2D::lposition() const
 
 void collider2D::begin_update()
 {
-    KIT_ASSERT_ERROR(m_body->m_spatial_update, "Cannot begin update collider while parent is not spatially updating")
+    KIT_ASSERT_ERROR(m_body->spatial_updating(), "Cannot begin update collider while parent is not spatially updating")
     mutable_shape().begin_update();
 }
 void collider2D::end_update()
@@ -105,13 +105,13 @@ void collider2D::ltranslate(const glm::vec2 &dpos)
 {
     mutable_shape().ltranslate(dpos);
     m_position += dpos;
-    update_parent();
+    m_body->full_update();
 }
 void collider2D::gtranslate(const glm::vec2 &dpos)
 {
     mutable_shape().gtranslate(dpos);
     m_position += glm::vec2(m_body->centroid_transform().inv_ltransform() * glm::vec3(dpos, 0.f));
-    update_parent();
+    m_body->full_update();
 }
 void collider2D::lrotate(float dangle)
 {
@@ -122,7 +122,7 @@ void collider2D::lposition(const glm::vec2 &position)
 {
     mutable_shape().ltranslate(position - m_position);
     m_position = position;
-    update_parent();
+    m_body->full_update();
 }
 
 const glm::vec2 &collider2D::gcentroid() const
@@ -140,7 +140,7 @@ void collider2D::gcentroid(const glm::vec2 &gcentroid)
     const glm::vec2 dpos = gcentroid - gc;
     mutable_shape().gcentroid(gcentroid);
     m_position += glm::vec2(m_body->centroid_transform().inv_ltransform() * glm::vec3(dpos, 0.f));
-    update_parent();
+    m_body->full_update();
 }
 void collider2D::lcentroid(const glm::vec2 &lcentroid)
 {
@@ -163,7 +163,7 @@ void collider2D::lrotation(float lrotation)
 void collider2D::origin(const glm::vec2 &origin)
 {
     mutable_shape().origin(origin);
-    update_parent();
+    m_body->full_update();
 }
 
 const shape2D &collider2D::shape() const
@@ -186,13 +186,6 @@ shape2D &collider2D::mutable_shape()
     case stype::CIRCLE:
         return std::get<circle>(m_shape);
     }
-}
-
-void collider2D::update_parent()
-{
-    m_body->update_centroids();
-    m_body->update_inertia();
-    m_body->update_colliders();
 }
 
 collider2D::stype collider2D::shape_type() const

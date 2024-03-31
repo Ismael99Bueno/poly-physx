@@ -1,10 +1,12 @@
 #pragma once
 
 #include "ppx/joints/joint2D.hpp"
+#include "ppx/common/specs2D.hpp"
+#include "kit/interface/non_copyable.hpp"
 
 namespace ppx
 {
-class spring2D : public joint2D
+class spring2D : public joint2D, kit::non_copyable
 {
   public:
     using specs = specs::spring2D;

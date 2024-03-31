@@ -1,10 +1,21 @@
 #pragma once
 
-#include "ppx/body/body2D.hpp"
+#include "ppx/internal/worldref.hpp"
+#include "ppx/common/specs2D.hpp"
 #include "kit/interface/indexable.hpp"
 
 namespace ppx
 {
+class joint2D;
+
+template <typename T>
+concept Joint2D = requires() {
+    requires kit::DerivedFrom<T, joint2D>;
+    typename T::specs;
+    requires kit::DerivedFrom<typename T::specs, specs::joint2D>;
+};
+
+class body2D;
 class joint2D : public kit::indexable, public worldref2D
 {
   public:
@@ -12,8 +23,11 @@ class joint2D : public kit::indexable, public worldref2D
 
     bool bodies_collide;
 
-    body2D *body1() const;
-    body2D *body2() const;
+    const body2D *body1() const;
+    const body2D *body2() const;
+
+    body2D *body1();
+    body2D *body2();
 
     const glm::vec2 &lanchor1() const;
     const glm::vec2 &lanchor2() const;
@@ -38,5 +52,12 @@ class joint2D : public kit::indexable, public worldref2D
 
     glm::vec2 m_lanchor1;
     glm::vec2 m_lanchor2;
+
+  private:
+    void add_to_bodies();
+    void remove_from_bodies();
+
+    template <Joint2D T> friend class joint_container2D;
 };
+
 } // namespace ppx

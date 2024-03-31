@@ -120,6 +120,8 @@ template <typename T> class manager2D : public worldref2D, kit::non_copyable
     {
     }
     std::vector<element_t> m_elements;
+
+    friend class world2D;
 };
 
 template <typename T>

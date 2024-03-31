@@ -113,6 +113,13 @@ void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_b
     m_state.angular_velocity = vars_buffer[idx + 5];
 }
 
+void body2D::full_update()
+{
+    update_centroids();
+    update_inertia();
+    update_colliders();
+}
+
 void body2D::update_colliders()
 {
     if (m_spatial_update)
@@ -192,6 +199,15 @@ void body2D::update_inertia()
         m_props.dynamic.inertia = m_props.nondynamic.inertia;
         m_props.dynamic.inv_inertia = m_props.nondynamic.inv_inertia;
     }
+}
+
+bool body2D::density_updating() const
+{
+    return m_density_update;
+}
+bool body2D::spatial_updating() const
+{
+    return m_spatial_update;
 }
 
 void body2D::reset_simulation_forces()
@@ -283,6 +299,10 @@ void body2D::gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint)
 {
     instant_force += force;
     instant_torque += kit::cross2D(gpoint - m_state.centroid.position(), force);
+}
+void body2D::add_force(const glm::vec2 &force)
+{
+    instant_force += force;
 }
 
 void body2D::apply_simulation_force(const glm::vec2 &force)

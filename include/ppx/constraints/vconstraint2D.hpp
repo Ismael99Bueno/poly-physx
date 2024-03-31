@@ -4,6 +4,13 @@
 
 namespace ppx
 {
+class vconstraint2D;
+template <typename T>
+concept VConstraint2D = requires() {
+    requires Joint2D<T>;
+    requires kit::DerivedFrom<T, vconstraint2D>;
+};
+
 class vconstraint2D : public joint2D
 {
   public:

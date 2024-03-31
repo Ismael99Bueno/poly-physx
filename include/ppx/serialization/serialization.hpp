@@ -145,12 +145,13 @@ template <> struct kit::yaml::codec<ppx::specs::joint2D>
             node["Index2"] = joint.bindex2;
         else
             node["Body2"] = joint.bspecs2;
+        node["Bodies collide"] = joint.bodies_collide;
 
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::specs::joint2D &joint)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() != 3)
             return false;
 
         if (node["Index1"])
@@ -162,6 +163,7 @@ template <> struct kit::yaml::codec<ppx::specs::joint2D>
             joint.bindex2 = node["Index2"].as<std::size_t>();
         else
             joint.bspecs2 = node["Body2"].as<ppx::body2D::specs>();
+        joint.bodies_collide = node["Bodies collide"].as<bool>();
 
         return true;
     }

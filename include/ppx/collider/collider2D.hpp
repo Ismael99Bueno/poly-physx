@@ -8,7 +8,6 @@
 
 namespace ppx
 {
-class body2D;
 struct collision2D;
 class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
 {
@@ -99,7 +98,7 @@ class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
             m_type = stype::POLYGON;
         else if constexpr (std::is_same_v<T, circle>)
             m_type = stype::CIRCLE;
-        update_parent();
+        m_body->full_update();
     }
 
   private:
@@ -112,9 +111,7 @@ class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
     stype m_type;
 
     shape2D &mutable_shape();
-    void update_parent();
 
     friend class body2D;
-    friend class collider_manager2D;
 };
 } // namespace ppx

@@ -46,23 +46,21 @@ body2D body2D::from_instance(const ppx::body2D &body)
 
 distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj)
 {
-    return {{dj.body1()->index, dj.body2()->index},
-            dj.ganchor1(),
-            dj.ganchor2(),
-            {{dj.bodies_collide}, dj.min_distance, dj.max_distance}};
+    distance_joint2D specs{
+        {dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), {dj.min_distance, dj.max_distance}};
+    specs.bodies_collide = dj.bodies_collide;
+    return specs;
 }
 
 spring2D spring2D::from_instance(const ppx::spring2D &sp)
 {
-    return {{sp.body1()->index, sp.body2()->index},
-            sp.ganchor1(),
-            sp.ganchor2(),
-            {{sp.bodies_collide},
-             sp.frequency,
-             sp.damping_ratio,
-             sp.length,
-             sp.non_linear_terms,
-             sp.non_linear_contribution}};
+
+    spring2D specs{{sp.body1()->index, sp.body2()->index},
+                   sp.ganchor1(),
+                   sp.ganchor2(),
+                   {sp.frequency, sp.damping_ratio, sp.length, sp.non_linear_terms, sp.non_linear_contribution}};
+    specs.bodies_collide = sp.bodies_collide;
+    return specs;
 }
 
 contraption2D contraption2D::rope(const glm::vec2 &start, const glm::vec2 &end, const std::uint32_t segments,

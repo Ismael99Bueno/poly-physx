@@ -26,7 +26,5 @@ class collider_manager2D final : public manager2D<collider2D>
   private:
     using manager2D<collider2D>::manager2D;
     kit::block_allocator<collider2D> m_allocator{1024};
-
-    friend class world2D;
 };
 } // namespace ppx

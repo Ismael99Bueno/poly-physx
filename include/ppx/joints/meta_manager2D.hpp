@@ -82,6 +82,7 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
     }
 
     friend class world2D;
+    friend class joint_repository2D;
 };
 
 class joint_meta_manager2D final : public meta_manager2D<ijoint_manager2D>
@@ -89,7 +90,6 @@ class joint_meta_manager2D final : public meta_manager2D<ijoint_manager2D>
     using meta_manager2D<ijoint_manager2D>::meta_manager2D;
     void solve();
     friend class world2D;
-    friend class joint_repository2D;
 };
 
 class constraint_meta_manager2D final : public meta_manager2D<iconstraint_manager2D>
@@ -101,7 +101,6 @@ class constraint_meta_manager2D final : public meta_manager2D<iconstraint_manage
     void delegate_contacts_resolution(sequential_impulses_resolution2D *solver);
 
     friend class world2D;
-    friend class joint_repository2D;
     friend class sequential_impulses_resolution2D;
 };
 } // namespace ppx

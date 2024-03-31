@@ -9,13 +9,6 @@
 
 namespace ppx
 {
-template <typename T>
-concept Joint2D = requires() {
-    requires kit::DerivedFrom<T, joint2D>;
-    typename T::specs;
-    requires kit::DerivedFrom<typename T::specs, specs::joint2D>;
-};
-
 template <Joint2D T> class joint_container2D : public manager2D<T>
 {
   public:
@@ -28,6 +21,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         T *joint = m_allocator.create(this->world, spc);
         joint->index = this->m_elements.size();
         this->m_elements.push_back(joint);
+        joint->add_to_bodies();
         this->events.on_addition(joint);
         return joint;
     }
@@ -50,6 +44,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         T *joint = this->m_elements[index];
         this->events.on_removal(*joint);
 
+        joint->remove_from_bodies();
         if (index != this->m_elements.size() - 1)
         {
             this->m_elements[index] = this->m_elements.back();

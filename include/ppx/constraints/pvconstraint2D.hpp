@@ -4,6 +4,10 @@
 
 namespace ppx
 {
+class pvconstraint2D;
+template <typename T>
+concept PVConstraint2D = requires() { requires kit::DerivedFrom<T, pvconstraint2D>; };
+
 class pvconstraint2D : public vconstraint2D
 {
   public:
