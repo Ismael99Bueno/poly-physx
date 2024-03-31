@@ -4,12 +4,12 @@
 
 namespace ppx
 {
-template <Joint T> class joint_manager2D;
+template <Joint2D T> class joint_manager2D;
 
 class ijoint_manager2D : public kit::identifiable<std::string>, public kit::yaml::codecable
 {
   public:
-    template <Joint T> using manager_t = joint_manager2D<T>;
+    template <Joint2D T> using manager_t = joint_manager2D<T>;
 
     virtual ~ijoint_manager2D() = default;
     virtual void solve() = 0;
@@ -19,7 +19,7 @@ class ijoint_manager2D : public kit::identifiable<std::string>, public kit::yaml
     ijoint_manager2D(const std::string &name);
 };
 
-template <Joint T> class joint_manager2D : public joint_container2D<T>, public ijoint_manager2D
+template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public ijoint_manager2D
 {
   public:
     virtual ~joint_manager2D() = default;

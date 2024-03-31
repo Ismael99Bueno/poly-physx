@@ -7,17 +7,20 @@
 namespace ppx
 {
 template <typename T>
-concept Constraint = requires() {
-    requires Joint<T>;
+concept VConstraint2D = requires() {
+    requires Joint2D<T>;
     requires kit::DerivedFrom<T, vconstraint2D>;
 };
 
-template <Constraint T> class constraint_manager2D;
+template <typename T>
+concept PVConstraint2D = requires() { requires kit::DerivedFrom<T, pvconstraint2D>; };
+
+template <VConstraint2D T> class constraint_manager2D;
 
 class iconstraint_manager2D : public kit::identifiable<std::string>, public kit::yaml::codecable
 {
   public:
-    template <Constraint T> using manager_t = constraint_manager2D<T>;
+    template <VConstraint2D T> using manager_t = constraint_manager2D<T>;
 
     virtual ~iconstraint_manager2D() = default;
 
@@ -30,7 +33,7 @@ class iconstraint_manager2D : public kit::identifiable<std::string>, public kit:
     iconstraint_manager2D(const std::string &name);
 };
 
-template <Constraint T> class constraint_manager2D : public joint_container2D<T>, public iconstraint_manager2D
+template <VConstraint2D T> class constraint_manager2D : public joint_container2D<T>, public iconstraint_manager2D
 {
   public:
     virtual ~constraint_manager2D() = default;
@@ -65,7 +68,7 @@ template <Constraint T> class constraint_manager2D : public joint_container2D<T>
 
     virtual bool adjust_positions() override
     {
-        if constexpr (std::is_base_of_v<pvconstraint2D, T>)
+        if constexpr (PVConstraint2D<T>)
         {
             bool fully_adjusted = true;
             for (T *constraint : this->m_elements)

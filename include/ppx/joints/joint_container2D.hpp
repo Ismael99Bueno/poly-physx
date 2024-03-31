@@ -10,13 +10,13 @@
 namespace ppx
 {
 template <typename T>
-concept Joint = requires() {
+concept Joint2D = requires() {
     requires kit::DerivedFrom<T, joint2D>;
     typename T::specs;
     requires kit::DerivedFrom<typename T::specs, specs::joint2D>;
 };
 
-template <Joint T> class joint_container2D : public manager2D<T>
+template <Joint2D T> class joint_container2D : public manager2D<T>
 {
   public:
     using specs = typename T::specs;

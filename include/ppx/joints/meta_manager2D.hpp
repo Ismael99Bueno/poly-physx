@@ -15,7 +15,7 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
   public:
     using idmanager2D<kit::scope<IM>>::idmanager2D;
 
-    template <Joint T> T *add(const typename T::specs &spc)
+    template <Joint2D T> T *add(const typename T::specs &spc)
     {
         using Manager = typename IM::template manager_t<T>;
         Manager *mng = manager<T>();
@@ -24,7 +24,7 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
         return mng->add(spc);
     }
 
-    template <Joint T,
+    template <Joint2D T,
               kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
     Manager *add_manager(const std::string &name)
     {
@@ -35,14 +35,14 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
         return ptr;
     }
 
-    template <Joint T,
+    template <Joint2D T,
               kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
     const Manager *manager() const
     {
         const IM *solver = (*this)[Manager::name()];
         return solver ? static_cast<const Manager *>(solver) : nullptr;
     }
-    template <Joint T,
+    template <Joint2D T,
               kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
     Manager *manager()
     {
@@ -53,7 +53,7 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
     using idmanager2D<kit::scope<IM>>::remove;
     bool remove(std::size_t index) override;
 
-    template <Joint T> bool remove()
+    template <Joint2D T> bool remove()
     {
         using Manager = typename IM::template manager_t<T>;
         for (std::size_t i = 0; i < this->m_elements.size(); i++)
@@ -61,13 +61,13 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
                 return remove(i);
         return false;
     }
-    template <Joint T> bool remove(const std::size_t index)
+    template <Joint2D T> bool remove(const std::size_t index)
     {
         using Manager = typename IM::template manager_t<T>;
         Manager *mng = manager<T>();
         return mng ? mng->remove(index) : false;
     }
-    template <Joint T> bool remove(const T *element)
+    template <Joint2D T> bool remove(const T *element)
     {
         using Manager = typename IM::template manager_t<T>;
         Manager *mng = manager<T>();

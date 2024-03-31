@@ -271,7 +271,7 @@ template <> struct kit::yaml::codec<ppx::behaviour_manager2D>
     }
 };
 
-template <ppx::Joint T> struct kit::yaml::codec<ppx::joint_container2D<T>>
+template <ppx::Joint2D T> struct kit::yaml::codec<ppx::joint_container2D<T>>
 {
     static YAML::Node encode(const ppx::joint_container2D<T> &jc)
     {
