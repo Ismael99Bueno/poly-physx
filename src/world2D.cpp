@@ -38,7 +38,6 @@ void world2D::pre_step_preparation()
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 
-    m_timestep_ratio = kit::approaches_zero(integrator.ts.value) ? 1.f : m_previous_timestep / integrator.ts.value;
     collisions.detection()->flag_new_frame();
 
     bodies.send_data_to_state(integrator.state);
@@ -57,11 +56,6 @@ void world2D::post_step_setup()
 float world2D::rk_substep_timestep() const
 {
     return m_rk_substep_timestep;
-}
-
-float world2D::timestep_ratio() const
-{
-    return m_timestep_ratio;
 }
 
 std::vector<float> world2D::create_state_derivative() const

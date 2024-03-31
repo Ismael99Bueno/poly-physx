@@ -49,7 +49,6 @@ class world2D : kit::non_copyable
     bool step();
 
     float rk_substep_timestep() const;
-    float timestep_ratio() const;
 
     float kinetic_energy() const;
     float potential_energy() const;
