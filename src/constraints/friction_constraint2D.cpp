@@ -9,7 +9,7 @@ friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *
                                              const std::size_t manifold_index)
     : vconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
                     collision->manifold[manifold_index].point),
-      m_friction(collision->friction), m_mtv(collision->mtv)
+      m_friction(collision->friction), m_mtv(glm::normalize(collision->mtv))
 {
 }
 float friction_constraint2D::constraint_velocity() const
@@ -24,14 +24,13 @@ void friction_constraint2D::solve()
     solve_clamped(-mu, mu);
 }
 
-void friction_constraint2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &lanchor2)
+void friction_constraint2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &norm_mtv)
 {
     m_body1 = collision->collider1->body();
     m_body2 = collision->collider2->body();
     m_friction = collision->friction;
     m_lanchor1 = lanchor1;
-    m_lanchor2 = lanchor2;
-    m_mtv = collision->mtv;
+    m_mtv = norm_mtv;
 }
 
 float friction_constraint2D::inverse_mass() const
@@ -45,7 +44,7 @@ float friction_constraint2D::inverse_mass() const
 
 glm::vec2 friction_constraint2D::direction() const
 {
-    return glm::normalize(glm::vec2(-m_mtv.y, m_mtv.x));
+    return glm::vec2(-m_mtv.y, m_mtv.x);
 }
 
 } // namespace ppx

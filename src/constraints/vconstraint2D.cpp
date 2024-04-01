@@ -53,7 +53,11 @@ void vconstraint2D::solve_unclamped()
 void vconstraint2D::startup()
 {
     m_ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
-    m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
+    if (!m_single_anchor)
+        m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
+    else
+        m_ganchor2 = m_ganchor1;
+
     m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position();
     m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();
     m_dir = direction();
