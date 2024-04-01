@@ -5,14 +5,14 @@
 
 namespace ppx
 {
-float vconstraint2D::compute_velocity_lambda() const
+float vconstraint2D::compute_impulse() const
 {
     return -constraint_velocity() / m_inv_mass;
 }
 
-void vconstraint2D::apply_velocity_lambda(const float lambda)
+void vconstraint2D::apply_impulse(const float impulse)
 {
-    const glm::vec2 imp2 = lambda * m_dir;
+    const glm::vec2 imp2 = impulse * m_dir;
     const glm::vec2 imp1 = -imp2;
 
     m_body1->ctr_state.velocity += m_body1->props().dynamic.inv_mass * imp1;
@@ -34,20 +34,20 @@ void vconstraint2D::apply_velocity_lambda(const float lambda)
 
 void vconstraint2D::solve_clamped(const float min, const float max)
 {
-    const float lambda = compute_velocity_lambda();
-    const float old_lambda = m_cumlambda;
-    m_cumlambda = std::clamp(m_cumlambda + lambda, min, max);
+    const float impulse = compute_impulse();
+    const float old_impulse = m_cumimpulse;
+    m_cumimpulse = std::clamp(m_cumimpulse + impulse, min, max);
 
-    const float delta_lambda = m_cumlambda - old_lambda;
-    if (!kit::approaches_zero(delta_lambda))
-        apply_velocity_lambda(delta_lambda);
+    const float delta_impulse = m_cumimpulse - old_impulse;
+    if (!kit::approaches_zero(delta_impulse))
+        apply_impulse(delta_impulse);
 }
 
 void vconstraint2D::solve_unclamped()
 {
-    const float lambda = compute_velocity_lambda();
-    m_cumlambda += lambda;
-    apply_velocity_lambda(lambda);
+    const float impulse = compute_impulse();
+    m_cumimpulse += impulse;
+    apply_impulse(impulse);
 }
 
 void vconstraint2D::startup()
@@ -62,9 +62,9 @@ void vconstraint2D::startup()
 
 void vconstraint2D::warmup()
 {
-    if (kit::approaches_zero(m_cumlambda))
+    if (kit::approaches_zero(m_cumimpulse))
         return;
-    apply_velocity_lambda(m_cumlambda);
+    apply_impulse(m_cumimpulse);
 }
 
 } // namespace ppx

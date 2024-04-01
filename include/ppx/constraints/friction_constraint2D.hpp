@@ -10,7 +10,7 @@ class friction_constraint2D final : public vconstraint2D
   public:
     friction_constraint2D(world2D &world, const collision2D *collision, std::size_t manifold_index);
 
-    float max_lambda;
+    float max_impulse;
 
     float constraint_velocity() const override;
     void solve() override;

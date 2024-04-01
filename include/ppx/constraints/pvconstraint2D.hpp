@@ -22,6 +22,6 @@ class pvconstraint2D : public vconstraint2D
     float m_c = 0.f;
 
   private:
-    float compute_velocity_lambda() const override;
+    float compute_impulse() const override;
 };
 } // namespace ppx

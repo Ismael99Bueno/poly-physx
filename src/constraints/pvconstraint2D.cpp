@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-float pvconstraint2D::compute_velocity_lambda() const
+float pvconstraint2D::compute_impulse() const
 {
     const float cvel = constraint_velocity();
     if (world.constraints.baumgarte_correction && std::abs(m_c) > world.constraints.baumgarte_threshold)
@@ -20,12 +20,12 @@ bool pvconstraint2D::adjust_positions()
         return true;
 
     const float signed_slop = m_c > 0.f ? -world.constraints.slop : world.constraints.slop;
-    const float lambda =
+    const float impulse =
         -std::clamp(world.constraints.position_resolution_speed * (m_c + signed_slop),
                     -world.constraints.max_position_correction, world.constraints.max_position_correction) /
         m_inv_mass;
 
-    const glm::vec2 imp2 = lambda * m_dir;
+    const glm::vec2 imp2 = impulse * m_dir;
     const glm::vec2 imp1 = -imp2;
 
     const glm::vec2 dpos1 = m_body1->props().dynamic.inv_mass * imp1;

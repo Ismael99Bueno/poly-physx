@@ -31,7 +31,7 @@ float contact_constraint2D::constraint_velocity() const
 
 void contact_constraint2D::solve()
 {
-    m_friction.max_lambda = std::abs(m_cumlambda);
+    m_friction.max_impulse = std::abs(m_cumimpulse);
     m_friction.solve();
     solve_clamped(0.f, FLT_MAX);
 }

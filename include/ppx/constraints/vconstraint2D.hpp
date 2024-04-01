@@ -23,7 +23,7 @@ class vconstraint2D : public joint2D
 
   protected:
     using joint2D::joint2D;
-    float m_cumlambda = 0.f;
+    float m_cumimpulse = 0.f;
 
     glm::vec2 m_ganchor1;
     glm::vec2 m_ganchor2;
@@ -37,13 +37,13 @@ class vconstraint2D : public joint2D
     void solve_clamped(float min, float max);
     void solve_unclamped();
 
-    virtual float compute_velocity_lambda() const;
+    virtual float compute_impulse() const;
 
   private:
     virtual float inverse_mass() const = 0;
     virtual glm::vec2 direction() const = 0;
 
-    void apply_velocity_lambda(float lambda);
+    void apply_impulse(float impulse);
 };
 
 } // namespace ppx

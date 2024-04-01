@@ -20,7 +20,7 @@ float friction_constraint2D::constraint_velocity() const
 
 void friction_constraint2D::solve()
 {
-    const float mu = m_friction * max_lambda;
+    const float mu = m_friction * max_impulse;
     solve_clamped(-mu, mu);
 }
 
