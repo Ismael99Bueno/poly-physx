@@ -42,6 +42,10 @@ void constraint_meta_manager2D::solve()
     }
     for (std::size_t i = 0; i < this->world.constraints.position_iterations; i++)
     {
+        if (i > 0)
+            for (const auto &solver : this->m_elements)
+                solver->startup();
+
         bool fully_adjusted = true;
         for (const auto &solver : this->m_elements)
             fully_adjusted &= solver->adjust_positions();

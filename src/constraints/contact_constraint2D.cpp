@@ -20,7 +20,7 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
 
 float contact_constraint2D::constraint_position() const
 {
-    return m_penetration;
+    return m_penetration + m_pntr_correction;
 }
 float contact_constraint2D::constraint_velocity() const
 {
@@ -38,9 +38,14 @@ void contact_constraint2D::solve()
 
 void contact_constraint2D::startup()
 {
+    const glm::vec2 g1 = m_ganchor1;
+    const glm::vec2 g2 = m_ganchor2;
     pvconstraint2D::startup();
     if (!m_is_adjusting_positions)
         m_friction.startup();
+    const glm::vec2 dpos1 = m_ganchor1 - g1;
+    const glm::vec2 dpos2 = m_ganchor2 - g2;
+    m_pntr_correction = glm::dot(m_dir, dpos2 - dpos1);
 }
 
 void contact_constraint2D::warmup()
@@ -63,6 +68,7 @@ void contact_constraint2D::update(const collision2D *collision, const std::size_
     m_friction.update(collision, m_lanchor1, m_lanchor2);
     recently_updated = true;
     m_is_adjusting_positions = false;
+    m_pntr_correction = 0.f;
 }
 
 float contact_constraint2D::inverse_mass() const

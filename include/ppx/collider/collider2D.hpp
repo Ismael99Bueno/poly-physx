@@ -9,7 +9,7 @@
 namespace ppx
 {
 struct collision2D;
-class collider2D : public kit::indexable, public worldref2D, kit::non_copyable
+class collider2D final : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
     using specs = specs::collider2D;

@@ -24,6 +24,7 @@ class contact_constraint2D final : public pvconstraint2D
   private:
     float m_restitution;
     float m_penetration;
+    float m_pntr_correction = 0.f;
     glm::vec2 m_mtv;
     friction_constraint2D m_friction;
     bool m_is_adjusting_positions = false;

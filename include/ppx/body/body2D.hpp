@@ -14,7 +14,7 @@ namespace ppx
 class world2D;
 class collider2D;
 class joint2D;
-class body2D : public kit::indexable, public worldref2D, kit::non_copyable
+class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
     using specs = specs::body2D;

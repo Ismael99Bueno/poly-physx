@@ -15,7 +15,6 @@ float pvconstraint2D::compute_impulse() const
 
 bool pvconstraint2D::adjust_positions()
 {
-    startup();
     if (std::abs(m_c) < world.constraints.slop)
         return true;
 
