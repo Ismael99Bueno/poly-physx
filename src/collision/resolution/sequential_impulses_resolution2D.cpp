@@ -45,11 +45,14 @@ void sequential_impulses_resolution2D::startup()
 {
     KIT_PERF_SCOPE("Contacts startup")
     for (auto &[hash, contact] : m_contacts)
-    {
         contact.startup();
-        if (world.constraints.warmup)
-            contact.warmup();
-    }
+}
+
+void sequential_impulses_resolution2D::warmup()
+{
+    KIT_PERF_SCOPE("Contacts warmup")
+    for (auto &[hash, contact] : m_contacts)
+        contact.warmup();
 }
 
 void sequential_impulses_resolution2D::solve_contacts()

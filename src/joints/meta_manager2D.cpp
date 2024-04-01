@@ -28,29 +28,43 @@ void constraint_meta_manager2D::delegate_contacts_resolution(sequential_impulses
 void constraint_meta_manager2D::solve()
 {
     KIT_PERF_SCOPE("Constraints solve")
+    const bool warmup = world.constraints.warmup;
+    const std::size_t viters = world.constraints.velocity_iterations;
+    const std::size_t piters = world.constraints.position_iterations;
     if (m_si_solver)
+    {
         m_si_solver->startup();
+        if (warmup)
+            m_si_solver->warmup();
+    }
     for (const auto &solver : this->m_elements)
         solver->startup();
+    if (warmup)
+        for (const auto &solver : this->m_elements)
+            solver->warmup();
 
-    for (std::size_t i = 0; i < this->world.constraints.velocity_iterations; i++)
+    for (std::size_t i = 0; i < viters; i++)
     {
         if (m_si_solver)
             m_si_solver->solve_contacts();
         for (const auto &solver : this->m_elements)
             solver->solve();
     }
-    for (std::size_t i = 0; i < this->world.constraints.position_iterations; i++)
+    for (std::size_t i = 0; i < piters; i++)
     {
-        if (i > 0)
-            for (const auto &solver : this->m_elements)
-                solver->startup();
-
         bool fully_adjusted = true;
         for (const auto &solver : this->m_elements)
+        {
+            if (i > 0)
+                solver->startup();
             fully_adjusted &= solver->adjust_positions();
+        }
         if (m_si_solver)
+        {
+            if (i > 0)
+                m_si_solver->startup();
             fully_adjusted &= m_si_solver->adjust_positions();
+        }
         if (fully_adjusted)
             break;
     }

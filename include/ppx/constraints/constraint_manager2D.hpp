@@ -16,6 +16,7 @@ class iconstraint_manager2D : public kit::identifiable<std::string>, public kit:
     virtual ~iconstraint_manager2D() = default;
 
     virtual void startup() = 0;
+    virtual void warmup() = 0;
     virtual void solve() = 0;
     virtual bool adjust_positions() = 0;
     virtual void on_body_removal_validation(const body2D *body) = 0;
@@ -44,11 +45,13 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
     virtual void startup() override
     {
         for (T *constraint : this->m_elements)
-        {
             constraint->startup();
-            if (this->world.constraints.warmup)
-                constraint->warmup();
-        }
+    }
+
+    virtual void warmup() override
+    {
+        for (T *constraint : this->m_elements)
+            constraint->warmup();
     }
 
     virtual void solve() override
