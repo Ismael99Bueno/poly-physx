@@ -40,8 +40,8 @@ bool pvconstraint2D::adjust_positions()
     m_body1->ctr_state.centroid.rotate(da1);
     m_body2->ctr_state.centroid.rotate(da2);
 
-    m_body1->ctr_state.gposition = m_body1->ctr_state.global_centroid_point(m_body1->ctr_state.lposition);
-    m_body2->ctr_state.gposition = m_body2->ctr_state.global_centroid_point(m_body2->ctr_state.lposition);
+    // m_body1->ctr_state.gposition = m_body1->ctr_state.global_centroid_point(m_body1->ctr_state.lposition);
+    // m_body2->ctr_state.gposition = m_body2->ctr_state.global_centroid_point(m_body2->ctr_state.lposition);
 
     m_body1->velocity() += dpos1 / world.rk_substep_timestep();
     m_body1->angular_velocity() += da1 / world.rk_substep_timestep();
