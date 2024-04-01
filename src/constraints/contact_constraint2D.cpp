@@ -10,11 +10,12 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
     : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
                      collision->manifold[manifold_index].point),
       m_restitution(collision->restitution), m_penetration(-glm::length(collision->mtv)),
-      m_mtv(glm::normalize(collision->mtv)), m_friction(world, collision, manifold_index)
+      m_mtv(glm::normalize(collision->mtv)), m_friction(world, collision, manifold_index),
+      m_has_friction(!kit::approaches_zero(collision->friction))
 {
+    m_ganchor1 = collision->manifold[manifold_index].point;
     if (!kit::approaches_zero(m_restitution))
-        m_init_ctr_vel = glm::dot(m_mtv, m_body2->gvelocity_at(collision->manifold[manifold_index].point) -
-                                             m_body1->gvelocity_at(collision->manifold[manifold_index].point));
+        m_init_ctr_vel = glm::dot(m_mtv, m_body2->gvelocity_at(m_ganchor1) - m_body1->gvelocity_at(m_ganchor1));
 }
 
 float contact_constraint2D::constraint_position() const
@@ -31,7 +32,8 @@ float contact_constraint2D::constraint_velocity() const
 void contact_constraint2D::solve()
 {
     m_friction.max_impulse = std::abs(m_cumimpulse);
-    m_friction.solve();
+    if (m_has_friction)
+        m_friction.solve();
     solve_clamped(0.f, FLT_MAX);
 }
 
@@ -39,8 +41,9 @@ void contact_constraint2D::startup()
 {
     const glm::vec2 g1 = m_ganchor1;
     pvconstraint2D::startup();
-    if (!m_is_adjusting_positions)
+    if (!m_is_adjusting_positions && m_has_friction)
         m_friction.startup();
+
     const glm::vec2 dpos1 = m_ganchor1 - g1;
     m_pntr_correction = glm::dot(m_dir, dpos1);
 }
@@ -48,7 +51,8 @@ void contact_constraint2D::startup()
 void contact_constraint2D::warmup()
 {
     pvconstraint2D::warmup();
-    m_friction.warmup();
+    if (m_has_friction)
+        m_friction.warmup();
 }
 
 void contact_constraint2D::update(const collision2D *collision, const std::size_t manifold_index)
@@ -57,6 +61,7 @@ void contact_constraint2D::update(const collision2D *collision, const std::size_
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
     m_body1 = collision->collider1->body();
     m_body2 = collision->collider2->body();
+    m_ganchor1 = collision->manifold[manifold_index].point;
     m_lanchor1 = m_body1->local_position_point(collision->manifold[manifold_index].point); // lanchor2 is not used
     m_mtv = glm::normalize(collision->mtv);
     m_restitution = collision->restitution;
@@ -65,6 +70,7 @@ void contact_constraint2D::update(const collision2D *collision, const std::size_
     recently_updated = true;
     m_is_adjusting_positions = false;
     m_pntr_correction = 0.f;
+    m_has_friction = !kit::approaches_zero(collision->friction);
 }
 
 float contact_constraint2D::inverse_mass() const
