@@ -17,7 +17,6 @@ class vconstraint2D : public joint2D
     virtual ~vconstraint2D() = default;
 
     virtual float constraint_velocity() const = 0;
-
     virtual void startup();
     virtual void warmup();
 
@@ -38,6 +37,7 @@ class vconstraint2D : public joint2D
     void solve_unclamped();
 
     virtual float compute_impulse() const;
+    virtual void update_constraint_data();
 
   private:
     virtual float inverse_mass() const = 0;

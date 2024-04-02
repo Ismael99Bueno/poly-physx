@@ -9,13 +9,13 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
                                            const std::size_t manifold_index)
     : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
                      collision->manifold[manifold_index].point),
-      m_restitution(collision->restitution), m_penetration(-glm::length(collision->mtv)),
-      m_mtv(glm::normalize(collision->mtv)), m_friction(world, collision, manifold_index),
+      m_restitution(collision->restitution), m_penetration(collision->manifold[manifold_index].penetration),
+      m_nmtv(glm::normalize(collision->mtv)), m_friction(world, collision, manifold_index),
       m_has_friction(!kit::approaches_zero(collision->friction))
 {
     m_ganchor1 = collision->manifold[manifold_index].point;
     if (!kit::approaches_zero(m_restitution))
-        m_init_ctr_vel = glm::dot(m_mtv, m_body2->gvelocity_at(m_ganchor1) - m_body1->gvelocity_at(m_ganchor1));
+        m_init_ctr_vel = glm::dot(m_nmtv, m_body2->gvelocity_at(m_ganchor1) - m_body1->gvelocity_at(m_ganchor1));
 }
 
 float contact_constraint2D::constraint_position() const
@@ -39,13 +39,18 @@ void contact_constraint2D::solve()
 
 void contact_constraint2D::startup()
 {
-    const glm::vec2 g1 = m_ganchor1;
     pvconstraint2D::startup();
     if (!m_is_adjusting_positions && m_has_friction)
         m_friction.startup();
+}
 
+void contact_constraint2D::update_position_data()
+{
+    m_is_adjusting_positions = true;
+    const glm::vec2 g1 = m_ganchor1;
+    pvconstraint2D::update_position_data();
     const glm::vec2 dpos1 = m_ganchor1 - g1;
-    m_pntr_correction = glm::dot(m_dir, dpos1);
+    m_pntr_correction = std::abs(glm::dot(m_dir, dpos1));
 }
 
 void contact_constraint2D::warmup()
@@ -63,10 +68,10 @@ void contact_constraint2D::update(const collision2D *collision, const std::size_
     m_body2 = collision->collider2->body();
     m_ganchor1 = collision->manifold[manifold_index].point;
     m_lanchor1 = m_body1->local_position_point(collision->manifold[manifold_index].point); // lanchor2 is not used
-    m_mtv = glm::normalize(collision->mtv);
+    m_nmtv = glm::normalize(collision->mtv);
     m_restitution = collision->restitution;
     m_penetration = -glm::length(collision->mtv);
-    m_friction.update(collision, m_lanchor1, m_mtv);
+    m_friction.update(collision, m_lanchor1, m_nmtv);
     recently_updated = true;
     m_is_adjusting_positions = false;
     m_pntr_correction = 0.f;
@@ -84,7 +89,7 @@ float contact_constraint2D::inverse_mass() const
 
 glm::vec2 contact_constraint2D::direction() const
 {
-    return m_mtv;
+    return m_nmtv;
 }
 
 } // namespace ppx

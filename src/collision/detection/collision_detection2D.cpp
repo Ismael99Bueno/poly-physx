@@ -191,7 +191,7 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
         return;
 
     fill_collision_data(collision, collider1, collider2, mres.mtv);
-    collision.manifold = {{geo::radius_distance_contact_point(circ1, circ2), {}}};
+    collision.manifold = {geo::radius_distance_contact_point(circ1, circ2, mres.mtv)};
 }
 void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
                                                       collision2D &collision) const
@@ -204,7 +204,7 @@ void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, col
         return;
 
     fill_collision_data(collision, collider1, collider2, nres.mtv);
-    collision.manifold = {{geo::radius_penetration_contact_point(circ, nres.mtv), {}}};
+    collision.manifold = {geo::radius_penetration_contact_point(circ, nres.mtv)};
 }
 void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
                                                       collision2D &collision) const

@@ -48,13 +48,6 @@ void sequential_impulses_resolution2D::startup()
         contact.startup();
 }
 
-void sequential_impulses_resolution2D::warmup()
-{
-    KIT_PERF_SCOPE("Contacts warmup")
-    for (auto &[hash, contact] : m_contacts)
-        contact.warmup();
-}
-
 void sequential_impulses_resolution2D::solve_contacts()
 {
     KIT_PERF_SCOPE("Contacts solve")

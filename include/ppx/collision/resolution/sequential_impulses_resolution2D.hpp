@@ -19,7 +19,6 @@ class sequential_impulses_resolution2D : public collision_resolution2D
     void solve(const collision_detection2D::collision_map &collisions) override;
 
     void startup();
-    void warmup();
     void solve_contacts();
     bool adjust_positions();
 

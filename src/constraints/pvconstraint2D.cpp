@@ -15,6 +15,7 @@ float pvconstraint2D::compute_impulse() const
 
 bool pvconstraint2D::adjust_positions()
 {
+    update_position_data();
     if (std::abs(m_c) < world.constraints.slop)
         return true;
 
@@ -46,12 +47,19 @@ bool pvconstraint2D::adjust_positions()
     m_body1->angular_velocity() += da1 / world.rk_substep_timestep();
     m_body2->velocity() += dpos2 / world.rk_substep_timestep();
     m_body2->angular_velocity() += da2 / world.rk_substep_timestep();
+    m_needs_position_update = true;
     return false;
 }
 
-void pvconstraint2D::startup()
+void pvconstraint2D::update_constraint_data()
 {
-    vconstraint2D::startup();
+    vconstraint2D::update_constraint_data();
     m_c = constraint_position();
 }
+
+void pvconstraint2D::update_position_data()
+{
+    update_constraint_data();
+}
+
 } // namespace ppx

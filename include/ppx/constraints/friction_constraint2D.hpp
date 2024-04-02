@@ -14,11 +14,11 @@ class friction_constraint2D final : public vconstraint2D
 
     float constraint_velocity() const override;
     void solve() override;
-    void update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &norm_mtv);
+    void update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &nmtv);
 
   private:
     float m_friction;
-    glm::vec2 m_mtv;
+    glm::vec2 m_nmtv;
 
     float inverse_mass() const override;
     glm::vec2 direction() const override;
