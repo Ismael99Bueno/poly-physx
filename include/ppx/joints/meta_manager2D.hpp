@@ -28,7 +28,7 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
               kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
     Manager *add_manager(const std::string &name)
     {
-        KIT_ASSERT_ERROR(!this->contains(Manager::name()), "There is already a solver of this type in the repository")
+        KIT_ASSERT_ERROR(!this->contains(Manager::name()), "There is already a manager of this type in the repository")
         auto manager = kit::make_scope<Manager>(this->world, name);
         Manager *ptr = manager.get();
         this->m_elements.push_back(std::move(manager));
@@ -39,15 +39,15 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
               kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
     const Manager *manager() const
     {
-        const IM *solver = (*this)[Manager::name()];
-        return solver ? static_cast<const Manager *>(solver) : nullptr;
+        const IM *manager = (*this)[Manager::name()];
+        return manager ? static_cast<const Manager *>(manager) : nullptr;
     }
     template <Joint2D T,
               kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
     Manager *manager()
     {
-        IM *solver = (*this)[Manager::name()];
-        return solver ? static_cast<Manager *>(solver) : nullptr;
+        IM *manager = (*this)[Manager::name()];
+        return manager ? static_cast<Manager *>(manager) : nullptr;
     }
 
     using idmanager2D<kit::scope<IM>>::remove;
@@ -77,8 +77,8 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
   private:
     void on_body_removal_validation(const body2D *body)
     {
-        for (const auto &solver : this->m_elements)
-            solver->on_body_removal_validation(body);
+        for (const auto &manager : this->m_elements)
+            manager->on_body_removal_validation(body);
     }
 
     friend class world2D;
@@ -98,7 +98,7 @@ class constraint_meta_manager2D final : public meta_manager2D<iconstraint_manage
     sequential_impulses_resolution2D *m_si_solver = nullptr;
 
     void solve();
-    void delegate_contacts_resolution(sequential_impulses_resolution2D *solver);
+    void delegate_contacts_resolution(sequential_impulses_resolution2D *si_solver);
 
     friend class world2D;
     friend class sequential_impulses_resolution2D;

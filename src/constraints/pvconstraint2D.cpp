@@ -4,60 +4,136 @@
 
 namespace ppx
 {
-float pvconstraint2D::compute_impulse() const
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<LinDegrees,
+                                                                       AngDegrees>::compute_constraint_impulse() const
 {
-    const float cvel = constraint_velocity();
-    if (world.constraints.baumgarte_correction && std::abs(m_c) > world.constraints.baumgarte_threshold)
-        return -(cvel + world.constraints.baumgarte_coef * m_c / world.rk_substep_timestep()) / m_inv_mass;
+    flat_t cvel = constraint_velocity();
+    if (this->world.constraints.baumgarte_correction && std::abs(m_c) > this->world.constraints.baumgarte_threshold)
+        cvel += this->world.constraints.baumgarte_coef * m_c / this->world.rk_substep_timestep();
 
-    return -cvel / m_inv_mass;
+    if constexpr (LinDegrees + AngDegrees == 1)
+        return -cvel * this->m_mass;
+    else
+        return this->m_mass * (-cvel);
 }
 
-bool pvconstraint2D::adjust_positions()
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<
+    LinDegrees, AngDegrees>::compute_constraint_correction() const
+{
+    if constexpr (LinDegrees + AngDegrees == 1)
+    {
+        const float signed_slop = m_c > 0.f ? -this->world.constraints.slop : this->world.constraints.slop;
+        return -std::clamp(this->world.constraints.position_resolution_speed * (m_c + signed_slop),
+                           -this->world.constraints.max_position_correction,
+                           this->world.constraints.max_position_correction) *
+               this->m_mass;
+    }
+    else
+        return this->m_mass * (glm::normalize(m_c) * this->world.constraints.slop - m_c)
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+glm::vec2 pvconstraint2D<LinDegrees, AngDegrees>::compute_linear_correction(const flat_t &ccorrection) const
+{
+    if constexpr (LinDegrees + AngDegrees > 1)
+        return glm::vec2(ccorrection);
+    else
+        return this->m_dir * ccorrection;
+}
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+float pvconstraint2D<LinDegrees, AngDegrees>::compute_angular_correction(const flat_t &ccorrection) const
+{
+    static_assert(AngDegrees == 1,
+                  "Angular impulse can only be computed when the angular degrees of the constraint is 1");
+    if constexpr (LinDegrees == 2)
+        return ccorrection.z;
+    else if constexpr (LinDegrees == 1)
+        return ccorrection.y;
+    else
+        return ccorrection;
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::vec2 &lincorrection)
+{
+    static_assert(LinDegrees > 0,
+                  "Linear correction can only be applied when the linear degrees of the constraint is greater than 0");
+    const glm::vec2 dpos1 = -this->m_body1->props().dynamic.inv_mass * lincorrection;
+    const glm::vec2 dpos2 = this->m_body2->props().dynamic.inv_mass * lincorrection;
+
+    const float da1 = -this->m_body1->props().dynamic.inv_inertia * kit::cross2D(this->m_offset1, lincorrection);
+    const float da2 = this->m_body2->props().dynamic.inv_inertia * kit::cross2D(this->m_offset2, lincorrection);
+
+    this->m_body1->ctr_state.centroid.translate(dpos1);
+    this->m_body2->ctr_state.centroid.translate(dpos2);
+
+    this->m_body1->ctr_state.centroid.rotate(da1);
+    this->m_body2->ctr_state.centroid.rotate(da2);
+
+    this->m_body1->velocity() += dpos1 / this->world.rk_substep_timestep();
+    this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
+    this->m_body2->velocity() += dpos2 / this->world.rk_substep_timestep();
+    this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+void pvconstraint2D<LinDegrees, AngDegrees>::apply_angular_correction(float angcorrection)
+{
+    static_assert(AngDegrees == 1,
+                  "Angular correction can only be applied when the angular degrees of the constraint is equal to 1");
+    const float da1 = -angcorrection;
+    const float da2 = angcorrection;
+
+    this->m_body1->ctr_state.centroid.rotate(da1);
+    this->m_body2->ctr_state.centroid.rotate(da2);
+
+    this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
+    this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+bool pvconstraint2D<LinDegrees, AngDegrees>::solve_positions()
 {
     update_position_data();
-    if (std::abs(m_c) < world.constraints.slop)
+    if (glm::length(m_c) < this->world.constraints.slop)
         return true;
 
-    const float signed_slop = m_c > 0.f ? -world.constraints.slop : world.constraints.slop;
-    const float impulse =
-        -std::clamp(world.constraints.position_resolution_speed * (m_c + signed_slop),
-                    -world.constraints.max_position_correction, world.constraints.max_position_correction) /
-        m_inv_mass;
+    const flat_t ccorrection = compute_constraint_correction();
+    if constexpr (LinDegrees > 1)
+        apply_linear_correction(compute_linear_correction(ccorrection));
+    if constexpr (AngDegrees == 1)
+        apply_angular_correction(compute_angular_correction(ccorrection));
 
-    const glm::vec2 imp2 = impulse * m_dir;
-    const glm::vec2 imp1 = -imp2;
-
-    const glm::vec2 dpos1 = m_body1->props().dynamic.inv_mass * imp1;
-    const glm::vec2 dpos2 = m_body2->props().dynamic.inv_mass * imp2;
-
-    const float da1 = m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, imp1);
-    const float da2 = m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, imp2);
-
-    m_body1->ctr_state.centroid.translate(dpos1);
-    m_body2->ctr_state.centroid.translate(dpos2);
-
-    m_body1->ctr_state.centroid.rotate(da1);
-    m_body2->ctr_state.centroid.rotate(da2);
-
-    // m_body1->ctr_state.gposition = m_body1->ctr_state.global_centroid_point(m_body1->ctr_state.lposition);
-    // m_body2->ctr_state.gposition = m_body2->ctr_state.global_centroid_point(m_body2->ctr_state.lposition);
-
-    m_body1->velocity() += dpos1 / world.rk_substep_timestep();
-    m_body1->angular_velocity() += da1 / world.rk_substep_timestep();
-    m_body2->velocity() += dpos2 / world.rk_substep_timestep();
-    m_body2->angular_velocity() += da2 / world.rk_substep_timestep();
-    m_needs_position_update = true;
     return false;
 }
-
-void pvconstraint2D::update_constraint_data()
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+void pvconstraint2D<LinDegrees, AngDegrees>::solve()
 {
-    vconstraint2D::update_constraint_data();
+    this->solve_velocities();
+    solve_positions();
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+void pvconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
+{
+    base_t::update_constraint_data();
     m_c = constraint_position();
 }
 
-void pvconstraint2D::update_position_data()
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+void pvconstraint2D<LinDegrees, AngDegrees>::update_position_data()
 {
     update_constraint_data();
 }
