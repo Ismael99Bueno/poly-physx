@@ -33,9 +33,12 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 float vconstraint2D<LinDegrees, AngDegrees>::compute_angular_impulse(const flat_t &cimpulse) const
 {
-    static_assert(AngDegrees == 1,
-                  "Angular impulse can only be computed when the angular degrees of the constraint is 1");
-    if constexpr (LinDegrees == 2)
+    if constexpr (AngDegrees == 0)
+    {
+        KIT_ERROR("Angular impulse can only be computed when the angular degrees of the constraint is equal to 1")
+        return 0.f;
+    }
+    else if constexpr (LinDegrees == 2)
         return cimpulse.z;
     else if constexpr (LinDegrees == 1)
         return cimpulse.y;
@@ -47,8 +50,10 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2 &linimpulse)
 {
-    static_assert(LinDegrees > 0,
-                  "Linear impulse can only be applied when the linear degrees of the constraint is greater than 0");
+    if constexpr (LinDegrees == 0)
+    {
+        KIT_ERROR("Linear impulse can only be applied when the linear degrees of the constraint is greater than 0")
+    }
     m_body1->ctr_state.velocity -= m_body1->props().dynamic.inv_mass * linimpulse;
     m_body2->ctr_state.velocity += m_body2->props().dynamic.inv_mass * linimpulse;
 
@@ -70,8 +75,10 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 void vconstraint2D<LinDegrees, AngDegrees>::apply_angular_impulse(float angimpulse)
 {
-    static_assert(AngDegrees == 1,
-                  "Angular impulse can only be applied when the angular degrees of the constraint is equal to 1");
+    if constexpr (AngDegrees == 0)
+    {
+        KIT_ERROR("Angular impulse can only be applied when the angular degrees of the constraint is equal to 1")
+    }
     m_body1->ctr_state.angular_velocity -= m_body1->props().dynamic.inv_inertia * angimpulse;
     m_body2->ctr_state.angular_velocity += m_body2->props().dynamic.inv_inertia * angimpulse;
 
@@ -97,7 +104,7 @@ void vconstraint2D<LinDegrees, AngDegrees>::solve_velocities()
     m_cumimpulse += impulse;
     if constexpr (LinDegrees > 0)
         apply_linear_impulse(compute_linear_impulse(impulse));
-    if constexpr (AngDegrees > 0)
+    if constexpr (AngDegrees == 1)
         apply_angular_impulse(compute_angular_impulse(impulse));
 }
 
@@ -132,9 +139,9 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 void vconstraint2D<LinDegrees, AngDegrees>::warmup()
 {
-    if (!kit::approaches_zero(m_cumimpulse))
+    if (kit::approaches_zero(glm::length(m_cumimpulse)))
         return;
-    if constexpr (LinDegrees == 1)
+    if constexpr (LinDegrees > 0)
         apply_linear_impulse(compute_linear_impulse(m_cumimpulse));
     if constexpr (AngDegrees == 1)
         apply_angular_impulse(compute_angular_impulse(m_cumimpulse));
@@ -163,7 +170,7 @@ void vconstraint10_2D::update_constraint_data()
     m_mass = 1.f / inverse_mass();
 }
 
-void vconstraint10_2D::solve_clamped(const float min, const float max)
+void vconstraint10_2D::solve_velocities_clamped(const float min, const float max)
 {
     const float impulse = compute_constraint_impulse();
     const float old_impulse = m_cumimpulse;
@@ -182,7 +189,7 @@ float vconstraint01_2D::inverse_mass() const
 {
     return m_body1->props().dynamic.inv_inertia + m_body2->props().dynamic.inv_inertia;
 }
-void vconstraint01_2D::solve_clamped(const float min, const float max)
+void vconstraint01_2D::solve_velocities_clamped(const float min, const float max)
 {
     const float impulse = compute_constraint_impulse();
     const float old_impulse = m_cumimpulse;
@@ -192,5 +199,11 @@ void vconstraint01_2D::solve_clamped(const float min, const float max)
     if (!kit::approaches_zero(delta_impulse))
         apply_angular_impulse(delta_impulse);
 }
+
+template class vconstraint2D<1, 0>;
+template class vconstraint2D<0, 1>;
+template class vconstraint2D<1, 1>;
+template class vconstraint2D<2, 0>;
+template class vconstraint2D<2, 1>;
 
 } // namespace ppx

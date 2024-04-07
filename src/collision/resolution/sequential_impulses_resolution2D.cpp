@@ -48,19 +48,19 @@ void sequential_impulses_resolution2D::startup()
         contact.startup();
 }
 
-void sequential_impulses_resolution2D::solve_contacts()
+void sequential_impulses_resolution2D::solve_velocities()
 {
     KIT_PERF_SCOPE("Contacts solve")
     for (auto &[hash, contact] : m_contacts)
-        contact.solve();
+        contact.solve_velocities();
 }
 
-bool sequential_impulses_resolution2D::adjust_positions()
+bool sequential_impulses_resolution2D::solve_positions()
 {
     KIT_PERF_SCOPE("Contacts adjust positions")
     bool fully_adjusted = true;
     for (auto &[hash, contact] : m_contacts)
-        fully_adjusted &= contact.adjust_positions();
+        fully_adjusted &= contact.solve_positions();
     return fully_adjusted;
 }
 

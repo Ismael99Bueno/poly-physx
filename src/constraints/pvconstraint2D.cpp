@@ -9,8 +9,8 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<LinDegrees,
                                                                        AngDegrees>::compute_constraint_impulse() const
 {
-    flat_t cvel = constraint_velocity();
-    if (this->world.constraints.baumgarte_correction && std::abs(m_c) > this->world.constraints.baumgarte_threshold)
+    flat_t cvel = this->constraint_velocity();
+    if (this->world.constraints.baumgarte_correction && glm::length(m_c) > this->world.constraints.baumgarte_threshold)
         cvel += this->world.constraints.baumgarte_coef * m_c / this->world.rk_substep_timestep();
 
     if constexpr (LinDegrees + AngDegrees == 1)
@@ -33,14 +33,19 @@ typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<
                this->m_mass;
     }
     else
-        return this->m_mass * (glm::normalize(m_c) * this->world.constraints.slop - m_c)
+        return this->m_mass * (glm::normalize(m_c) * this->world.constraints.slop - m_c);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 glm::vec2 pvconstraint2D<LinDegrees, AngDegrees>::compute_linear_correction(const flat_t &ccorrection) const
 {
-    if constexpr (LinDegrees + AngDegrees > 1)
+    if constexpr (LinDegrees == 0)
+    {
+        KIT_ERROR("Linear correction can only be computed when the linear degrees of the constraint is greater than 0")
+        return {};
+    }
+    else if constexpr (LinDegrees + AngDegrees > 1)
         return glm::vec2(ccorrection);
     else
         return this->m_dir * ccorrection;
@@ -49,9 +54,12 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 float pvconstraint2D<LinDegrees, AngDegrees>::compute_angular_correction(const flat_t &ccorrection) const
 {
-    static_assert(AngDegrees == 1,
-                  "Angular impulse can only be computed when the angular degrees of the constraint is 1");
-    if constexpr (LinDegrees == 2)
+    if constexpr (AngDegrees == 0)
+    {
+        KIT_ERROR("Angular correction can only be computed when the angular degrees of the constraint is equal to 1")
+        return 0.f;
+    }
+    else if constexpr (LinDegrees == 2)
         return ccorrection.z;
     else if constexpr (LinDegrees == 1)
         return ccorrection.y;
@@ -63,8 +71,10 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::vec2 &lincorrection)
 {
-    static_assert(LinDegrees > 0,
-                  "Linear correction can only be applied when the linear degrees of the constraint is greater than 0");
+    if constexpr (LinDegrees == 0)
+    {
+        KIT_ERROR("Linear correction can only be applied when the linear degrees of the constraint is greater than 0")
+    }
     const glm::vec2 dpos1 = -this->m_body1->props().dynamic.inv_mass * lincorrection;
     const glm::vec2 dpos2 = this->m_body2->props().dynamic.inv_mass * lincorrection;
 
@@ -87,8 +97,10 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 void pvconstraint2D<LinDegrees, AngDegrees>::apply_angular_correction(float angcorrection)
 {
-    static_assert(AngDegrees == 1,
-                  "Angular correction can only be applied when the angular degrees of the constraint is equal to 1");
+    if constexpr (AngDegrees == 0)
+    {
+        KIT_ERROR("Angular correction can only be applied when the angular degrees of the constraint is equal to 1")
+    }
     const float da1 = -angcorrection;
     const float da2 = angcorrection;
 
@@ -108,7 +120,7 @@ bool pvconstraint2D<LinDegrees, AngDegrees>::solve_positions()
         return true;
 
     const flat_t ccorrection = compute_constraint_correction();
-    if constexpr (LinDegrees > 1)
+    if constexpr (LinDegrees > 0)
         apply_linear_correction(compute_linear_correction(ccorrection));
     if constexpr (AngDegrees == 1)
         apply_angular_correction(compute_angular_correction(ccorrection));
@@ -137,5 +149,11 @@ void pvconstraint2D<LinDegrees, AngDegrees>::update_position_data()
 {
     update_constraint_data();
 }
+
+template class pvconstraint2D<1, 0>;
+template class pvconstraint2D<0, 1>;
+template class pvconstraint2D<1, 1>;
+template class pvconstraint2D<2, 0>;
+template class pvconstraint2D<2, 1>;
 
 } // namespace ppx

@@ -6,7 +6,7 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : pvconstraint2D(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
+    : pvconstraint10_2D(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
       max_distance(spc.props.max_distance)
 {
     if (kit::approximately(min_distance, max_distance))
@@ -34,30 +34,21 @@ float distance_joint2D::constraint_velocity() const
                                m_body1->ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
-float distance_joint2D::inverse_mass() const
-{
-    const float cross1 = kit::cross2D(m_offset1, m_dir);
-    const float cross2 = kit::cross2D(m_offset2, m_dir);
-    return m_body1->props().dynamic.inv_mass + m_body2->props().dynamic.inv_mass +
-           m_body1->props().dynamic.inv_inertia * cross1 * cross1 +
-           m_body2->props().dynamic.inv_inertia * cross2 * cross2;
-}
-
 glm::vec2 distance_joint2D::direction() const
 {
     return glm::normalize(m_ganchor2 - m_ganchor1);
 }
 
-void distance_joint2D::solve()
+void distance_joint2D::solve_velocities()
 {
     if (legal_length())
         return;
     if (kit::approximately(min_distance, max_distance))
-        solve_unclamped();
+        pvconstraint10_2D::solve_velocities();
     else if (m_length < min_distance)
-        solve_clamped(0.f, FLT_MAX);
+        solve_velocities_clamped(0.f, FLT_MAX);
     else
-        solve_clamped(-FLT_MAX, 0.f);
+        solve_velocities_clamped(-FLT_MAX, 0.f);
 }
 
 bool distance_joint2D::legal_length() const

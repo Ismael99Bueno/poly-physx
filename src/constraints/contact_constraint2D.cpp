@@ -29,17 +29,17 @@ float contact_constraint2D::constraint_velocity() const
                                m_body1->ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
-void contact_constraint2D::solve()
+void contact_constraint2D::solve_velocities()
 {
     m_friction.max_impulse = std::abs(m_cumimpulse);
     if (m_has_friction)
-        m_friction.solve();
-    solve_clamped(0.f, FLT_MAX);
+        m_friction.solve_velocities();
+    solve_velocities_clamped(0.f, FLT_MAX);
 }
 
 void contact_constraint2D::startup()
 {
-    pvconstraint2D::startup();
+    pvconstraint10_2D::startup();
     if (!m_is_adjusting_positions && m_has_friction)
         m_friction.startup();
 }

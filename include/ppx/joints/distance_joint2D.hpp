@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class distance_joint2D final : public pvconstraint2D, kit::non_copyable
+class distance_joint2D final : public pvconstraint10_2D, kit::non_copyable
 {
   public:
     using specs = specs::distance_joint2D;
@@ -19,10 +19,9 @@ class distance_joint2D final : public pvconstraint2D, kit::non_copyable
     float constraint_velocity() const override;
 
     void startup() override;
-    void solve() override;
+    void solve_velocities() override;
 
   private:
-    float inverse_mass() const override;
     glm::vec2 direction() const override;
 
     bool legal_length() const;

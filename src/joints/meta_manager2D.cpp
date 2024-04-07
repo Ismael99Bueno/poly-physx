@@ -39,17 +39,17 @@ void constraint_meta_manager2D::solve()
     for (std::size_t i = 0; i < viters; i++)
     {
         if (m_si_solver)
-            m_si_solver->solve_contacts();
+            m_si_solver->solve_velocities();
         for (const auto &manager : this->m_elements)
-            manager->solve();
+            manager->solve_velocities();
     }
     for (std::size_t i = 0; i < piters; i++)
     {
         bool fully_adjusted = true;
         for (const auto &manager : this->m_elements)
-            fully_adjusted &= manager->adjust_positions();
+            fully_adjusted &= manager->solve_positions();
         if (m_si_solver)
-            fully_adjusted &= m_si_solver->adjust_positions();
+            fully_adjusted &= m_si_solver->solve_positions();
         if (fully_adjusted)
             break;
     }

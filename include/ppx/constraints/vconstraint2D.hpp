@@ -89,7 +89,7 @@ class vconstraint10_2D : public vconstraint2D<1, 0>
 
     virtual float inverse_mass() const override;
     virtual void update_constraint_data() override;
-    void solve_clamped(float min, float max);
+    void solve_velocities_clamped(float min, float max);
 
   private:
     virtual glm::vec2 direction() const = 0;
@@ -102,7 +102,7 @@ class vconstraint01_2D : public vconstraint2D<0, 1>
     using vconstraint2D<0, 1>::vconstraint2D;
 
     virtual float inverse_mass() const override;
-    void solve_clamped(float min, float max);
+    void solve_velocities_clamped(float min, float max);
 };
 
 } // namespace ppx

@@ -7,8 +7,8 @@ namespace ppx
 {
 friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision,
                                              const std::size_t manifold_index)
-    : vconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
-                    collision->manifold[manifold_index].point),
+    : vconstraint10_2D(world, collision->collider1->body(), collision->collider2->body(),
+                       collision->manifold[manifold_index].point),
       m_friction(collision->friction), m_nmtv(glm::normalize(collision->mtv))
 {
 }
@@ -18,10 +18,10 @@ float friction_constraint2D::constraint_velocity() const
                                m_body1->ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
-void friction_constraint2D::solve()
+void friction_constraint2D::solve_velocities()
 {
     const float mu = m_friction * max_impulse;
-    solve_clamped(-mu, mu);
+    solve_velocities_clamped(-mu, mu);
 }
 
 void friction_constraint2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &nmtv)
@@ -31,15 +31,6 @@ void friction_constraint2D::update(const collision2D *collision, const glm::vec2
     m_friction = collision->friction;
     m_lanchor1 = lanchor1;
     m_nmtv = nmtv;
-}
-
-float friction_constraint2D::inverse_mass() const
-{
-    const float cross1 = kit::cross2D(m_offset1, m_dir);
-    const float cross2 = kit::cross2D(m_offset2, m_dir);
-    return m_body1->props().dynamic.inv_mass + m_body2->props().dynamic.inv_mass +
-           m_body1->props().dynamic.inv_inertia * cross1 * cross1 +
-           m_body2->props().dynamic.inv_inertia * cross2 * cross2;
 }
 
 glm::vec2 friction_constraint2D::direction() const

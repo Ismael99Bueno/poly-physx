@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class contact_constraint2D final : public pvconstraint2D
+class contact_constraint2D final : public pvconstraint10_2D
 {
   public:
     contact_constraint2D(world2D &world, const collision2D *collision, std::size_t manifold_index);
@@ -16,7 +16,7 @@ class contact_constraint2D final : public pvconstraint2D
     float constraint_velocity() const override;
 
     void startup() override;
-    void solve() override;
+    void solve_velocities() override;
     void update(const collision2D *collision, std::size_t manifold_index);
 
   private:

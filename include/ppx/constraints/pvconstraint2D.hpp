@@ -15,7 +15,7 @@ using pvconstraint20_2D = pvconstraint2D<2, 0>;
 using pvconstraint21_2D = pvconstraint2D<2, 1>;
 
 template <typename T>
-concept VConstraint2D = requires() {
+concept PVConstraint2D = requires() {
     requires Joint2D<T>;
     requires kit::DerivedFrom<T, pvconstraint10_2D> || kit::DerivedFrom<T, pvconstraint01_2D> ||
                  kit::DerivedFrom<T, pvconstraint11_2D> || kit::DerivedFrom<T, pvconstraint20_2D> ||
@@ -52,7 +52,7 @@ class pvconstraint2D : public pvbase<LinDegrees, AngDegrees>::type
     virtual flat_t constraint_position() const = 0;
 
   protected:
-    using vconstraint2D<LinDegrees, AngDegrees>::vconstraint2D;
+    using base_t::base_t;
     flat_t m_c{0.f};
 
     virtual void update_constraint_data() override;
