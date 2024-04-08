@@ -9,7 +9,7 @@ distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
     : pvconstraint10_2D(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
       max_distance(spc.props.max_distance)
 {
-    if (spc.props.automatic_distance)
+    if (spc.props.deduce_distance)
     {
         const float length = glm::distance(ganchor1(), ganchor2());
         min_distance = length;
