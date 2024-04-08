@@ -9,7 +9,7 @@ distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
     : pvconstraint10_2D(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
       max_distance(spc.props.max_distance)
 {
-    if (kit::approximately(min_distance, max_distance))
+    if (spc.props.automatic_distance)
     {
         const float length = glm::distance(ganchor1(), ganchor2());
         min_distance = length;
@@ -36,7 +36,8 @@ float distance_joint2D::constraint_velocity() const
 
 glm::vec2 distance_joint2D::direction() const
 {
-    return glm::normalize(m_ganchor2 - m_ganchor1);
+    const float dst = glm::distance2(m_ganchor1, m_ganchor2);
+    return !kit::approaches_zero(dst) ? glm::normalize(m_ganchor2 - m_ganchor1) : glm::vec2(1.f, 0.f);
 }
 
 void distance_joint2D::solve_velocities()
