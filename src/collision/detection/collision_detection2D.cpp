@@ -169,10 +169,6 @@ static void fill_collision_data(collision2D &collision, collider2D *collider1, c
     collision.collided = true;
     collision.collider1 = collider1;
     collision.collider2 = collider2;
-    collision.velocity1 = collider1->body()->velocity();
-    collision.velocity2 = collider2->body()->velocity();
-    collision.angular_velocity1 = collider1->body()->angular_velocity();
-    collision.angular_velocity2 = collider2->body()->angular_velocity();
     collision.friction = sqrtf(collider1->friction * collider2->friction);
     collision.restitution = sqrtf(collider1->restitution * collider2->restitution);
     collision.mtv = mtv;
