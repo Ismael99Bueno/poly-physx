@@ -69,9 +69,9 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
 
     void on_body_removal_validation(const body2D *body)
     {
-        for (std::size_t i = this->m_elements.size() - 1; i < this->m_elements.size() && i >= 0; i--)
-            if (this->m_elements[i]->body1() == body || this->m_elements[i]->body2() == body)
-                remove(i);
+        const auto &joints = body->joints();
+        for (std::size_t i = joints.size() - 1; i < joints.size() && i >= 0; i--)
+            remove(joints[i]->index);
     }
 
   private:

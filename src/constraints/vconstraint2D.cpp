@@ -110,6 +110,29 @@ void vconstraint2D<LinDegrees, AngDegrees>::solve_velocities()
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
+void vconstraint2D<LinDegrees, AngDegrees>::solve_velocities_clamped(const flat_t &min, const flat_t &max)
+{
+    const flat_t impulse = compute_constraint_impulse();
+    const flat_t old_impulse = m_cumimpulse;
+    m_cumimpulse = glm::clamp(m_cumimpulse + impulse, min, max);
+
+    const flat_t delta_impulse = m_cumimpulse - old_impulse;
+    if constexpr (LinDegrees > 0)
+    {
+        const glm::vec2 linimpulse = compute_linear_impulse(delta_impulse);
+        if (!kit::approaches_zero(glm::length2(linimpulse)))
+            apply_linear_impulse(compute_linear_impulse(delta_impulse));
+    }
+    if constexpr (AngDegrees == 1)
+    {
+        const float angimpulse = compute_angular_impulse(delta_impulse);
+        if (!kit::approaches_zero(angimpulse))
+            apply_angular_impulse(compute_angular_impulse(delta_impulse));
+    }
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
 void vconstraint2D<LinDegrees, AngDegrees>::startup()
 {
     update_constraint_data();
@@ -170,16 +193,6 @@ void vconstraint10_2D::update_constraint_data()
     m_mass = 1.f / inverse_mass();
 }
 
-void vconstraint10_2D::solve_velocities_clamped(const float min, const float max)
-{
-    const float impulse = compute_constraint_impulse();
-    const float old_impulse = m_cumimpulse;
-    m_cumimpulse = std::clamp(m_cumimpulse + impulse, min, max);
-
-    const float delta_impulse = m_cumimpulse - old_impulse;
-    if (!kit::approaches_zero(delta_impulse))
-        apply_linear_impulse(compute_linear_impulse(delta_impulse));
-}
 glm::vec2 vconstraint10_2D::compute_linear_impulse(const float &cimpulse) const
 {
     return cimpulse * m_dir;
@@ -188,16 +201,6 @@ glm::vec2 vconstraint10_2D::compute_linear_impulse(const float &cimpulse) const
 float vconstraint01_2D::inverse_mass() const
 {
     return m_body1->props().dynamic.inv_inertia + m_body2->props().dynamic.inv_inertia;
-}
-void vconstraint01_2D::solve_velocities_clamped(const float min, const float max)
-{
-    const float impulse = compute_constraint_impulse();
-    const float old_impulse = m_cumimpulse;
-    m_cumimpulse = std::clamp(m_cumimpulse + impulse, min, max);
-
-    const float delta_impulse = m_cumimpulse - old_impulse;
-    if (!kit::approaches_zero(delta_impulse))
-        apply_angular_impulse(delta_impulse);
 }
 
 template class vconstraint2D<1, 0>;

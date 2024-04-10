@@ -114,6 +114,7 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     float torque() const;
 
     const properties &props() const;
+    const std::vector<joint2D *> &joints() const;
 
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);

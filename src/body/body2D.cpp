@@ -75,6 +75,10 @@ const body2D::properties &body2D::props() const
 {
     return m_props;
 }
+const std::vector<joint2D *> &body2D::joints() const
+{
+    return m_joints;
+}
 
 void body2D::begin_density_update()
 {

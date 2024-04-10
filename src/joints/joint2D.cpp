@@ -93,6 +93,18 @@ void joint2D::add_to_bodies()
 
 void joint2D::remove_from_bodies()
 {
+    for (auto it = m_body1->m_joints.begin(); it != m_body1->m_joints.end(); ++it)
+        if (*it == this)
+        {
+            m_body1->m_joints.erase(it);
+            break;
+        }
+    for (auto it = m_body2->m_joints.begin(); it != m_body2->m_joints.end(); ++it)
+        if (*it == this)
+        {
+            m_body2->m_joints.erase(it);
+            break;
+        }
 }
 
 } // namespace ppx

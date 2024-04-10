@@ -74,6 +74,7 @@ class vconstraint2D : public joint2D
 
     void apply_linear_impulse(const glm::vec2 &linimpulse);
     void apply_angular_impulse(float angimpulse);
+    void solve_velocities_clamped(const flat_t &min, const flat_t &max);
 
   private:
     float compute_angular_impulse(const flat_t &cimpulse) const;
@@ -89,7 +90,6 @@ class vconstraint10_2D : public vconstraint2D<1, 0>
 
     virtual float inverse_mass() const override;
     virtual void update_constraint_data() override;
-    void solve_velocities_clamped(float min, float max);
 
   private:
     virtual glm::vec2 direction() const = 0;
@@ -102,7 +102,6 @@ class vconstraint01_2D : public vconstraint2D<0, 1>
     using vconstraint2D<0, 1>::vconstraint2D;
 
     virtual float inverse_mass() const override;
-    void solve_velocities_clamped(float min, float max);
 };
 
 } // namespace ppx

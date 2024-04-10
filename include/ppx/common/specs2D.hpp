@@ -9,6 +9,7 @@ namespace ppx
 class body2D;
 class collider2D;
 class distance_joint2D;
+class revolute_joint2D;
 class joint2D;
 class spring2D;
 } // namespace ppx
@@ -82,6 +83,12 @@ struct distance_joint2D : joint2D
         bool deduce_distance = true;
     } props;
     static distance_joint2D from_instance(const ppx::distance_joint2D &dj);
+};
+
+struct revolute_joint2D : joint2D
+{
+    glm::vec2 ganchor{FLT_MAX};
+    static revolute_joint2D from_instance(const ppx::revolute_joint2D &rj);
 };
 
 struct spring2D : joint2D
