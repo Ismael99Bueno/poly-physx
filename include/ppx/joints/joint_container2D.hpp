@@ -2,6 +2,7 @@
 
 #include "ppx/manager2D.hpp"
 #include "ppx/joints/joint2D.hpp"
+#include "ppx/body/body2D.hpp"
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/indexable.hpp"
