@@ -145,10 +145,7 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 void vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
 {
     m_ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
-    if (!m_single_anchor)
-        m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
-    else
-        m_ganchor2 = m_ganchor1;
+    m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
 
     m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position();
     m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();
@@ -182,10 +179,7 @@ float vconstraint10_2D::inverse_mass() const
 void vconstraint10_2D::update_constraint_data()
 {
     m_ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
-    if (!m_single_anchor)
-        m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
-    else
-        m_ganchor2 = m_ganchor1;
+    m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
 
     m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position();
     m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();

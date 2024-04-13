@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/body/body2D.hpp"
 

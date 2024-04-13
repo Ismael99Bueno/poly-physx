@@ -32,9 +32,6 @@ class joint2D : public kit::indexable, public worldref2D
     const glm::vec2 &lanchor1() const;
     const glm::vec2 &lanchor2() const;
 
-    bool single_anchor() const;
-    glm::vec2 ganchor() const;
-
     glm::vec2 ganchor1() const;
     glm::vec2 ganchor2() const;
 
@@ -55,7 +52,6 @@ class joint2D : public kit::indexable, public worldref2D
 
     glm::vec2 m_lanchor1;
     glm::vec2 m_lanchor2;
-    bool m_single_anchor;
 
   private:
     void add_to_bodies();

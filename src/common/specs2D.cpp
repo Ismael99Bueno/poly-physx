@@ -4,6 +4,7 @@
 #include "ppx/collider/collider2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
+#include "ppx/joints/revolute_joint2D.hpp"
 
 namespace ppx::specs
 {
@@ -49,6 +50,13 @@ distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj
     distance_joint2D specs{
         {dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), {dj.min_distance, dj.max_distance}};
     specs.bodies_collide = dj.bodies_collide;
+    return specs;
+}
+
+revolute_joint2D revolute_joint2D::from_instance(const ppx::revolute_joint2D &rj)
+{
+    revolute_joint2D specs{{rj.body1()->index, rj.body2()->index}, rj.ganchor1()};
+    specs.bodies_collide = rj.bodies_collide;
     return specs;
 }
 

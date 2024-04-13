@@ -98,6 +98,7 @@ void world2D::add_builtin_joint_managers()
 {
     joints.add_manager<spring2D>("Springs");
     joints.add_manager<distance_joint2D>("Distance joints");
+    joints.add_manager<revolute_joint2D>("Revolute joints");
 }
 
 float world2D::kinetic_energy() const

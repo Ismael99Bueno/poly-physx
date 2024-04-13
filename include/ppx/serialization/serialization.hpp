@@ -2,6 +2,7 @@
 
 #include "ppx/world2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
+#include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
@@ -192,6 +193,27 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
         dj.ganchor2 = node["Anchor2"].as<glm::vec2>();
         dj.props.min_distance = node["Min distance"].as<float>();
         dj.props.max_distance = node["Max distance"].as<float>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::revolute_joint2D::specs>
+{
+    static YAML::Node encode(const ppx::revolute_joint2D::specs &rj)
+    {
+        YAML::Node node;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(rj);
+        node["Anchor"] = rj.ganchor;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::revolute_joint2D::specs &rj)
+    {
+        if (!node.IsMap() || node.size() != 2)
+            return false;
+
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], rj))
+            return false;
+        rj.ganchor = node["Anchor"].as<glm::vec2>();
         return true;
     }
 };
