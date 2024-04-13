@@ -56,6 +56,13 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         m_allocator.destroy(joint);
         return true;
     }
+    bool remove(const joint2D *joint)
+    {
+        const T *tjoint = dynamic_cast<const T *>(joint);
+        if (!tjoint)
+            return false;
+        return remove(tjoint);
+    }
 
     static const std::string &name()
     {

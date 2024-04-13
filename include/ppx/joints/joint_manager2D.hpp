@@ -14,6 +14,7 @@ class ijoint_manager2D : public kit::identifiable<std::string>, public kit::yaml
     virtual ~ijoint_manager2D() = default;
     virtual void solve() = 0;
     virtual void on_body_removal_validation(const body2D *body) = 0;
+    virtual bool remove(const joint2D *joint) = 0;
 
   protected:
     ijoint_manager2D(const std::string &name);
@@ -27,6 +28,11 @@ template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public
     joint_manager2D(world2D &world, const std::string &name) : joint_container2D<T>(world), ijoint_manager2D(name)
     {
         joint_container2D<T>::s_name = name;
+    }
+
+    bool remove(const joint2D *joint) override
+    {
+        return joint_container2D<T>::remove(joint);
     }
 
   private:

@@ -52,6 +52,7 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
 
     using idmanager2D<kit::scope<IM>>::remove;
     bool remove(std::size_t index) override;
+    bool remove(const joint2D *joint);
 
     template <Joint2D T> bool remove()
     {
