@@ -180,11 +180,12 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
         node["Anchor2"] = dj.ganchor2;
         node["Min distance"] = dj.props.min_distance;
         node["Max distance"] = dj.props.max_distance;
+        node["Deduce distance"] = dj.props.deduce_distance;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
     {
-        if (!node.IsMap() || node.size() != 5)
+        if (!node.IsMap() || node.size() != 6)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], dj))
@@ -193,6 +194,7 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
         dj.ganchor2 = node["Anchor2"].as<glm::vec2>();
         dj.props.min_distance = node["Min distance"].as<float>();
         dj.props.max_distance = node["Max distance"].as<float>();
+        dj.props.deduce_distance = node["Deduce distance"].as<bool>();
         return true;
     }
 };
@@ -229,13 +231,14 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         node["Frequency"] = sp.props.frequency;
         node["Damping ratio"] = sp.props.damping_ratio;
         node["Length"] = sp.props.length;
+        node["Deduce length"] = sp.props.deduce_length;
         node["Non linear terms"] = sp.props.non_linear_terms;
         node["Non linear contribution"] = sp.props.non_linear_contribution;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::spring2D::specs &sp)
     {
-        if (!node.IsMap() || node.size() != 8)
+        if (!node.IsMap() || node.size() != 9)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], sp))
@@ -245,6 +248,7 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         sp.props.frequency = node["Frequency"].as<float>();
         sp.props.damping_ratio = node["Damping ratio"].as<float>();
         sp.props.length = node["Length"].as<float>();
+        sp.props.deduce_length = node["Deduce length"].as<bool>();
         sp.props.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
         sp.props.non_linear_contribution = node["Non linear contribution"].as<float>();
         return true;

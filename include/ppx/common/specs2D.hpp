@@ -100,6 +100,7 @@ struct spring2D : joint2D
         float frequency = 1.f;
         float damping_ratio = 0.2f;
         float length = 0.f;
+        bool deduce_length = false;
 
         std::uint32_t non_linear_terms = 0;
         float non_linear_contribution = 0.001f;
