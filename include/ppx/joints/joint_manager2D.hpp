@@ -30,6 +30,7 @@ template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public
         joint_container2D<T>::s_name = name;
     }
 
+    using joint_container2D<T>::remove;
     bool remove(const joint2D *joint) override
     {
         return joint_container2D<T>::remove(joint);

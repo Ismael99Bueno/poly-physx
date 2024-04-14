@@ -66,7 +66,7 @@ spring2D spring2D::from_instance(const ppx::spring2D &sp)
     spring2D specs{{sp.body1()->index, sp.body2()->index},
                    sp.ganchor1(),
                    sp.ganchor2(),
-                   {sp.frequency, sp.damping_ratio, sp.length, sp.non_linear_terms, sp.non_linear_contribution}};
+                   {sp.frequency, sp.damping_ratio, sp.length, false, sp.non_linear_terms, sp.non_linear_contribution}};
     specs.bodies_collide = sp.bodies_collide;
     return specs;
 }

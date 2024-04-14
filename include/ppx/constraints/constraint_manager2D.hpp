@@ -36,6 +36,7 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
     {
         joint_container2D<T>::s_name = name;
     }
+    using joint_container2D<T>::remove;
     bool remove(const joint2D *constraint) override
     {
         return joint_container2D<T>::remove(constraint);

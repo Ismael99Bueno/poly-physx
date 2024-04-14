@@ -217,6 +217,7 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     const auto pcontact = m_last_collisions.find({collider1, collider2});
     collision.manifold = m_pp_manifold->polygon_polygon_contacts(
         collision, pcontact != m_last_collisions.end() ? &pcontact->second : nullptr);
+    collision.collided = !collision.manifold.empty();
 }
 
 } // namespace ppx
