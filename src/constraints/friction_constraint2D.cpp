@@ -5,12 +5,14 @@
 
 namespace ppx
 {
-friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision,
+friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision, const glm::vec2 &nmtv,
                                              const std::size_t manifold_index)
     : vconstraint10_2D(world, collision->collider1->body(), collision->collider2->body(),
                        collision->manifold[manifold_index].point),
-      m_friction(collision->friction), m_nmtv(glm::normalize(collision->mtv))
+      m_friction(collision->friction)
 {
+    m_tangent = glm::vec2(-nmtv.y, nmtv.x);
+    m_use_both_anchors = false;
 }
 float friction_constraint2D::constraint_velocity() const
 {
@@ -30,12 +32,12 @@ void friction_constraint2D::update(const collision2D *collision, const glm::vec2
     m_body2 = collision->collider2->body();
     m_friction = collision->friction;
     m_lanchor1 = lanchor1;
-    m_nmtv = nmtv;
+    m_tangent = glm::vec2(-nmtv.y, nmtv.x);
 }
 
 glm::vec2 friction_constraint2D::direction() const
 {
-    return glm::vec2(-m_nmtv.y, m_nmtv.x);
+    return m_tangent;
 }
 
 } // namespace ppx

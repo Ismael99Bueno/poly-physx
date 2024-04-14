@@ -33,7 +33,6 @@ class contact_constraint2D final : public pvconstraint10_2D
 
     void update_position_data() override;
     void warmup() override;
-    float inverse_mass() const override;
     glm::vec2 direction() const override;
 };
 } // namespace ppx

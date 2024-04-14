@@ -64,9 +64,9 @@ class vconstraint2D : public joint2D
     glm::vec2 m_offset2;
 
     square_t m_mass;
+    bool m_use_both_anchors = true;
 
     virtual void update_constraint_data();
-
     virtual square_t inverse_mass() const = 0;
 
     virtual flat_t compute_constraint_impulse() const;

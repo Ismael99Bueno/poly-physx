@@ -10,10 +10,11 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
     : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
                      collision->manifold[manifold_index].point),
       m_restitution(collision->restitution), m_penetration(collision->manifold[manifold_index].penetration),
-      m_nmtv(glm::normalize(collision->mtv)), m_friction(world, collision, manifold_index),
+      m_nmtv(glm::normalize(collision->mtv)), m_friction(world, collision, m_nmtv, manifold_index),
       m_has_friction(!kit::approaches_zero(collision->friction))
 {
     m_ganchor1 = collision->manifold[manifold_index].point;
+    m_use_both_anchors = false;
     if (!kit::approaches_zero(m_restitution))
         m_init_ctr_vel = glm::dot(m_nmtv, m_body2->gvelocity_at(m_ganchor1) - m_body1->gvelocity_at(m_ganchor1));
 }
@@ -66,7 +67,6 @@ void contact_constraint2D::update(const collision2D *collision, const std::size_
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
     m_body1 = collision->collider1->body();
     m_body2 = collision->collider2->body();
-    m_ganchor1 = collision->manifold[manifold_index].point;
     m_lanchor1 = m_body1->local_position_point(collision->manifold[manifold_index].point); // lanchor2 is not used
     m_nmtv = glm::normalize(collision->mtv);
     m_restitution = collision->restitution;
@@ -76,15 +76,6 @@ void contact_constraint2D::update(const collision2D *collision, const std::size_
     m_is_adjusting_positions = false;
     m_pntr_correction = 0.f;
     m_has_friction = !kit::approaches_zero(collision->friction);
-}
-
-float contact_constraint2D::inverse_mass() const
-{
-    const float cross1 = kit::cross2D(m_offset1, m_dir);
-    const float cross2 = kit::cross2D(m_offset2, m_dir);
-    return m_body1->props().dynamic.inv_mass + m_body2->props().dynamic.inv_mass +
-           m_body1->props().dynamic.inv_inertia * cross1 * cross1 +
-           m_body2->props().dynamic.inv_inertia * cross2 * cross2;
 }
 
 glm::vec2 contact_constraint2D::direction() const

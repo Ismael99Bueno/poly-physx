@@ -8,7 +8,8 @@ namespace ppx
 class friction_constraint2D final : public vconstraint10_2D
 {
   public:
-    friction_constraint2D(world2D &world, const collision2D *collision, std::size_t manifold_index);
+    friction_constraint2D(world2D &world, const collision2D *collision, const glm::vec2 &nmtv,
+                          std::size_t manifold_index);
 
     float max_impulse;
 
@@ -18,7 +19,7 @@ class friction_constraint2D final : public vconstraint10_2D
 
   private:
     float m_friction;
-    glm::vec2 m_nmtv;
+    glm::vec2 m_tangent;
 
     glm::vec2 direction() const override;
 };
