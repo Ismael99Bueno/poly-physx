@@ -79,7 +79,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
     {
         const auto &joints = body->joints();
         for (std::size_t i = joints.size() - 1; i < joints.size() && i >= 0; i--)
-            remove(joints[i]->index);
+            remove(joints[i]);
     }
 
   private:

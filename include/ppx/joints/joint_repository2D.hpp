@@ -50,7 +50,7 @@ class joint_repository2D
         else
             return non_constraint_based.manager<T>();
     }
-
+    bool remove(const joint2D *joint);
     template <Joint2D T> bool remove()
     {
         if constexpr (VConstraint2D<T>)
