@@ -40,7 +40,7 @@ void contact_constraint2D::solve_velocities()
 
 void contact_constraint2D::startup()
 {
-    pvconstraint10_2D::startup();
+    pvconstraint2D<1, 0>::startup();
     if (!m_is_adjusting_positions && m_has_friction)
         m_friction.startup();
 }

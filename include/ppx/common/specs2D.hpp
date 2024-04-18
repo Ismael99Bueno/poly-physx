@@ -11,6 +11,8 @@ class collider2D;
 class distance_joint2D;
 class revolute_joint2D;
 class joint2D;
+class rotor_joint2D;
+class motor_joint2D;
 class spring2D;
 } // namespace ppx
 
@@ -72,6 +74,30 @@ struct joint2D
     bool bodies_collide = true;
 };
 
+struct rotor_joint2D : joint2D
+{
+    struct properties
+    {
+        float torque = 0.f;
+        float correction_factor = 0.3f;
+        float target_speed = 0.f;
+        float target_offset = 0.f;
+        bool spin_indefinitely = false;
+    } props;
+    static rotor_joint2D from_instance(const ppx::rotor_joint2D &rotj);
+};
+
+struct motor_joint2D : joint2D
+{
+    struct properties
+    {
+        float force = 0.f;
+        float correction_factor = 0.3f;
+        glm::vec2 target_offset{0.f};
+    } props;
+    static motor_joint2D from_instance(const ppx::motor_joint2D &mj);
+};
+
 struct distance_joint2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
@@ -88,7 +114,7 @@ struct distance_joint2D : joint2D
 struct revolute_joint2D : joint2D
 {
     glm::vec2 ganchor{FLT_MAX};
-    static revolute_joint2D from_instance(const ppx::revolute_joint2D &rj);
+    static revolute_joint2D from_instance(const ppx::revolute_joint2D &revj);
 };
 
 struct spring2D : joint2D

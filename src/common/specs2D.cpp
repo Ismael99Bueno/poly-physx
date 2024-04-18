@@ -53,10 +53,10 @@ distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj
     return specs;
 }
 
-revolute_joint2D revolute_joint2D::from_instance(const ppx::revolute_joint2D &rj)
+revolute_joint2D revolute_joint2D::from_instance(const ppx::revolute_joint2D &revj)
 {
-    revolute_joint2D specs{{rj.body1()->index, rj.body2()->index}, rj.ganchor1()};
-    specs.bodies_collide = rj.bodies_collide;
+    revolute_joint2D specs{{revj.body1()->index, revj.body2()->index}, revj.ganchor1()};
+    specs.bodies_collide = revj.bodies_collide;
     return specs;
 }
 

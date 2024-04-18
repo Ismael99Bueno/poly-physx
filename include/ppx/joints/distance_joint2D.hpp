@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class distance_joint2D final : public pvconstraint10_2D, kit::non_copyable
+class distance_joint2D final : public pvconstraint2D<1, 0>, kit::non_copyable
 {
   public:
     using specs = specs::distance_joint2D;

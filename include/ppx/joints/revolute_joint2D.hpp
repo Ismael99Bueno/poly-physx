@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class revolute_joint2D final : public pvconstraint20_2D, kit::non_copyable
+class revolute_joint2D final : public pvconstraint2D<2, 0>, kit::non_copyable
 {
   public:
     using specs = specs::revolute_joint2D;

@@ -6,7 +6,7 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : pvconstraint10_2D(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
+    : pvconstraint2D<1, 0>(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
       max_distance(spc.props.max_distance)
 {
     if (spc.props.deduce_distance)
@@ -45,7 +45,7 @@ void distance_joint2D::solve_velocities()
     if (legal_length())
         return;
     if (kit::approximately(min_distance, max_distance))
-        pvconstraint10_2D::solve_velocities();
+        pvconstraint2D<1, 0>::solve_velocities();
     else if (m_length < min_distance)
         solve_velocities_clamped(0.f, FLT_MAX);
     else

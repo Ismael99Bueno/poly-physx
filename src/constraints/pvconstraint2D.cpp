@@ -139,7 +139,7 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 void pvconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
 {
-    base_t::update_constraint_data();
+    vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data();
     m_c = constraint_position();
 }
 

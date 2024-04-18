@@ -8,41 +8,19 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 class pvconstraint2D;
 
-using pvconstraint10_2D = pvconstraint2D<1, 0>;
-using pvconstraint01_2D = pvconstraint2D<0, 1>;
-using pvconstraint11_2D = pvconstraint2D<1, 1>;
-using pvconstraint20_2D = pvconstraint2D<2, 0>;
-using pvconstraint21_2D = pvconstraint2D<2, 1>;
-
 template <typename T>
 concept PVConstraint2D = requires() {
     requires Joint2D<T>;
-    requires kit::DerivedFrom<T, pvconstraint10_2D> || kit::DerivedFrom<T, pvconstraint01_2D> ||
-                 kit::DerivedFrom<T, pvconstraint11_2D> || kit::DerivedFrom<T, pvconstraint20_2D> ||
-                 kit::DerivedFrom<T, pvconstraint21_2D>;
+    requires kit::DerivedFrom<T, pvconstraint2D<1, 0>> || kit::DerivedFrom<T, pvconstraint2D<0, 1>> ||
+                 kit::DerivedFrom<T, pvconstraint2D<1, 1>> || kit::DerivedFrom<T, pvconstraint2D<2, 0>> ||
+                 kit::DerivedFrom<T, pvconstraint2D<2, 1>>;
 };
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
-struct pvbase
-{
-    using type = vconstraint2D<LinDegrees, AngDegrees>;
-};
-template <> struct pvbase<1, 0>
-{
-    using type = vconstraint10_2D;
-};
-template <> struct pvbase<0, 1>
-{
-    using type = vconstraint01_2D;
-};
-
-template <std::size_t LinDegrees, std::size_t AngDegrees>
-    requires LegalDegrees2D<LinDegrees, AngDegrees>
-class pvconstraint2D : public pvbase<LinDegrees, AngDegrees>::type
+class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
 {
   public:
-    using base_t = typename pvbase<LinDegrees, AngDegrees>::type;
     using flat_t = typename degree_types<LinDegrees + AngDegrees>::flat_t;
     using square_t = typename degree_types<LinDegrees + AngDegrees>::square_t;
 
@@ -52,7 +30,7 @@ class pvconstraint2D : public pvbase<LinDegrees, AngDegrees>::type
     virtual flat_t constraint_position() const = 0;
 
   protected:
-    using base_t::base_t;
+    using vconstraint2D<LinDegrees, AngDegrees>::vconstraint2D;
     flat_t m_c{0.f};
 
     virtual void update_constraint_data() override;

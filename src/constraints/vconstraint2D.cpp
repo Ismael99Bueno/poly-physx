@@ -20,13 +20,17 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 glm::vec2 vconstraint2D<LinDegrees, AngDegrees>::compute_linear_impulse(const flat_t &cimpulse) const
 {
-    if constexpr (LinDegrees + AngDegrees > 1)
-        return glm::vec2(cimpulse);
-    else
+    if constexpr (LinDegrees == 0)
     {
-        KIT_ERROR("compute_linear_impulse must be specialized when the total degrees of the constraint is 1")
+        KIT_ERROR("Linear impulse can only be computed when the linear degrees of the constraint is greater than 0")
         return glm::vec2(0.f);
     }
+    else if constexpr (LinDegrees == 1 && AngDegrees == 0)
+        return cimpulse * this->m_dir;
+    else if constexpr (LinDegrees == 1 && AngDegrees == 1)
+        return cimpulse.x * this->m_dir;
+    else if constexpr (LinDegrees == 2)
+        return glm::vec2(cimpulse);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -152,10 +156,62 @@ void vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
 
     m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position();
     m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();
+    if constexpr (LinDegrees == 1)
+        this->m_dir = this->direction();
     if constexpr (LinDegrees + AngDegrees == 1)
         m_mass = 1.f / inverse_mass();
     else
         m_mass = glm::inverse(inverse_mass());
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegrees, AngDegrees>::inverse_mass() const
+{
+    if constexpr (LinDegrees == 0)
+        return m_body1->props().dynamic.inv_inertia + m_body2->props().dynamic.inv_inertia;
+    else
+    {
+        const float im1 = m_body1->props().dynamic.inv_mass;
+        const float im2 = m_body2->props().dynamic.inv_mass;
+
+        const float ii1 = m_body1->props().dynamic.inv_inertia;
+        const float ii2 = m_body2->props().dynamic.inv_inertia;
+        if constexpr (LinDegrees == 1)
+        {
+            const float cross1 = kit::cross2D(m_offset1, this->m_dir);
+            const float cross2 = kit::cross2D(m_offset2, this->m_dir);
+            const float diag1 = im1 + im2 + ii1 * cross1 * cross1 + ii2 * cross2 * cross2;
+            if constexpr (AngDegrees == 0)
+                return diag1;
+            else
+            {
+                const float cross_term = ii1 * cross1 + ii2 * cross2;
+                return glm::mat2{{diag1, cross_term}, {cross_term, ii1 + ii2}};
+            }
+        }
+        else if constexpr (LinDegrees == 2)
+        {
+            const glm::vec2 a1 = m_offset1 * m_offset1;
+            const glm::vec2 a2 = m_offset2 * m_offset2;
+            const glm::vec2 a12 = {m_offset1.x * m_offset1.y, m_offset2.x * m_offset2.y};
+
+            const float diag1 = im1 + im2 + ii1 * a1.y + ii2 * a2.y;
+            const float diag2 = im1 + im2 + ii1 * a1.x + ii2 * a2.x;
+
+            const float cross_term1 = -ii1 * a12.x - ii2 * a12.y;
+            if constexpr (AngDegrees == 0)
+                return glm::mat2{{diag1, cross_term1}, {cross_term1, diag2}};
+            else
+            {
+                const float cross_term2 = -ii1 * m_offset1.y - ii2 * m_offset2.y;
+                const float cross_term3 = ii1 * m_offset1.x + ii2 * m_offset2.x;
+                return glm::mat3{{diag1, cross_term1, cross_term2},
+                                 {cross_term1, diag2, cross_term3},
+                                 {cross_term2, cross_term3, ii1 + ii2}};
+            }
+        }
+    }
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -168,39 +224,6 @@ void vconstraint2D<LinDegrees, AngDegrees>::warmup()
         apply_linear_impulse(compute_linear_impulse(m_cumimpulse));
     if constexpr (AngDegrees == 1)
         apply_angular_impulse(compute_angular_impulse(m_cumimpulse));
-}
-
-float vconstraint10_2D::inverse_mass() const
-{
-    const float cross1 = kit::cross2D(m_offset1, m_dir);
-    const float cross2 = kit::cross2D(m_offset2, m_dir);
-    return m_body1->props().dynamic.inv_mass + m_body2->props().dynamic.inv_mass +
-           m_body1->props().dynamic.inv_inertia * cross1 * cross1 +
-           m_body2->props().dynamic.inv_inertia * cross2 * cross2;
-}
-
-void vconstraint10_2D::update_constraint_data()
-{
-    m_ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
-    if (m_use_both_anchors)
-        m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
-    else
-        m_ganchor2 = m_ganchor1;
-
-    m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position();
-    m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();
-    m_dir = direction();
-    m_mass = 1.f / inverse_mass();
-}
-
-glm::vec2 vconstraint10_2D::compute_linear_impulse(const float &cimpulse) const
-{
-    return cimpulse * m_dir;
-}
-
-float vconstraint01_2D::inverse_mass() const
-{
-    return m_body1->props().dynamic.inv_inertia + m_body2->props().dynamic.inv_inertia;
 }
 
 template class vconstraint2D<1, 0>;

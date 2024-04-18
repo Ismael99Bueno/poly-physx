@@ -7,8 +7,8 @@ namespace ppx
 {
 friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *collision, const glm::vec2 &nmtv,
                                              const std::size_t manifold_index)
-    : vconstraint10_2D(world, collision->collider1->body(), collision->collider2->body(),
-                       collision->manifold[manifold_index].point),
+    : vconstraint2D<1, 0>(world, collision->collider1->body(), collision->collider2->body(),
+                          collision->manifold[manifold_index].point),
       m_friction(collision->friction)
 {
     m_tangent = glm::vec2(-nmtv.y, nmtv.x);

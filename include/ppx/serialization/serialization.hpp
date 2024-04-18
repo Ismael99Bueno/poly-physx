@@ -201,21 +201,21 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
 
 template <> struct kit::yaml::codec<ppx::revolute_joint2D::specs>
 {
-    static YAML::Node encode(const ppx::revolute_joint2D::specs &rj)
+    static YAML::Node encode(const ppx::revolute_joint2D::specs &revj)
     {
         YAML::Node node;
-        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(rj);
-        node["Anchor"] = rj.ganchor;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(revj);
+        node["Anchor"] = revj.ganchor;
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::revolute_joint2D::specs &rj)
+    static bool decode(const YAML::Node &node, ppx::revolute_joint2D::specs &revj)
     {
         if (!node.IsMap() || node.size() != 2)
             return false;
 
-        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], rj))
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], revj))
             return false;
-        rj.ganchor = node["Anchor"].as<glm::vec2>();
+        revj.ganchor = node["Anchor"].as<glm::vec2>();
         return true;
     }
 };
