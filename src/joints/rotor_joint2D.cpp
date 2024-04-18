@@ -12,7 +12,7 @@ float rotor_joint2D::constraint_velocity() const
 {
     KIT_ASSERT_ERROR(props.correction_factor >= 0.0f && props.correction_factor <= 1.0f,
                      "Correction factor must be in the range [0, 1]: {0}", props.correction_factor);
-    const float dw = m_body2->ctr_state.angular_velocity - m_body1->ctr_state.angular_velocity;
+    const float dw = m_body2->ctr_state.angular_velocity - m_body1->ctr_state.angular_velocity - props.target_speed;
     if (props.spin_indefinitely)
         return dw;
     const float da =

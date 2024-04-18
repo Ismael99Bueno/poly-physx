@@ -93,6 +93,7 @@ struct motor_joint2D : joint2D
     {
         float force = 0.f;
         float correction_factor = 0.3f;
+        float target_speed = 0.f;
         glm::vec2 target_offset{0.f};
     } props;
     static motor_joint2D from_instance(const ppx::motor_joint2D &mj);

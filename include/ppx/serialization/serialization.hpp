@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ppx/world2D.hpp"
+#include "ppx/joints/rotor_joint2D.hpp"
+#include "ppx/joints/motor_joint2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/joints/spring2D.hpp"
@@ -170,6 +172,62 @@ template <> struct kit::yaml::codec<ppx::specs::joint2D>
     }
 };
 
+template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs>
+{
+    static YAML::Node encode(const ppx::rotor_joint2D::specs &rj)
+    {
+        YAML::Node node;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(rj);
+        node["Torque"] = rj.props.torque;
+        node["Correction factor"] = rj.props.correction_factor;
+        node["Target speed"] = rj.props.target_speed;
+        node["Target offset"] = rj.props.target_offset;
+        node["Spin indefinitely"] = rj.props.spin_indefinitely;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::rotor_joint2D::specs &rj)
+    {
+        if (!node.IsMap() || node.size() != 6)
+            return false;
+
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], rj))
+            return false;
+        rj.props.torque = node["Torque"].as<float>();
+        rj.props.correction_factor = node["Correction factor"].as<float>();
+        rj.props.target_speed = node["Target speed"].as<float>();
+        rj.props.target_offset = node["Target offset"].as<float>();
+        rj.props.spin_indefinitely = node["Spin indefinitely"].as<bool>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::motor_joint2D::specs>
+{
+    static YAML::Node encode(const ppx::motor_joint2D::specs &mj)
+    {
+        YAML::Node node;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(mj);
+        node["Force"] = mj.props.force;
+        node["Correction factor"] = mj.props.correction_factor;
+        node["Target speed"] = mj.props.target_speed;
+        node["Target offset"] = mj.props.target_offset;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::motor_joint2D::specs &mj)
+    {
+        if (!node.IsMap() || node.size() != 5)
+            return false;
+
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], mj))
+            return false;
+        mj.props.force = node["Force"].as<float>();
+        mj.props.correction_factor = node["Correction factor"].as<float>();
+        mj.props.target_speed = node["Target speed"].as<float>();
+        mj.props.target_offset = node["Target offset"].as<glm::vec2>();
+        return true;
+    }
+};
+
 template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
 {
     static YAML::Node encode(const ppx::distance_joint2D::specs &dj)
@@ -180,7 +238,7 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
         node["Anchor2"] = dj.ganchor2;
         node["Min distance"] = dj.props.min_distance;
         node["Max distance"] = dj.props.max_distance;
-        node["Deduce distance"] = dj.props.deduce_distance;
+        node["Deduce distance"] = dj.deduce_distance;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
@@ -194,7 +252,7 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
         dj.ganchor2 = node["Anchor2"].as<glm::vec2>();
         dj.props.min_distance = node["Min distance"].as<float>();
         dj.props.max_distance = node["Max distance"].as<float>();
-        dj.props.deduce_distance = node["Deduce distance"].as<bool>();
+        dj.deduce_distance = node["Deduce distance"].as<bool>();
         return true;
     }
 };
@@ -231,7 +289,7 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         node["Frequency"] = sp.props.frequency;
         node["Damping ratio"] = sp.props.damping_ratio;
         node["Length"] = sp.props.length;
-        node["Deduce length"] = sp.props.deduce_length;
+        node["Deduce length"] = sp.deduce_length;
         node["Non linear terms"] = sp.props.non_linear_terms;
         node["Non linear contribution"] = sp.props.non_linear_contribution;
         return node;
@@ -248,7 +306,7 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         sp.props.frequency = node["Frequency"].as<float>();
         sp.props.damping_ratio = node["Damping ratio"].as<float>();
         sp.props.length = node["Length"].as<float>();
-        sp.props.deduce_length = node["Deduce length"].as<bool>();
+        sp.deduce_length = node["Deduce length"].as<bool>();
         sp.props.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
         sp.props.non_linear_contribution = node["Non linear contribution"].as<float>();
         return true;

@@ -12,8 +12,11 @@ glm::vec2 motor_joint2D::constraint_velocity() const
 {
     KIT_ASSERT_ERROR(props.correction_factor >= 0.0f && props.correction_factor <= 1.0f,
                      "Correction factor must be in the range [0, 1]: {0}", props.correction_factor);
-    const glm::vec2 dv = m_body2->ctr_state.velocity_at_centroid_offset(m_offset2) -
-                         m_body1->ctr_state.velocity_at_centroid_offset(m_offset1);
+    glm::vec2 dv = m_body2->ctr_state.velocity_at_centroid_offset(m_offset2) -
+                   m_body1->ctr_state.velocity_at_centroid_offset(m_offset1);
+    if (glm::length2(dv) > props.target_speed * props.target_speed)
+        dv = glm::normalize(dv) * props.target_speed;
+
     const glm::vec2 dp = m_ganchor2 - m_ganchor1 - props.target_offset;
     return dv + props.correction_factor * dp / world.rk_substep_timestep();
 }
