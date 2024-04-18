@@ -42,10 +42,12 @@ class joint2D : public kit::indexable, public worldref2D
   protected:
     joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2);
     joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor);
+    joint2D(world2D &world, const specs::joint2D &spc);
 
     joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2,
             bool bodies_collide = true);
     joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor, bool bodies_collide = true);
+    joint2D(world2D &world, body2D *body1, body2D *body2, bool bodies_collide = true);
 
     body2D *m_body1;
     body2D *m_body2;

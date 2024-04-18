@@ -9,12 +9,10 @@
 namespace ppx
 {
 
-spring2D::spring2D(world2D &world, const specs &spc)
-    : joint2D(world, spc, spc.ganchor1, spc.ganchor2), frequency(spc.props.frequency),
-      damping_ratio(spc.props.damping_ratio),
-      length(!spc.props.deduce_length ? spc.props.length : glm::distance(spc.ganchor1, spc.ganchor2)),
-      non_linear_terms(spc.props.non_linear_terms), non_linear_contribution(spc.props.non_linear_contribution)
+spring2D::spring2D(world2D &world, const specs &spc) : joint2D(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props)
 {
+    if (spc.deduce_length)
+        props.length = glm::distance(spc.ganchor1, spc.ganchor2);
 }
 
 glm::vec2 spring2D::non_linear_displacement(const glm::vec2 &displacement) const
@@ -22,22 +20,22 @@ glm::vec2 spring2D::non_linear_displacement(const glm::vec2 &displacement) const
     glm::vec2 nl_term = displacement;
     glm::vec2 nl_cummulative = displacement;
     float decay = 16.f;
-    for (std::uint32_t term = 0; term < non_linear_terms; term++)
+    for (std::uint32_t term = 0; term < props.non_linear_terms; term++)
     {
         nl_term *= displacement * displacement;
         nl_cummulative += nl_term / decay;
         decay *= decay;
     }
-    return nl_cummulative * non_linear_contribution;
+    return nl_cummulative * props.non_linear_contribution;
 }
 
 glm::vec4 spring2D::force() const
 {
-    KIT_ASSERT_ERROR(frequency >= 0.f, "Frequency must be non-negative: {0}", frequency)
-    KIT_ASSERT_ERROR(damping_ratio >= 0.f, "Damping ratio must be non-negative: {0}", damping_ratio)
-    KIT_ASSERT_ERROR(length >= 0.f, "Length must be non-negative: {0}", length)
-    KIT_ASSERT_ERROR(non_linear_contribution >= 0.f, "Non linear contribution must be non-negative: {0}",
-                     non_linear_contribution)
+    KIT_ASSERT_ERROR(props.frequency >= 0.f, "Frequency must be non-negative: {0}", props.frequency)
+    KIT_ASSERT_ERROR(props.damping_ratio >= 0.f, "Damping ratio must be non-negative: {0}", props.damping_ratio)
+    KIT_ASSERT_ERROR(props.length >= 0.f, "Length must be non-negative: {0}", props.length)
+    KIT_ASSERT_ERROR(props.non_linear_contribution >= 0.f, "Non linear contribution must be non-negative: {0}",
+                     props.non_linear_contribution)
 
     const glm::vec2 ga1 = ganchor1();
     const glm::vec2 ga2 = ganchor2();
@@ -52,14 +50,15 @@ glm::vec4 spring2D::force() const
     const glm::vec2 relvel = direction * glm::dot(m_body2->velocity_at_centroid_offset(offset2) -
                                                       m_body1->velocity_at_centroid_offset(offset1),
                                                   direction);
-    const glm::vec2 vlen = length * direction;
+    const glm::vec2 vlen = props.length * direction;
     const glm::vec2 displacement = relpos - vlen;
 
     const float meff = 1.f / (m_body1->props().dynamic.inv_mass + m_body2->props().dynamic.inv_mass);
-    const auto [stiffness, damping] = stiffness_and_damping(frequency, damping_ratio, meff);
+    const auto [stiffness, damping] = stiffness_and_damping(props.frequency, props.damping_ratio, meff);
 
     const glm::vec2 force =
-        stiffness * (non_linear_terms != 0 ? non_linear_displacement(displacement) : displacement) + damping * relvel;
+        stiffness * (props.non_linear_terms != 0 ? non_linear_displacement(displacement) : displacement) +
+        damping * relvel;
 
     const float torque1 = kit::cross2D(offset1, force);
     const float torque2 = kit::cross2D(force, offset2);
@@ -72,8 +71,8 @@ float spring2D::kinetic_energy() const
 }
 float spring2D::potential_energy() const
 {
-    const float dist = glm::distance(ganchor1(), ganchor2()) - length;
-    return 0.5f * frequency * dist * dist;
+    const float dist = glm::distance(ganchor1(), ganchor2()) - props.length;
+    return 0.5f * props.frequency * dist * dist;
 }
 float spring2D::energy() const
 {

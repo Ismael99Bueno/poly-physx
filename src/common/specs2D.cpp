@@ -5,6 +5,7 @@
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
+#include "ppx/joints/rotor_joint2D.hpp"
 
 namespace ppx::specs
 {
@@ -45,10 +46,15 @@ body2D body2D::from_instance(const ppx::body2D &body)
             {body.props().nondynamic.mass, body.charge, colliders, body.type()}};
 }
 
+rotor_joint2D rotor_joint2D::from_instance(const ppx::rotor_joint2D &rotj)
+{
+    rotor_joint2D specs{{rotj.body1()->index, rotj.body2()->index}, rotj.props};
+    return specs;
+}
+
 distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj)
 {
-    distance_joint2D specs{
-        {dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), {dj.min_distance, dj.max_distance}};
+    distance_joint2D specs{{dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), false, dj.props};
     specs.bodies_collide = dj.bodies_collide;
     return specs;
 }
@@ -63,10 +69,7 @@ revolute_joint2D revolute_joint2D::from_instance(const ppx::revolute_joint2D &re
 spring2D spring2D::from_instance(const ppx::spring2D &sp)
 {
 
-    spring2D specs{{sp.body1()->index, sp.body2()->index},
-                   sp.ganchor1(),
-                   sp.ganchor2(),
-                   {sp.frequency, sp.damping_ratio, sp.length, false, sp.non_linear_terms, sp.non_linear_contribution}};
+    spring2D specs{{sp.body1()->index, sp.body2()->index}, sp.ganchor1(), sp.ganchor2(), false, sp.props};
     specs.bodies_collide = sp.bodies_collide;
     return specs;
 }
@@ -87,8 +90,11 @@ contraption2D contraption2D::rope(const glm::vec2 &start, const glm::vec2 &end, 
     {
         const glm::vec2 curpos = start + dir * (float)i;
         const body2D current = {.position = curpos, .props = node_props};
-        contraption.springs.push_back(
-            {{.bspecs1 = previous, .bspecs2 = current}, previous.position + spacing, curpos - spacing, spring_props});
+        contraption.springs.push_back({{.bspecs1 = previous, .bspecs2 = current},
+                                       previous.position + spacing,
+                                       curpos - spacing,
+                                       false,
+                                       spring_props});
         previous = current;
     }
     return contraption;
@@ -110,8 +116,11 @@ contraption2D contraption2D::chain(const glm::vec2 &start, const glm::vec2 &end,
     {
         const glm::vec2 curpos = start + dir * (float)i;
         const body2D current = {.position = curpos, .props = node_props};
-        contraption.distance_joints.push_back(
-            {{.bspecs1 = previous, .bspecs2 = current}, previous.position + spacing, curpos - spacing, dj_props});
+        contraption.distance_joints.push_back({{.bspecs1 = previous, .bspecs2 = current},
+                                               previous.position + spacing,
+                                               curpos - spacing,
+                                               false,
+                                               dj_props});
         previous = current;
     }
     return contraption;

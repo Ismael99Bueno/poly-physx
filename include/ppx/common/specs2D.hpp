@@ -102,11 +102,11 @@ struct distance_joint2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
+    bool deduce_distance = true;
     struct properties
     {
         float min_distance = 0.f;
         float max_distance = 0.f;
-        bool deduce_distance = true;
     } props;
     static distance_joint2D from_instance(const ppx::distance_joint2D &dj);
 };
@@ -121,12 +121,12 @@ struct spring2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
+    bool deduce_length = false;
     struct properties
     {
         float frequency = 1.f;
         float damping_ratio = 0.2f;
         float length = 0.f;
-        bool deduce_length = false;
 
         std::uint32_t non_linear_terms = 0;
         float non_linear_contribution = 0.001f;

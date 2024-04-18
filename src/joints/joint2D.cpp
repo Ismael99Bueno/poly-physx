@@ -16,6 +16,12 @@ joint2D::joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &gan
 {
 }
 
+joint2D::joint2D(world2D &world, const specs::joint2D &spc)
+    : joint2D(world, spc.bindex1 != SIZE_MAX ? world.bodies[spc.bindex1] : world.bodies.add(spc.bspecs1),
+              spc.bindex2 != SIZE_MAX ? world.bodies[spc.bindex2] : world.bodies.add(spc.bspecs2), spc.bodies_collide)
+{
+}
+
 joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2,
                  const bool bodies_collide)
     : worldref2D(world), bodies_collide(bodies_collide), m_body1(body1), m_body2(body2),
@@ -26,6 +32,11 @@ joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &
 
 joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor, const bool bodies_collide)
     : joint2D(world, body1, body2, ganchor, ganchor)
+{
+}
+
+joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const bool bodies_collide)
+    : joint2D(world, body1, body2, body1->centroid(), body2->centroid(), bodies_collide)
 {
 }
 

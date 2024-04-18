@@ -13,12 +13,7 @@ class spring2D : public joint2D, kit::non_copyable
 
     spring2D(world2D &world, const specs &spc);
 
-    float frequency;
-    float damping_ratio;
-    float length;
-
-    std::uint32_t non_linear_terms;
-    float non_linear_contribution;
+    specs::properties props;
 
     glm::vec4 force() const;
 

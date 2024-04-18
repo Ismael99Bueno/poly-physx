@@ -6,26 +6,25 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : pvconstraint2D<1, 0>(world, spc, spc.ganchor1, spc.ganchor2), min_distance(spc.props.min_distance),
-      max_distance(spc.props.max_distance)
+    : pvconstraint2D<1, 0>(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props)
 {
-    if (spc.props.deduce_distance)
+    if (spc.deduce_distance)
     {
         const float length = glm::distance(ganchor1(), ganchor2());
-        min_distance = length;
-        max_distance = length;
+        props.min_distance = length;
+        props.max_distance = length;
     }
 }
 
 float distance_joint2D::constraint_position() const
 {
-    KIT_ASSERT_ERROR(min_distance <= max_distance,
-                     "Minimum distance must be less than or equal to maximum distance: {0} <= {1}", min_distance,
-                     max_distance)
-    if (m_length < min_distance)
-        return m_length - min_distance;
-    if (m_length > max_distance)
-        return m_length - max_distance;
+    KIT_ASSERT_ERROR(props.min_distance <= props.max_distance,
+                     "Minimum distance must be less than or equal to maximum distance: {0} <= {1}", props.min_distance,
+                     props.max_distance)
+    if (m_length < props.min_distance)
+        return m_length - props.min_distance;
+    if (m_length > props.max_distance)
+        return m_length - props.max_distance;
     return 0.f;
 }
 float distance_joint2D::constraint_velocity() const
@@ -44,9 +43,9 @@ void distance_joint2D::solve_velocities()
 {
     if (legal_length())
         return;
-    if (kit::approximately(min_distance, max_distance))
+    if (kit::approximately(props.min_distance, props.max_distance))
         pvconstraint2D<1, 0>::solve_velocities();
-    else if (m_length < min_distance)
+    else if (m_length < props.min_distance)
         solve_velocities_clamped(0.f, FLT_MAX);
     else
         solve_velocities_clamped(-FLT_MAX, 0.f);
@@ -54,7 +53,7 @@ void distance_joint2D::solve_velocities()
 
 bool distance_joint2D::legal_length() const
 {
-    return m_length >= min_distance && m_length <= max_distance;
+    return m_length >= props.min_distance && m_length <= props.max_distance;
 }
 
 void distance_joint2D::startup()

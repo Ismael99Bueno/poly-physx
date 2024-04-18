@@ -12,8 +12,7 @@ class distance_joint2D final : public pvconstraint2D<1, 0>, kit::non_copyable
 
     distance_joint2D(world2D &world, const specs &spc);
 
-    float min_distance;
-    float max_distance;
+    specs::properties props;
 
     float constraint_position() const override;
     float constraint_velocity() const override;

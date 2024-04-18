@@ -125,13 +125,13 @@ void vconstraint2D<LinDegrees, AngDegrees>::solve_velocities_clamped(const flat_
     {
         const glm::vec2 linimpulse = compute_linear_impulse(delta_impulse);
         if (!kit::approaches_zero(glm::length2(linimpulse)))
-            apply_linear_impulse(compute_linear_impulse(delta_impulse));
+            apply_linear_impulse(linimpulse);
     }
     if constexpr (AngDegrees == 1)
     {
         const float angimpulse = compute_angular_impulse(delta_impulse);
         if (!kit::approaches_zero(angimpulse))
-            apply_angular_impulse(compute_angular_impulse(delta_impulse));
+            apply_angular_impulse(angimpulse);
     }
 }
 
