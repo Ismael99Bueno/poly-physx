@@ -10,6 +10,7 @@ class body2D;
 class collider2D;
 class distance_joint2D;
 class revolute_joint2D;
+class weld_joint2D;
 class joint2D;
 class rotor_joint2D;
 class motor_joint2D;
@@ -116,6 +117,18 @@ struct revolute_joint2D : joint2D
 {
     glm::vec2 ganchor{FLT_MAX};
     static revolute_joint2D from_instance(const ppx::revolute_joint2D &revj);
+};
+
+struct weld_joint2D : joint2D
+{
+    glm::vec2 ganchor{FLT_MAX};
+    bool deduce_angle = true;
+    struct properties
+    {
+        float min_angle = 0.f;
+        float max_angle = 0.f;
+    };
+    static weld_joint2D from_instance(const ppx::weld_joint2D &weldj);
 };
 
 struct spring2D : joint2D

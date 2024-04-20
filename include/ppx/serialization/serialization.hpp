@@ -5,6 +5,7 @@
 #include "ppx/joints/motor_joint2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
+#include "ppx/joints/weld_joint2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
@@ -274,6 +275,27 @@ template <> struct kit::yaml::codec<ppx::revolute_joint2D::specs>
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], revj))
             return false;
         revj.ganchor = node["Anchor"].as<glm::vec2>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::weld_joint2D::specs>
+{
+    static YAML::Node encode(const ppx::weld_joint2D::specs &weldj)
+    {
+        YAML::Node node;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(weldj);
+        node["Anchor"] = weldj.ganchor;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::weld_joint2D::specs &weldj)
+    {
+        if (!node.IsMap() || node.size() != 2)
+            return false;
+
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], weldj))
+            return false;
+        weldj.ganchor = node["Anchor"].as<glm::vec2>();
         return true;
     }
 };

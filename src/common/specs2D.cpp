@@ -5,6 +5,7 @@
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
+#include "ppx/joints/weld_joint2D.hpp"
 #include "ppx/joints/rotor_joint2D.hpp"
 #include "ppx/joints/motor_joint2D.hpp"
 
@@ -72,6 +73,13 @@ revolute_joint2D revolute_joint2D::from_instance(const ppx::revolute_joint2D &re
 {
     revolute_joint2D specs{{revj.body1()->index, revj.body2()->index}, revj.ganchor1()};
     specs.bodies_collide = revj.bodies_collide;
+    return specs;
+}
+
+weld_joint2D weld_joint2D::from_instance(const ppx::weld_joint2D &weldj)
+{
+    weld_joint2D specs{{weldj.body1()->index, weldj.body2()->index}, weldj.ganchor1()};
+    specs.bodies_collide = weldj.bodies_collide;
     return specs;
 }
 

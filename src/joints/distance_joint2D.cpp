@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
-#include "ppx/world2D.hpp"
+#include "ppx/body/body2D.hpp"
 #include "kit/utility/utils.hpp"
 
 namespace ppx
@@ -56,9 +56,9 @@ bool distance_joint2D::legal_length() const
     return m_length >= props.min_distance && m_length <= props.max_distance;
 }
 
-void distance_joint2D::startup()
+void distance_joint2D::update_constraint_data()
 {
-    pvconstraint2D::startup();
+    pvconstraint2D<1, 0>::update_constraint_data();
     m_length = glm::distance(m_ganchor1, m_ganchor2);
 }
 } // namespace ppx
