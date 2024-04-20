@@ -16,5 +16,10 @@ class rotor_joint2D final : public vconstraint2D<0, 1>, kit::non_copyable
 
     float constraint_velocity() const override;
     void solve_velocities() override;
+
+  private:
+    void update_constraint_data() override;
+
+    float m_correction;
 };
 } // namespace ppx

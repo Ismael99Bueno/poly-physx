@@ -6,6 +6,7 @@
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/joints/rotor_joint2D.hpp"
+#include "ppx/joints/motor_joint2D.hpp"
 
 namespace ppx::specs
 {
@@ -49,6 +50,14 @@ body2D body2D::from_instance(const ppx::body2D &body)
 rotor_joint2D rotor_joint2D::from_instance(const ppx::rotor_joint2D &rotj)
 {
     rotor_joint2D specs{{rotj.body1()->index, rotj.body2()->index}, rotj.props};
+    specs.bodies_collide = rotj.bodies_collide;
+    return specs;
+}
+
+motor_joint2D motor_joint2D::from_instance(const ppx::motor_joint2D &motj)
+{
+    motor_joint2D specs{{motj.body1()->index, motj.body2()->index}, motj.props};
+    specs.bodies_collide = motj.bodies_collide;
     return specs;
 }
 

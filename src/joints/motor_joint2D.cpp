@@ -16,9 +16,7 @@ glm::vec2 motor_joint2D::constraint_velocity() const
                    m_body1->ctr_state.velocity_at_centroid_offset(m_offset1);
     if (glm::length2(dv) > props.target_speed * props.target_speed)
         dv = glm::normalize(dv) * props.target_speed;
-
-    const glm::vec2 dp = m_ganchor2 - m_ganchor1 - props.target_offset;
-    return dv + props.correction_factor * dp / world.rk_substep_timestep();
+    return dv + m_correction;
 }
 
 void motor_joint2D::solve_velocities()
@@ -34,5 +32,12 @@ void motor_joint2D::solve_velocities()
     const glm::vec2 delta_impulse = m_cumimpulse - old_impulse;
     if (!kit::approaches_zero(glm::length2(delta_impulse)))
         apply_linear_impulse(delta_impulse);
+}
+
+void motor_joint2D::update_constraint_data()
+{
+    vconstraint2D<2, 0>::update_constraint_data();
+    m_correction =
+        props.correction_factor * (m_ganchor2 - m_ganchor1 - props.target_offset) / world.rk_substep_timestep();
 }
 } // namespace ppx

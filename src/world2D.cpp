@@ -3,6 +3,9 @@
 #include "ppx/behaviours/behaviour2D.hpp"
 #include "ppx/joints/spring2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
+#include "ppx/joints/revolute_joint2D.hpp"
+#include "ppx/joints/rotor_joint2D.hpp"
+#include "ppx/joints/motor_joint2D.hpp"
 #ifdef KIT_USE_YAML_CPP
 #include "ppx/serialization/serialization.hpp"
 #endif
@@ -99,6 +102,8 @@ void world2D::add_builtin_joint_managers()
     joints.add_manager<spring2D>("Springs");
     joints.add_manager<distance_joint2D>("Distance joints");
     joints.add_manager<revolute_joint2D>("Revolute joints");
+    joints.add_manager<rotor_joint2D>("Rotor joints");
+    joints.add_manager<motor_joint2D>("Motor joints");
 }
 
 float world2D::kinetic_energy() const

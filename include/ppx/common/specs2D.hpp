@@ -96,7 +96,7 @@ struct motor_joint2D : joint2D
         float target_speed = 0.f;
         glm::vec2 target_offset{0.f};
     } props;
-    static motor_joint2D from_instance(const ppx::motor_joint2D &mj);
+    static motor_joint2D from_instance(const ppx::motor_joint2D &motj);
 };
 
 struct distance_joint2D : joint2D
@@ -173,7 +173,7 @@ struct contraption2D
                 auto p2 = it1 + j;
                 const body2D spc1 = {.position = *p1, .props = body_props};
                 const body2D spc2 = {.position = *p2, .props = body_props};
-                contraption.springs.push_back({{.bspecs1 = spc1, .bspecs2 = spc2}, *p1, *p2, spring_props});
+                contraption.springs.push_back({{.bspecs1 = spc1, .bspecs2 = spc2}, *p1, *p2, false, spring_props});
             }
         return contraption;
     }

@@ -49,6 +49,10 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 class vconstraint2D : public joint2D, public auxiliar_1D_direction<LinDegrees, AngDegrees>
 {
   public:
+    static inline constexpr std::size_t LINEAR = LinDegrees;
+    static inline constexpr std::size_t ANGULAR = AngDegrees;
+    static inline constexpr std::size_t DIMENSION = LINEAR + ANGULAR;
+
     using flat_t = typename degree_types<LinDegrees + AngDegrees>::flat_t;
     using square_t = typename degree_types<LinDegrees + AngDegrees>::square_t;
 

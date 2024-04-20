@@ -16,5 +16,10 @@ class motor_joint2D final : public vconstraint2D<2, 0>, kit::non_copyable
 
     glm::vec2 constraint_velocity() const override;
     void solve_velocities() override;
+
+  private:
+    void update_constraint_data() override;
+
+    glm::vec2 m_correction;
 };
 } // namespace ppx
