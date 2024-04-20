@@ -16,8 +16,8 @@ class body_manager2D final : public manager2D<body2D>
     std::vector<const body2D *> operator[](const aabb2D &aabb) const;
     std::vector<body2D *> operator[](const aabb2D &aabb);
 
-    const body2D *operator[](const glm::vec2 &point) const;
-    body2D *operator[](const glm::vec2 &point);
+    std::vector<const body2D *> operator[](const glm::vec2 &point) const;
+    std::vector<body2D *> operator[](const glm::vec2 &point);
 
     using manager2D<body2D>::remove;
     bool remove(std::size_t index) override;

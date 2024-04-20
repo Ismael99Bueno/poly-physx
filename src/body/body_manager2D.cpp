@@ -85,20 +85,25 @@ std::vector<body2D *> body_manager2D::operator[](const aabb2D &aabb)
     return in_area<body2D, collider2D>(m_elements, aabb);
 }
 
-template <typename Body, typename Collider, typename C> static Body *at_point(C &elements, const glm::vec2 &point)
+template <typename Body, typename Collider, typename C>
+static std::vector<Body *> at_point(C &elements, const glm::vec2 &point)
 {
+    std::vector<Body *> at_point;
     for (Body *body : elements)
         for (Collider *collider : *body)
             if (geo::intersects(collider->bounding_box(), point))
-                return body;
-    return nullptr;
+            {
+                at_point.push_back(body);
+                break;
+            }
+    return at_point;
 }
 
-const body2D *body_manager2D::operator[](const glm::vec2 &point) const
+std::vector<const body2D *> body_manager2D::operator[](const glm::vec2 &point) const
 {
     return at_point<const body2D, const collider2D>(m_elements, point);
 }
-body2D *body_manager2D::operator[](const glm::vec2 &point)
+std::vector<body2D *> body_manager2D::operator[](const glm::vec2 &point)
 {
     return at_point<body2D, collider2D>(m_elements, point);
 }
