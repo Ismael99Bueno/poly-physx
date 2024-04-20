@@ -182,13 +182,14 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs>
         node["Torque"] = rj.props.torque;
         node["Correction factor"] = rj.props.correction_factor;
         node["Target speed"] = rj.props.target_speed;
-        node["Target offset"] = rj.props.target_offset;
+        node["Min offset"] = rj.props.min_offset;
+        node["Max offset"] = rj.props.max_offset;
         node["Spin indefinitely"] = rj.props.spin_indefinitely;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::rotor_joint2D::specs &rj)
     {
-        if (!node.IsMap() || node.size() != 6)
+        if (!node.IsMap() || node.size() != 7)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], rj))
@@ -196,7 +197,8 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs>
         rj.props.torque = node["Torque"].as<float>();
         rj.props.correction_factor = node["Correction factor"].as<float>();
         rj.props.target_speed = node["Target speed"].as<float>();
-        rj.props.target_offset = node["Target offset"].as<float>();
+        rj.props.min_offset = node["Min offset"].as<float>();
+        rj.props.max_offset = node["Max offset"].as<float>();
         rj.props.spin_indefinitely = node["Spin indefinitely"].as<bool>();
         return true;
     }

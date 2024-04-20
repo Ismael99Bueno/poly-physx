@@ -21,5 +21,7 @@ class rotor_joint2D final : public vconstraint2D<0, 1>, kit::non_copyable
     void update_constraint_data() override;
 
     float m_correction;
+    float m_relangle;
+    bool m_legal_offset;
 };
 } // namespace ppx

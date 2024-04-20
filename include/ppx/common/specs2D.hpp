@@ -82,7 +82,8 @@ struct rotor_joint2D : joint2D
         float torque = 0.f;
         float correction_factor = 0.3f;
         float target_speed = 0.f;
-        float target_offset = 0.f;
+        float min_offset = 0.f;
+        float max_offset = 0.f;
         bool spin_indefinitely = false;
     } props;
     static rotor_joint2D from_instance(const ppx::rotor_joint2D &rotj);
