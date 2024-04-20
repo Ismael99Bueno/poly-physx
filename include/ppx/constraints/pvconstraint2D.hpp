@@ -36,16 +36,17 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
     virtual void update_constraint_data() override;
     virtual void update_position_data();
 
-  private:
     flat_t compute_constraint_impulse() const override;
     flat_t compute_constraint_correction() const;
+
     glm::vec2 compute_linear_correction(const flat_t &ccorrection) const;
     float compute_angular_correction(const flat_t &ccorrection) const;
 
-    void solve() override;
-
     void apply_linear_correction(const glm::vec2 &lincorrection);
     void apply_angular_correction(float angcorrection);
+
+  private:
+    void solve() override;
 };
 
 } // namespace ppx

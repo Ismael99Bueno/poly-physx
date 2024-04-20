@@ -24,16 +24,21 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<
     LinDegrees, AngDegrees>::compute_constraint_correction() const
 {
+    const float max_correction = this->world.constraints.max_position_correction;
+    const float resol_speed = this->world.constraints.position_resolution_speed;
     if constexpr (LinDegrees + AngDegrees == 1)
     {
         const float signed_slop = m_c > 0.f ? -this->world.constraints.slop : this->world.constraints.slop;
-        return -std::clamp(this->world.constraints.position_resolution_speed * (m_c + signed_slop),
-                           -this->world.constraints.max_position_correction,
-                           this->world.constraints.max_position_correction) *
-               this->m_mass;
+        return -std::clamp(resol_speed * (m_c + signed_slop), -max_correction, max_correction) * this->m_mass;
     }
     else
-        return this->m_mass * (glm::normalize(m_c) * this->world.constraints.slop - m_c);
+    {
+        const flat_t correction = resol_speed * (glm::normalize(m_c) * this->world.constraints.slop - m_c);
+        if (glm::length2(correction) > max_correction * max_correction)
+            return this->m_mass * max_correction * glm::normalize(correction);
+
+        return this->m_mass * correction;
+    }
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>

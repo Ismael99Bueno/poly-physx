@@ -12,16 +12,10 @@ class weld_joint2D final : public pvconstraint2D<2, 1>, kit::non_copyable
 
     weld_joint2D(world2D &world, const specs &spc);
 
-    specs::properties props;
-
     glm::vec3 constraint_position() const override;
     glm::vec3 constraint_velocity() const override;
 
-    void solve_velocities() override;
-
   private:
-    void update_constraint_data() override;
-
-    float m_relangle;
+    float m_target_relangle;
 };
 } // namespace ppx

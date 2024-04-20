@@ -78,17 +78,19 @@ class vconstraint2D : public joint2D, public auxiliar_1D_direction<LinDegrees, A
     bool m_use_both_anchors = true;
 
     virtual void update_constraint_data();
-    virtual square_t inverse_mass() const;
+
+    virtual square_t mass() const;
+    square_t default_inverse_mass() const;
 
     virtual flat_t compute_constraint_impulse() const;
     glm::vec2 compute_linear_impulse(const flat_t &cimpulse) const;
+    float compute_angular_impulse(const flat_t &cimpulse) const;
 
     void apply_linear_impulse(const glm::vec2 &linimpulse);
     void apply_angular_impulse(float angimpulse);
     void solve_velocities_clamped(const flat_t &min, const flat_t &max);
 
   private:
-    float compute_angular_impulse(const flat_t &cimpulse) const;
     virtual void solve() override;
 };
 } // namespace ppx

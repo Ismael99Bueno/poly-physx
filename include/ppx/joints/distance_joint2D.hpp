@@ -23,8 +23,7 @@ class distance_joint2D final : public pvconstraint2D<1, 0>, kit::non_copyable
     void update_constraint_data() override;
     glm::vec2 direction() const override;
 
-    bool legal_length() const;
-
     float m_length;
+    bool m_legal_length;
 };
 } // namespace ppx

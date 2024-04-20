@@ -122,12 +122,6 @@ struct revolute_joint2D : joint2D
 struct weld_joint2D : joint2D
 {
     glm::vec2 ganchor{FLT_MAX};
-    bool deduce_angle = true;
-    struct properties
-    {
-        float min_angle = 0.f;
-        float max_angle = 0.f;
-    };
     static weld_joint2D from_instance(const ppx::weld_joint2D &weldj);
 };
 

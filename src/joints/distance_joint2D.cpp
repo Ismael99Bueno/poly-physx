@@ -41,7 +41,7 @@ glm::vec2 distance_joint2D::direction() const
 
 void distance_joint2D::solve_velocities()
 {
-    if (legal_length())
+    if (m_legal_length)
         return;
     if (kit::approximately(props.min_distance, props.max_distance))
         pvconstraint2D<1, 0>::solve_velocities();
@@ -51,14 +51,10 @@ void distance_joint2D::solve_velocities()
         solve_velocities_clamped(-FLT_MAX, 0.f);
 }
 
-bool distance_joint2D::legal_length() const
-{
-    return m_length >= props.min_distance && m_length <= props.max_distance;
-}
-
 void distance_joint2D::update_constraint_data()
 {
     pvconstraint2D<1, 0>::update_constraint_data();
     m_length = glm::distance(m_ganchor1, m_ganchor2);
+    m_legal_length = m_length > props.min_distance && m_length < props.max_distance;
 }
 } // namespace ppx

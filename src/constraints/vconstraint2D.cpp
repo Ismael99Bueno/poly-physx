@@ -158,15 +158,23 @@ void vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
     m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();
     if constexpr (LinDegrees == 1)
         this->m_dir = this->direction();
-    if constexpr (LinDegrees + AngDegrees == 1)
-        m_mass = 1.f / inverse_mass();
-    else
-        m_mass = glm::inverse(inverse_mass());
+    m_mass = mass();
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
-typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegrees, AngDegrees>::inverse_mass() const
+typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegrees, AngDegrees>::mass() const
+{
+    if constexpr (LinDegrees + AngDegrees == 1)
+        return 1.f / default_inverse_mass();
+    else
+        return glm::inverse(default_inverse_mass());
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegrees, AngDegrees>::default_inverse_mass()
+    const
 {
     if constexpr (LinDegrees == 0)
         return m_body1->props().dynamic.inv_inertia + m_body2->props().dynamic.inv_inertia;
