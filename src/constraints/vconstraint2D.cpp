@@ -61,18 +61,22 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
     m_body1->ctr_state.velocity -= m_body1->props().dynamic.inv_mass * linimpulse;
     m_body2->ctr_state.velocity += m_body2->props().dynamic.inv_mass * linimpulse;
 
+    const glm::vec2 f1 = -linimpulse / world.rk_substep_timestep();
+    const glm::vec2 f2 = linimpulse / world.rk_substep_timestep();
+
+    m_body1->apply_simulation_force(f1);
+    m_body2->apply_simulation_force(f2);
+    if (m_no_anchors)
+        return;
+
     m_body1->ctr_state.angular_velocity -= m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, linimpulse);
     m_body2->ctr_state.angular_velocity += m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, linimpulse);
 
-    const glm::vec2 f1 = -linimpulse / world.rk_substep_timestep();
-    const glm::vec2 f2 = linimpulse / world.rk_substep_timestep();
     const float torque1 = kit::cross2D(m_offset1, f1);
     const float torque2 = kit::cross2D(m_offset2, f2);
 
-    m_body1->apply_simulation_force(f1);
-    m_body1->apply_simulation_torque(torque1);
-    m_body2->apply_simulation_force(f2);
     m_body2->apply_simulation_torque(torque2);
+    m_body1->apply_simulation_torque(torque1);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -150,17 +154,35 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 void vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
 {
-    m_ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
-    if (m_use_both_anchors)
-        m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
+    if (m_no_anchors)
+    {
+        m_ganchor1 = m_body1->ctr_state.centroid.position();
+        m_ganchor2 = m_body2->ctr_state.centroid.position();
+        m_offset1 = glm::vec2(0.f);
+        m_offset2 = glm::vec2(0.f);
+    }
     else
-        m_ganchor2 = m_ganchor1;
+    {
+        m_ganchor1 = m_body1->ctr_state.global_position_point(m_lanchor1);
+        if (m_use_both_anchors)
+            m_ganchor2 = m_body2->ctr_state.global_position_point(m_lanchor2);
+        else
+            m_ganchor2 = m_ganchor1;
 
-    m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position();
-    m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();
+        m_offset1 = m_ganchor1 - m_body1->ctr_state.centroid.position();
+        m_offset2 = m_ganchor2 - m_body2->ctr_state.centroid.position();
+    }
     if constexpr (LinDegrees == 1)
         this->m_dir = this->direction();
     m_mass = mass();
+}
+
+template <typename Mat> static Mat invert_diagonal(const Mat &mat)
+{
+    Mat invmat;
+    for (std::size_t i = 0; i < mat.length(); ++i)
+        invmat[i][i] = 1.f / mat[i][i];
+    return invmat;
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -170,7 +192,10 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
     if constexpr (LinDegrees + AngDegrees == 1)
         return 1.f / default_inverse_mass();
     else
-        return glm::inverse(default_inverse_mass());
+    {
+        const square_t invmass = default_inverse_mass();
+        return m_no_anchors ? invert_diagonal(invmass) : glm::inverse(invmass);
+    }
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -182,11 +207,25 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
         return m_body1->props().dynamic.inv_inertia + m_body2->props().dynamic.inv_inertia;
     else
     {
+
         const float im1 = m_body1->props().dynamic.inv_mass;
         const float im2 = m_body2->props().dynamic.inv_mass;
 
         const float ii1 = m_body1->props().dynamic.inv_inertia;
         const float ii2 = m_body2->props().dynamic.inv_inertia;
+
+        if (m_no_anchors)
+        {
+            if constexpr (LinDegrees == 1 && AngDegrees == 0)
+                return im1 + im2;
+            else if constexpr (LinDegrees == 1 && AngDegrees == 1)
+                return glm::mat2{{im1 + im2, 0.f}, {0.f, ii1 + ii2}};
+            else if constexpr (LinDegrees == 2 && AngDegrees == 0)
+                return glm::mat2{{im1 + im2, 0.f}, {0.f, im1 + im2}};
+            else if constexpr (LinDegrees == 2 && AngDegrees == 1)
+                return glm::mat3{{im1 + im2, 0.f, 0.f}, {0.f, im1 + im2, 0.f}, {0.f, 0.f, ii1 + ii2}};
+        }
+
         if constexpr (LinDegrees == 1)
         {
             const float cross1 = kit::cross2D(m_offset1, this->m_dir);

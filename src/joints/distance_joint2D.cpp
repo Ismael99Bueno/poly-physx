@@ -6,14 +6,15 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : pvconstraint2D<1, 0>(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props)
+    : pvconstraint2D<1, 0>(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props),
+      m_length(glm::distance(spc.ganchor1, spc.ganchor2))
 {
     if (spc.deduce_distance)
     {
-        const float length = glm::distance(ganchor1(), ganchor2());
-        props.min_distance = length;
-        props.max_distance = length;
+        props.min_distance = m_length;
+        props.max_distance = m_length;
     }
+    m_legal_length = m_length >= props.min_distance && m_length <= props.max_distance;
 }
 
 float distance_joint2D::constraint_position() const
@@ -53,8 +54,9 @@ void distance_joint2D::solve_velocities()
 
 void distance_joint2D::update_constraint_data()
 {
-    pvconstraint2D<1, 0>::update_constraint_data();
+    vconstraint2D<1, 0>::update_constraint_data();
     m_length = glm::distance(m_ganchor1, m_ganchor2);
-    m_legal_length = m_length > props.min_distance && m_length < props.max_distance;
+    m_legal_length = m_length >= props.min_distance && m_length <= props.max_distance;
+    m_c = constraint_position();
 }
 } // namespace ppx

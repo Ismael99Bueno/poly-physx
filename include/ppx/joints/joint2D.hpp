@@ -55,6 +55,9 @@ class joint2D : public kit::indexable, public worldref2D
     glm::vec2 m_lanchor1;
     glm::vec2 m_lanchor2;
 
+  protected:
+    bool m_no_anchors; // joint is not anchored (e.g. rotor or motor)
+
   private:
     void add_to_bodies();
     void remove_from_bodies();
