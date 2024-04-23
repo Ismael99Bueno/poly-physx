@@ -85,7 +85,6 @@ weld_joint2D weld_joint2D::from_instance(const ppx::weld_joint2D &weldj)
 
 spring2D spring2D::from_instance(const ppx::spring2D &sp)
 {
-
     spring2D specs{{sp.body1()->index, sp.body2()->index}, sp.ganchor1(), sp.ganchor2(), false, sp.props};
     specs.bodies_collide = sp.bodies_collide;
     return specs;
