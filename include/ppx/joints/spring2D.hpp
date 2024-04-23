@@ -9,6 +9,7 @@ namespace ppx
 class spring2D : public joint2D, kit::non_copyable
 {
   public:
+    static inline constexpr std::uint8_t ANCHORS = 2;
     using specs = specs::spring2D;
 
     spring2D(world2D &world, const specs &spc);

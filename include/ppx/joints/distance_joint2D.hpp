@@ -8,6 +8,7 @@ namespace ppx
 class distance_joint2D final : public pvconstraint2D<1, 0>, kit::non_copyable
 {
   public:
+    static inline constexpr std::uint8_t ANCHORS = 2;
     using specs = specs::distance_joint2D;
 
     distance_joint2D(world2D &world, const specs &spc);

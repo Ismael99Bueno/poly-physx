@@ -80,7 +80,7 @@ struct rotor_joint2D : joint2D
     struct properties
     {
         float torque = 0.f;
-        float correction_factor = 0.3f;
+        float correction_factor = 0.05f;
         float target_speed = 0.f;
         float min_offset = 0.f;
         float max_offset = 0.f;
@@ -94,7 +94,7 @@ struct motor_joint2D : joint2D
     struct properties
     {
         float force = 0.f;
-        float correction_factor = 0.3f;
+        float correction_factor = 0.05f;
         float target_speed = 0.f;
         glm::vec2 target_offset{0.f};
     } props;

@@ -8,6 +8,7 @@ namespace ppx
 class motor_joint2D final : public vconstraint2D<2, 0>, kit::non_copyable
 {
   public:
+    static inline constexpr std::uint8_t ANCHORS = 0;
     using specs = specs::motor_joint2D;
 
     motor_joint2D(world2D &world, const specs &spc);

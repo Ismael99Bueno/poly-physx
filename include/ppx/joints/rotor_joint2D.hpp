@@ -8,6 +8,7 @@ namespace ppx
 class rotor_joint2D final : public vconstraint2D<0, 1>, kit::non_copyable
 {
   public:
+    static inline constexpr std::uint8_t ANCHORS = 0;
     using specs = specs::rotor_joint2D;
 
     rotor_joint2D(world2D &world, const specs &spc);

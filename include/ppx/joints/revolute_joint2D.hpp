@@ -8,6 +8,7 @@ namespace ppx
 class revolute_joint2D final : public pvconstraint2D<2, 0>, kit::non_copyable
 {
   public:
+    static inline constexpr std::uint8_t ANCHORS = 1;
     using specs = specs::revolute_joint2D;
 
     revolute_joint2D(world2D &world, const specs &spc);

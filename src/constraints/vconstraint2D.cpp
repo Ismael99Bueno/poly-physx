@@ -180,7 +180,7 @@ void vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
 template <typename Mat> static Mat invert_diagonal(const Mat &mat)
 {
     Mat invmat;
-    for (std::size_t i = 0; i < mat.length(); ++i)
+    for (int i = 0; i < mat.length(); ++i)
         invmat[i][i] = 1.f / mat[i][i];
     return invmat;
 }

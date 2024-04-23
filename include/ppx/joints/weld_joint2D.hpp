@@ -8,6 +8,7 @@ namespace ppx
 class weld_joint2D final : public pvconstraint2D<2, 1>, kit::non_copyable
 {
   public:
+    static inline constexpr std::uint8_t ANCHORS = 1;
     using specs = specs::weld_joint2D;
 
     weld_joint2D(world2D &world, const specs &spc);
