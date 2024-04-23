@@ -142,6 +142,8 @@ void vconstraint2D<LinDegrees, AngDegrees>::startup()
     update_constraint_data();
     if (world.constraints.warmup)
         warmup();
+    else
+        m_cumimpulse = flat_t(0.f);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>

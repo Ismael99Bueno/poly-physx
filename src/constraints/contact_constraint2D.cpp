@@ -32,7 +32,6 @@ float contact_constraint2D::constraint_velocity() const
 
 void contact_constraint2D::solve_velocities()
 {
-    m_friction.max_impulse = m_cumimpulse;
     if (m_has_friction)
         m_friction.solve_velocities();
     solve_velocities_clamped(0.f, FLT_MAX);
@@ -40,7 +39,9 @@ void contact_constraint2D::solve_velocities()
 
 void contact_constraint2D::startup()
 {
+    m_friction.max_impulse = m_cumimpulse;
     pvconstraint2D<1, 0>::startup();
+
     if (!m_is_adjusting_positions && m_has_friction)
         m_friction.startup();
 }
