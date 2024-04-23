@@ -17,6 +17,8 @@ float rotor_joint2D::constraint_velocity() const
     const float dw = m_body2->ctr_state.angular_velocity - m_body1->ctr_state.angular_velocity;
     if (props.spin_indefinitely)
         return dw - props.target_speed;
+    if (glm::abs(m_correction) > glm::abs(props.target_speed))
+        return dw + glm::abs(props.target_speed) * glm::sign(m_correction);
     return dw + m_correction;
 }
 
