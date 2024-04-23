@@ -6,7 +6,7 @@
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/joints/weld_joint2D.hpp"
-#include "ppx/joints/spring2D.hpp"
+#include "ppx/joints/spring_joint2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
@@ -302,9 +302,9 @@ template <> struct kit::yaml::codec<ppx::weld_joint2D::specs>
     }
 };
 
-template <> struct kit::yaml::codec<ppx::spring2D::specs>
+template <> struct kit::yaml::codec<ppx::spring_joint2D::specs>
 {
-    static YAML::Node encode(const ppx::spring2D::specs &sp)
+    static YAML::Node encode(const ppx::spring_joint2D::specs &sp)
     {
         YAML::Node node;
         node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(sp);
@@ -312,15 +312,16 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         node["Anchor2"] = sp.ganchor2;
         node["Frequency"] = sp.props.frequency;
         node["Damping ratio"] = sp.props.damping_ratio;
-        node["Length"] = sp.props.length;
+        node["Min length"] = sp.props.min_length;
+        node["Max length"] = sp.props.max_length;
         node["Deduce length"] = sp.deduce_length;
         node["Non linear terms"] = sp.props.non_linear_terms;
         node["Non linear contribution"] = sp.props.non_linear_contribution;
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::spring2D::specs &sp)
+    static bool decode(const YAML::Node &node, ppx::spring_joint2D::specs &sp)
     {
-        if (!node.IsMap() || node.size() != 9)
+        if (!node.IsMap() || node.size() != 10)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], sp))
@@ -329,7 +330,8 @@ template <> struct kit::yaml::codec<ppx::spring2D::specs>
         sp.ganchor2 = node["Anchor2"].as<glm::vec2>();
         sp.props.frequency = node["Frequency"].as<float>();
         sp.props.damping_ratio = node["Damping ratio"].as<float>();
-        sp.props.length = node["Length"].as<float>();
+        sp.props.min_length = node["Min length"].as<float>();
+        sp.props.max_length = node["Max length"].as<float>();
         sp.deduce_length = node["Deduce length"].as<bool>();
         sp.props.non_linear_terms = node["Non linear terms"].as<std::uint32_t>();
         sp.props.non_linear_contribution = node["Non linear contribution"].as<float>();

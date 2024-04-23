@@ -1,7 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/world2D.hpp"
 #include "ppx/behaviours/behaviour2D.hpp"
-#include "ppx/joints/spring2D.hpp"
+#include "ppx/joints/spring_joint2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/joints/weld_joint2D.hpp"
@@ -22,8 +22,8 @@ void world2D::add(const specs::contraption2D &contraption)
 {
     for (const body2D::specs &body : contraption.bodies)
         bodies.add(body);
-    for (const spring2D::specs &spring : contraption.springs)
-        joints.add<spring2D>(spring);
+    for (const spring_joint2D::specs &spring : contraption.springs)
+        joints.add<spring_joint2D>(spring);
     for (const distance_joint2D::specs &joint : contraption.distance_joints)
         joints.add<distance_joint2D>(joint);
 }
@@ -100,7 +100,7 @@ void world2D::on_body_removal_validation(const body2D *body)
 
 void world2D::add_builtin_joint_managers()
 {
-    joints.add_manager<spring2D>("Springs");
+    joints.add_manager<spring_joint2D>("Spring joints");
     joints.add_manager<distance_joint2D>("Distance joints");
     joints.add_manager<revolute_joint2D>("Revolute joints");
     joints.add_manager<weld_joint2D>("Weld joints");
@@ -121,7 +121,7 @@ float world2D::potential_energy() const
     for (const auto &bhv : behaviours)
         if (bhv->enabled)
             pot += bhv->potential_energy();
-    for (const spring2D *sp : *joints.manager<spring2D>())
+    for (const spring_joint2D *sp : *joints.manager<spring_joint2D>())
         pot += sp->potential_energy();
     return pot;
 }

@@ -2,7 +2,7 @@
 #include "ppx/common/specs2D.hpp"
 #include "ppx/body/body2D.hpp"
 #include "ppx/collider/collider2D.hpp"
-#include "ppx/joints/spring2D.hpp"
+#include "ppx/joints/spring_joint2D.hpp"
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/joints/weld_joint2D.hpp"
@@ -83,16 +83,16 @@ weld_joint2D weld_joint2D::from_instance(const ppx::weld_joint2D &weldj)
     return specs;
 }
 
-spring2D spring2D::from_instance(const ppx::spring2D &sp)
+spring_joint2D spring_joint2D::from_instance(const ppx::spring_joint2D &sp)
 {
-    spring2D specs{{sp.body1()->index, sp.body2()->index}, sp.ganchor1(), sp.ganchor2(), false, sp.props};
+    spring_joint2D specs{{sp.body1()->index, sp.body2()->index}, sp.ganchor1(), sp.ganchor2(), false, sp.props};
     specs.bodies_collide = sp.bodies_collide;
     return specs;
 }
 
 contraption2D contraption2D::rope(const glm::vec2 &start, const glm::vec2 &end, const std::uint32_t segments,
                                   const float spring_anchor_spacing, const body2D::properties &node_props,
-                                  const spring2D::properties &spring_props, const bool fixed_start,
+                                  const spring_joint2D::properties &spring_props, const bool fixed_start,
                                   const bool fixed_end)
 {
     contraption2D contraption;
@@ -143,12 +143,13 @@ contraption2D contraption2D::chain(const glm::vec2 &start, const glm::vec2 &end,
 }
 
 contraption2D contraption2D::soft_body(const std::vector<glm::vec2> &anchors, const body2D::properties &body_props,
-                                       const spring2D::properties &spring_props)
+                                       const spring_joint2D::properties &spring_props)
 {
     return soft_body(anchors.begin(), anchors.end(), body_props, spring_props);
 }
 contraption2D contraption2D::soft_body(const float radius, const std::uint32_t segments,
-                                       const body2D::properties &body_props, const spring2D::properties &spring_props)
+                                       const body2D::properties &body_props,
+                                       const spring_joint2D::properties &spring_props)
 {
     std::vector<glm::vec2> anchors;
     anchors.reserve(segments);

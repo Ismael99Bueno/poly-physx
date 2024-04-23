@@ -14,7 +14,7 @@ class weld_joint2D;
 class joint2D;
 class rotor_joint2D;
 class motor_joint2D;
-class spring2D;
+class spring_joint2D;
 } // namespace ppx
 
 namespace ppx::specs
@@ -126,7 +126,7 @@ struct weld_joint2D : joint2D
     static weld_joint2D from_instance(const ppx::weld_joint2D &weldj);
 };
 
-struct spring2D : joint2D
+struct spring_joint2D : joint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
@@ -135,24 +135,25 @@ struct spring2D : joint2D
     {
         float frequency = 1.f;
         float damping_ratio = 0.2f;
-        float length = 0.f;
+        float min_length = 0.f;
+        float max_length = 0.f;
 
         std::uint32_t non_linear_terms = 0;
         float non_linear_contribution = 0.001f;
     } props;
 
-    static spring2D from_instance(const ppx::spring2D &sp);
+    static spring_joint2D from_instance(const ppx::spring_joint2D &sp);
 };
 
 struct contraption2D
 {
     std::vector<body2D> bodies{};
     std::vector<distance_joint2D> distance_joints{};
-    std::vector<spring2D> springs{};
+    std::vector<spring_joint2D> springs{};
 
     static contraption2D rope(const glm::vec2 &start, const glm::vec2 &end, std::uint32_t segments,
                               float spring_anchor_spacing, const body2D::properties &node_props = {},
-                              const spring2D::properties &spring_props = {}, bool fixed_start = true,
+                              const spring_joint2D::properties &spring_props = {}, bool fixed_start = true,
                               bool fixed_end = true);
     static contraption2D chain(const glm::vec2 &start, const glm::vec2 &end, std::uint32_t segments,
                                float spring_anchor_spacing, const body2D::properties &node_props = {},
@@ -160,13 +161,13 @@ struct contraption2D
                                bool fixed_end = true);
 
     static contraption2D soft_body(const std::vector<glm::vec2> &anchors, const body2D::properties &body_props = {},
-                                   const spring2D::properties &spring_props = {});
+                                   const spring_joint2D::properties &spring_props = {});
     static contraption2D soft_body(float radius, std::uint32_t segments, const body2D::properties &body_props = {},
-                                   const spring2D::properties &spring_props = {});
+                                   const spring_joint2D::properties &spring_props = {});
 
     template <std::random_access_iterator AnchorIt>
     static contraption2D soft_body(AnchorIt it1, AnchorIt it2, const body2D::properties &body_props = {},
-                                   const spring2D::properties &spring_props = {})
+                                   const spring_joint2D::properties &spring_props = {})
     {
         const std::size_t size = std::distance(it1, it2);
         KIT_ASSERT_ERROR(size > 1, "Soft body must have at least 2 anchors");

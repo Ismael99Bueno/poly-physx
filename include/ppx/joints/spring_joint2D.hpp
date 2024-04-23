@@ -6,13 +6,13 @@
 
 namespace ppx
 {
-class spring2D : public joint2D, kit::non_copyable
+class spring_joint2D : public joint2D, kit::non_copyable
 {
   public:
     static inline constexpr std::uint8_t ANCHORS = 2;
-    using specs = specs::spring2D;
+    using specs = specs::spring_joint2D;
 
-    spring2D(world2D &world, const specs &spc);
+    spring_joint2D(world2D &world, const specs &spc);
 
     specs::properties props;
 
