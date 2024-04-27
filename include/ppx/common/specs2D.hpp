@@ -15,6 +15,7 @@ class joint2D;
 class rotor_joint2D;
 class motor_joint2D;
 class spring_joint2D;
+class ball_joint2D;
 } // namespace ppx
 
 namespace ppx::specs
@@ -82,8 +83,8 @@ struct rotor_joint2D : joint2D
         float torque = 0.f;
         float correction_factor = 0.05f;
         float target_speed = 0.f;
-        float min_offset = 0.f;
-        float max_offset = 0.f;
+        float min_angle = 0.f;
+        float max_angle = 0.f;
         bool spin_indefinitely = false;
     } props;
     static rotor_joint2D from_instance(const ppx::rotor_joint2D &rotj);
@@ -124,6 +125,17 @@ struct weld_joint2D : joint2D
 {
     glm::vec2 ganchor{FLT_MAX};
     static weld_joint2D from_instance(const ppx::weld_joint2D &weldj);
+};
+
+struct ball_joint2D : joint2D
+{
+    bool deduce_angle = true;
+    struct properties
+    {
+        float min_angle = 0.f;
+        float max_angle = 0.f;
+    } props;
+    static ball_joint2D from_instance(const ppx::ball_joint2D &bj);
 };
 
 struct spring_joint2D : joint2D

@@ -40,6 +40,13 @@ glm::vec2 distance_joint2D::direction() const
     return !kit::approaches_zero(dst) ? glm::normalize(m_ganchor2 - m_ganchor1) : glm::vec2(1.f, 0.f);
 }
 
+bool distance_joint2D::solve_positions()
+{
+    if (m_legal_length)
+        return true;
+    return pvconstraint2D<1, 0>::solve_positions();
+}
+
 void distance_joint2D::solve_velocities()
 {
     if (m_legal_length)

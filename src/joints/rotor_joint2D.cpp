@@ -12,8 +12,8 @@ float rotor_joint2D::constraint_velocity() const
 {
     KIT_ASSERT_ERROR(props.correction_factor >= 0.0f && props.correction_factor <= 1.0f,
                      "Correction factor must be in the range [0, 1]: {0}", props.correction_factor);
-    KIT_ASSERT_ERROR(props.min_offset <= props.max_offset, "Min offset must be less than max offset: {0} < {1}",
-                     props.min_offset, props.max_offset);
+    KIT_ASSERT_ERROR(props.min_angle <= props.max_angle, "Min angle must be less than max angle: {0} < {1}",
+                     props.min_angle, props.max_angle);
     const float dw = m_body2->ctr_state.angular_velocity - m_body1->ctr_state.angular_velocity;
     if (props.spin_indefinitely)
         return dw - props.target_speed;
@@ -24,12 +24,12 @@ float rotor_joint2D::constraint_velocity() const
 
 void rotor_joint2D::solve_velocities()
 {
-    if (m_legal_offset && !props.spin_indefinitely)
+    if (m_legal_angle && !props.spin_indefinitely)
         return;
     const float max_impulse = world.rk_substep_timestep() * props.torque;
-    if (props.spin_indefinitely || kit::approximately(props.max_offset, props.min_offset))
+    if (props.spin_indefinitely || kit::approximately(props.max_angle, props.min_angle))
         vconstraint2D<0, 1>::solve_velocities_clamped(-max_impulse, max_impulse);
-    else if (m_relangle < props.min_offset)
+    else if (m_relangle < props.min_angle)
         vconstraint2D<0, 1>::solve_velocities_clamped(0.f, max_impulse);
     else
         vconstraint2D<0, 1>::solve_velocities_clamped(-max_impulse, 0.f);
@@ -44,19 +44,19 @@ void rotor_joint2D::update_constraint_data()
     da -= glm::round(da / glm::two_pi<float>()) * glm::two_pi<float>();
     m_relangle = da;
 
-    if (da < props.min_offset)
-        da = m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation() - props.min_offset;
-    else if (da > props.max_offset)
-        da = m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation() - props.max_offset;
+    if (da < props.min_angle)
+        da = m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation() - props.min_angle;
+    else if (da > props.max_angle)
+        da = m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation() - props.max_angle;
     else
     {
         m_correction = 0.f;
-        m_legal_offset = true;
+        m_legal_angle = true;
         return;
     }
 
     da -= glm::round(da / glm::two_pi<float>()) * glm::two_pi<float>();
     m_correction = props.correction_factor * da / world.rk_substep_timestep();
-    m_legal_offset = false;
+    m_legal_angle = false;
 }
 } // namespace ppx

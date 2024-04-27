@@ -182,8 +182,8 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs>
         node["Torque"] = rj.props.torque;
         node["Correction factor"] = rj.props.correction_factor;
         node["Target speed"] = rj.props.target_speed;
-        node["Min offset"] = rj.props.min_offset;
-        node["Max offset"] = rj.props.max_offset;
+        node["Min angle"] = rj.props.min_angle;
+        node["Max angle"] = rj.props.max_angle;
         node["Spin indefinitely"] = rj.props.spin_indefinitely;
         return node;
     }
@@ -197,8 +197,8 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs>
         rj.props.torque = node["Torque"].as<float>();
         rj.props.correction_factor = node["Correction factor"].as<float>();
         rj.props.target_speed = node["Target speed"].as<float>();
-        rj.props.min_offset = node["Min offset"].as<float>();
-        rj.props.max_offset = node["Max offset"].as<float>();
+        rj.props.min_angle = node["Min angle"].as<float>();
+        rj.props.max_angle = node["Max angle"].as<float>();
         rj.props.spin_indefinitely = node["Spin indefinitely"].as<bool>();
         return true;
     }
