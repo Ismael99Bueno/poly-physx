@@ -6,6 +6,7 @@
 #include "ppx/joints/distance_joint2D.hpp"
 #include "ppx/joints/revolute_joint2D.hpp"
 #include "ppx/joints/weld_joint2D.hpp"
+#include "ppx/joints/ball_joint2D.hpp"
 #include "ppx/joints/spring_joint2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
@@ -256,6 +257,31 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
         dj.props.min_distance = node["Min distance"].as<float>();
         dj.props.max_distance = node["Max distance"].as<float>();
         dj.deduce_distance = node["Deduce distance"].as<bool>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::ball_joint2D::specs>
+{
+    static YAML::Node encode(const ppx::ball_joint2D::specs &bj)
+    {
+        YAML::Node node;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(bj);
+        node["Deduce angle"] = bj.deduce_angle;
+        node["Min angle"] = bj.props.min_angle;
+        node["Max angle"] = bj.props.max_angle;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::ball_joint2D::specs &bj)
+    {
+        if (!node.IsMap() || node.size() != 4)
+            return false;
+
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], bj))
+            return false;
+        bj.deduce_angle = node["Deduce angle"].as<bool>();
+        bj.props.min_angle = node["Min angle"].as<float>();
+        bj.props.max_angle = node["Max angle"].as<float>();
         return true;
     }
 };

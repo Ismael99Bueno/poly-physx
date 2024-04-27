@@ -75,8 +75,8 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
     const float torque1 = kit::cross2D(m_offset1, f1);
     const float torque2 = kit::cross2D(m_offset2, f2);
 
-    m_body2->apply_simulation_torque(torque2);
     m_body1->apply_simulation_torque(torque1);
+    m_body2->apply_simulation_torque(torque2);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>

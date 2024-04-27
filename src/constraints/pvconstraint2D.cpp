@@ -50,10 +50,10 @@ glm::vec2 pvconstraint2D<LinDegrees, AngDegrees>::compute_linear_correction(cons
         KIT_ERROR("Linear correction can only be computed when the linear degrees of the constraint is greater than 0")
         return {};
     }
-    else if constexpr (LinDegrees + AngDegrees > 1)
-        return glm::vec2(ccorrection);
-    else
+    else if constexpr (LinDegrees == 1)
         return this->m_dir * ccorrection;
+    else
+        return glm::vec2(ccorrection);
 }
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
@@ -83,19 +83,33 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::
     const glm::vec2 dpos1 = -this->m_body1->props().dynamic.inv_mass * lincorrection;
     const glm::vec2 dpos2 = this->m_body2->props().dynamic.inv_mass * lincorrection;
 
+    if (this->m_body1->is_dynamic())
+    {
+        this->m_body1->ctr_state.centroid.translate(dpos1);
+        this->m_body1->velocity() += dpos1 / this->world.rk_substep_timestep();
+    }
+    if (this->m_body2->is_dynamic())
+    {
+        this->m_body2->ctr_state.centroid.translate(dpos2);
+        this->m_body2->velocity() += dpos2 / this->world.rk_substep_timestep();
+    }
+
+    if (this->m_no_anchors)
+        return;
+
     const float da1 = -this->m_body1->props().dynamic.inv_inertia * kit::cross2D(this->m_offset1, lincorrection);
     const float da2 = this->m_body2->props().dynamic.inv_inertia * kit::cross2D(this->m_offset2, lincorrection);
 
-    this->m_body1->ctr_state.centroid.translate(dpos1);
-    this->m_body2->ctr_state.centroid.translate(dpos2);
-
-    this->m_body1->ctr_state.centroid.rotate(da1);
-    this->m_body2->ctr_state.centroid.rotate(da2);
-
-    this->m_body1->velocity() += dpos1 / this->world.rk_substep_timestep();
-    this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
-    this->m_body2->velocity() += dpos2 / this->world.rk_substep_timestep();
-    this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+    if (this->m_body1->is_dynamic())
+    {
+        this->m_body1->ctr_state.centroid.rotate(da1);
+        this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
+    }
+    if (this->m_body2->is_dynamic())
+    {
+        this->m_body2->ctr_state.centroid.rotate(da2);
+        this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+    }
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -106,14 +120,19 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_angular_correction(float angc
     {
         KIT_ERROR("Angular correction can only be applied when the angular degrees of the constraint is equal to 1")
     }
-    const float da1 = -angcorrection;
-    const float da2 = angcorrection;
+    const float da1 = -this->m_body1->props().dynamic.inv_inertia * angcorrection;
+    const float da2 = this->m_body2->props().dynamic.inv_inertia * angcorrection;
 
-    this->m_body1->ctr_state.centroid.rotate(da1);
-    this->m_body2->ctr_state.centroid.rotate(da2);
-
-    this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
-    this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+    if (this->m_body1->is_dynamic())
+    {
+        this->m_body1->ctr_state.centroid.rotate(da1);
+        this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
+    }
+    if (this->m_body2->is_dynamic())
+    {
+        this->m_body2->ctr_state.centroid.rotate(da2);
+        this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+    }
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>

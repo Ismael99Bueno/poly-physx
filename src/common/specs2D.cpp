@@ -8,6 +8,7 @@
 #include "ppx/joints/weld_joint2D.hpp"
 #include "ppx/joints/rotor_joint2D.hpp"
 #include "ppx/joints/motor_joint2D.hpp"
+#include "ppx/joints/ball_joint2D.hpp"
 
 namespace ppx::specs
 {
@@ -80,6 +81,13 @@ weld_joint2D weld_joint2D::from_instance(const ppx::weld_joint2D &weldj)
 {
     weld_joint2D specs{{weldj.body1()->index, weldj.body2()->index}, weldj.ganchor1()};
     specs.bodies_collide = weldj.bodies_collide;
+    return specs;
+}
+
+ball_joint2D ball_joint2D::from_instance(const ppx::ball_joint2D &bj)
+{
+    ball_joint2D specs{{bj.body1()->index, bj.body2()->index}, false, bj.props};
+    specs.bodies_collide = bj.bodies_collide;
     return specs;
 }
 
