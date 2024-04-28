@@ -31,7 +31,6 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
         };
         data dynamic;
         data nondynamic;
-        float charge;
     };
 
     body2D(world2D &world, const specs &spc = {});
