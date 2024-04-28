@@ -159,7 +159,7 @@ void body2D::update_centroids()
         centroid += cmass * shape.gcentroid();
         artificial_mass += cmass;
 
-        const float ccharge = collider->charge_density() * shape.area();
+        const float ccharge = glm::abs(collider->charge_density()) * shape.area();
         charge_centroid += ccharge * shape.gcentroid();
         artificial_charge += ccharge;
     }
