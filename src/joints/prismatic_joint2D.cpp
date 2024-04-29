@@ -6,7 +6,8 @@ namespace ppx
 {
 prismatic_joint2D::prismatic_joint2D(world2D &world, const specs &spc)
     : pvconstraint2D<1, 1>(world, spc, spc.ganchor1, spc.ganchor2),
-      m_target_relangle(m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation())
+      m_target_relangle(m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation()),
+      props(spc.props)
 {
     if (spc.deduce_axis)
         props.axis = spc.ganchor2 - spc.ganchor1;
@@ -29,7 +30,7 @@ glm::vec2 prismatic_joint2D::constraint_velocity() const
 
 glm::vec2 prismatic_joint2D::direction() const
 {
-    return glm::normalize(props.axis);
+    return glm::normalize(glm::vec2(-props.axis.y, props.axis.x));
 }
 
 glm::vec2 prismatic_joint2D::axis_from_angle(const float radians)
