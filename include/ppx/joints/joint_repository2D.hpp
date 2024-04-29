@@ -10,12 +10,19 @@ class joint_repository2D
     joint_meta_manager2D non_constraint_based;
     constraint_meta_manager2D constraint_based;
 
+    struct
+    {
+        kit::event<joint2D *> on_addition;
+        kit::event<joint2D &> on_removal;
+    } events;
+
     template <Joint2D T> T *add(const typename T::specs &spc)
     {
-        if constexpr (VConstraint2D<T>)
-            return constraint_based.add<T>(spc);
-        else
-            return non_constraint_based.add<T>(spc);
+        auto mng = manager<T>();
+        KIT_ASSERT_ERROR(mng, "There is no manager of this type in the repository")
+        T *joint = mng->add(spc);
+        events.on_addition(joint);
+        return joint;
     }
 
     template <Joint2D T> auto add_manager(const std::string &name)
@@ -50,27 +57,31 @@ class joint_repository2D
         else
             return non_constraint_based.manager<T>();
     }
-    bool remove(const joint2D *joint);
-    template <Joint2D T> bool remove()
+
+    template <Joint2D T> bool remove_manager()
     {
         if constexpr (VConstraint2D<T>)
-            return constraint_based.remove<T>();
+            return constraint_based.remove_manager<T>();
         else
-            return non_constraint_based.remove<T>();
+            return non_constraint_based.remove_manager<T>();
     }
+    bool remove(const joint2D *joint);
     template <Joint2D T> bool remove(const std::size_t index)
     {
-        if constexpr (VConstraint2D<T>)
-            return constraint_based.remove<T>(index);
-        else
-            return non_constraint_based.remove<T>(index);
+        auto mng = manager<T>();
+        if (!mng || index >= mng->size())
+            return false;
+        T *joint = mng->at(index);
+        mng->events.on_removal(*joint);
+        return mng->remove(index);
     }
     template <Joint2D T> bool remove(const T *joint)
     {
-        if constexpr (VConstraint2D<T>)
-            return constraint_based.remove(joint);
-        else
-            return non_constraint_based.remove(joint);
+        auto mng = manager<T>();
+        if (!mng || !mng->contains(joint))
+            return false;
+        mng->events.on_removal(*joint);
+        return mng->remove(joint);
     }
 
   private:
