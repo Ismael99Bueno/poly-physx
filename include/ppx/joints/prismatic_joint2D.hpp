@@ -22,5 +22,7 @@ class prismatic_joint2D final : public pvconstraint2D<1, 1>, kit::non_copyable
 
   private:
     float m_target_relangle;
+
+    glm::vec2 direction() const override;
 };
 } // namespace ppx
