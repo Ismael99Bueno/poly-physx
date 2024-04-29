@@ -9,7 +9,7 @@ prismatic_joint2D::prismatic_joint2D(world2D &world, const specs &spc)
       m_target_relangle(m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation())
 {
     if (spc.deduce_axis)
-        props.axis = m_ganchor2 - m_ganchor1;
+        props.axis = spc.ganchor2 - spc.ganchor1;
 }
 
 glm::vec2 prismatic_joint2D::constraint_position() const

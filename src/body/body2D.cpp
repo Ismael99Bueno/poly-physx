@@ -486,6 +486,11 @@ void body2D::reset_dynamic_properties()
         m_props.dynamic.inv_mass = 0.f;
         m_props.dynamic.inertia = FLT_MAX;
         m_props.dynamic.inv_inertia = 0.f;
+        if (is_static())
+        {
+            m_state.velocity = glm::vec2(0.f);
+            m_state.angular_velocity = 0.f;
+        }
     }
 }
 
