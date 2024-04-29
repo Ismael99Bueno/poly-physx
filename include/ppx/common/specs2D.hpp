@@ -16,6 +16,7 @@ class rotor_joint2D;
 class motor_joint2D;
 class spring_joint2D;
 class ball_joint2D;
+class prismatic_joint2D;
 } // namespace ppx
 
 namespace ppx::specs
@@ -136,6 +137,18 @@ struct ball_joint2D : joint2D
         float max_angle = 0.f;
     } props;
     static ball_joint2D from_instance(const ppx::ball_joint2D &bj);
+};
+
+struct prismatic_joint2D : joint2D
+{
+    glm::vec2 ganchor1{FLT_MAX};
+    glm::vec2 ganchor2{FLT_MAX};
+    bool deduce_axis = true;
+    struct properties
+    {
+        glm::vec2 axis{1.f, 0.f};
+    } props;
+    static prismatic_joint2D from_instance(const ppx::prismatic_joint2D &pj);
 };
 
 struct spring_joint2D : joint2D
