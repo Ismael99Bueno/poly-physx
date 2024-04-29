@@ -10,6 +10,13 @@
 
 namespace ppx
 {
+
+struct joint_events
+{
+    kit::event<joint2D *> on_addition;
+    kit::event<joint2D &> on_removal;
+};
+
 template <Joint2D T> class joint_container2D : public manager2D<T>
 {
   public:
@@ -24,6 +31,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         this->m_elements.push_back(joint);
         joint->add_to_bodies();
         this->events.on_addition(joint);
+        jevents.on_addition(joint);
         return joint;
     }
 
@@ -44,6 +52,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
 
         T *joint = this->m_elements[index];
         this->events.on_removal(*joint);
+        jevents.on_removal(*joint);
 
         joint->remove_from_bodies();
         if (index != this->m_elements.size() - 1)
@@ -56,9 +65,9 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         m_allocator.destroy(joint);
         return true;
     }
-    bool remove(const joint2D *joint)
+    bool remove(joint2D *joint)
     {
-        const T *tjoint = dynamic_cast<const T *>(joint);
+        T *tjoint = dynamic_cast<T *>(joint);
         if (!tjoint)
             return false;
         return remove(tjoint);
@@ -70,12 +79,15 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
     }
 
   protected:
-    using manager2D<T>::manager2D;
+    joint_container2D(world2D &world, joint_events &jevents) : manager2D<T>(world), jevents(jevents)
+    {
+    }
     kit::block_allocator<T> m_allocator;
+    joint_events &jevents;
 
     static inline std::string s_name;
 
-    void on_body_removal_validation(const body2D *body)
+    void on_body_removal_validation(body2D *body)
     {
         const auto &joints = body->joints();
         for (std::size_t i = joints.size() - 1; i < joints.size() && i >= 0; i--)

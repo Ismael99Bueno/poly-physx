@@ -13,7 +13,7 @@ template <IManager IM> bool meta_manager2D<IM>::remove(std::size_t index)
     return true;
 }
 
-template <IManager IM> bool meta_manager2D<IM>::remove(const joint2D *joint)
+template <IManager IM> bool meta_manager2D<IM>::remove(joint2D *joint)
 {
     for (const auto &manager : this->m_elements)
         if (manager->remove(joint))

@@ -8,6 +8,7 @@
 #include "ppx/joints/rotor_joint2D.hpp"
 #include "ppx/joints/motor_joint2D.hpp"
 #include "ppx/joints/ball_joint2D.hpp"
+#include "ppx/joints/prismatic_joint2D.hpp"
 #ifdef KIT_USE_YAML_CPP
 #include "ppx/serialization/serialization.hpp"
 #endif
@@ -92,7 +93,7 @@ std::vector<float> world2D::create_state_derivative() const
     return state_derivative;
 }
 
-void world2D::on_body_removal_validation(const body2D *body)
+void world2D::on_body_removal_validation(body2D *body)
 {
     joints.constraint_based.on_body_removal_validation(body);
     joints.non_constraint_based.on_body_removal_validation(body);
@@ -108,6 +109,7 @@ void world2D::add_builtin_joint_managers()
     joints.add_manager<rotor_joint2D>("Rotor joints");
     joints.add_manager<motor_joint2D>("Motor joints");
     joints.add_manager<ball_joint2D>("Ball joints");
+    joints.add_manager<prismatic_joint2D>("Prismatic joints");
 }
 
 float world2D::kinetic_energy() const

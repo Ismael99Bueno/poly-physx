@@ -3,11 +3,12 @@
 
 namespace ppx
 {
-joint_repository2D::joint_repository2D(world2D &world) : non_constraint_based(world), constraint_based(world)
+joint_repository2D::joint_repository2D(world2D &world)
+    : non_constraint_based(world, events), constraint_based(world, events)
 {
 }
 
-bool joint_repository2D::remove(const joint2D *joint)
+bool joint_repository2D::remove(joint2D *joint)
 {
     if (non_constraint_based.remove(joint))
         return true;

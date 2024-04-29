@@ -24,7 +24,7 @@ bool behaviour2D::remove(std::size_t index)
     return true;
 }
 
-bool behaviour2D::remove(const body2D *body)
+bool behaviour2D::remove(body2D *body)
 {
     for (std::size_t i = 0; i < m_bodies.size(); i++)
         if (m_bodies[i] == body)

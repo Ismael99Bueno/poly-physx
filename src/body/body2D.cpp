@@ -41,9 +41,9 @@ bool body2D::remove(const std::size_t index)
     return world.colliders.remove(m_colliders[index]);
 }
 
-bool body2D::remove(const collider2D *collider)
+bool body2D::remove(collider2D *collider)
 {
-    for (const collider2D *c : *this)
+    for (collider2D *c : *this)
         if (c == collider)
             return world.colliders.remove(collider);
     return false;

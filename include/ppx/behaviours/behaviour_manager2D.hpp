@@ -33,7 +33,7 @@ class behaviour_manager2D final : public idmanager2D<kit::scope<behaviour2D>>
   private:
     using idmanager2D<kit::scope<behaviour2D>>::idmanager2D;
 
-    void on_body_removal_validation(const body2D *body);
+    void on_body_removal_validation(body2D *body);
     void apply_forces();
 
     void process_addition(kit::scope<behaviour2D> &&bhv);

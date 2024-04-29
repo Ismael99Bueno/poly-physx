@@ -7,22 +7,15 @@ namespace ppx
 class joint_repository2D
 {
   public:
+    joint_events events;
     joint_meta_manager2D non_constraint_based;
     constraint_meta_manager2D constraint_based;
-
-    struct
-    {
-        kit::event<joint2D *> on_addition;
-        kit::event<joint2D &> on_removal;
-    } events;
 
     template <Joint2D T> T *add(const typename T::specs &spc)
     {
         auto mng = manager<T>();
         KIT_ASSERT_ERROR(mng, "There is no manager of this type in the repository")
-        T *joint = mng->add(spc);
-        events.on_addition(joint);
-        return joint;
+        return mng->add(spc);
     }
 
     template <Joint2D T> auto add_manager(const std::string &name)
@@ -61,27 +54,20 @@ class joint_repository2D
     template <Joint2D T> bool remove_manager()
     {
         if constexpr (VConstraint2D<T>)
-            return constraint_based.remove_manager<T>();
+            return constraint_based.remove<T>();
         else
-            return non_constraint_based.remove_manager<T>();
+            return non_constraint_based.remove<T>();
     }
-    bool remove(const joint2D *joint);
+    bool remove(joint2D *joint);
     template <Joint2D T> bool remove(const std::size_t index)
     {
         auto mng = manager<T>();
-        if (!mng || index >= mng->size())
-            return false;
-        T *joint = mng->at(index);
-        mng->events.on_removal(*joint);
-        return mng->remove(index);
+        return mng ? mng->remove(index) : false;
     }
-    template <Joint2D T> bool remove(const T *joint)
+    template <Joint2D T> bool remove(T *joint)
     {
         auto mng = manager<T>();
-        if (!mng || !mng->contains(joint))
-            return false;
-        mng->events.on_removal(*joint);
-        return mng->remove(joint);
+        return mng ? mng->remove(joint) : false;
     }
 
   private:

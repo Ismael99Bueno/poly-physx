@@ -19,8 +19,8 @@ class iconstraint_manager2D : public kit::identifiable<std::string>, public kit:
     virtual void warmup() = 0;
     virtual void solve_velocities() = 0;
     virtual bool solve_positions() = 0;
-    virtual void on_body_removal_validation(const body2D *body) = 0;
-    virtual bool remove(const joint2D *constraint) = 0;
+    virtual void on_body_removal_validation(body2D *body) = 0;
+    virtual bool remove(joint2D *constraint) = 0;
 
   protected:
     iconstraint_manager2D(const std::string &name);
@@ -31,19 +31,19 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
   public:
     virtual ~constraint_manager2D() = default;
 
-    constraint_manager2D(world2D &world, const std::string &name)
-        : joint_container2D<T>(world), iconstraint_manager2D(name)
+    constraint_manager2D(world2D &world, joint_events &jevents, const std::string &name)
+        : joint_container2D<T>(world, jevents), iconstraint_manager2D(name)
     {
         joint_container2D<T>::s_name = name;
     }
     using joint_container2D<T>::remove;
-    bool remove(const joint2D *constraint) override
+    bool remove(joint2D *constraint) override
     {
         return joint_container2D<T>::remove(constraint);
     }
 
   private:
-    void on_body_removal_validation(const body2D *body) override
+    void on_body_removal_validation(body2D *body) override
     {
         joint_container2D<T>::on_body_removal_validation(body);
     }

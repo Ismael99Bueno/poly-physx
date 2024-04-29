@@ -51,7 +51,7 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     collider2D *add(const ppx::specs::collider2D &spc);
 
     bool remove(std::size_t index);
-    bool remove(const collider2D *collider);
+    bool remove(collider2D *collider);
 
     bool contains(const collider2D *collider) const;
     void clear();

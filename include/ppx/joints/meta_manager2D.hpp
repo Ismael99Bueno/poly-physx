@@ -12,13 +12,18 @@ concept IManager = std::is_same_v<T, ijoint_manager2D> || std::is_same_v<T, icon
 
 template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
 {
-    using idmanager2D<kit::scope<IM>>::idmanager2D;
+    meta_manager2D(world2D &world, joint_events &jevents) : idmanager2D<kit::scope<IM>>(world), jevents(jevents)
+    {
+    }
+
+    joint_events &jevents;
+
     template <Joint2D T,
               kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
     Manager *add_manager(const std::string &name)
     {
         KIT_ASSERT_ERROR(!this->contains(Manager::name()), "There is already a manager of this type in the repository")
-        auto manager = kit::make_scope<Manager>(this->world, name);
+        auto manager = kit::make_scope<Manager>(this->world, jevents, name);
         Manager *ptr = manager.get();
         this->m_elements.push_back(std::move(manager));
         return ptr;
@@ -41,9 +46,9 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
 
     using idmanager2D<kit::scope<IM>>::remove;
     bool remove(std::size_t index) override;
-    bool remove(const joint2D *joint);
+    bool remove(joint2D *joint);
 
-    template <Joint2D T> bool remove_manager()
+    template <Joint2D T> bool remove()
     {
         using Manager = typename IM::template manager_t<T>;
         for (std::size_t i = 0; i < this->m_elements.size(); i++)
@@ -52,7 +57,7 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
         return false;
     }
 
-    void on_body_removal_validation(const body2D *body)
+    void on_body_removal_validation(body2D *body)
     {
         for (const auto &manager : this->m_elements)
             manager->on_body_removal_validation(body);
