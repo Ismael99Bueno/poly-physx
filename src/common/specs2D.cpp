@@ -9,6 +9,7 @@
 #include "ppx/joints/rotor_joint2D.hpp"
 #include "ppx/joints/motor_joint2D.hpp"
 #include "ppx/joints/ball_joint2D.hpp"
+#include "ppx/joints/prismatic_joint2D.hpp"
 
 namespace ppx::specs
 {
@@ -88,6 +89,13 @@ ball_joint2D ball_joint2D::from_instance(const ppx::ball_joint2D &bj)
 {
     ball_joint2D specs{{bj.body1()->index, bj.body2()->index}, false, bj.props};
     specs.bodies_collide = bj.bodies_collide;
+    return specs;
+}
+
+prismatic_joint2D prismatic_joint2D::from_instance(const ppx::prismatic_joint2D &pj)
+{
+    prismatic_joint2D specs{{pj.body1()->index, pj.body2()->index}, pj.ganchor1(), pj.ganchor2(), false, pj.props};
+    specs.bodies_collide = pj.bodies_collide;
     return specs;
 }
 

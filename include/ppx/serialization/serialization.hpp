@@ -8,6 +8,7 @@
 #include "ppx/joints/weld_joint2D.hpp"
 #include "ppx/joints/ball_joint2D.hpp"
 #include "ppx/joints/spring_joint2D.hpp"
+#include "ppx/joints/prismatic_joint2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
@@ -282,6 +283,33 @@ template <> struct kit::yaml::codec<ppx::ball_joint2D::specs>
         bj.deduce_angle = node["Deduce angle"].as<bool>();
         bj.props.min_angle = node["Min angle"].as<float>();
         bj.props.max_angle = node["Max angle"].as<float>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::prismatic_joint2D::specs>
+{
+    static YAML::Node encode(const ppx::prismatic_joint2D::specs &pj)
+    {
+        YAML::Node node;
+        node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(pj);
+        node["Anchor1"] = pj.ganchor1;
+        node["Anchor2"] = pj.ganchor2;
+        node["Deduce axis"] = pj.deduce_axis;
+        node["Axis"] = pj.props.axis;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::prismatic_joint2D::specs &pj)
+    {
+        if (!node.IsMap() || node.size() != 5)
+            return false;
+
+        if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], pj))
+            return false;
+        pj.ganchor1 = node["Anchor1"].as<glm::vec2>();
+        pj.ganchor2 = node["Anchor2"].as<glm::vec2>();
+        pj.deduce_axis = node["Deduce axis"].as<bool>();
+        pj.props.axis = node["Axis"].as<glm::vec2>();
         return true;
     }
 };
