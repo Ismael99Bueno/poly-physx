@@ -6,7 +6,7 @@
 
 namespace ppx
 {
-class collision_resolution2D : public worldref2D, kit::non_copyable
+class collision_resolution2D : public worldref2D, public kit::toggleable, kit::non_copyable
 {
   public:
     collision_resolution2D(world2D &world);
