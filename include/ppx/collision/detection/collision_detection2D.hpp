@@ -12,6 +12,7 @@
 #include "kit/utility/type_constraints.hpp"
 #include "kit/multithreading/mt_for_each.hpp"
 #include "kit/container/hashable_tuple.hpp"
+#include "kit/interface/toggleable.hpp"
 
 #ifndef PPX_THREAD_COUNT
 #define PPX_THREAD_COUNT 8

@@ -3,6 +3,7 @@
 #include "ppx/body/body2D.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/internal/worldref.hpp"
+#include "kit/interface/toggleable.hpp"
 
 namespace ppx
 {
