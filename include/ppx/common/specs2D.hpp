@@ -175,13 +175,21 @@ struct contraption2D
     std::vector<body2D> bodies{};
     std::vector<distance_joint2D> distance_joints{};
     std::vector<spring_joint2D> springs{};
+    std::vector<revolute_joint2D> revolute_joints{};
+    std::vector<weld_joint2D> weld_joints{};
+    std::vector<rotor_joint2D> rotor_joints{};
+    std::vector<motor_joint2D> motor_joints{};
+    std::vector<ball_joint2D> ball_joints{};
+    std::vector<prismatic_joint2D> prismatic_joints{};
+
+    void add_offset_to_joint_indices(std::size_t offset);
 
     static contraption2D rope(const glm::vec2 &start, const glm::vec2 &end, std::uint32_t segments,
-                              float spring_anchor_spacing, const body2D::properties &node_props = {},
+                              float anchor_spacing, const body2D::properties &body_props = {},
                               const spring_joint2D::properties &spring_props = {}, bool fixed_start = true,
                               bool fixed_end = true);
     static contraption2D chain(const glm::vec2 &start, const glm::vec2 &end, std::uint32_t segments,
-                               float spring_anchor_spacing, const body2D::properties &node_props = {},
+                               float anchor_spacing, const body2D::properties &body_props = {},
                                const distance_joint2D::properties &dj_props = {}, bool fixed_start = true,
                                bool fixed_end = true);
 

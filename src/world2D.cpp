@@ -28,6 +28,18 @@ void world2D::add(const specs::contraption2D &contraption)
         joints.add<spring_joint2D>(spring);
     for (const distance_joint2D::specs &joint : contraption.distance_joints)
         joints.add<distance_joint2D>(joint);
+    for (const revolute_joint2D::specs &joint : contraption.revolute_joints)
+        joints.add<revolute_joint2D>(joint);
+    for (const weld_joint2D::specs &joint : contraption.weld_joints)
+        joints.add<weld_joint2D>(joint);
+    for (const rotor_joint2D::specs &joint : contraption.rotor_joints)
+        joints.add<rotor_joint2D>(joint);
+    for (const motor_joint2D::specs &joint : contraption.motor_joints)
+        joints.add<motor_joint2D>(joint);
+    for (const ball_joint2D::specs &joint : contraption.ball_joints)
+        joints.add<ball_joint2D>(joint);
+    for (const prismatic_joint2D::specs &joint : contraption.prismatic_joints)
+        joints.add<prismatic_joint2D>(joint);
 }
 
 bool world2D::step()
