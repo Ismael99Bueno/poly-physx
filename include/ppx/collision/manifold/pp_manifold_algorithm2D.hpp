@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/common/shapes2D.hpp"
+#include "ppx/common/alias.hpp"
 #include "ppx/collision/collision2D.hpp"
 
 namespace ppx
