@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
-#include "geo/algorithm/intersection.hpp"
+#include "geo/algorithm/intersection2D.hpp"
 
 namespace ppx
 {

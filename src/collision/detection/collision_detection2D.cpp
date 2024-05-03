@@ -2,7 +2,7 @@
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/world2D.hpp"
 
-#include "geo/algorithm/intersection.hpp"
+#include "geo/algorithm/intersection2D.hpp"
 
 namespace ppx
 {

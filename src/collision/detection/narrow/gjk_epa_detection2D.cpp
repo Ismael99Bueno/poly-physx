@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
-#include "geo/algorithm/intersection.hpp"
+#include "geo/algorithm/intersection2D.hpp"
 
 namespace ppx
 {

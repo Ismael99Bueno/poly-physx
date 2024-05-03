@@ -1,7 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/body/body_manager2D.hpp"
 #include "ppx/world2D.hpp"
-#include "geo/algorithm/intersection.hpp"
+#include "geo/algorithm/intersection2D.hpp"
 
 namespace ppx
 {

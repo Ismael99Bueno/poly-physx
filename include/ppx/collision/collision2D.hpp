@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ppx/collider/collider2D.hpp"
-#include "geo/algorithm/intersection.hpp"
+#include "geo/algorithm/intersection2D.hpp"
 
 namespace ppx
 {

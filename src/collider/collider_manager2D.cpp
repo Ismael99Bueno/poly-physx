@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "geo/algorithm/intersection.hpp"
+#include "geo/algorithm/intersection2D.hpp"
 #include "ppx/collider/collider_manager2D.hpp"
 #include "ppx/body/body2D.hpp"
 #include "ppx/world2D.hpp"
