@@ -5,9 +5,9 @@
 namespace ppx
 {
 prismatic_joint2D::prismatic_joint2D(world2D &world, const specs &spc)
-    : pvconstraint2D<1, 1>(world, spc, spc.ganchor1, spc.ganchor2),
-      m_target_relangle(m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation()),
-      props(spc.props)
+    : pvconstraint2D<1, 1>(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props),
+      m_target_relangle(m_body2->ctr_state.centroid.rotation() - m_body1->ctr_state.centroid.rotation())
+
 {
     if (spc.deduce_axis)
         props.axis = spc.ganchor2 - spc.ganchor1;

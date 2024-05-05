@@ -22,11 +22,11 @@ narrow_result gjk_epa_detection2D::gjk_epa(const shape2D &sh1, const shape2D &sh
 {
     narrow_result result;
     const geo::gjk_result2D gres = geo::gjk(sh1, sh2);
-    if (!gres.intersect)
+    if (!gres)
         return result;
 
     const geo::mtv_result2D mres = geo::epa(sh1, sh2, gres.simplex, epa_threshold);
-    if (!mres.valid)
+    if (!mres)
         return result;
     result.valid = true;
     result.mtv = mres.mtv;

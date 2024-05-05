@@ -25,9 +25,9 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
 
     for (auto it = m_collisions.begin(); it != m_collisions.end();)
     {
-        if (it->second.collided)
+        if (it->second)
             it->second = generate_collision(it->second.collider1, it->second.collider2);
-        if (!it->second.collided)
+        if (!it->second)
             it = m_collisions.erase(it);
         else
             ++it;
@@ -111,7 +111,7 @@ void collision_detection2D::inherit(collision_detection2D &&coldet)
 void collision_detection2D::process_collision_st(collider2D *collider1, collider2D *collider2)
 {
     const collision2D colis = generate_collision(collider1, collider2);
-    if (colis.collided)
+    if (colis)
     {
         kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
         m_collisions.emplace(hash, colis);
@@ -123,7 +123,7 @@ void collision_detection2D::process_collision_mt(collider2D *collider1, collider
                                                  const std::size_t thread_idx)
 {
     const collision2D colis = generate_collision(collider1, collider2);
-    if (colis.collided)
+    if (colis)
     {
         kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
         m_mt_collisions[thread_idx].emplace(hash, colis);
@@ -183,7 +183,7 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
     if (!geo::intersects(circ1, circ2))
         return;
     const geo::mtv_result2D mres = geo::mtv(circ1, circ2);
-    if (!mres.valid)
+    if (!mres)
         return;
 
     fill_collision_data(collision, collider1, collider2, mres.mtv);
@@ -196,7 +196,7 @@ void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, col
     const polygon &poly = collider2->shape<polygon>();
 
     const narrow_result nres = m_cp_narrow->circle_polygon(circ, poly);
-    if (!nres.valid)
+    if (!nres)
         return;
 
     fill_collision_data(collision, collider1, collider2, nres.mtv);
@@ -209,7 +209,7 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     const polygon &poly2 = collider2->shape<polygon>();
 
     const narrow_result nres = m_pp_narrow->polygon_polygon(poly1, poly2);
-    if (!nres.valid)
+    if (!nres)
         return;
 
     fill_collision_data(collision, collider1, collider2, nres.mtv);

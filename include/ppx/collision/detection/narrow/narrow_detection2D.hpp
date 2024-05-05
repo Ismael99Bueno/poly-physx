@@ -8,6 +8,10 @@ struct narrow_result
 {
     bool valid = false;
     glm::vec2 mtv;
+    operator bool() const
+    {
+        return valid;
+    }
 };
 
 class cp_narrow_detection2D

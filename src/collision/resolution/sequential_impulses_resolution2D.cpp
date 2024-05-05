@@ -11,7 +11,7 @@ void sequential_impulses_resolution2D::update_contacts(const collision_detection
     for (const auto &pair : collisions)
     {
         const collision2D &collision = pair.second;
-        if (!collision.enabled)
+        if (!collision)
             continue;
         for (std::size_t i = 0; i < collision.manifold.size(); i++)
         {

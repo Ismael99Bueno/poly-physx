@@ -19,5 +19,10 @@ struct collision2D
 
     bool collided = false;
     mutable bool enabled = true;
+
+    operator bool() const
+    {
+        return collided && enabled;
+    }
 };
 } // namespace ppx
