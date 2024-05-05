@@ -52,8 +52,8 @@ void quad_tree_detection2D::update_quad_tree()
     bool first = true;
     for (const collider2D *collider : world.colliders)
     {
-        if (!collider->body()->is_dynamic())
-            continue;
+        // if (!collider->body()->is_dynamic())
+        //     continue;
         if (first)
         {
             aabb = collider->bounding_box();

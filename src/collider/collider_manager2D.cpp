@@ -24,8 +24,13 @@ template <typename Collider, typename C> static std::vector<Collider *> in_area(
     std::vector<Collider *> in_area;
     in_area.reserve(8);
 
+    const glm::vec2 tr = aabb.max;
+    const glm::vec2 bl = aabb.min;
+    const glm::vec2 tl = {bl.x, tr.y};
+    const glm::vec2 br = {tr.x, bl.y};
+    const polygon aabb_poly{bl, br, tr, tl};
     for (Collider *collider : elements)
-        if (geo::intersects(collider->bounding_box(), aabb))
+        if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
             in_area.emplace_back(collider);
     return in_area;
 }
@@ -42,7 +47,7 @@ std::vector<collider2D *> collider_manager2D::operator[](const aabb2D &aabb)
 template <typename Collider, typename C> static Collider *at_point(C &elements, const glm::vec2 &point)
 {
     for (Collider *collider : elements)
-        if (geo::intersects(collider->bounding_box(), point))
+        if (geo::intersects(collider->bounding_box(), point) && collider->shape().contains_point(point))
             return collider;
     return nullptr;
 }
