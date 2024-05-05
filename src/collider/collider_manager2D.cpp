@@ -1,8 +1,10 @@
 #include "ppx/internal/pch.hpp"
-#include "geo/algorithm/intersection2D.hpp"
 #include "ppx/collider/collider_manager2D.hpp"
+#include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/body/body2D.hpp"
 #include "ppx/world2D.hpp"
+#include "geo/algorithm/intersection2D.hpp"
+#include "kit/container/quad_tree.hpp"
 
 namespace ppx
 {
@@ -19,7 +21,23 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
     return collider;
 }
 
-template <typename Collider, typename C> static std::vector<Collider *> in_area(C &elements, const aabb2D &aabb)
+template <typename Collider>
+static void in_area_qt_recursive(const kit::quad_tree<collider2D *>::node &qtnode, std::vector<Collider *> &in_area,
+                                 const aabb2D &aabb, const polygon &aabb_poly)
+{
+    if (!geo::intersects(qtnode.aabb, aabb))
+        return;
+    if (qtnode.partitioned)
+        for (auto child : qtnode.children)
+            in_area_qt_recursive(*child, in_area, aabb, aabb_poly);
+    else
+        for (collider2D *collider : qtnode.elements)
+            if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
+                in_area.push_back(collider);
+}
+
+template <typename Collider, typename C>
+static std::vector<Collider *> in_area(const world2D &world, C &elements, const aabb2D &aabb)
 {
     std::vector<Collider *> in_area;
     in_area.reserve(8);
@@ -29,19 +47,26 @@ template <typename Collider, typename C> static std::vector<Collider *> in_area(
     const glm::vec2 tl = {bl.x, tr.y};
     const glm::vec2 br = {tr.x, bl.y};
     const polygon aabb_poly{bl, br, tr, tl};
-    for (Collider *collider : elements)
-        if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
-            in_area.emplace_back(collider);
+
+    const auto qtdet = world.collisions.detection<quad_tree_detection2D>();
+    if (!qtdet)
+    {
+        for (Collider *collider : elements)
+            if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
+                in_area.emplace_back(collider);
+    }
+    else
+        in_area_qt_recursive(qtdet->quad_tree().root(), in_area, aabb, aabb_poly);
     return in_area;
 }
 
 std::vector<const collider2D *> collider_manager2D::operator[](const aabb2D &aabb) const
 {
-    return in_area<const collider2D>(m_elements, aabb);
+    return in_area<const collider2D>(world, m_elements, aabb);
 }
 std::vector<collider2D *> collider_manager2D::operator[](const aabb2D &aabb)
 {
-    return in_area<collider2D>(m_elements, aabb);
+    return in_area<collider2D>(world, m_elements, aabb);
 }
 
 template <typename Collider, typename C> static Collider *at_point(C &elements, const glm::vec2 &point)
