@@ -13,6 +13,8 @@ class collider_manager2D final : public manager2D<collider2D>
   public:
     collider2D *add(body2D *parent, const collider2D::specs &spc = {});
 
+    ray2D::hit<collider2D> cast(const ray2D &ray) const;
+
     using manager2D<collider2D>::operator[];
     std::vector<const collider2D *> operator[](const aabb2D &aabb) const;
     std::vector<collider2D *> operator[](const aabb2D &aabb);

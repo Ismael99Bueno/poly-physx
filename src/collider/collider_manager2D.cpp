@@ -21,6 +21,43 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
     return collider;
 }
 
+static void cast_check(collider2D *collider, const ray2D &ray, ray2D::hit<collider2D> &closest)
+{
+    if (!geo::intersects(collider->bounding_box(), ray))
+        return;
+    ray2D::hit<collider2D> hit;
+    if (auto shape = collider->shape_if<polygon>())
+        hit = geo::intersects(*shape, ray, collider);
+    else
+        hit = geo::intersects(collider->shape<circle>(), ray, collider);
+    if (hit && hit.distance < closest.distance)
+        closest = hit;
+}
+
+static void cast_qt_recursive(const kit::quad_tree<collider2D *>::node &qtnode, const ray2D &ray,
+                              ray2D::hit<collider2D> &closest)
+{
+    if (!geo::intersects(qtnode.aabb, ray))
+        return;
+    if (qtnode.partitioned)
+        for (auto child : qtnode.children)
+            cast_qt_recursive(*child, ray, closest);
+    else
+        for (collider2D *collider : qtnode.elements)
+            cast_check(collider, ray, closest);
+}
+
+ray2D::hit<collider2D> collider_manager2D::cast(const ray2D &ray) const
+{
+    ray2D::hit<collider2D> closest;
+    closest.distance = FLT_MAX;
+    const auto qtdet = world.collisions.detection<quad_tree_detection2D>();
+    if (!qtdet)
+        for (collider2D *collider : m_elements)
+            cast_check(collider, ray, closest);
+    return closest;
+}
+
 template <typename Collider>
 static void in_area_qt_recursive(const kit::quad_tree<collider2D *>::node &qtnode, std::vector<Collider *> &in_area,
                                  const aabb2D &aabb, const polygon &aabb_poly)
