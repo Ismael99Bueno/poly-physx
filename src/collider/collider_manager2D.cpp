@@ -55,6 +55,8 @@ ray2D::hit<collider2D> collider_manager2D::cast(const ray2D &ray) const
     if (!qtdet)
         for (collider2D *collider : m_elements)
             cast_check(collider, ray, closest);
+    else
+        cast_qt_recursive(qtdet->quad_tree().root(), ray, closest);
     return closest;
 }
 
