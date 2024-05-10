@@ -28,10 +28,10 @@ glm::vec2 spring_joint2D::non_linear_displacement(const glm::vec2 &displacement)
     for (std::uint32_t term = 0; term < props.non_linear_terms; term++)
     {
         nl_term *= displacement * displacement;
-        nl_cummulative += nl_term / decay;
+        nl_cummulative += props.non_linear_contribution * nl_term / decay;
         decay *= decay;
     }
-    return nl_cummulative * props.non_linear_contribution;
+    return nl_cummulative;
 }
 
 glm::vec4 spring_joint2D::force() const
