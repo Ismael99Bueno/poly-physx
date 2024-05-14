@@ -3,7 +3,7 @@
 #include "rk/integration/state.hpp"
 #include "ppx/manager2D.hpp"
 #include "ppx/body/body2D.hpp"
-#include "kit/memory/allocator/block_allocator.hpp"
+#include "ppx/common/alias.hpp"
 
 namespace ppx
 {
@@ -25,7 +25,7 @@ class body_manager2D final : public manager2D<body2D>
   private:
     using manager2D<body2D>::manager2D;
 
-    kit::block_allocator<body2D> m_allocator{1024};
+    allocator<body2D> m_allocator;
 
     void apply_instant_and_persistent_forces();
     void reset_instant_forces();

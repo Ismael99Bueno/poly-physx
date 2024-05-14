@@ -3,8 +3,8 @@
 #include "rk/integration/state.hpp"
 #include "ppx/collider/collider2D.hpp"
 #include "ppx/manager2D.hpp"
+#include "ppx/common/alias.hpp"
 #include "kit/events/event.hpp"
-#include "kit/memory/allocator/block_allocator.hpp"
 
 namespace ppx
 {
@@ -27,6 +27,6 @@ class collider_manager2D final : public manager2D<collider2D>
 
   private:
     using manager2D<collider2D>::manager2D;
-    kit::block_allocator<collider2D> m_allocator{1024};
+    allocator<collider2D> m_allocator;
 };
 } // namespace ppx

@@ -3,10 +3,10 @@
 #include "ppx/manager2D.hpp"
 #include "ppx/joints/joint2D.hpp"
 #include "ppx/body/body2D.hpp"
+#include "ppx/common/alias.hpp"
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/indexable.hpp"
-#include "kit/memory/allocator/block_allocator.hpp"
 
 namespace ppx
 {
@@ -82,7 +82,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
     joint_container2D(world2D &world, joint_events &jevents) : manager2D<T>(world), jevents(jevents)
     {
     }
-    kit::block_allocator<T> m_allocator;
+    allocator<T> m_allocator;
     joint_events &jevents;
 
     static inline std::string s_name;
