@@ -3,7 +3,6 @@
 #include "ppx/internal/worldref.hpp"
 #include "ppx/common/specs2D.hpp"
 #include "ppx/body/state2D.hpp"
-#include "kit/memory/vector_ptr.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/indexable.hpp"

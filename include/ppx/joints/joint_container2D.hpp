@@ -6,7 +6,7 @@
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/indexable.hpp"
-#include "kit/memory/block_allocator.hpp"
+#include "kit/memory/allocator/block_allocator.hpp"
 
 namespace ppx
 {

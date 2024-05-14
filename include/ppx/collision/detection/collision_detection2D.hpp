@@ -7,7 +7,7 @@
 #include "ppx/collision/detection/narrow/narrow_detection2D.hpp"
 
 #include "ppx/internal/worldref.hpp"
-#include "kit/memory/scope.hpp"
+#include "kit/memory/ptr/scope.hpp"
 #include "kit/utility/utils.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/multithreading/mt_for_each.hpp"

@@ -4,7 +4,7 @@
 #include "ppx/collider/collider2D.hpp"
 #include "ppx/manager2D.hpp"
 #include "kit/events/event.hpp"
-#include "kit/memory/block_allocator.hpp"
+#include "kit/memory/allocator/block_allocator.hpp"
 
 namespace ppx
 {

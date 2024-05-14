@@ -3,7 +3,7 @@
 #include "rk/integration/state.hpp"
 #include "ppx/manager2D.hpp"
 #include "ppx/body/body2D.hpp"
-#include "kit/memory/block_allocator.hpp"
+#include "kit/memory/allocator/block_allocator.hpp"
 
 namespace ppx
 {

@@ -4,7 +4,7 @@
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/interface/indexable.hpp"
-#include "kit/memory/scope.hpp"
+#include "kit/memory/ptr/scope.hpp"
 #include "kit/events/event.hpp"
 #include <vector>
 

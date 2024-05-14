@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kit/memory/scope.hpp"
+#include "kit/memory/ptr/scope.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/events/event.hpp"

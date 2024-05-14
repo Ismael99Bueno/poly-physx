@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kit/memory/scope.hpp"
+#include "kit/memory/ptr/scope.hpp"
 #include "kit/utility/utils.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/utility/type_constraints.hpp"
