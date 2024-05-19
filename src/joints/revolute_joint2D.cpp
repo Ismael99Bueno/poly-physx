@@ -14,8 +14,8 @@ glm::vec2 revolute_joint2D::constraint_position() const
 }
 glm::vec2 revolute_joint2D::constraint_velocity() const
 {
-    return m_body2->ctr_state.velocity_at_centroid_offset(m_offset2) -
-           m_body1->ctr_state.velocity_at_centroid_offset(m_offset1);
+    return m_body2->proxy.ctr_state.velocity_at_centroid_offset(m_offset2) -
+           m_body1->proxy.ctr_state.velocity_at_centroid_offset(m_offset1);
 }
 
 } // namespace ppx

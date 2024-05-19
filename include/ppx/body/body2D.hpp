@@ -42,7 +42,10 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     float charge;
 
-    state2D ctr_state;
+    struct
+    {
+        state2D ctr_state;
+    } proxy;
 
     const collider2D *operator[](std::size_t index) const;
     collider2D *operator[](std::size_t index);

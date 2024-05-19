@@ -172,11 +172,12 @@ void body_manager2D::prepare_constraint_states()
 {
     for (body2D *body : m_elements)
     {
-        body->ctr_state = body->m_state;
+        body->proxy.ctr_state = body->m_state;
         if (world.semi_implicit_integration)
         {
-            body->ctr_state.velocity += body->props().dynamic.inv_mass * body->force() * world.rk_substep_timestep();
-            body->ctr_state.angular_velocity +=
+            body->proxy.ctr_state.velocity +=
+                body->props().dynamic.inv_mass * body->force() * world.rk_substep_timestep();
+            body->proxy.ctr_state.angular_velocity +=
                 body->props().dynamic.inv_inertia * body->torque() * world.rk_substep_timestep();
         }
     }

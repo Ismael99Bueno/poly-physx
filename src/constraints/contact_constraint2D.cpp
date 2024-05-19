@@ -26,8 +26,8 @@ float contact_constraint2D::constraint_position() const
 float contact_constraint2D::constraint_velocity() const
 {
     return m_restitution * m_init_ctr_vel +
-           glm::dot(m_dir, m_body2->ctr_state.velocity_at_centroid_offset(m_offset2) -
-                               m_body1->ctr_state.velocity_at_centroid_offset(m_offset1));
+           glm::dot(m_dir, m_body2->proxy.ctr_state.velocity_at_centroid_offset(m_offset2) -
+                               m_body1->proxy.ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
 void contact_constraint2D::solve_velocities()
