@@ -86,12 +86,12 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::
     if (this->m_body1->is_dynamic())
     {
         this->m_body1->meta.ctr_state.centroid.translate(dpos1);
-        this->m_body1->velocity() += dpos1 / this->world.rk_substep_timestep();
+        this->m_body1->velocity(this->m_body1->velocity() + dpos1 / this->world.rk_substep_timestep());
     }
     if (this->m_body2->is_dynamic())
     {
         this->m_body2->meta.ctr_state.centroid.translate(dpos2);
-        this->m_body2->velocity() += dpos2 / this->world.rk_substep_timestep();
+        this->m_body2->velocity(this->m_body2->velocity() + dpos2 / this->world.rk_substep_timestep());
     }
 
     if (this->m_no_anchors)
@@ -103,12 +103,12 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::
     if (this->m_body1->is_dynamic())
     {
         this->m_body1->meta.ctr_state.centroid.rotate(da1);
-        this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
+        this->m_body1->angular_velocity(this->m_body1->angular_velocity() + da1 / this->world.rk_substep_timestep());
     }
     if (this->m_body2->is_dynamic())
     {
         this->m_body2->meta.ctr_state.centroid.rotate(da2);
-        this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+        this->m_body2->angular_velocity(this->m_body2->angular_velocity() + da2 / this->world.rk_substep_timestep());
     }
 }
 
@@ -126,12 +126,12 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_angular_correction(float angc
     if (this->m_body1->is_dynamic())
     {
         this->m_body1->meta.ctr_state.centroid.rotate(da1);
-        this->m_body1->angular_velocity() += da1 / this->world.rk_substep_timestep();
+        this->m_body1->angular_velocity(this->m_body1->angular_velocity() + da1 / this->world.rk_substep_timestep());
     }
     if (this->m_body2->is_dynamic())
     {
         this->m_body2->meta.ctr_state.centroid.rotate(da2);
-        this->m_body2->angular_velocity() += da2 / this->world.rk_substep_timestep();
+        this->m_body2->angular_velocity(this->m_body2->angular_velocity() + da2 / this->world.rk_substep_timestep());
     }
 }
 
