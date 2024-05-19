@@ -41,6 +41,7 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     float persistent_torque = 0.f;
 
     float charge;
+    bool awake = true;
 
     struct
     {
