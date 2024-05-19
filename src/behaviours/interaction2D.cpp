@@ -4,7 +4,6 @@
 namespace ppx
 {
 interaction2D::interaction2D(world2D &world, const std::string &name) : behaviour2D(world, name), m_unit(world)
-
 {
 }
 float interaction2D::potential(const body2D &body, const glm::vec2 &position) const
@@ -36,6 +35,15 @@ float interaction2D::potential_energy() const
         for (std::size_t j = i + 1; j < m_bodies.size(); j++)
             pot += potential_energy_pair(*m_bodies[i], *m_bodies[j]);
     return pot;
+}
+
+bool interaction2D::remove(std::size_t index)
+{
+    if (!behaviour2D::remove(index))
+        return false;
+    for (body2D *body : m_bodies)
+        body->awake(true);
+    return true;
 }
 
 glm::vec3 interaction2D::force(const body2D &body1) const

@@ -20,7 +20,7 @@ void spring_driven_resolution2D::solve(const collision_detection2D::collision_ma
 
     KIT_PERF_SCOPE("Spring driven solve")
     for (const auto &colis : collisions)
-        if (colis.second)
+        if (colis.second.collided && colis.second.enabled)
             solve_and_apply_collision_forces(colis.second);
 }
 

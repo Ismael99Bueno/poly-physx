@@ -17,12 +17,7 @@ struct collision2D
     glm::vec2 mtv{0.f};
     manifold2D manifold;
 
-    bool collided = false;
+    bool collided = false; // in case multi step rk integrator is used
     mutable bool enabled = true;
-
-    operator bool() const
-    {
-        return collided && enabled;
-    }
 };
 } // namespace ppx

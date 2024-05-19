@@ -4,14 +4,13 @@
 
 namespace ppx
 {
-
 void sequential_impulses_resolution2D::update_contacts(const collision_detection2D::collision_map &collisions)
 {
     KIT_PERF_FUNCTION()
     for (const auto &pair : collisions)
     {
         const collision2D &collision = pair.second;
-        if (!collision)
+        if (!collision.collided || !collision.enabled)
             continue;
         for (std::size_t i = 0; i < collision.manifold.size(); i++)
         {

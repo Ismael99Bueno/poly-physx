@@ -52,23 +52,24 @@ void collision_manager2D::solve()
     if (!m_detection->enabled)
         return;
     const auto &collisions = m_detection->detect_collisions_cached();
-    if (collisions.empty())
+    if (collisions.empty() || !m_resolution->enabled)
         return;
 
-    if (enable_events)
-        for (const auto &collision : collisions)
-        {
-            collision.second.collider1->events.on_collision_pre_solve(collision.second);
-            collision.second.collider2->events.on_collision_pre_solve(collision.second);
-        }
-    if (m_resolution->enabled)
-        m_resolution->solve(collisions);
-    if (enable_events)
-        for (const auto &collision : collisions)
-        {
-            collision.second.collider1->events.on_collision_post_solve(collision.second);
-            collision.second.collider2->events.on_collision_post_solve(collision.second);
-        }
+    for (const auto &collision : collisions)
+    {
+        if (!collision.second.collided || !collision.second.enabled)
+            continue;
+        collision.second.collider1->events.on_collision_pre_solve(collision.second);
+        collision.second.collider2->events.on_collision_pre_solve(collision.second);
+    }
+    m_resolution->solve(collisions);
+    for (const auto &collision : collisions)
+    {
+        if (!collision.second.collided || !collision.second.enabled)
+            continue;
+        collision.second.collider1->events.on_collision_post_solve(collision.second);
+        collision.second.collider2->events.on_collision_post_solve(collision.second);
+    }
 }
 
 std::size_t collision_manager2D::size() const

@@ -14,8 +14,6 @@ class world2D;
 class collision_manager2D : public kit::toggleable, public worldref2D
 {
   public:
-    bool enable_events = false;
-
     auto begin() const
     {
         return m_detection->collisions().begin();

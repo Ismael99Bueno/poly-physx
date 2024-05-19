@@ -35,19 +35,16 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     body2D(world2D &world, const specs &spc = {});
 
-    glm::vec2 instant_force{0.f};
-    glm::vec2 persistent_force{0.f};
-
-    float instant_torque = 0.f;
-    float persistent_torque = 0.f;
-
-    float charge;
-
-    struct
+    struct metadata
     {
         state2D ctr_state;
         std::uint32_t steps_still = 0;
-    } proxy;
+        std::vector<joint2D *> joints;
+        std::unordered_map<body2D *, std::uint32_t> connected_bodies;
+        void connect_body(body2D *body);
+        void disconnect_body(body2D *body);
+        void remove_joint(joint2D *joint);
+    } meta; // easy read & write data
 
     const collider2D *operator[](std::size_t index) const;
     collider2D *operator[](std::size_t index);
@@ -116,11 +113,20 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     void gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint);
     void add_force(const glm::vec2 &force);
 
+    const glm::vec2 &instant_force() const;
+    const glm::vec2 &persistent_force() const;
+    float instant_torque() const;
+    float persistent_torque() const;
+
+    void instant_force(const glm::vec2 &force);
+    void persistent_force(const glm::vec2 &force);
+    void instant_torque(float torque);
+    void persistent_torque(float torque);
+
     const glm::vec2 &force() const;
     float torque() const;
 
     const properties &props() const;
-    const std::vector<joint2D *> &joints() const;
 
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
@@ -137,15 +143,16 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     const glm::vec2 &charge_centroid() const;
 
     const glm::vec2 &velocity() const;
-    glm::vec2 &velocity();
     float angular_velocity() const;
-    float &angular_velocity();
 
     glm::vec2 lvelocity_at_from_centroid(const glm::vec2 &lpoint) const;
     glm::vec2 lvelocity_at_from_position(const glm::vec2 &lpoint) const;
     glm::vec2 gvelocity_at(const glm::vec2 &gpoint) const;
     glm::vec2 velocity_at_centroid_offset(const glm::vec2 &offset) const;
     glm::vec2 velocity_at_position_offset(const glm::vec2 &offset) const;
+
+    float charge() const;
+    void charge(float charge);
 
     void centroid(const glm::vec2 &centroid);
     void gposition(const glm::vec2 &gposition);
@@ -173,9 +180,15 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     glm::vec2 m_charge_centroid;
     glm::vec2 m_force{0.f};
     float m_torque = 0.f;
+    float m_charge;
+
+    glm::vec2 m_instant_force{0.f};
+    glm::vec2 m_persistent_force{0.f};
+
+    float m_instant_torque = 0.f;
+    float m_persistent_torque = 0.f;
 
     std::vector<collider2D *> m_colliders;
-    std::vector<joint2D *> m_joints;
     btype m_type;
 
     bool m_density_update = false;
@@ -187,7 +200,6 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     void reset_dynamic_properties();
 
-    friend class joint2D;
     friend class collider_manager2D;
     friend class body_manager2D;
 };

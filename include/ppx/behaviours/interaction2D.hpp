@@ -13,6 +13,8 @@ class interaction2D : public behaviour2D
     virtual glm::vec3 force_pair(const body2D &body1, const body2D &body2) const = 0;
     glm::vec3 force(const body2D &body) const override;
 
+    bool remove(std::size_t index) override;
+
     float potential(const body2D &body, const glm::vec2 &position) const;
     float potential(const glm::vec2 &position) const;
 

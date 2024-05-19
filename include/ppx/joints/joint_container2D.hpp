@@ -55,6 +55,8 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         jevents.on_removal(*joint);
 
         joint->remove_from_bodies();
+        joint->body1()->awake(true);
+        joint->body2()->awake(true);
         if (index != this->m_elements.size() - 1)
         {
             this->m_elements[index] = this->m_elements.back();
@@ -89,7 +91,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
 
     void on_body_removal_validation(body2D *body)
     {
-        const auto &joints = body->joints();
+        const auto &joints = body->meta.joints;
         for (std::size_t i = joints.size() - 1; i < joints.size() && i >= 0; i--)
             remove(joints[i]);
     }

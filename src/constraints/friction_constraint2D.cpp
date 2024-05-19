@@ -16,8 +16,8 @@ friction_constraint2D::friction_constraint2D(world2D &world, const collision2D *
 }
 float friction_constraint2D::constraint_velocity() const
 {
-    return glm::dot(m_dir, m_body2->proxy.ctr_state.velocity_at_centroid_offset(m_offset2) -
-                               m_body1->proxy.ctr_state.velocity_at_centroid_offset(m_offset1));
+    return glm::dot(m_dir, m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
+                               m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
 void friction_constraint2D::solve_velocities()

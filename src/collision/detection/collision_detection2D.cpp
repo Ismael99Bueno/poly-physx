@@ -18,20 +18,13 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
     if (m_new_frame)
     {
         detect_collisions();
-        if (world.collisions.enable_events)
-            handle_collision_enter_exit_events();
+        handle_collision_enter_exit_events();
         return m_collisions;
     }
 
-    for (auto it = m_collisions.begin(); it != m_collisions.end();)
-    {
-        if (it->second)
-            it->second = generate_collision(it->second.collider1, it->second.collider2);
-        if (!it->second)
-            it = m_collisions.erase(it);
-        else
-            ++it;
-    }
+    for (auto &[hash, collision] : m_collisions)
+        if (collision.collided)
+            collision = generate_collision(collision.collider1, collision.collider2);
 
     return m_collisions;
 }
@@ -42,6 +35,12 @@ void collision_detection2D::handle_collision_enter_exit_events() const
     for (auto &[hash, collision] : m_collisions)
         if (!m_last_collisions.contains(hash))
         {
+            body2D *body1 = collision.collider1->body();
+            body2D *body2 = collision.collider2->body();
+            body1->awake(true);
+            body2->awake(true);
+            body1->meta.connect_body(body2);
+            body2->meta.connect_body(body1);
             collision.collider1->events.on_collision_enter(collision);
             collision.collider2->events.on_collision_enter(collision);
         }
@@ -49,6 +48,12 @@ void collision_detection2D::handle_collision_enter_exit_events() const
     for (auto &[hash, collision] : m_last_collisions)
         if (!m_collisions.contains(hash))
         {
+            body2D *body1 = collision.collider1->body();
+            body2D *body2 = collision.collider2->body();
+            body1->awake(true);
+            body2->awake(true);
+            body1->meta.disconnect_body(body2);
+            body2->meta.disconnect_body(body1);
             collision.collider1->events.on_collision_exit(collision.collider1, collision.collider2);
             collision.collider2->events.on_collision_exit(collision.collider2, collision.collider1);
         }
@@ -62,12 +67,14 @@ void collision_detection2D::remove_any_collisions_with(collider2D *collider)
         {
             collider->events.on_collision_exit(collider, it->second.collider2);
             it->second.collider2->events.on_collision_exit(it->second.collider2, collider);
+            it->second.collider2->body()->awake(true);
             it = m_collisions.erase(it);
         }
         else if (it->second.collider2 == collider)
         {
             collider->events.on_collision_exit(collider, it->second.collider1);
             it->second.collider1->events.on_collision_exit(it->second.collider1, collider);
+            it->second.collider1->body()->awake(true);
             it = m_collisions.erase(it);
         }
         else
@@ -111,7 +118,7 @@ void collision_detection2D::inherit(collision_detection2D &&coldet)
 void collision_detection2D::process_collision_st(collider2D *collider1, collider2D *collider2)
 {
     const collision2D colis = generate_collision(collider1, collider2);
-    if (colis)
+    if (colis.collided)
     {
         kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
         m_collisions.emplace(hash, colis);
@@ -123,7 +130,7 @@ void collision_detection2D::process_collision_mt(collider2D *collider1, collider
                                                  const std::size_t thread_idx)
 {
     const collision2D colis = generate_collision(collider1, collider2);
-    if (colis)
+    if (colis.collided)
     {
         kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
         m_mt_collisions[thread_idx].emplace(hash, colis);
@@ -150,6 +157,17 @@ static bool elligible_for_collision(const collider2D *collider1, const collider2
 collision2D collision_detection2D::generate_collision(collider2D *collider1, collider2D *collider2) const
 {
     collision2D collision;
+    if (!collider1->body()->awake() && !collider2->body()->awake())
+    {
+        const auto last_collision = m_last_collisions.find({collider1, collider2});
+        if (last_collision != m_last_collisions.end())
+        {
+            collision = last_collision->second;
+            collision.enabled = false;
+            return collision;
+        }
+        return collision;
+    }
     if (!elligible_for_collision(collider1, collider2))
         return collision;
     if (collider1->is_circle() && collider2->is_circle())

@@ -29,6 +29,8 @@ class joint2D : public kit::indexable, public worldref2D
     body2D *body1();
     body2D *body2();
 
+    bool awake() const;
+
     const glm::vec2 &lanchor1() const;
     const glm::vec2 &lanchor2() const;
 

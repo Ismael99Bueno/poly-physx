@@ -23,7 +23,7 @@ class behaviour2D : kit::non_copyable,
     void add(body2D *body);
     bool contains(const body2D *body) const;
 
-    bool remove(std::size_t index);
+    virtual bool remove(std::size_t index);
     bool remove(body2D *body);
 
     auto begin() const

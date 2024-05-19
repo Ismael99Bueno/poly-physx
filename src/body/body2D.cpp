@@ -8,12 +8,42 @@
 namespace ppx
 {
 body2D::body2D(world2D &world, const body2D::specs &spc)
-    : kit::indexable(world.bodies.size()), worldref2D(world), charge(spc.props.charge),
+    : kit::indexable(world.bodies.size()), worldref2D(world),
       m_state({transform2D{kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()},
                spc.position, glm::vec2(0.f), spc.velocity, spc.angular_velocity}),
-      m_charge_centroid(spc.position), m_type(spc.props.type)
+      m_charge_centroid(spc.position), m_charge(spc.props.charge), m_type(spc.props.type)
 {
     mass(spc.props.mass);
+}
+
+void body2D::metadata::connect_body(body2D *body)
+{
+    const auto it = connected_bodies.find(body);
+    if (it == connected_bodies.end())
+        connected_bodies[body] = 1;
+    else
+        it->second++;
+}
+void body2D::metadata::disconnect_body(body2D *body)
+{
+    KIT_ASSERT_ERROR(connected_bodies.contains(body), "Body not connected")
+    const auto it = connected_bodies.find(body);
+    if (it != connected_bodies.end())
+    {
+        if (it->second == 1)
+            connected_bodies.erase(it);
+        else
+            it->second--;
+    }
+}
+void body2D::metadata::remove_joint(joint2D *joint)
+{
+    for (std::size_t i = 0; i < joints.size(); i++)
+        if (joints[i] == joint)
+        {
+            joints.erase(joints.begin() + i);
+            return;
+        }
 }
 
 const collider2D *body2D::operator[](const std::size_t index) const
@@ -77,18 +107,21 @@ bool body2D::awake() const
 }
 void body2D::awake(bool awake)
 {
-    m_awake = awake;
-    if (awake)
-        proxy.steps_still = 0;
+    if (awake && m_awake)
+        return;
+    if (!awake)
+    {
+        m_awake = false;
+        return;
+    }
+    m_awake = true;
+    for (auto &elem : meta.connected_bodies)
+        elem.first->m_awake = true;
 }
 
 const body2D::properties &body2D::props() const
 {
     return m_props;
-}
-const std::vector<joint2D *> &body2D::joints() const
-{
-    return m_joints;
 }
 
 void body2D::begin_density_update()
@@ -246,14 +279,14 @@ bool body2D::is_static() const
 
 bool body2D::joint_prevents_collision(const body2D *body) const
 {
-    for (const joint2D *joint : body->m_joints)
+    for (const joint2D *joint : body->meta.joints)
         if (!joint->bodies_collide && joint->contains(this))
             return true;
     return false;
 }
 bool body2D::attached_to(const body2D *body) const
 {
-    for (const joint2D *joint : body->m_joints)
+    for (const joint2D *joint : body->meta.joints)
         if (joint->contains(this))
             return true;
     return false;
@@ -270,6 +303,7 @@ body2D::btype body2D::type() const
 void body2D::type(btype type)
 {
     m_type = type;
+    awake(true);
     reset_dynamic_properties();
 }
 
@@ -312,12 +346,53 @@ void body2D::ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint)
 }
 void body2D::gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint)
 {
-    instant_force += force;
-    instant_torque += kit::cross2D(gpoint - m_state.centroid.position(), force);
+    m_instant_force += force;
+    m_instant_torque += kit::cross2D(gpoint - m_state.centroid.position(), force);
+    awake(true);
 }
 void body2D::add_force(const glm::vec2 &force)
 {
-    instant_force += force;
+    m_instant_force += force;
+    awake(true);
+}
+
+const glm::vec2 &body2D::instant_force() const
+{
+    return m_instant_force;
+}
+const glm::vec2 &body2D::persistent_force() const
+{
+    return m_persistent_force;
+}
+float body2D::instant_torque() const
+{
+    return m_instant_torque;
+}
+float body2D::persistent_torque() const
+{
+    return m_persistent_torque;
+}
+
+void body2D::persistent_force(const glm::vec2 &force)
+{
+    m_persistent_force = force;
+    awake(true);
+}
+void body2D::instant_force(const glm::vec2 &force)
+{
+    m_instant_force = force;
+    awake(true);
+}
+
+void body2D::persistent_torque(const float torque)
+{
+    m_persistent_torque = torque;
+    awake(true);
+}
+void body2D::instant_torque(const float torque)
+{
+    m_instant_torque = torque;
+    awake(true);
 }
 
 void body2D::apply_simulation_force(const glm::vec2 &force)
@@ -346,16 +421,8 @@ const glm::vec2 &body2D::velocity() const
 {
     return m_state.velocity;
 }
-glm::vec2 &body2D::velocity()
-{
-    return m_state.velocity;
-}
-float body2D::angular_velocity() const
-{
-    return m_state.angular_velocity;
-}
 
-float &body2D::angular_velocity()
+float body2D::angular_velocity() const
 {
     return m_state.angular_velocity;
 }
@@ -363,10 +430,12 @@ float &body2D::angular_velocity()
 void body2D::velocity(const glm::vec2 &velocity)
 {
     m_state.velocity = velocity;
+    awake(true);
 }
 void body2D::angular_velocity(const float angular_velocity)
 {
     m_state.angular_velocity = angular_velocity;
+    awake(true);
 }
 
 void body2D::translate(const glm::vec2 &dpos)
@@ -434,6 +503,16 @@ glm::vec2 body2D::velocity_at_position_offset(const glm::vec2 &offset) const
     return m_state.velocity_at_position_offset(offset);
 }
 
+float body2D::charge() const
+{
+    return m_charge;
+}
+void body2D::charge(const float charge)
+{
+    m_charge = charge;
+    awake(true);
+}
+
 float body2D::rotation() const
 {
     return m_state.centroid.rotation();
@@ -485,6 +564,7 @@ void body2D::mass(const float mass)
         m_props.nondynamic.inv_inertia /= ratio;
     }
     reset_dynamic_properties();
+    awake(true);
 }
 
 void body2D::reset_dynamic_properties()

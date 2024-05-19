@@ -51,19 +51,22 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
     virtual void startup() override
     {
         for (T *constraint : this->m_elements)
-            constraint->startup();
+            if (constraint->awake())
+                constraint->startup();
     }
 
     virtual void warmup() override
     {
         for (T *constraint : this->m_elements)
-            constraint->warmup();
+            if (constraint->awake())
+                constraint->warmup();
     }
 
     virtual void solve_velocities() override
     {
         for (T *constraint : this->m_elements)
-            constraint->solve_velocities();
+            if (constraint->awake())
+                constraint->solve_velocities();
     }
 
     virtual bool solve_positions() override
@@ -72,7 +75,8 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
         {
             bool fully_adjusted = true;
             for (T *constraint : this->m_elements)
-                fully_adjusted &= constraint->solve_positions();
+                if (constraint->awake())
+                    fully_adjusted &= constraint->solve_positions();
             return fully_adjusted;
         }
         else

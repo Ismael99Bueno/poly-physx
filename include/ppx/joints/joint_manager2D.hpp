@@ -46,7 +46,8 @@ template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public
     virtual void solve() override
     {
         for (T *joint : this->m_elements)
-            joint->solve();
+            if (joint->awake())
+                joint->solve();
     }
 
 #ifdef KIT_USE_YAML_CPP

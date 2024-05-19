@@ -57,7 +57,6 @@ void world2D::pre_step_preparation()
 #endif
 
     collisions.detection()->flag_new_frame();
-    bodies.update_bodies_sleep_state();
     bodies.send_data_to_state(integrator.state);
 }
 void world2D::post_step_setup()

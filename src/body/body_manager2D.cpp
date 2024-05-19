@@ -23,23 +23,6 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     return body;
 }
 
-void body_manager2D::update_bodies_sleep_state()
-{
-    KIT_PERF_FUNCTION()
-    const float threshold = 0.1f;
-    for (body2D *body : m_elements)
-    {
-        if (std::abs(body->angular_velocity()) < threshold && glm::length2(body->velocity()) < threshold * threshold)
-        {
-            body->proxy.steps_still++;
-            if (body->proxy.steps_still >= body2D::steps_until_asleep)
-                body->awake(false);
-        }
-        else
-            body->awake(true);
-    }
-}
-
 void body_manager2D::prepare_for_next_step(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()
@@ -47,8 +30,11 @@ void body_manager2D::prepare_for_next_step(const std::vector<float> &vars_buffer
     {
         body->reset_simulation_forces();
         body->retrieve_data_from_state_variables(vars_buffer);
-        body->apply_simulation_force(body->instant_force + body->persistent_force);
-        body->apply_simulation_torque(body->instant_torque + body->persistent_torque);
+        if (body->awake())
+        {
+            body->apply_simulation_force(body->instant_force() + body->persistent_force());
+            body->apply_simulation_torque(body->instant_torque() + body->persistent_torque());
+        }
     }
 }
 
@@ -57,8 +43,9 @@ void body_manager2D::reset_instant_forces()
     KIT_PERF_FUNCTION()
     for (body2D *body : m_elements)
     {
-        body->instant_force = glm::vec2(0.f);
-        body->instant_torque = 0.f;
+        // to avoid triggering awake
+        body->m_instant_force = glm::vec2(0.f);
+        body->m_instant_torque = 0.f;
     }
 }
 
@@ -157,20 +144,19 @@ void body_manager2D::send_data_to_state(rk::state<float> &state)
     {
         const std::size_t index = 6 * body->index;
         const glm::vec2 &centroid = body->centroid();
-        glm::vec2 &velocity = body->velocity();
-        float &angular_velocity = body->angular_velocity();
         if (body->is_static())
         {
-            velocity = glm::vec2(0.f);
-            angular_velocity = 0.f;
+            body->velocity(glm::vec2(0.f));
+            body->angular_velocity(0.f);
         }
 
+        const glm::vec2 &velocity = body->velocity();
         state[index] = centroid.x;
         state[index + 1] = centroid.y;
         state[index + 2] = body->rotation();
         state[index + 3] = velocity.x;
         state[index + 4] = velocity.y;
-        state[index + 5] = angular_velocity;
+        state[index + 5] = body->angular_velocity();
     }
 }
 
@@ -185,12 +171,12 @@ void body_manager2D::prepare_constraint_states()
 {
     for (body2D *body : m_elements)
     {
-        body->proxy.ctr_state = body->m_state;
+        body->meta.ctr_state = body->m_state;
         if (world.semi_implicit_integration)
         {
-            body->proxy.ctr_state.velocity +=
+            body->meta.ctr_state.velocity +=
                 body->props().dynamic.inv_mass * body->force() * world.rk_substep_timestep();
-            body->proxy.ctr_state.angular_velocity +=
+            body->meta.ctr_state.angular_velocity +=
                 body->props().dynamic.inv_inertia * body->torque() * world.rk_substep_timestep();
         }
     }

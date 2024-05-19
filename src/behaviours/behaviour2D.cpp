@@ -28,10 +28,7 @@ bool behaviour2D::remove(body2D *body)
 {
     for (std::size_t i = 0; i < m_bodies.size(); i++)
         if (m_bodies[i] == body)
-        {
-            m_bodies.erase(m_bodies.begin() + i);
-            return true;
-        }
+            return remove(i);
     return false;
 }
 bool behaviour2D::contains(const body2D *body) const
@@ -82,7 +79,7 @@ void behaviour2D::apply_force_to_bodies()
 {
     for (const auto &body : m_bodies)
     {
-        if (!body->is_dynamic())
+        if (!body->is_dynamic() || !body->awake())
             continue;
         const glm::vec3 f = force(*body);
         body->apply_simulation_force(glm::vec2(f));
