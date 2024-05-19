@@ -27,6 +27,7 @@ class body_manager2D final : public manager2D<body2D>
 
     allocator<body2D> m_allocator;
 
+    void update_bodies_sleep_state();
     void prepare_for_next_step(const std::vector<float> &vars_buffer);
     void prepare_constraint_states();
     void send_data_to_state(rk::state<float> &state);

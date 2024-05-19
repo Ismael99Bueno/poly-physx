@@ -23,6 +23,23 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     return body;
 }
 
+void body_manager2D::update_bodies_sleep_state()
+{
+    KIT_PERF_FUNCTION()
+    const float threshold = 0.1f;
+    for (body2D *body : m_elements)
+    {
+        if (std::abs(body->angular_velocity()) < threshold && glm::length2(body->velocity()) < threshold * threshold)
+        {
+            body->proxy.steps_still++;
+            if (body->proxy.steps_still >= body2D::steps_until_asleep)
+                body->awake(false);
+        }
+        else
+            body->awake(true);
+    }
+}
+
 void body_manager2D::prepare_for_next_step(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()

@@ -18,6 +18,7 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
   public:
     using specs = specs::body2D;
     using btype = specs::btype;
+    static inline std::uint32_t steps_until_asleep = 150;
 
     struct properties
     {
@@ -41,11 +42,11 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     float persistent_torque = 0.f;
 
     float charge;
-    bool awake = true;
 
     struct
     {
         state2D ctr_state;
+        std::uint32_t steps_still = 0;
     } proxy;
 
     const collider2D *operator[](std::size_t index) const;
@@ -79,6 +80,9 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     bool empty() const;
     std::size_t size() const;
+
+    bool awake() const;
+    void awake(bool awake);
 
     bool is_dynamic() const;
     bool is_kinematic() const;
@@ -176,6 +180,7 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     bool m_density_update = false;
     bool m_spatial_update = false;
+    bool m_awake = true;
 
     void reset_simulation_forces();
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);

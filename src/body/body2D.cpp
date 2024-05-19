@@ -71,6 +71,17 @@ std::size_t body2D::size() const
     return m_colliders.size();
 }
 
+bool body2D::awake() const
+{
+    return m_awake;
+}
+void body2D::awake(bool awake)
+{
+    m_awake = awake;
+    if (awake)
+        proxy.steps_still = 0;
+}
+
 const body2D::properties &body2D::props() const
 {
     return m_props;
