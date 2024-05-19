@@ -27,14 +27,11 @@ class body_manager2D final : public manager2D<body2D>
 
     allocator<body2D> m_allocator;
 
-    void apply_instant_and_persistent_forces();
-    void reset_instant_forces();
-    void reset_simulation_forces();
-
+    void prepare_for_next_step(const std::vector<float> &vars_buffer);
+    void prepare_constraint_states();
     void send_data_to_state(rk::state<float> &state);
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
-
-    void prepare_constraint_states();
+    void reset_instant_forces();
 
     friend class world2D;
 };

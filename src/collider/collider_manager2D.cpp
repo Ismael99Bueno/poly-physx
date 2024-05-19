@@ -16,7 +16,7 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
     m_elements.push_back(collider);
 
     events.on_addition(collider);
-    KIT_INFO("Added collider with index {0}.", m_elements.size())
+    KIT_INFO("Added collider with index {0}.", m_elements.size() - 1)
 
     return collider;
 }

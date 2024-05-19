@@ -57,7 +57,6 @@ void world2D::pre_step_preparation()
 #endif
 
     collisions.detection()->flag_new_frame();
-
     bodies.send_data_to_state(integrator.state);
 }
 void world2D::post_step_setup()
@@ -155,10 +154,8 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         vars.size(), bodies.size())
 
     m_rk_substep_timestep = timestep;
-    bodies.reset_simulation_forces();
-    bodies.retrieve_data_from_state_variables(vars);
+    bodies.prepare_for_next_step(vars);
 
-    bodies.apply_instant_and_persistent_forces();
     behaviours.apply_forces();
     joints.non_constraint_based.solve();
 

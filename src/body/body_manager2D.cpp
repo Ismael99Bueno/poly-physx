@@ -23,11 +23,13 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     return body;
 }
 
-void body_manager2D::apply_instant_and_persistent_forces()
+void body_manager2D::prepare_for_next_step(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()
     for (body2D *body : m_elements)
     {
+        body->reset_simulation_forces();
+        body->retrieve_data_from_state_variables(vars_buffer);
         body->apply_simulation_force(body->instant_force + body->persistent_force);
         body->apply_simulation_torque(body->instant_torque + body->persistent_torque);
     }
@@ -41,12 +43,6 @@ void body_manager2D::reset_instant_forces()
         body->instant_force = glm::vec2(0.f);
         body->instant_torque = 0.f;
     }
-}
-void body_manager2D::reset_simulation_forces()
-{
-    KIT_PERF_FUNCTION()
-    for (body2D *body : m_elements)
-        body->reset_simulation_forces();
 }
 
 template <typename Body, typename Collider, typename C>
