@@ -84,11 +84,11 @@ void quad_tree_detection2D::update_quad_tree()
                            [](const collider2D *collider) -> const geo::aabb2D & { return collider->bounding_box(); });
 }
 
-const kit::quad_tree<collider2D *> &quad_tree_detection2D::quad_tree() const
+const ppx::quad_tree &quad_tree_detection2D::quad_tree() const
 {
     return m_quad_tree;
 }
-kit::quad_tree<collider2D *> &quad_tree_detection2D::quad_tree()
+ppx::quad_tree &quad_tree_detection2D::quad_tree()
 {
     return m_quad_tree;
 }

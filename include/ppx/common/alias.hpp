@@ -8,6 +8,7 @@
 #else
 #include "kit/memory/allocator/vanilla_allocator.hpp"
 #endif
+#include "kit/container/quad_tree.hpp"
 
 #ifndef PPX_MAX_VERTICES
 #define PPX_MAX_VERTICES 8
@@ -15,6 +16,7 @@
 
 namespace ppx
 {
+class collider2D;
 using shape2D = geo::shape2D;
 using circle = geo::circle;
 using aabb2D = geo::aabb2D;
@@ -27,4 +29,5 @@ template <typename T> using allocator = kit::block_allocator<T>;
 #else
 template <typename T> using allocator = kit::vanilla_allocator<T>;
 #endif
+using quad_tree = kit::quad_tree<collider2D *, allocator>;
 } // namespace ppx

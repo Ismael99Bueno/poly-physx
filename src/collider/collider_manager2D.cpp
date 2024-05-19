@@ -34,8 +34,7 @@ static void cast_check(collider2D *collider, const ray2D &ray, ray2D::hit<collid
         closest = hit;
 }
 
-static void cast_qt_recursive(const kit::quad_tree<collider2D *>::node &qtnode, const ray2D &ray,
-                              ray2D::hit<collider2D> &closest)
+static void cast_qt_recursive(const quad_tree::node &qtnode, const ray2D &ray, ray2D::hit<collider2D> &closest)
 {
     if (!geo::intersects(qtnode.aabb, ray))
         return;
@@ -61,8 +60,8 @@ ray2D::hit<collider2D> collider_manager2D::cast(const ray2D &ray) const
 }
 
 template <typename Collider>
-static void in_area_qt_recursive(const kit::quad_tree<collider2D *>::node &qtnode, std::vector<Collider *> &in_area,
-                                 const aabb2D &aabb, const polygon &aabb_poly)
+static void in_area_qt_recursive(const quad_tree::node &qtnode, std::vector<Collider *> &in_area, const aabb2D &aabb,
+                                 const polygon &aabb_poly)
 {
     if (!geo::intersects(qtnode.aabb, aabb))
         return;
