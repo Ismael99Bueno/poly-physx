@@ -26,6 +26,7 @@ class constraint_driven_resolution2D : public collision_resolution2D
                 pair.second->startup();
                 pair.second->collider1()->events.on_contact_pre_solve(pair.second);
                 pair.second->collider2()->events.on_contact_pre_solve(pair.second);
+                world.collisions.events.on_contact_pre_solve(pair.second);
             }
         }
         void solve_velocities()
@@ -46,6 +47,7 @@ class constraint_driven_resolution2D : public collision_resolution2D
             {
                 pair.second->collider1()->events.on_contact_post_solve(pair.second);
                 pair.second->collider2()->events.on_contact_post_solve(pair.second);
+                world.collisions.events.on_contact_post_solve(pair.second);
             }
         }
 

@@ -27,12 +27,6 @@ class collider2D final : public kit::indexable, public worldref2D, kit::non_copy
         kit::event<contact2D *> on_contact_pre_solve;
         kit::event<contact2D *> on_contact_post_solve;
         kit::event<const contact2D &> on_contact_exit;
-
-        bool empty() const
-        {
-            return on_contact_enter.empty() && on_contact_pre_solve.empty() && on_contact_post_solve.empty() &&
-                   on_contact_exit.empty();
-        }
     } events;
 
     stype shape_type() const;

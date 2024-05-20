@@ -21,6 +21,14 @@ concept ValidResolution =
 class collision_manager2D : public kit::toggleable, public worldref2D
 {
   public:
+    struct
+    {
+        kit::event<contact2D *> on_contact_enter;
+        kit::event<contact2D *> on_contact_pre_solve;
+        kit::event<contact2D *> on_contact_post_solve;
+        kit::event<const contact2D &> on_contact_exit;
+    } events;
+
     auto begin() const
     {
         return m_detection->collisions().begin();

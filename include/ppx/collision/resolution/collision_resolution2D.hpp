@@ -37,6 +37,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
                 {
                     contact->collider1()->events.on_contact_exit(*contact);
                     contact->collider2()->events.on_contact_exit(*contact);
+                    world.collisions.events.on_contact_exit(*contact);
                     contact->collider1()->body()->meta.remove_contact(contact);
                     contact->collider2()->body()->meta.remove_contact(contact);
                     allocator<T>::destroy(contact);
@@ -68,6 +69,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
                         collision.collider2->body()->meta.contacts.push_back(contact);
                         collision.collider1->events.on_contact_enter(contact);
                         collision.collider2->events.on_contact_enter(contact);
+                        world.collisions.events.on_contact_enter(contact);
                     }
                 }
             }
@@ -78,6 +80,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
                 {
                     contact->collider1()->events.on_contact_exit(*contact);
                     contact->collider2()->events.on_contact_exit(*contact);
+                    world.collisions.events.on_contact_exit(*contact);
                     contact->collider1()->body()->meta.remove_contact(contact);
                     contact->collider2()->body()->meta.remove_contact(contact);
                     allocator<T>::destroy(contact);
