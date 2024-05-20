@@ -26,7 +26,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
 
     virtual T *add(const specs &spc)
     {
-        T *joint = m_allocator.create(this->world, spc);
+        T *joint = allocator<T>::create(this->world, spc);
         joint->index = this->m_elements.size();
         this->m_elements.push_back(joint);
         joint->add_to_bodies();
@@ -64,7 +64,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         }
         this->m_elements.pop_back();
 
-        m_allocator.destroy(joint);
+        allocator<T>::destroy(joint);
         return true;
     }
     bool remove(joint2D *joint)
@@ -84,7 +84,6 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
     joint_container2D(world2D &world, joint_events &jevents) : manager2D<T>(world), jevents(jevents)
     {
     }
-    allocator<T> m_allocator;
     joint_events &jevents;
 
     static inline std::string s_name;

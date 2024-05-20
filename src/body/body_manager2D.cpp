@@ -7,7 +7,7 @@ namespace ppx
 {
 body2D *body_manager2D::add(const body2D::specs &spc)
 {
-    body2D *body = m_allocator.create(world, spc);
+    body2D *body = allocator<body2D>::create(world, spc);
     body->begin_density_update();
     for (const auto &collider_spc : spc.props.colliders)
         body->add(collider_spc);
@@ -133,7 +133,7 @@ bool body_manager2D::remove(const std::size_t index)
     state.resize(6 * m_elements.size());
 
     world.on_body_removal_validation(body);
-    m_allocator.destroy(body);
+    allocator<body2D>::destroy(body);
     return true;
 }
 

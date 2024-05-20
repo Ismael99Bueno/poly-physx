@@ -25,9 +25,26 @@ using transform2D = geo::transform2D;
 using ray2D = geo::ray2D;
 
 #ifdef PPX_ENABLE_BLOCK_ALLOCATOR
-template <typename T> using allocator = kit::block_allocator<T>;
+template <typename T> using allocator_t = kit::block_allocator<T>;
 #else
-template <typename T> using allocator = kit::vanilla_allocator<T>;
+template <typename T> using allocator_t = kit::vanilla_allocator<T>;
 #endif
-using quad_tree = kit::quad_tree<collider2D *, allocator>;
+
+template <typename T> class allocator
+{
+  public:
+    template <class... Args> static T *create(Args &&...args)
+    {
+        return s_allocator.create(std::forward<Args>(args)...);
+    }
+    static void destroy(T *ptr)
+    {
+        s_allocator.destroy(ptr);
+    }
+
+  private:
+    static inline allocator_t<T> s_allocator;
+};
+
+using quad_tree = kit::quad_tree<collider2D *, allocator_t>;
 } // namespace ppx

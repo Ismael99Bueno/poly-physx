@@ -10,7 +10,7 @@ namespace ppx
 {
 collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc)
 {
-    collider2D *collider = m_allocator.create(world, parent, spc);
+    collider2D *collider = allocator<collider2D>::create(world, parent, spc);
     parent->m_colliders.push_back(collider);
     collider->body()->full_update();
     m_elements.push_back(collider);
@@ -146,7 +146,7 @@ bool collider_manager2D::remove(const std::size_t index)
     m_elements.pop_back();
     parent->full_update();
 
-    m_allocator.destroy(collider);
+    allocator<collider2D>::destroy(collider);
     return true;
 }
 

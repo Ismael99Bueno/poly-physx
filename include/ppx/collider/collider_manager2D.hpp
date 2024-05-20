@@ -27,6 +27,5 @@ class collider_manager2D final : public manager2D<collider2D>
 
   private:
     using manager2D<collider2D>::manager2D;
-    allocator<collider2D> m_allocator;
 };
 } // namespace ppx
