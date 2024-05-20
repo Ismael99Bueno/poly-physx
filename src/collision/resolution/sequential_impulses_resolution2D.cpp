@@ -33,7 +33,7 @@ void sequential_impulses_resolution2D::update_contacts(const collision_detection
         }
 }
 
-void sequential_impulses_resolution2D::solve_collisions(const collision_detection2D::collision_map &collisions)
+void sequential_impulses_resolution2D::resolve(const collision_detection2D::collision_map &collisions)
 {
     KIT_PERF_SCOPE("Collisions solve")
     update_contacts(collisions);

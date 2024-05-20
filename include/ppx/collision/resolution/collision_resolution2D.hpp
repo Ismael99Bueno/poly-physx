@@ -13,16 +13,14 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
     collision_resolution2D(world2D &world);
     virtual ~collision_resolution2D() = default;
 
-    void solve(const collision_detection2D::collision_map &collisions);
-    virtual void solve_collisions(const collision_detection2D::collision_map &collisions) = 0;
-
-    void flag_new_step();
+    void resolve_into_contact_joints(const collision_detection2D::collision_map &collisions);
 
   private:
     virtual void on_attach()
     {
     }
 
+    virtual void resolve(const collision_detection2D::collision_map &collisions) = 0;
     friend class collision_manager2D;
 };
 } // namespace ppx

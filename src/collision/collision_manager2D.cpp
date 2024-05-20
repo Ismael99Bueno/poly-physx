@@ -53,7 +53,7 @@ void collision_manager2D::detect_and_resolve()
         return;
     const auto &collisions = m_detection->detect_collisions_cached();
     if (m_resolution->enabled)
-        m_resolution->solve(collisions);
+        m_resolution->resolve_into_contact_joints(collisions);
 }
 
 std::size_t collision_manager2D::size() const
