@@ -1,5 +1,5 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/constraints/contact_constraint2D.hpp"
+#include "ppx/collision/contacts/contact_constraint2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 

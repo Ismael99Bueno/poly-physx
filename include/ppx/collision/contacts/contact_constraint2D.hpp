@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/constraints/friction_constraint2D.hpp"
+#include "ppx/collision/contacts/friction_constraint2D.hpp"
 #include "ppx/constraints/pvconstraint2D.hpp"
 
 namespace ppx
