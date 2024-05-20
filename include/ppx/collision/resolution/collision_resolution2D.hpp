@@ -3,7 +3,10 @@
 #include "ppx/body/body2D.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/internal/worldref.hpp"
+#include "ppx/collision/contacts/contact2D.hpp"
 #include "kit/interface/toggleable.hpp"
+#include "kit/container/hashable_tuple.hpp"
+#include "kit/utility/type_constraints.hpp"
 
 namespace ppx
 {
@@ -13,14 +16,93 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
     collision_resolution2D(world2D &world);
     virtual ~collision_resolution2D() = default;
 
-    void resolve_into_contacts(const collision_detection2D::collision_map &collisions);
+    virtual void remove_any_contacts_with(const collider2D *collider) = 0;
+
+  protected:
+    template <kit::DerivedFrom<contact2D> T> struct contact_manager : public worldref2D
+    {
+        using contact_map =
+            std::unordered_map<kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>, T *>;
+
+        contact_manager(world2D &world) : worldref2D(world)
+        {
+        }
+
+        void remove_any_contacts_with(const collider2D *collider, contact_map &contacts)
+        {
+            for (auto it = contacts.begin(); it != contacts.end();)
+            {
+                T *contact = it->second;
+                const collision2D *collision = contact->collision();
+                if (collision->collider1 == collider || collision->collider2 == collider)
+                {
+                    collision->collider1->events.on_contact_exit(*contact);
+                    collision->collider2->events.on_contact_exit(*contact);
+                    collision->collider1->body()->meta.remove_contact(contact);
+                    collision->collider2->body()->meta.remove_contact(contact);
+                    allocator<T>::destroy(contact);
+                    it = contacts.erase(it);
+                }
+                else
+                    ++it;
+            }
+        }
+
+        void update(const collision_detection2D::collision_map &collisions, contact_map &contacts)
+        {
+            KIT_PERF_FUNCTION()
+            for (const auto &pair : collisions)
+            {
+                const collision2D &collision = pair.second;
+                if (!collision.collided || !collision.enabled)
+                    continue;
+                for (std::size_t i = 0; i < collision.manifold.size(); i++)
+                {
+                    const kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t> hash{
+                        collision.collider1, collision.collider2, collision.manifold[i].id.key};
+                    const auto old_contact = contacts.find(hash);
+                    if (old_contact != contacts.end())
+                        old_contact->second->update(&collision, i);
+                    else
+                    {
+                        T *contact = allocator<T>::create(world, &collision, i);
+                        contacts.emplace(hash, contact);
+                        collision.collider1->body()->meta.contacts.push_back(contact);
+                        collision.collider2->body()->meta.contacts.push_back(contact);
+                        collision.collider1->events.on_contact_enter(contact);
+                        collision.collider2->events.on_contact_enter(contact);
+                    }
+                }
+            }
+            for (auto it = contacts.begin(); it != contacts.end();)
+            {
+                T *contact = it->second;
+                if (!contact->recently_updated)
+                {
+                    const collision2D *collision = contact->collision();
+                    collision->collider1->events.on_contact_exit(*contact);
+                    collision->collider2->events.on_contact_exit(*contact);
+                    collision->collider1->body()->meta.remove_contact(contact);
+                    collision->collider2->body()->meta.remove_contact(contact);
+                    allocator<T>::destroy(contact);
+                    it = contacts.erase(it);
+                }
+                else
+                {
+                    contact->recently_updated = false;
+                    ++it;
+                }
+            }
+        }
+    };
 
   private:
     virtual void on_attach()
     {
     }
 
-    virtual void resolve(const collision_detection2D::collision_map &collisions) = 0;
+    virtual void resolve_contacts(const collision_detection2D::collision_map &collisions) = 0;
+
     friend class collision_manager2D;
 };
 } // namespace ppx

@@ -92,10 +92,9 @@ class collision_detection2D : public worldref2D, public kit::toggleable, kit::no
         return ptr;
     }
 
-    void remove_any_collisions_with(collider2D *collider);
-
     const collision_map &detect_collisions_cached();
     const collision_map &collisions() const;
+    void flag_new_step();
 
     virtual void on_attach()
     {
@@ -119,8 +118,6 @@ class collision_detection2D : public worldref2D, public kit::toggleable, kit::no
     void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
     void cp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
     void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
-
-    void handle_collision_enter_exit_events() const;
 
     kit::scope<cp_narrow_detection2D> m_cp_narrow;
     kit::scope<pp_narrow_detection2D> m_pp_narrow;

@@ -1,23 +1,21 @@
 #pragma once
 
 #include "ppx/collision/contacts/si_friction2D.hpp"
-#include "ppx/constraints/pvconstraint2D.hpp"
+#include "ppx/collision/contacts/contact_constraint2D.hpp"
 
 namespace ppx
 {
-class si_contact2D final : public pvconstraint2D<1, 0>
+class si_contact2D final : public contact_constraint2D
 {
   public:
     si_contact2D(world2D &world, const collision2D *collision, std::size_t manifold_index);
-
-    bool recently_updated = true;
 
     float constraint_position() const override;
     float constraint_velocity() const override;
 
     void startup() override;
     void solve_velocities() override;
-    void update(const collision2D *collision, std::size_t manifold_index);
+    void update(const collision2D *collision, std::size_t manifold_index) override;
 
   private:
     float m_restitution;

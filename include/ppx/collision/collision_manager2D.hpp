@@ -6,11 +6,18 @@
 #include "kit/utility/type_constraints.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/collision/resolution/collision_resolution2D.hpp"
+#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/joint_driven_resolution2D.hpp"
 #include "ppx/internal/worldref.hpp"
 
 namespace ppx
 {
 class world2D;
+
+template <typename T>
+concept ValidResolution =
+    kit::DerivedFrom<T, constraint_driven_resolution2D> || kit::DerivedFrom<T, joint_driven_resolution2D>;
+
 class collision_manager2D : public kit::toggleable, public worldref2D
 {
   public:
@@ -68,10 +75,14 @@ class collision_manager2D : public kit::toggleable, public worldref2D
         m_detection->on_attach();
         return ptr;
     }
-    template <kit::DerivedFrom<collision_resolution2D> T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
+    template <ValidResolution T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
     {
         auto colres = kit::make_scope<T>(world, std::forward<ColSolvArgs>(args)...);
         T *ptr = colres.get();
+        if constexpr (kit::DerivedFrom<T, constraint_driven_resolution2D>)
+            set_resolution_constraint_based(ptr);
+        else if constexpr (kit::DerivedFrom<T, joint_driven_resolution2D>)
+            set_resolution_non_constraint_based(ptr);
 
         m_resolution = std::move(colres);
         m_resolution->on_attach();
@@ -87,6 +98,8 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     kit::scope<collision_detection2D> m_detection;
     kit::scope<collision_resolution2D> m_resolution;
 
+    void set_resolution_constraint_based(constraint_driven_resolution2D *resolution);
+    void set_resolution_non_constraint_based(joint_driven_resolution2D *resolution);
     void detect_and_resolve();
     friend class world2D;
 };

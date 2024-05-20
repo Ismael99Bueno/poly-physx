@@ -1,24 +1,19 @@
 #pragma once
 
-#include "ppx/collision/resolution/collision_resolution2D.hpp"
+#include "ppx/collision/resolution/joint_driven_resolution2D.hpp"
+#include "ppx/collision/contacts/sd_contact2D.hpp"
 
 namespace ppx
 {
-class spring_driven_resolution2D : public collision_resolution2D
+class spring_driven_resolution2D final : public joint_driven_resolution2D
 {
-  public:
-    spring_driven_resolution2D(world2D &world, float rigidity = 2000.f, float normal_damping = 8.5f,
-                               float tangen_damping = 8.5f);
+    using joint_driven_resolution2D::joint_driven_resolution2D;
 
-    float rigidity;
-    float normal_damping;
-    float tangent_damping;
+    jd_contact_manager<sd_contact2D> m_contacts{world};
 
-  private:
-    void resolve(const collision_detection2D::collision_map &collisions) override;
+    void remove_any_contacts_with(const collider2D *collider) override;
 
-    std::tuple<glm::vec2, float, float> compute_collision_forces(const collision2D &colis,
-                                                                 std::size_t manifold_index) const;
-    void solve_and_apply_collision_forces(const collision2D &colis) const;
+    void solve() override;
+    void resolve_contacts(const collision_detection2D::collision_map &collisions) override;
 };
 } // namespace ppx

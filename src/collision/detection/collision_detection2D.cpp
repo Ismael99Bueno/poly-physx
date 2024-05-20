@@ -18,7 +18,6 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
     if (m_new_step)
     {
         detect_collisions();
-        handle_collision_enter_exit_events();
         m_new_step = false;
         return m_collisions;
     }
@@ -28,66 +27,6 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
             collision = generate_collision(collision.collider1, collision.collider2);
 
     return m_collisions;
-}
-
-void collision_detection2D::handle_collision_enter_exit_events() const
-{
-    KIT_PERF_FUNCTION()
-    for (auto &[hash, collision] : m_collisions)
-        if (!m_last_collisions.contains(hash))
-        {
-            body2D *body1 = collision.collider1->body();
-            body2D *body2 = collision.collider2->body();
-            body1->awake(true);
-            body2->awake(true);
-            body1->meta.connect_body(body2);
-            body2->meta.connect_body(body1);
-            collision.collider1->events.on_collision_enter(collision);
-            collision.collider2->events.on_collision_enter(collision);
-        }
-
-    for (auto &[hash, collision] : m_last_collisions)
-        if (!m_collisions.contains(hash))
-        {
-            body2D *body1 = collision.collider1->body();
-            body2D *body2 = collision.collider2->body();
-            body1->awake(true);
-            body2->awake(true);
-            body1->meta.disconnect_body(body2);
-            body2->meta.disconnect_body(body1);
-            collision.collider1->events.on_collision_exit(collision.collider1, collision.collider2);
-            collision.collider2->events.on_collision_exit(collision.collider2, collision.collider1);
-        }
-}
-
-void collision_detection2D::remove_any_collisions_with(collider2D *collider)
-{
-    for (auto it = m_collisions.begin(); it != m_collisions.end();)
-    {
-        if (it->second.collider1 == collider)
-        {
-            collider->events.on_collision_exit(collider, it->second.collider2);
-            it->second.collider2->events.on_collision_exit(it->second.collider2, collider);
-            it->second.collider2->body()->awake(true);
-            it = m_collisions.erase(it);
-        }
-        else if (it->second.collider2 == collider)
-        {
-            collider->events.on_collision_exit(collider, it->second.collider1);
-            it->second.collider1->events.on_collision_exit(it->second.collider1, collider);
-            it->second.collider1->body()->awake(true);
-            it = m_collisions.erase(it);
-        }
-        else
-            ++it;
-    }
-    for (auto it = m_last_collisions.begin(); it != m_last_collisions.end();)
-    {
-        if (it->second.collider1 == collider || it->second.collider2 == collider)
-            it = m_last_collisions.erase(it);
-        else
-            ++it;
-    }
 }
 
 const collision_detection2D::collision_map &collision_detection2D::collisions() const

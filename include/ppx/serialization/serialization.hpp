@@ -13,11 +13,12 @@
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
 #include "ppx/collision/detection/brute_force_detection2D.hpp"
 #include "ppx/collision/detection/sort_sweep_detection2D.hpp"
+#include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
 
 #include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
 #include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
 
-#include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
+#include "ppx/collision/contacts/sd_contact2D.hpp"
 
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
@@ -573,13 +574,11 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         if (auto colres = cm.resolution<ppx::sequential_impulses_resolution2D>())
             nres["Detection method"] = 0;
         else if (auto colres = cm.resolution<ppx::spring_driven_resolution2D>())
-        {
             nres["Detection method"] = 1;
-            nres["Rigidity"] = colres->rigidity;
-            nres["Normal damping"] = colres->normal_damping;
-            nres["Tangent damping"] = colres->tangent_damping;
-        }
 
+        nres["Rigidity"] = ppx::sd_contact2D::rigidity;
+        nres["Max normal damping"] = ppx::sd_contact2D::max_normal_damping;
+        nres["Max tangent damping"] = ppx::sd_contact2D::max_tangent_damping;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::collision_manager2D &cm)
@@ -630,10 +629,12 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             if (method == 0)
                 cm.set_resolution<ppx::sequential_impulses_resolution2D>();
             else if (method == 1)
-                cm.set_resolution<ppx::spring_driven_resolution2D>(nres["Rigidity"].as<float>(),
-                                                                   nres["Normal damping"].as<float>(),
-                                                                   nres["Tangent damping"].as<float>());
+                cm.set_resolution<ppx::spring_driven_resolution2D>();
         }
+
+        ppx::sd_contact2D::rigidity = nres["Rigidity"].as<float>();
+        ppx::sd_contact2D::max_normal_damping = nres["Max normal damping"].as<float>();
+        ppx::sd_contact2D::max_tangent_damping = nres["Max tangent damping"].as<float>();
         return true;
     }
 };

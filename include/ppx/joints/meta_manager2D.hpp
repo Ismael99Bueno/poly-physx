@@ -6,7 +6,8 @@
 
 namespace ppx
 {
-class sequential_impulses_resolution2D;
+class constraint_driven_resolution2D;
+class joint_driven_resolution2D;
 template <typename T>
 concept IManager = std::is_same_v<T, ijoint_manager2D> || std::is_same_v<T, iconstraint_manager2D>;
 
@@ -70,19 +71,20 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
 class joint_meta_manager2D final : public meta_manager2D<ijoint_manager2D>
 {
     using meta_manager2D<ijoint_manager2D>::meta_manager2D;
+    joint_driven_resolution2D *m_resolution = nullptr;
+
     void solve();
     friend class world2D;
+    friend class collision_manager2D;
 };
 
 class constraint_meta_manager2D final : public meta_manager2D<iconstraint_manager2D>
 {
     using meta_manager2D<iconstraint_manager2D>::meta_manager2D;
-    sequential_impulses_resolution2D *m_si_resolution = nullptr;
+    constraint_driven_resolution2D *m_resolution = nullptr;
 
     void solve();
-    void delegate_contacts_resolution(sequential_impulses_resolution2D *si_solver);
-
     friend class world2D;
-    friend class sequential_impulses_resolution2D;
+    friend class collision_manager2D;
 };
 } // namespace ppx

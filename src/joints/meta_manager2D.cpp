@@ -24,14 +24,11 @@ template <IManager IM> bool meta_manager2D<IM>::remove(joint2D *joint)
 void joint_meta_manager2D::solve()
 {
     KIT_PERF_SCOPE("Joints solve")
+    if (m_resolution)
+        m_resolution->solve();
     for (const auto &manager : m_elements)
         if (manager->enabled)
             manager->solve();
-}
-
-void constraint_meta_manager2D::delegate_contacts_resolution(sequential_impulses_resolution2D *si_solver)
-{
-    m_si_resolution = si_solver;
 }
 
 void constraint_meta_manager2D::solve()
@@ -39,8 +36,8 @@ void constraint_meta_manager2D::solve()
     KIT_PERF_SCOPE("Constraints solve")
     const std::size_t viters = world.constraints.velocity_iterations;
     const std::size_t piters = world.constraints.position_iterations;
-    if (m_si_resolution)
-        m_si_resolution->startup();
+    if (m_resolution)
+        m_resolution->startup();
 
     for (const auto &manager : this->m_elements)
         if (manager->enabled)
@@ -48,8 +45,8 @@ void constraint_meta_manager2D::solve()
 
     for (std::size_t i = 0; i < viters; i++)
     {
-        if (m_si_resolution)
-            m_si_resolution->solve_velocities();
+        if (m_resolution)
+            m_resolution->solve_velocities();
         for (const auto &manager : this->m_elements)
             if (manager->enabled)
                 manager->solve_velocities();
@@ -60,13 +57,11 @@ void constraint_meta_manager2D::solve()
         for (const auto &manager : this->m_elements)
             if (manager->enabled)
                 fully_adjusted &= manager->solve_positions();
-        if (m_si_resolution)
-            fully_adjusted &= m_si_resolution->solve_positions();
+        if (m_resolution)
+            fully_adjusted &= m_resolution->solve_positions();
         if (fully_adjusted)
             break;
     }
-
-    m_si_resolution = nullptr;
 }
 
 template class meta_manager2D<ijoint_manager2D>;

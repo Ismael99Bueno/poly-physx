@@ -6,11 +6,9 @@
 namespace ppx
 {
 si_contact2D::si_contact2D(world2D &world, const collision2D *collision, const std::size_t manifold_index)
-    : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
-                     collision->manifold[manifold_index].point),
-      m_restitution(collision->restitution), m_penetration(collision->manifold[manifold_index].penetration),
-      m_nmtv(glm::normalize(collision->mtv)), m_friction(world, collision, m_nmtv, manifold_index),
-      m_has_friction(!kit::approaches_zero(collision->friction))
+    : contact_constraint2D(world, collision, manifold_index), m_restitution(collision->restitution),
+      m_penetration(collision->manifold[manifold_index].penetration), m_nmtv(glm::normalize(collision->mtv)),
+      m_friction(world, collision, m_nmtv, manifold_index), m_has_friction(!kit::approaches_zero(collision->friction))
 {
     m_ganchor1 = collision->manifold[manifold_index].point;
     m_use_both_anchors = false;
@@ -25,8 +23,8 @@ float si_contact2D::constraint_position() const
 float si_contact2D::constraint_velocity() const
 {
     return m_restitution * m_init_ctr_vel +
-           glm::dot(m_dir, m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
-                               m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1));
+           glm::dot(m_dir, m_body2->meta.ctr.state.velocity_at_centroid_offset(m_offset2) -
+                               m_body1->meta.ctr.state.velocity_at_centroid_offset(m_offset1));
 }
 
 void si_contact2D::solve_velocities()
@@ -63,6 +61,7 @@ void si_contact2D::warmup()
 
 void si_contact2D::update(const collision2D *collision, const std::size_t manifold_index)
 {
+    contact2D::update(collision, manifold_index);
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
     m_body1 = collision->collider1->body();
@@ -72,7 +71,6 @@ void si_contact2D::update(const collision2D *collision, const std::size_t manifo
     m_restitution = collision->restitution;
     m_penetration = -glm::length(collision->mtv);
     m_friction.update(collision, m_lanchor1, m_nmtv);
-    recently_updated = true;
     m_is_adjusting_positions = false;
     m_pntr_correction = 0.f;
     m_has_friction = !kit::approaches_zero(collision->friction);

@@ -16,32 +16,22 @@ body2D::body2D(world2D &world, const body2D::specs &spc)
     mass(spc.props.mass);
 }
 
-void body2D::metadata::connect_body(body2D *body)
-{
-    const auto it = connected_bodies.find(body);
-    if (it == connected_bodies.end())
-        connected_bodies[body] = 1;
-    else
-        it->second++;
-}
-void body2D::metadata::disconnect_body(body2D *body)
-{
-    KIT_ASSERT_ERROR(connected_bodies.contains(body), "Body not connected")
-    const auto it = connected_bodies.find(body);
-    if (it != connected_bodies.end())
-    {
-        if (it->second == 1)
-            connected_bodies.erase(it);
-        else
-            it->second--;
-    }
-}
-void body2D::metadata::remove_joint(joint2D *joint)
+void body2D::metadata::remove_joint(const joint2D *joint)
 {
     for (std::size_t i = 0; i < joints.size(); i++)
         if (joints[i] == joint)
         {
             joints.erase(joints.begin() + i);
+            return;
+        }
+}
+
+void body2D::metadata::remove_contact(const contact2D *contact)
+{
+    for (std::size_t i = 0; i < contacts.size(); i++)
+        if (contacts[i] == contact)
+        {
+            contacts.erase(contacts.begin() + i);
             return;
         }
 }
@@ -107,16 +97,7 @@ bool body2D::awake() const
 }
 void body2D::awake(bool awake)
 {
-    if (awake && m_awake)
-        return;
-    if (!awake)
-    {
-        m_awake = false;
-        return;
-    }
-    m_awake = true;
-    for (auto &elem : meta.connected_bodies)
-        elem.first->m_awake = true;
+    m_awake = awake;
 }
 
 const body2D::properties &body2D::props() const

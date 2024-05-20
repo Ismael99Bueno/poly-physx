@@ -3,6 +3,7 @@
 #include "ppx/internal/worldref.hpp"
 #include "ppx/common/specs2D.hpp"
 #include "kit/interface/indexable.hpp"
+#include "kit/interface/toggleable.hpp"
 
 namespace ppx
 {

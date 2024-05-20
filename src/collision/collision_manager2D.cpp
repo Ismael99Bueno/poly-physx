@@ -9,6 +9,8 @@
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 
+#include "ppx/world2D.hpp"
+
 namespace ppx
 {
 collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
@@ -46,6 +48,18 @@ bool collision_manager2D::contains(const collider2D *collider1, const collider2D
     return m_detection->collisions().contains({collider1, collider2});
 }
 
+void collision_manager2D::set_resolution_constraint_based(constraint_driven_resolution2D *resolution)
+{
+    world.joints.constraint_based.m_resolution = resolution;
+    world.joints.non_constraint_based.m_resolution = nullptr;
+}
+
+void collision_manager2D::set_resolution_non_constraint_based(joint_driven_resolution2D *resolution)
+{
+    world.joints.non_constraint_based.m_resolution = resolution;
+    world.joints.constraint_based.m_resolution = nullptr;
+}
+
 void collision_manager2D::detect_and_resolve()
 {
     KIT_PERF_SCOPE("Collision solve")
@@ -53,7 +67,7 @@ void collision_manager2D::detect_and_resolve()
         return;
     const auto &collisions = m_detection->detect_collisions_cached();
     if (m_resolution->enabled)
-        m_resolution->resolve_into_contacts(collisions);
+        m_resolution->resolve_contacts(collisions);
 }
 
 std::size_t collision_manager2D::size() const

@@ -30,8 +30,8 @@ float distance_joint2D::constraint_position() const
 }
 float distance_joint2D::constraint_velocity() const
 {
-    return glm::dot(m_dir, m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
-                               m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1));
+    return glm::dot(m_dir, m_body2->meta.ctr.state.velocity_at_centroid_offset(m_offset2) -
+                               m_body1->meta.ctr.state.velocity_at_centroid_offset(m_offset1));
 }
 
 glm::vec2 distance_joint2D::direction() const

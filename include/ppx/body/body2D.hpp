@@ -13,12 +13,12 @@ namespace ppx
 class world2D;
 class collider2D;
 class joint2D;
+class contact2D;
 class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
     using specs = specs::body2D;
     using btype = specs::btype;
-    static inline std::uint32_t steps_until_asleep = 150;
 
     struct properties
     {
@@ -40,11 +40,16 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
         struct
         {
             state2D state;
-        } constraint;
+        } ctr;
         struct
         {
             float time_still = 0.f;
         } islands;
+        std::vector<joint2D *> joints; // add remove method
+        std::vector<contact2D *> contacts;
+
+        void remove_joint(const joint2D *joint);
+        void remove_contact(const contact2D *contact);
     } meta; // easy read & write data
 
     const collider2D *operator[](std::size_t index) const;

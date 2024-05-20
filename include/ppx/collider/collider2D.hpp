@@ -8,7 +8,7 @@
 
 namespace ppx
 {
-struct collision2D;
+class contact2D;
 class collider2D final : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
@@ -23,15 +23,15 @@ class collider2D final : public kit::indexable, public worldref2D, kit::non_copy
 
     struct
     {
-        kit::event<const collision2D &> on_collision_enter;
-        kit::event<const collision2D &> on_collision_pre_solve;
-        kit::event<const collision2D &> on_collision_post_solve;
-        kit::event<collider2D *, collider2D *> on_collision_exit;
+        kit::event<contact2D *> on_contact_enter;
+        kit::event<contact2D *> on_contact_pre_solve;
+        kit::event<contact2D *> on_contact_post_solve;
+        kit::event<const contact2D &> on_contact_exit;
 
         bool empty() const
         {
-            return on_collision_enter.empty() && on_collision_pre_solve.empty() && on_collision_post_solve.empty() &&
-                   on_collision_exit.empty();
+            return on_contact_enter.empty() && on_contact_pre_solve.empty() && on_contact_post_solve.empty() &&
+                   on_contact_exit.empty();
         }
     } events;
 
