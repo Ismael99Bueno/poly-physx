@@ -96,7 +96,6 @@ class collision_detection2D : public worldref2D, public kit::toggleable, kit::no
 
     const collision_map &detect_collisions_cached();
     const collision_map &collisions() const;
-    void flag_new_frame();
 
     virtual void on_attach()
     {
@@ -114,7 +113,7 @@ class collision_detection2D : public worldref2D, public kit::toggleable, kit::no
     collision_map m_last_collisions;
     std::array<collision_map, PPX_THREAD_COUNT> m_mt_collisions;
 
-    bool m_new_frame = true;
+    bool m_new_step = true;
 
     collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
     void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;

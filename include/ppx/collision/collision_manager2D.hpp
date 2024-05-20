@@ -87,7 +87,7 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     kit::scope<collision_detection2D> m_detection;
     kit::scope<collision_resolution2D> m_resolution;
 
-    void solve();
+    void detect_and_resolve();
     friend class world2D;
 };
 } // namespace ppx

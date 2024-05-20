@@ -46,30 +46,14 @@ bool collision_manager2D::contains(const collider2D *collider1, const collider2D
     return m_detection->collisions().contains({collider1, collider2});
 }
 
-void collision_manager2D::solve()
+void collision_manager2D::detect_and_resolve()
 {
     KIT_PERF_SCOPE("Collision solve")
     if (!m_detection->enabled)
         return;
     const auto &collisions = m_detection->detect_collisions_cached();
-    if (collisions.empty() || !m_resolution->enabled)
-        return;
-
-    for (const auto &collision : collisions)
-    {
-        if (!collision.second.collided || !collision.second.enabled)
-            continue;
-        collision.second.collider1->events.on_collision_pre_solve(collision.second);
-        collision.second.collider2->events.on_collision_pre_solve(collision.second);
-    }
-    m_resolution->solve(collisions);
-    for (const auto &collision : collisions)
-    {
-        if (!collision.second.collided || !collision.second.enabled)
-            continue;
-        collision.second.collider1->events.on_collision_post_solve(collision.second);
-        collision.second.collider2->events.on_collision_post_solve(collision.second);
-    }
+    if (m_resolution->enabled)
+        m_resolution->solve(collisions);
 }
 
 std::size_t collision_manager2D::size() const

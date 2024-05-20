@@ -16,7 +16,7 @@ concept Joint2D = requires() {
 };
 
 class body2D;
-class joint2D : public kit::indexable, public worldref2D
+class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 {
   public:
     virtual ~joint2D() = default;

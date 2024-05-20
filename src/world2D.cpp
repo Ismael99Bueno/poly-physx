@@ -56,7 +56,8 @@ void world2D::pre_step_preparation()
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 
-    collisions.detection()->flag_new_frame();
+    collisions.detection()->flag_new_step();
+    collisions.resolution()->flag_new_step();
     bodies.send_data_to_state(integrator.state);
 }
 void world2D::post_step_setup()
@@ -154,13 +155,13 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         vars.size(), bodies.size())
 
     m_rk_substep_timestep = timestep;
-    bodies.prepare_for_next_step(vars);
+    bodies.prepare_for_next_substep(vars);
 
     behaviours.apply_forces();
     joints.non_constraint_based.solve();
 
     if (collisions.enabled)
-        collisions.solve();
+        collisions.detect_and_resolve();
 
     bodies.prepare_constraint_states();
     joints.constraint_based.solve();

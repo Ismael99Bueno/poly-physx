@@ -15,7 +15,7 @@ class spring_driven_resolution2D : public collision_resolution2D
     float tangent_damping;
 
   private:
-    void solve(const collision_detection2D::collision_map &collisions) override;
+    void solve_collisions(const collision_detection2D::collision_map &collisions) override;
 
     std::tuple<glm::vec2, float, float> compute_collision_forces(const collision2D &colis,
                                                                  std::size_t manifold_index) const;

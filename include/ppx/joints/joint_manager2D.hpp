@@ -1,12 +1,14 @@
 #pragma once
 
 #include "ppx/joints/joint_container2D.hpp"
+#include "kit/interface/toggleable.hpp"
+#include "kit/serialization/yaml/codec.hpp"
 
 namespace ppx
 {
 template <Joint2D T> class joint_manager2D;
 
-class ijoint_manager2D : public kit::identifiable<std::string>, public kit::yaml::codecable
+class ijoint_manager2D : public kit::identifiable<std::string>, public kit::toggleable, public kit::yaml::codecable
 {
   public:
     template <Joint2D T> using manager_t = joint_manager2D<T>;
@@ -46,7 +48,7 @@ template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public
     virtual void solve() override
     {
         for (T *joint : this->m_elements)
-            if (joint->awake())
+            if (joint->enabled)
                 joint->solve();
     }
 

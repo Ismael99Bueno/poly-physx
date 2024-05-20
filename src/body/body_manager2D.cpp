@@ -23,7 +23,7 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     return body;
 }
 
-void body_manager2D::prepare_for_next_step(const std::vector<float> &vars_buffer)
+void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_FUNCTION()
     for (body2D *body : m_elements)

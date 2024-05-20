@@ -16,7 +16,7 @@ class sequential_impulses_resolution2D : public collision_resolution2D
 
   private:
     void update_contacts(const collision_detection2D::collision_map &collisions);
-    void solve(const collision_detection2D::collision_map &collisions) override;
+    void solve_collisions(const collision_detection2D::collision_map &collisions) override;
 
     void startup();
     void solve_velocities();

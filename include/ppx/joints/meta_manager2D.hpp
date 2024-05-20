@@ -77,7 +77,7 @@ class joint_meta_manager2D final : public meta_manager2D<ijoint_manager2D>
 class constraint_meta_manager2D final : public meta_manager2D<iconstraint_manager2D>
 {
     using meta_manager2D<iconstraint_manager2D>::meta_manager2D;
-    sequential_impulses_resolution2D *m_si_solver = nullptr;
+    sequential_impulses_resolution2D *m_si_resolution = nullptr;
 
     void solve();
     void delegate_contacts_resolution(sequential_impulses_resolution2D *si_solver);
