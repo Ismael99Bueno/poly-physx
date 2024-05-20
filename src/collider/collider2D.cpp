@@ -33,6 +33,18 @@ body2D *collider2D::body()
     return m_body;
 }
 
+void collider2D::metadata::remove_contact(const contact2D *contact)
+{
+    for (std::size_t i = 0; i < contacts.size(); ++i)
+    {
+        if (contacts[i] == contact)
+        {
+            contacts.erase(contacts.begin() + i);
+            return;
+        }
+    }
+}
+
 float collider2D::density() const
 {
     return m_density;
@@ -164,6 +176,11 @@ void collider2D::origin(const glm::vec2 &origin)
 {
     mutable_shape().origin(origin);
     m_body->full_update();
+}
+
+const std::vector<contact2D *> &collider2D::contacts() const
+{
+    return meta.contacts;
 }
 
 const shape2D &collider2D::shape() const

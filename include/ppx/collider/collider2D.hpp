@@ -26,8 +26,14 @@ class collider2D final : public kit::indexable, public worldref2D, kit::non_copy
         kit::event<contact2D *> on_contact_enter;
         kit::event<contact2D *> on_contact_pre_solve;
         kit::event<contact2D *> on_contact_post_solve;
-        kit::event<const contact2D &> on_contact_exit;
+        kit::event<contact2D &> on_contact_exit;
     } events;
+
+    struct metadata
+    {
+        std::vector<contact2D *> contacts;
+        void remove_contact(const contact2D *contact);
+    } meta;
 
     stype shape_type() const;
 
@@ -72,6 +78,8 @@ class collider2D final : public kit::indexable, public worldref2D, kit::non_copy
 
     void lrotation(float lrotation);
     void origin(const glm::vec2 &origin);
+
+    const std::vector<contact2D *> &contacts() const;
 
     const shape2D &shape() const;
     template <kit::DerivedFrom<shape2D> T> const T &shape() const

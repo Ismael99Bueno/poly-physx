@@ -239,6 +239,15 @@ bool body2D::spatial_updating() const
     return m_spatial_update;
 }
 
+const std::vector<joint2D *> &body2D::joints() const
+{
+    return meta.joints;
+}
+const std::vector<contact2D *> &body2D::contacts() const
+{
+    return meta.contacts;
+}
+
 void body2D::reset_simulation_forces()
 {
     m_force = glm::vec2(0.f);
