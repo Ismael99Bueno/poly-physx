@@ -1,14 +1,14 @@
 #pragma once
 
-#include "ppx/collision/contacts/friction_constraint2D.hpp"
+#include "ppx/collision/contacts/si_friction2D.hpp"
 #include "ppx/constraints/pvconstraint2D.hpp"
 
 namespace ppx
 {
-class contact_constraint2D final : public pvconstraint2D<1, 0>
+class si_contact2D final : public pvconstraint2D<1, 0>
 {
   public:
-    contact_constraint2D(world2D &world, const collision2D *collision, std::size_t manifold_index);
+    si_contact2D(world2D &world, const collision2D *collision, std::size_t manifold_index);
 
     bool recently_updated = true;
 
@@ -24,7 +24,7 @@ class contact_constraint2D final : public pvconstraint2D<1, 0>
     float m_penetration;
     float m_pntr_correction = 0.f;
     glm::vec2 m_nmtv;
-    friction_constraint2D m_friction;
+    si_friction2D m_friction;
 
     bool m_has_friction;
     bool m_is_adjusting_positions = false;

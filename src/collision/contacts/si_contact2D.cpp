@@ -1,12 +1,11 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/contacts/contact_constraint2D.hpp"
+#include "ppx/collision/contacts/si_contact2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
 namespace ppx
 {
-contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *collision,
-                                           const std::size_t manifold_index)
+si_contact2D::si_contact2D(world2D &world, const collision2D *collision, const std::size_t manifold_index)
     : pvconstraint2D(world, collision->collider1->body(), collision->collider2->body(),
                      collision->manifold[manifold_index].point),
       m_restitution(collision->restitution), m_penetration(collision->manifold[manifold_index].penetration),
@@ -19,25 +18,25 @@ contact_constraint2D::contact_constraint2D(world2D &world, const collision2D *co
         m_init_ctr_vel = glm::dot(m_nmtv, m_body2->gvelocity_at(m_ganchor1) - m_body1->gvelocity_at(m_ganchor1));
 }
 
-float contact_constraint2D::constraint_position() const
+float si_contact2D::constraint_position() const
 {
     return m_penetration + m_pntr_correction;
 }
-float contact_constraint2D::constraint_velocity() const
+float si_contact2D::constraint_velocity() const
 {
     return m_restitution * m_init_ctr_vel +
            glm::dot(m_dir, m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
                                m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
-void contact_constraint2D::solve_velocities()
+void si_contact2D::solve_velocities()
 {
     if (m_has_friction)
         m_friction.solve_velocities();
     solve_velocities_clamped(0.f, FLT_MAX);
 }
 
-void contact_constraint2D::startup()
+void si_contact2D::startup()
 {
     m_friction.max_impulse = m_cumimpulse;
     pvconstraint2D<1, 0>::startup();
@@ -46,7 +45,7 @@ void contact_constraint2D::startup()
         m_friction.startup();
 }
 
-void contact_constraint2D::update_position_data()
+void si_contact2D::update_position_data()
 {
     m_is_adjusting_positions = true;
     const glm::vec2 g1 = m_ganchor1;
@@ -55,14 +54,14 @@ void contact_constraint2D::update_position_data()
     m_pntr_correction = std::abs(glm::dot(m_dir, dpos1));
 }
 
-void contact_constraint2D::warmup()
+void si_contact2D::warmup()
 {
     pvconstraint2D::warmup();
     if (m_has_friction)
         m_friction.warmup();
 }
 
-void contact_constraint2D::update(const collision2D *collision, const std::size_t manifold_index)
+void si_contact2D::update(const collision2D *collision, const std::size_t manifold_index)
 {
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
@@ -79,7 +78,7 @@ void contact_constraint2D::update(const collision2D *collision, const std::size_
     m_has_friction = !kit::approaches_zero(collision->friction);
 }
 
-glm::vec2 contact_constraint2D::direction() const
+glm::vec2 si_contact2D::direction() const
 {
     return m_nmtv;
 }

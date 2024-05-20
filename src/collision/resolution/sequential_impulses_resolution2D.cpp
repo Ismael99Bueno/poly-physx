@@ -20,7 +20,7 @@ void sequential_impulses_resolution2D::update_contacts(const collision_detection
             if (old_contact != m_contacts.end())
                 old_contact->second.update(&collision, i);
             else
-                m_contacts.emplace(hash, contact_constraint2D(world, &collision, i));
+                m_contacts.emplace(hash, si_contact2D(world, &collision, i));
         }
     }
     for (auto it = m_contacts.begin(); it != m_contacts.end();)
