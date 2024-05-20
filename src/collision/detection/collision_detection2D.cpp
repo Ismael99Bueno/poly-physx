@@ -22,10 +22,14 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
         return m_collisions;
     }
 
-    for (auto &[hash, collision] : m_collisions)
-        if (collision.collided)
-            collision = generate_collision(collision.collider1, collision.collider2);
-
+    for (auto it = m_collisions.begin(); it != m_collisions.end();)
+    {
+        it->second = generate_collision(it->second.collider1, it->second.collider2);
+        if (!it->second.collided)
+            it = m_collisions.erase(it);
+        else
+            ++it;
+    }
     return m_collisions;
 }
 

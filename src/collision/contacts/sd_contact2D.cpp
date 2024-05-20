@@ -23,8 +23,8 @@ void sd_contact2D::update(const collision2D *collision, const std::size_t manifo
 
 void sd_contact2D::solve()
 {
-    body2D *body1 = m_collision->collider1->body();
-    body2D *body2 = m_collision->collider2->body();
+    body2D *body1 = m_collider1->body();
+    body2D *body2 = m_collider2->body();
 
     const glm::vec2 &touch1 = m_collision->manifold[m_manifold_index].point;
     const glm::vec2 touch2 = m_collision->manifold[m_manifold_index].point - m_collision->mtv;

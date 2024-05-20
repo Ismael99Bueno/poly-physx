@@ -64,8 +64,8 @@ void si_contact2D::update(const collision2D *collision, const std::size_t manifo
     contact2D::update(collision, manifold_index);
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
-    m_body1 = collision->collider1->body();
-    m_body2 = collision->collider2->body();
+    m_body1 = m_collider1->body();
+    m_body2 = m_collider2->body();
     m_lanchor1 = m_body1->local_position_point(collision->manifold[manifold_index].point); // lanchor2 is not used
     m_nmtv = glm::normalize(collision->mtv);
     m_restitution = collision->restitution;

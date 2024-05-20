@@ -33,13 +33,12 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
             for (auto it = contacts.begin(); it != contacts.end();)
             {
                 T *contact = it->second;
-                const collision2D *collision = contact->collision();
-                if (collision->collider1 == collider || collision->collider2 == collider)
+                if (contact->collider1() == collider || contact->collider2() == collider)
                 {
-                    collision->collider1->events.on_contact_exit(*contact);
-                    collision->collider2->events.on_contact_exit(*contact);
-                    collision->collider1->body()->meta.remove_contact(contact);
-                    collision->collider2->body()->meta.remove_contact(contact);
+                    contact->collider1()->events.on_contact_exit(*contact);
+                    contact->collider2()->events.on_contact_exit(*contact);
+                    contact->collider1()->body()->meta.remove_contact(contact);
+                    contact->collider2()->body()->meta.remove_contact(contact);
                     allocator<T>::destroy(contact);
                     it = contacts.erase(it);
                 }
@@ -54,8 +53,6 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
             for (const auto &pair : collisions)
             {
                 const collision2D &collision = pair.second;
-                if (!collision.collided || !collision.enabled)
-                    continue;
                 for (std::size_t i = 0; i < collision.manifold.size(); i++)
                 {
                     const kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t> hash{
@@ -79,11 +76,10 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
                 T *contact = it->second;
                 if (!contact->recently_updated)
                 {
-                    const collision2D *collision = contact->collision();
-                    collision->collider1->events.on_contact_exit(*contact);
-                    collision->collider2->events.on_contact_exit(*contact);
-                    collision->collider1->body()->meta.remove_contact(contact);
-                    collision->collider2->body()->meta.remove_contact(contact);
+                    contact->collider1()->events.on_contact_exit(*contact);
+                    contact->collider2()->events.on_contact_exit(*contact);
+                    contact->collider1()->body()->meta.remove_contact(contact);
+                    contact->collider2()->body()->meta.remove_contact(contact);
                     allocator<T>::destroy(contact);
                     it = contacts.erase(it);
                 }

@@ -24,9 +24,8 @@ class constraint_driven_resolution2D : public collision_resolution2D
             for (auto &pair : contacts)
             {
                 pair.second->startup();
-                const collision2D *collision = pair.second->collision();
-                collision->collider1->events.on_contact_pre_solve(pair.second);
-                collision->collider2->events.on_contact_pre_solve(pair.second);
+                pair.second->collider1()->events.on_contact_pre_solve(pair.second);
+                pair.second->collider2()->events.on_contact_pre_solve(pair.second);
             }
         }
         void solve_velocities()
@@ -45,9 +44,8 @@ class constraint_driven_resolution2D : public collision_resolution2D
         {
             for (auto &pair : contacts)
             {
-                const collision2D *collision = pair.second->collision();
-                collision->collider1->events.on_contact_post_solve(pair.second);
-                collision->collider2->events.on_contact_post_solve(pair.second);
+                pair.second->collider1()->events.on_contact_post_solve(pair.second);
+                pair.second->collider2()->events.on_contact_post_solve(pair.second);
             }
         }
 
