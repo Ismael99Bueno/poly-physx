@@ -13,7 +13,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
     collision_resolution2D(world2D &world);
     virtual ~collision_resolution2D() = default;
 
-    void resolve_into_contact_joints(const collision_detection2D::collision_map &collisions);
+    void resolve_into_contacts(const collision_detection2D::collision_map &collisions);
 
   private:
     virtual void on_attach()

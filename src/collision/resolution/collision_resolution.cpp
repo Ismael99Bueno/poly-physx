@@ -7,7 +7,7 @@ collision_resolution2D::collision_resolution2D(world2D &world) : worldref2D(worl
 {
 }
 
-void collision_resolution2D::resolve_into_contact_joints(const collision_detection2D::collision_map &collisions)
+void collision_resolution2D::resolve_into_contacts(const collision_detection2D::collision_map &collisions)
 {
     for (const auto &collision : collisions)
     {

@@ -37,13 +37,14 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     struct metadata
     {
-        state2D ctr_state;
-        std::uint32_t steps_still = 0;
-        std::vector<joint2D *> joints;
-        std::unordered_map<body2D *, std::uint32_t> connected_bodies;
-        void connect_body(body2D *body);
-        void disconnect_body(body2D *body);
-        void remove_joint(joint2D *joint);
+        struct
+        {
+            state2D state;
+        } constraint;
+        struct
+        {
+            float time_still = 0.f;
+        } islands;
     } meta; // easy read & write data
 
     const collider2D *operator[](std::size_t index) const;
