@@ -107,7 +107,6 @@ collision2D collision_detection2D::generate_collision(collider2D *collider1, col
         if (last_collision != m_last_collisions.end())
         {
             collision = last_collision->second;
-            collision.enabled = false;
             return collision;
         }
         return collision;
