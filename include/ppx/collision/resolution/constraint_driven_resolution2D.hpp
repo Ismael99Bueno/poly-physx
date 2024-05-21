@@ -18,10 +18,9 @@ class constraint_driven_resolution2D : public collision_resolution2D
     template <kit::DerivedFrom<contact_constraint2D> T> struct cd_contact_manager : contact_manager<T>
     {
         using contact_manager<T>::contact_manager;
-        contact_manager<T>::contact_map contacts;
         void startup()
         {
-            for (auto &pair : contacts)
+            for (auto &pair : this->contacts)
             {
                 pair.second->startup();
                 pair.second->collider1()->events.on_contact_pre_solve(pair.second);
@@ -31,33 +30,24 @@ class constraint_driven_resolution2D : public collision_resolution2D
         }
         void solve_velocities()
         {
-            for (auto &pair : contacts)
+            for (auto &pair : this->contacts)
                 pair.second->solve_velocities();
         }
         bool solve_positions()
         {
             bool fully_adjusted = true;
-            for (auto &pair : contacts)
+            for (auto &pair : this->contacts)
                 fully_adjusted &= pair.second->solve_positions();
             return fully_adjusted;
         }
         void on_post_solve()
         {
-            for (auto &pair : contacts)
+            for (auto &pair : this->contacts)
             {
                 pair.second->collider1()->events.on_contact_post_solve(pair.second);
                 pair.second->collider2()->events.on_contact_post_solve(pair.second);
                 global_on_contact_post_solve(world, pair.second);
             }
-        }
-
-        void update(const collision_detection2D::collision_map &collisions)
-        {
-            contact_manager<T>::update(collisions, contacts);
-        }
-        void remove_any_contacts_with(const collider2D *collider)
-        {
-            contact_manager<T>::remove_any_contacts_with(collider, contacts);
         }
     };
 

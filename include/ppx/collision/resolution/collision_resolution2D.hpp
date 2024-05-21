@@ -21,28 +21,22 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
   protected:
     template <kit::DerivedFrom<contact2D> T> struct contact_manager : public worldref2D
     {
-        using contact_map =
-            std::unordered_map<kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>, T *>;
+        using key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
+        using contact_map = std::unordered_map<key, T *>;
+        contact_map contacts;
 
         contact_manager(world2D &world) : worldref2D(world)
         {
         }
 
-        void remove_any_contacts_with(const collider2D *collider, contact_map &contacts)
+        void remove_any_contacts_with(const collider2D *collider)
         {
             for (auto it = contacts.begin(); it != contacts.end();)
             {
                 T *contact = it->second;
                 if (contact->collider1() == collider || contact->collider2() == collider)
                 {
-                    contact->collider1()->events.on_contact_exit(*contact);
-                    contact->collider2()->events.on_contact_exit(*contact);
-                    global_on_contact_exit(world, *contact);
-                    contact->collider1()->body()->meta.remove_contact(contact);
-                    contact->collider2()->body()->meta.remove_contact(contact);
-                    contact->collider1()->meta.remove_contact(contact);
-                    contact->collider2()->meta.remove_contact(contact);
-                    allocator<T>::destroy(contact);
+                    destroy_contact(contact);
                     it = contacts.erase(it);
                 }
                 else
@@ -50,7 +44,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
             }
         }
 
-        void update(const collision_detection2D::collision_map &collisions, contact_map &contacts)
+        void update(const collision_detection2D::collision_map &collisions)
         {
             KIT_PERF_FUNCTION()
             for (const auto &pair : collisions)
@@ -58,23 +52,12 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
                 const collision2D &collision = pair.second;
                 for (std::size_t i = 0; i < collision.manifold.size(); i++)
                 {
-                    const kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t> hash{
-                        collision.collider1, collision.collider2, collision.manifold[i].id.key};
+                    const key hash{collision.collider1, collision.collider2, collision.manifold[i].id.key};
                     const auto old_contact = contacts.find(hash);
                     if (old_contact != contacts.end())
                         old_contact->second->update(&collision, i);
                     else
-                    {
-                        T *contact = allocator<T>::create(world, &collision, i);
-                        contacts.emplace(hash, contact);
-                        collision.collider1->body()->meta.contacts.push_back(contact);
-                        collision.collider2->body()->meta.contacts.push_back(contact);
-                        collision.collider1->meta.contacts.push_back(contact);
-                        collision.collider2->meta.contacts.push_back(contact);
-                        collision.collider1->events.on_contact_enter(contact);
-                        collision.collider2->events.on_contact_enter(contact);
-                        global_on_contact_enter(world, contact);
-                    }
+                        create_contact(hash, &collision, i);
                 }
             }
             for (auto it = contacts.begin(); it != contacts.end();)
@@ -82,14 +65,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
                 T *contact = it->second;
                 if (!contact->recently_updated)
                 {
-                    contact->collider1()->events.on_contact_exit(*contact);
-                    contact->collider2()->events.on_contact_exit(*contact);
-                    global_on_contact_exit(world, *contact);
-                    contact->collider1()->body()->meta.remove_contact(contact);
-                    contact->collider2()->body()->meta.remove_contact(contact);
-                    contact->collider1()->meta.remove_contact(contact);
-                    contact->collider2()->meta.remove_contact(contact);
-                    allocator<T>::destroy(contact);
+                    destroy_contact(contact);
                     it = contacts.erase(it);
                 }
                 else
@@ -99,10 +75,42 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
                 }
             }
         }
+
+        void destroy_all_contacts()
+        {
+            for (auto &pair : contacts)
+                destroy_contact(pair.second); // this is expensive, for every contact a call to remove_contact for
+                                              // colliders and bodies. it shouldnt matter because this is almost never
+                                              // called (only when user changes resolution)
+            contacts.clear();
+        }
+
+        void create_contact(const key &hash, const collision2D *collision, std::size_t manifold_index)
+        {
+            T *contact = allocator<T>::create(world, collision, manifold_index);
+            contacts.emplace(hash, contact);
+            collision->collider1->body()->meta.contacts.push_back(contact);
+            collision->collider2->body()->meta.contacts.push_back(contact);
+            collision->collider1->meta.contacts.push_back(contact);
+            collision->collider2->meta.contacts.push_back(contact);
+            collision->collider1->events.on_contact_enter(contact);
+            collision->collider2->events.on_contact_enter(contact);
+            global_on_contact_enter(world, contact);
+        }
+        void destroy_contact(T *contact)
+        {
+            contact->collider1()->events.on_contact_exit(*contact);
+            contact->collider2()->events.on_contact_exit(*contact);
+            global_on_contact_exit(world, *contact);
+            contact->collider1()->body()->meta.remove_contact(contact);
+            contact->collider2()->body()->meta.remove_contact(contact);
+            contact->collider1()->meta.remove_contact(contact);
+            contact->collider2()->meta.remove_contact(contact);
+            allocator<T>::destroy(contact);
+        }
     };
 
-    static void global_on_contact_enter(world2D &world, contact2D *contact);
-    static void global_on_contact_exit(world2D &world, contact2D &contact);
+  protected:
     static void global_on_contact_pre_solve(world2D &world, contact2D *contact);
     static void global_on_contact_post_solve(world2D &world, contact2D *contact);
 
@@ -110,6 +118,9 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
     virtual void on_attach()
     {
     }
+
+    static void global_on_contact_enter(world2D &world, contact2D *contact);
+    static void global_on_contact_exit(world2D &world, contact2D &contact);
 
     virtual void resolve_contacts(const collision_detection2D::collision_map &collisions) = 0;
 
