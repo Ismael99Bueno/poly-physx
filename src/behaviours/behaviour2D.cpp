@@ -79,7 +79,7 @@ void behaviour2D::apply_force_to_bodies()
 {
     for (const auto &body : m_bodies)
     {
-        if (!body->is_dynamic() || !body->awake())
+        if (!body->is_dynamic() || body->asleep())
             continue;
         const glm::vec3 f = force(*body);
         body->apply_simulation_force(glm::vec2(f));

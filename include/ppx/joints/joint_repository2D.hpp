@@ -1,15 +1,20 @@
 #pragma once
 
 #include "ppx/joints/meta_manager2D.hpp"
+#include "ppx/joints/island2D.hpp"
 
 namespace ppx
 {
-class joint_repository2D
+class joint_repository2D final : public manager2D<joint2D>
 {
   public:
-    joint_events events;
     joint_meta_manager2D non_constraint_based;
     constraint_meta_manager2D constraint_based;
+
+    void solve_islands();
+
+    bool islands_enabled() const;
+    void islands_enabled(bool enable);
 
     template <Joint2D T> T *add(const typename T::specs &spc)
     {
@@ -58,7 +63,9 @@ class joint_repository2D
         else
             return non_constraint_based.remove<T>();
     }
-    bool remove(joint2D *joint);
+    using manager2D<joint2D>::remove;
+    bool remove(std::size_t index) override;
+
     template <Joint2D T> bool remove(const std::size_t index)
     {
         auto mng = manager<T>();
@@ -73,6 +80,17 @@ class joint_repository2D
   private:
     joint_repository2D(world2D &world);
 
+    island2D *create_island();
+    void try_split_islands(std::uint32_t max_tries);
+    bool split_island(island2D *island);
+    void build_islands_from_existing_simulation();
+
+    std::vector<island2D *> m_islands;
+    bool m_enable_islands = true;
+    std::size_t m_island_to_split = 0;
+
     friend class world2D;
+    friend class body_manager2D;
+    friend class body2D;
 };
 } // namespace ppx

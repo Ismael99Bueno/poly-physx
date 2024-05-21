@@ -42,6 +42,19 @@ void world2D::add(const specs::contraption2D &contraption)
         joints.add<prismatic_joint2D>(joint);
 }
 
+world2D::island_settings::island_settings(joint_repository2D &jr) : m_joints(jr)
+{
+}
+
+bool world2D::island_settings::enabled() const
+{
+    return m_joints.islands_enabled();
+}
+void world2D::island_settings::enabled(bool enable)
+{
+    m_joints.islands_enabled(enable);
+}
+
 bool world2D::step()
 {
     pre_step_preparation();
@@ -58,6 +71,8 @@ void world2D::pre_step_preparation()
 
     collisions.detection()->flag_new_step();
     bodies.send_data_to_state(integrator.state);
+    if (joints.islands_enabled())
+        joints.try_split_islands(1);
 }
 void world2D::post_step_setup()
 {
@@ -157,13 +172,17 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     bodies.prepare_for_next_substep(vars);
 
     behaviours.apply_forces();
-    joints.non_constraint_based.solve();
-
     if (collisions.enabled)
         collisions.detect_and_resolve();
 
-    bodies.prepare_constraint_states();
-    joints.constraint_based.solve();
+    if (joints.islands_enabled())
+        joints.solve_islands();
+    else
+    {
+        joints.non_constraint_based.solve();
+        bodies.prepare_constraint_states();
+        joints.constraint_based.solve();
+    }
     return create_state_derivative();
 }
 } // namespace ppx

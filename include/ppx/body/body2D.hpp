@@ -14,6 +14,7 @@ class world2D;
 class collider2D;
 class joint2D;
 class contact2D;
+class island2D;
 class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 {
   public:
@@ -37,17 +38,13 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     struct metadata
     {
-        struct
-        {
-            state2D state;
-        } ctr;
-        struct
-        {
-            float time_still = 0.f;
-        } islands;
-        std::vector<joint2D *> joints; // add remove method
-        std::vector<contact2D *> contacts;
+        state2D ctr_state;
 
+        island2D *island = nullptr;
+        bool island_flag = false;
+
+        std::vector<joint2D *> joints;
+        std::vector<contact2D *> contacts;
         void remove_joint(const joint2D *joint);
         void remove_contact(const contact2D *contact);
     } meta; // easy read & write data
@@ -84,8 +81,8 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     bool empty() const;
     std::size_t size() const;
 
-    bool awake() const;
-    void awake(bool awake);
+    void awake();
+    bool asleep() const;
 
     bool is_dynamic() const;
     bool is_kinematic() const;
@@ -202,12 +199,13 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     bool m_density_update = false;
     bool m_spatial_update = false;
-    bool m_awake = true;
+    bool m_awake_allowed = true;
 
     void reset_simulation_forces();
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
     void reset_dynamic_properties();
+    void put_to_sleep();
 
     friend class collider_manager2D;
     friend class body_manager2D;

@@ -31,6 +31,13 @@ template <typename T> struct type_wrapper<kit::scope<T>>
     }
 };
 
+template <typename T> struct manager_events
+{
+    using value_t = typename type_wrapper<T>::value_t;
+    kit::event<value_t *> on_addition;
+    kit::event<value_t &> on_removal;
+};
+
 template <typename T> class manager2D : public worldref2D, kit::non_copyable
 {
   public:
@@ -39,11 +46,7 @@ template <typename T> class manager2D : public worldref2D, kit::non_copyable
 
     virtual ~manager2D() = default;
 
-    struct
-    {
-        kit::event<value_t *> on_addition;
-        kit::event<value_t &> on_removal;
-    } events;
+    manager_events<T> events;
 
     auto begin() const
     {

@@ -4,19 +4,13 @@
 #include "ppx/joints/joint2D.hpp"
 #include "ppx/body/body2D.hpp"
 #include "ppx/common/alias.hpp"
+#include "ppx/joints/island2D.hpp"
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/indexable.hpp"
 
 namespace ppx
 {
-
-struct joint_events
-{
-    kit::event<joint2D *> on_addition;
-    kit::event<joint2D &> on_removal;
-};
-
 template <Joint2D T> class joint_container2D : public manager2D<T>
 {
   public:
@@ -29,9 +23,13 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         T *joint = allocator<T>::create(this->world, spc);
         joint->index = this->m_elements.size();
         this->m_elements.push_back(joint);
+        m_total_joints.push_back(joint);
+
         joint->add_to_bodies();
+        island2D::add(joint);
+
         this->events.on_addition(joint);
-        jevents.on_addition(joint);
+        m_jevents.on_addition(joint);
         return joint;
     }
 
@@ -52,19 +50,26 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
 
         T *joint = this->m_elements[index];
         this->events.on_removal(*joint);
-        jevents.on_removal(*joint);
+        m_jevents.on_removal(*joint);
 
         joint->remove_from_bodies();
-        joint->body1()->awake(true);
-        joint->body2()->awake(true);
+        island2D::remove(joint);
+
         if (index != this->m_elements.size() - 1)
         {
             this->m_elements[index] = this->m_elements.back();
             this->m_elements[index]->index = index;
         }
         this->m_elements.pop_back();
-
         allocator<T>::destroy(joint);
+
+        for (std::size_t i = 0; i < m_total_joints.size(); i++)
+            if (m_total_joints[i] == joint)
+            {
+                m_total_joints.erase(m_total_joints.begin() + i);
+                return true;
+            }
+        KIT_WARN("Joint not found in total joints");
         return true;
     }
     bool remove(joint2D *joint)
@@ -81,10 +86,13 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
     }
 
   protected:
-    joint_container2D(world2D &world, joint_events &jevents) : manager2D<T>(world), jevents(jevents)
+    joint_container2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents)
+        : manager2D<T>(world), m_total_joints(total_joints), m_jevents(jevents)
     {
     }
-    joint_events &jevents;
+
+    std::vector<joint2D *> &m_total_joints;
+    manager_events<joint2D> &m_jevents;
 
     static inline std::string s_name;
 

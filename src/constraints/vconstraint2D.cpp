@@ -58,8 +58,8 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
     {
         KIT_ERROR("Linear impulse can only be applied when the linear degrees of the constraint is greater than 0")
     }
-    m_body1->meta.ctr.state.velocity -= m_body1->props().dynamic.inv_mass * linimpulse;
-    m_body2->meta.ctr.state.velocity += m_body2->props().dynamic.inv_mass * linimpulse;
+    m_body1->meta.ctr_state.velocity -= m_body1->props().dynamic.inv_mass * linimpulse;
+    m_body2->meta.ctr_state.velocity += m_body2->props().dynamic.inv_mass * linimpulse;
 
     const glm::vec2 f1 = -linimpulse / world.rk_substep_timestep();
     const glm::vec2 f2 = linimpulse / world.rk_substep_timestep();
@@ -69,9 +69,9 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
     if (m_no_anchors)
         return;
 
-    m_body1->meta.ctr.state.angular_velocity -=
+    m_body1->meta.ctr_state.angular_velocity -=
         m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, linimpulse);
-    m_body2->meta.ctr.state.angular_velocity +=
+    m_body2->meta.ctr_state.angular_velocity +=
         m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, linimpulse);
 
     const float torque1 = kit::cross2D(m_offset1, f1);
@@ -89,21 +89,14 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_angular_impulse(float angimpul
     {
         KIT_ERROR("Angular impulse can only be applied when the angular degrees of the constraint is equal to 1")
     }
-    m_body1->meta.ctr.state.angular_velocity -= m_body1->props().dynamic.inv_inertia * angimpulse;
-    m_body2->meta.ctr.state.angular_velocity += m_body2->props().dynamic.inv_inertia * angimpulse;
+    m_body1->meta.ctr_state.angular_velocity -= m_body1->props().dynamic.inv_inertia * angimpulse;
+    m_body2->meta.ctr_state.angular_velocity += m_body2->props().dynamic.inv_inertia * angimpulse;
 
     const float torque1 = -angimpulse / world.rk_substep_timestep();
     const float torque2 = angimpulse / world.rk_substep_timestep();
 
     m_body1->apply_simulation_torque(torque1);
     m_body2->apply_simulation_torque(torque2);
-}
-
-template <std::size_t LinDegrees, std::size_t AngDegrees>
-    requires LegalDegrees2D<LinDegrees, AngDegrees>
-void vconstraint2D<LinDegrees, AngDegrees>::solve()
-{
-    solve_velocities();
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -158,21 +151,21 @@ void vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
 {
     if (m_no_anchors)
     {
-        m_ganchor1 = m_body1->meta.ctr.state.centroid.position();
-        m_ganchor2 = m_body2->meta.ctr.state.centroid.position();
+        m_ganchor1 = m_body1->meta.ctr_state.centroid.position();
+        m_ganchor2 = m_body2->meta.ctr_state.centroid.position();
         m_offset1 = glm::vec2(0.f);
         m_offset2 = glm::vec2(0.f);
     }
     else
     {
-        m_ganchor1 = m_body1->meta.ctr.state.global_position_point(m_lanchor1);
+        m_ganchor1 = m_body1->meta.ctr_state.global_position_point(m_lanchor1);
         if (m_use_both_anchors)
-            m_ganchor2 = m_body2->meta.ctr.state.global_position_point(m_lanchor2);
+            m_ganchor2 = m_body2->meta.ctr_state.global_position_point(m_lanchor2);
         else
             m_ganchor2 = m_ganchor1;
 
-        m_offset1 = m_ganchor1 - m_body1->meta.ctr.state.centroid.position();
-        m_offset2 = m_ganchor2 - m_body2->meta.ctr.state.centroid.position();
+        m_offset1 = m_ganchor1 - m_body1->meta.ctr_state.centroid.position();
+        m_offset2 = m_ganchor2 - m_body2->meta.ctr_state.centroid.position();
     }
     if constexpr (LinDegrees == 1)
         this->m_dir = this->direction();

@@ -59,11 +59,6 @@ body2D *joint2D::body2()
     return m_body2;
 }
 
-bool joint2D::awake() const
-{
-    return m_body1->awake() || m_body2->awake();
-}
-
 const glm::vec2 &joint2D::lanchor1() const
 {
     return m_lanchor1;
@@ -86,13 +81,15 @@ bool joint2D::contains(const body2D *body) const
 {
     return body == m_body1 || body == m_body2;
 }
+bool joint2D::is_constraint() const
+{
+    return false;
+}
 
 void joint2D::add_to_bodies()
 {
     m_body1->meta.joints.push_back(this);
     m_body2->meta.joints.push_back(this);
-    m_body1->awake(true);
-    m_body2->awake(true);
 }
 
 void joint2D::remove_from_bodies()

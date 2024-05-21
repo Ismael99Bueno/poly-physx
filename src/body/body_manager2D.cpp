@@ -17,7 +17,14 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     state.append({body->centroid().x, body->centroid().y, body->rotation(), body->velocity().x, body->velocity().y,
                   body->angular_velocity()});
 
+    if (world.joints.islands_enabled() && body->is_dynamic())
+    {
+        island2D *island = world.joints.create_island();
+        island->add_body(body);
+    }
+
     m_elements.push_back(body);
+
     events.on_addition(body);
     KIT_INFO("Added body with index {0}.", m_elements.size() - 1)
     return body;
@@ -30,7 +37,7 @@ void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
     {
         body->reset_simulation_forces();
         body->retrieve_data_from_state_variables(vars_buffer);
-        if (body->awake())
+        if (!body->asleep())
         {
             body->apply_simulation_force(body->instant_force() + body->persistent_force());
             body->apply_simulation_torque(body->instant_torque() + body->persistent_torque());
@@ -132,6 +139,8 @@ bool body_manager2D::remove(const std::size_t index)
     m_elements.pop_back();
     state.resize(6 * m_elements.size());
 
+    if (body->meta.island)
+        body->meta.island->remove_body(body);
     world.on_body_removal_validation(body);
     allocator<body2D>::destroy(body);
     return true;
@@ -164,22 +173,27 @@ void body_manager2D::retrieve_data_from_state_variables(const std::vector<float>
 {
     KIT_PERF_FUNCTION()
     for (body2D *body : m_elements)
-        body->retrieve_data_from_state_variables(vars_buffer);
+        if (!body->is_static() && !body->asleep())
+            body->retrieve_data_from_state_variables(vars_buffer);
+}
+
+void body_manager2D::prepare_constraint_states(const std::vector<body2D *> &bodies, const float ts,
+                                               const bool semi_implicit)
+{
+    for (body2D *body : bodies)
+    {
+        body->meta.ctr_state = body->m_state;
+        if (semi_implicit)
+        {
+            body->meta.ctr_state.velocity += body->props().dynamic.inv_mass * body->force() * ts;
+            body->meta.ctr_state.angular_velocity += body->props().dynamic.inv_inertia * body->torque() * ts;
+        }
+    }
 }
 
 void body_manager2D::prepare_constraint_states()
 {
-    for (body2D *body : m_elements)
-    {
-        body->meta.ctr.state = body->m_state;
-        if (world.semi_implicit_integration)
-        {
-            body->meta.ctr.state.velocity +=
-                body->props().dynamic.inv_mass * body->force() * world.rk_substep_timestep();
-            body->meta.ctr.state.angular_velocity +=
-                body->props().dynamic.inv_inertia * body->torque() * world.rk_substep_timestep();
-        }
-    }
+    prepare_constraint_states(m_elements, world.rk_substep_timestep(), world.semi_implicit_integration);
 }
 
 } // namespace ppx

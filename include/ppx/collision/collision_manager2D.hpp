@@ -15,7 +15,7 @@ namespace ppx
 class world2D;
 
 template <typename T>
-concept ValidResolution =
+concept Resolution =
     kit::DerivedFrom<T, constraint_driven_resolution2D> || kit::DerivedFrom<T, joint_driven_resolution2D>;
 
 class collision_manager2D : public kit::toggleable, public worldref2D
@@ -83,7 +83,7 @@ class collision_manager2D : public kit::toggleable, public worldref2D
         m_detection->on_attach();
         return ptr;
     }
-    template <ValidResolution T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
+    template <Resolution T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
     {
         auto colres = kit::make_scope<T>(world, std::forward<ColSolvArgs>(args)...);
         T *ptr = colres.get();

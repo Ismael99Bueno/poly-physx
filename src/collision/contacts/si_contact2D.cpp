@@ -23,8 +23,8 @@ float si_contact2D::constraint_position() const
 float si_contact2D::constraint_velocity() const
 {
     return m_restitution * m_init_ctr_vel +
-           glm::dot(m_dir, m_body2->meta.ctr.state.velocity_at_centroid_offset(m_offset2) -
-                               m_body1->meta.ctr.state.velocity_at_centroid_offset(m_offset1));
+           glm::dot(m_dir, m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
+                               m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1));
 }
 
 void si_contact2D::solve_velocities()

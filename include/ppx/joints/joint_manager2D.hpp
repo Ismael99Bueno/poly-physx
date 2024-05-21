@@ -27,8 +27,9 @@ template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public
   public:
     virtual ~joint_manager2D() = default;
 
-    joint_manager2D(world2D &world, joint_events &jevents, const std::string &name)
-        : joint_container2D<T>(world, jevents), ijoint_manager2D(name)
+    joint_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents,
+                    const std::string &name)
+        : joint_container2D<T>(world, total_joints, jevents), ijoint_manager2D(name)
     {
         joint_container2D<T>::s_name = name;
     }

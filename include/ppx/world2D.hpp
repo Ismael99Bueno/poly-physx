@@ -42,6 +42,20 @@ class world2D : kit::non_copyable
         float position_resolution_speed = 0.2f;
     } constraints;
 
+    struct island_settings
+    {
+        island_settings(joint_repository2D &jr);
+
+        bool enabled() const;
+        void enabled(bool enable);
+
+        float sleep_energy_threshold = 0.6f;
+        float sleep_time_threshold = 1.f;
+
+      private:
+        joint_repository2D &m_joints;
+    } islands{joints};
+
     bool semi_implicit_integration = true;
 
     void add(const specs::contraption2D &contraption);

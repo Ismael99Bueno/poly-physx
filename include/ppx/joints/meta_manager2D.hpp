@@ -13,33 +13,32 @@ concept IManager = std::is_same_v<T, ijoint_manager2D> || std::is_same_v<T, icon
 
 template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
 {
-    meta_manager2D(world2D &world, joint_events &jevents) : idmanager2D<kit::scope<IM>>(world), jevents(jevents)
+    template <Joint2D T> using manager_t = typename IM::template manager_t<T>;
+
+    meta_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents)
+        : idmanager2D<kit::scope<IM>>(world), m_total_joints(total_joints), m_jevents(jevents)
     {
     }
 
-    joint_events &jevents;
+    std::vector<joint2D *> &m_total_joints;
+    manager_events<joint2D> &m_jevents;
 
-    template <Joint2D T,
-              kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
+    template <Joint2D T, kit::DerivedFrom<manager_t<T>> Manager = manager_t<T>>
     Manager *add_manager(const std::string &name)
     {
         KIT_ASSERT_ERROR(!this->contains(Manager::name()), "There is already a manager of this type in the repository")
-        auto manager = kit::make_scope<Manager>(this->world, jevents, name);
+        auto manager = kit::make_scope<Manager>(this->world, m_total_joints, m_jevents, name);
         Manager *ptr = manager.get();
         this->m_elements.push_back(std::move(manager));
         return ptr;
     }
 
-    template <Joint2D T,
-              kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
-    const Manager *manager() const
+    template <Joint2D T, kit::DerivedFrom<manager_t<T>> Manager = manager_t<T>> const Manager *manager() const
     {
         const IM *manager = (*this)[Manager::name()];
         return manager ? static_cast<const Manager *>(manager) : nullptr;
     }
-    template <Joint2D T,
-              kit::DerivedFrom<typename IM::template manager_t<T>> Manager = typename IM::template manager_t<T>>
-    Manager *manager()
+    template <Joint2D T, kit::DerivedFrom<manager_t<T>> Manager = manager_t<T>> Manager *manager()
     {
         IM *manager = (*this)[Manager::name()];
         return manager ? static_cast<Manager *>(manager) : nullptr;
@@ -51,9 +50,8 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
 
     template <Joint2D T> bool remove()
     {
-        using Manager = typename IM::template manager_t<T>;
         for (std::size_t i = 0; i < this->m_elements.size(); i++)
-            if (this->m_elements[i]->id == Manager::name())
+            if (this->m_elements[i]->id == manager_t<T>::name())
                 return remove(i);
         return false;
     }

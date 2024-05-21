@@ -34,4 +34,16 @@ class contact2D
     std::size_t m_manifold_index;
     bool m_is_new = true;
 };
+
+class contact_joint2D;
+class contact_constraint2D;
+
+template <typename T>
+concept ContactJoint2D = kit::DerivedFrom<T, contact_joint2D>;
+
+template <typename T>
+concept ContactConstraint2D = kit::DerivedFrom<T, contact_constraint2D>;
+
+template <typename T>
+concept Contact2D = ContactJoint2D<T> || ContactConstraint2D<T>;
 } // namespace ppx

@@ -53,13 +53,13 @@ void constraint_meta_manager2D::solve()
     }
     for (std::size_t i = 0; i < piters; i++)
     {
-        bool fully_adjusted = true;
+        bool solved = true;
         for (const auto &manager : this->m_elements)
             if (manager->enabled)
-                fully_adjusted &= manager->solve_positions();
+                solved &= manager->solve_positions();
         if (m_resolution)
-            fully_adjusted &= m_resolution->solve_positions();
-        if (fully_adjusted)
+            solved &= m_resolution->solve_positions();
+        if (solved)
             break;
     }
 }

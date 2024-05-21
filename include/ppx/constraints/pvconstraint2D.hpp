@@ -16,6 +16,9 @@ concept PVConstraint2D = requires() {
                  kit::DerivedFrom<T, pvconstraint2D<2, 1>>;
 };
 
+template <typename T>
+concept Constraint2D = VConstraint2D<T> || PVConstraint2D<T>;
+
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
 class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
@@ -26,7 +29,7 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
 
     virtual ~pvconstraint2D() = default;
 
-    virtual bool solve_positions();
+    virtual bool solve_positions() override;
     virtual flat_t constraint_position() const = 0;
 
   protected:
@@ -44,9 +47,6 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
 
     void apply_linear_correction(const glm::vec2 &lincorrection);
     void apply_angular_correction(float angcorrection);
-
-  private:
-    void solve() override;
 };
 
 } // namespace ppx

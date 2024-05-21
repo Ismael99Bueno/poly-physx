@@ -90,18 +90,23 @@ void collision_detection2D::join_mt_collisions()
 
 static bool elligible_for_collision(const collider2D *collider1, const collider2D *collider2)
 {
-    const body2D *p1 = collider1->body();
-    const body2D *p2 = collider2->body();
-    return collider1 != collider2 && p1 != p2 && (p1->is_dynamic() || p2->is_dynamic()) &&
+    const body2D *body1 = collider1->body();
+    const body2D *body2 = collider2->body();
+    return collider1 != collider2 && body1 != body2 &&
            (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
            (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
-           geo::may_intersect(collider1->shape(), collider2->shape()) && !p1->joint_prevents_collision(p2);
+           geo::may_intersect(collider1->shape(), collider2->shape()) && !body1->joint_prevents_collision(body2);
 }
 
 collision2D collision_detection2D::generate_collision(collider2D *collider1, collider2D *collider2) const
 {
     collision2D collision;
-    if (!collider1->body()->awake() && !collider2->body()->awake())
+    const body2D *body1 = collider1->body();
+    const body2D *body2 = collider2->body();
+    if (!body1->is_dynamic() && !body2->is_dynamic())
+        return collision;
+
+    if (collider1->body()->asleep() && collider2->body()->asleep())
     {
         const auto last_collision = m_last_collisions.find({collider1, collider2});
         if (last_collision != m_last_collisions.end())

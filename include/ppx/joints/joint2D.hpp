@@ -22,6 +22,11 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
   public:
     virtual ~joint2D() = default;
 
+    struct metadata
+    {
+        bool island_flag = false;
+    } meta;
+
     bool bodies_collide;
 
     const body2D *body1() const;
@@ -29,8 +34,6 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 
     body2D *body1();
     body2D *body2();
-
-    bool awake() const;
 
     const glm::vec2 &lanchor1() const;
     const glm::vec2 &lanchor2() const;
@@ -40,6 +43,7 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 
     bool contains(const body2D *body) const;
 
+    virtual bool is_constraint() const;
     virtual void solve() = 0;
 
   protected:

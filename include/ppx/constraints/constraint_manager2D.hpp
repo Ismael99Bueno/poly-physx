@@ -32,8 +32,9 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
   public:
     virtual ~constraint_manager2D() = default;
 
-    constraint_manager2D(world2D &world, joint_events &jevents, const std::string &name)
-        : joint_container2D<T>(world, jevents), iconstraint_manager2D(name)
+    constraint_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents,
+                         const std::string &name)
+        : joint_container2D<T>(world, total_joints, jevents), iconstraint_manager2D(name)
     {
         joint_container2D<T>::s_name = name;
     }
@@ -74,11 +75,11 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
     {
         if constexpr (PVConstraint2D<T>)
         {
-            bool fully_adjusted = true;
+            bool solved = true;
             for (T *constraint : this->m_elements)
                 if (constraint->enabled)
-                    fully_adjusted &= constraint->solve_positions();
-            return fully_adjusted;
+                    solved &= constraint->solve_positions();
+            return solved;
         }
         else
             return true;

@@ -4,6 +4,7 @@
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/internal/worldref.hpp"
 #include "ppx/collision/contacts/contact2D.hpp"
+#include "ppx/joints/island2D.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/container/hashable_tuple.hpp"
 #include "kit/utility/type_constraints.hpp"
@@ -19,7 +20,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
     virtual void remove_any_contacts_with(const collider2D *collider) = 0;
 
   protected:
-    template <kit::DerivedFrom<contact2D> T> struct contact_manager : public worldref2D
+    template <Contact2D T> struct contact_manager : public worldref2D
     {
         using key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
         using contact_map = std::unordered_map<key, T *>;
@@ -89,10 +90,9 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
         {
             T *contact = allocator<T>::create(world, collision, manifold_index);
             contacts.emplace(hash, contact);
+            island2D::add(contact);
             collision->collider1->body()->meta.contacts.push_back(contact);
             collision->collider2->body()->meta.contacts.push_back(contact);
-            collision->collider1->meta.contacts.push_back(contact);
-            collision->collider2->meta.contacts.push_back(contact);
             collision->collider1->events.on_contact_enter(contact);
             collision->collider2->events.on_contact_enter(contact);
             global_on_contact_enter(world, contact);
@@ -104,8 +104,7 @@ class collision_resolution2D : public worldref2D, public kit::toggleable, kit::n
             global_on_contact_exit(world, *contact);
             contact->collider1()->body()->meta.remove_contact(contact);
             contact->collider2()->body()->meta.remove_contact(contact);
-            contact->collider1()->meta.remove_contact(contact);
-            contact->collider2()->meta.remove_contact(contact);
+            island2D::remove(contact);
             allocator<T>::destroy(contact);
         }
     };

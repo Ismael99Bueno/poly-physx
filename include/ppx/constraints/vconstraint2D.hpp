@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/joints/joint2D.hpp"
+#include "ppx/constraints/constraint2D.hpp"
 
 namespace ppx
 {
@@ -46,7 +46,7 @@ template <std::size_t AngDegrees> class auxiliar_1D_direction<1, AngDegrees>
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
-class vconstraint2D : public joint2D, public auxiliar_1D_direction<LinDegrees, AngDegrees>
+class vconstraint2D : public constraint2D, public auxiliar_1D_direction<LinDegrees, AngDegrees>
 {
   public:
     static inline constexpr std::size_t LINEAR = LinDegrees;
@@ -60,12 +60,12 @@ class vconstraint2D : public joint2D, public auxiliar_1D_direction<LinDegrees, A
 
     virtual flat_t constraint_velocity() const = 0;
 
-    virtual void solve_velocities();
-    virtual void startup();
+    virtual void solve_velocities() override;
+    virtual void startup() override;
     virtual void warmup();
 
   protected:
-    using joint2D::joint2D;
+    using constraint2D::constraint2D;
     flat_t m_cumimpulse{0.f};
 
     glm::vec2 m_ganchor1;
@@ -89,8 +89,5 @@ class vconstraint2D : public joint2D, public auxiliar_1D_direction<LinDegrees, A
     void apply_linear_impulse(const glm::vec2 &linimpulse);
     void apply_angular_impulse(float angimpulse);
     void solve_velocities_clamped(const flat_t &min, const flat_t &max);
-
-  private:
-    virtual void solve() override;
 };
 } // namespace ppx

@@ -24,6 +24,7 @@ void body2D::metadata::remove_joint(const joint2D *joint)
             joints.erase(joints.begin() + i);
             return;
         }
+    KIT_WARN("Joint not found in body metadata")
 }
 
 void body2D::metadata::remove_contact(const contact2D *contact)
@@ -34,6 +35,7 @@ void body2D::metadata::remove_contact(const contact2D *contact)
             contacts.erase(contacts.begin() + i);
             return;
         }
+    KIT_WARN("Contact not found in body metadata")
 }
 
 const collider2D *body2D::operator[](const std::size_t index) const
@@ -91,13 +93,21 @@ std::size_t body2D::size() const
     return m_colliders.size();
 }
 
-bool body2D::awake() const
+void body2D::awake()
 {
-    return m_awake;
+    if (m_awake_allowed && meta.island)
+        meta.island->awake();
 }
-void body2D::awake(bool awake)
+bool body2D::asleep() const
 {
-    m_awake = awake;
+    if (meta.island)
+        return meta.island->asleep();
+    return !is_dynamic();
+}
+void body2D::put_to_sleep()
+{
+    m_state.velocity = glm::vec2(0.f);
+    m_state.angular_velocity = 0.f;
 }
 
 const body2D::properties &body2D::props() const
@@ -133,6 +143,7 @@ void body2D::end_spatial_update()
 void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
 {
     const std::size_t idx = 6 * index;
+    m_awake_allowed = false;
     begin_spatial_update();
     centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});
     rotation(vars_buffer[idx + 2]);
@@ -140,6 +151,7 @@ void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_b
 
     m_state.velocity = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
     m_state.angular_velocity = vars_buffer[idx + 5];
+    m_awake_allowed = true;
 }
 
 void body2D::full_update()
@@ -292,9 +304,36 @@ body2D::btype body2D::type() const
 }
 void body2D::type(btype type)
 {
+    if (type == m_type)
+        return;
+
+    const bool non_dynamic_change =
+        (type == btype::KINEMATIC && is_static()) || (type == btype::STATIC && is_kinematic());
     m_type = type;
-    awake(true);
     reset_dynamic_properties();
+    if (non_dynamic_change)
+        return;
+
+    if (is_dynamic())
+    {
+        if (world.joints.islands_enabled())
+        {
+            island2D *island = world.joints.create_island();
+            island->add_body(this);
+        }
+        return;
+    }
+    if (meta.island)
+    {
+        meta.island->remove_body(this);
+        meta.island = nullptr;
+    }
+    for (std::size_t i = meta.joints.size() - 1; i < meta.joints.size() && i >= 0; i--)
+    {
+        joint2D *joint = meta.joints[i];
+        if (!joint->body1()->is_dynamic() && !joint->body2()->is_dynamic())
+            world.joints.remove(joint);
+    }
 }
 
 float body2D::kinetic_energy() const
@@ -338,12 +377,12 @@ void body2D::gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint)
 {
     m_instant_force += force;
     m_instant_torque += kit::cross2D(gpoint - m_state.centroid.position(), force);
-    awake(true);
+    awake();
 }
 void body2D::add_force(const glm::vec2 &force)
 {
     m_instant_force += force;
-    awake(true);
+    awake();
 }
 
 const glm::vec2 &body2D::instant_force() const
@@ -366,23 +405,23 @@ float body2D::persistent_torque() const
 void body2D::persistent_force(const glm::vec2 &force)
 {
     m_persistent_force = force;
-    awake(true);
+    awake();
 }
 void body2D::instant_force(const glm::vec2 &force)
 {
     m_instant_force = force;
-    awake(true);
+    awake();
 }
 
 void body2D::persistent_torque(const float torque)
 {
     m_persistent_torque = torque;
-    awake(true);
+    awake();
 }
 void body2D::instant_torque(const float torque)
 {
     m_instant_torque = torque;
-    awake(true);
+    awake();
 }
 
 void body2D::apply_simulation_force(const glm::vec2 &force)
@@ -420,12 +459,12 @@ float body2D::angular_velocity() const
 void body2D::velocity(const glm::vec2 &velocity)
 {
     m_state.velocity = velocity;
-    awake(true);
+    awake();
 }
 void body2D::angular_velocity(const float angular_velocity)
 {
     m_state.angular_velocity = angular_velocity;
-    awake(true);
+    awake();
 }
 
 void body2D::translate(const glm::vec2 &dpos)
@@ -434,6 +473,7 @@ void body2D::translate(const glm::vec2 &dpos)
     m_state.gposition += dpos;
     m_charge_centroid += dpos;
     update_colliders();
+    awake();
 }
 void body2D::rotate(const float dangle)
 {
@@ -451,6 +491,7 @@ void body2D::centroid_transform(const transform2D &centroid)
     m_charge_centroid += dpos;
     m_state.centroid = centroid;
     update_colliders();
+    awake();
 }
 
 const glm::vec2 &body2D::centroid() const
@@ -500,7 +541,7 @@ float body2D::charge() const
 void body2D::charge(const float charge)
 {
     m_charge = charge;
-    awake(true);
+    awake();
 }
 
 float body2D::rotation() const
@@ -515,6 +556,7 @@ void body2D::centroid(const glm::vec2 &centroid)
     m_charge_centroid += dpos;
     m_state.centroid.position(centroid);
     update_colliders();
+    awake();
 }
 
 void body2D::gposition(const glm::vec2 &gposition)
@@ -524,11 +566,13 @@ void body2D::gposition(const glm::vec2 &gposition)
     m_charge_centroid += dpos;
     m_state.gposition = gposition;
     update_colliders();
+    awake();
 }
 void body2D::origin(const glm::vec2 &origin)
 {
     m_state.centroid.origin(origin);
     update_colliders();
+    awake();
 }
 void body2D::rotation(const float rotation)
 {
@@ -537,6 +581,7 @@ void body2D::rotation(const float rotation)
     m_charge_centroid = m_state.centroid.position() + rmat * (m_charge_centroid - m_state.centroid.position());
     m_state.centroid.rotation(rotation);
     update_colliders();
+    awake();
 }
 
 void body2D::mass(const float mass)
@@ -554,7 +599,7 @@ void body2D::mass(const float mass)
         m_props.nondynamic.inv_inertia /= ratio;
     }
     reset_dynamic_properties();
-    awake(true);
+    awake();
 }
 
 void body2D::reset_dynamic_properties()
@@ -567,11 +612,8 @@ void body2D::reset_dynamic_properties()
         m_props.dynamic.inv_mass = 0.f;
         m_props.dynamic.inertia = FLT_MAX;
         m_props.dynamic.inv_inertia = 0.f;
-        if (is_static())
-        {
-            m_state.velocity = glm::vec2(0.f);
-            m_state.angular_velocity = 0.f;
-        }
+        if (is_static() || (is_dynamic() && asleep()))
+            put_to_sleep();
     }
 }
 
