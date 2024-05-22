@@ -1,25 +1,19 @@
 #pragma once
 
 #include "ppx/joints/joint_container2D.hpp"
-#include "kit/interface/toggleable.hpp"
 #include "kit/serialization/yaml/codec.hpp"
 
 namespace ppx
 {
 template <Joint2D T> class joint_manager2D;
 
-class ijoint_manager2D : public kit::identifiable<std::string>, public kit::toggleable, public kit::yaml::codecable
+class ijoint_manager2D : public virtual ijoint_container2D
 {
   public:
     template <Joint2D T> using manager_t = joint_manager2D<T>;
 
     virtual ~ijoint_manager2D() = default;
     virtual void solve() = 0;
-    virtual void on_body_removal_validation(body2D *body) = 0;
-    virtual bool remove(joint2D *joint) = 0;
-
-  protected:
-    ijoint_manager2D(const std::string &name);
 };
 
 template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public ijoint_manager2D
@@ -29,40 +23,18 @@ template <Joint2D T> class joint_manager2D : public joint_container2D<T>, public
 
     joint_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents,
                     const std::string &name)
-        : joint_container2D<T>(world, total_joints, jevents), ijoint_manager2D(name)
+        : kit::identifiable<std::string>(name), joint_container2D<T>(world, total_joints, jevents)
     {
         joint_container2D<T>::s_name = name;
     }
 
-    using joint_container2D<T>::remove;
-    bool remove(joint2D *joint) override
-    {
-        return joint_container2D<T>::remove(joint);
-    }
-
   private:
-    void on_body_removal_validation(body2D *body) override
-    {
-        joint_container2D<T>::on_body_removal_validation(body);
-    }
-
     virtual void solve() override
     {
         for (T *joint : this->m_elements)
             if (joint->enabled)
                 joint->solve();
     }
-
-#ifdef KIT_USE_YAML_CPP
-    virtual YAML::Node encode() const override
-    {
-        return kit::yaml::codec<joint_container2D<T>>::encode(*this);
-    }
-    virtual bool decode(const YAML::Node &node) override
-    {
-        return kit::yaml::codec<joint_container2D<T>>::decode(node, *this);
-    }
-#endif
 };
 
 } // namespace ppx

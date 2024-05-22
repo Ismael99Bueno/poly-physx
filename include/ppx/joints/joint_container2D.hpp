@@ -8,10 +8,22 @@
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/indexable.hpp"
+#include "kit/interface/toggleable.hpp"
 
 namespace ppx
 {
-template <Joint2D T> class joint_container2D : public manager2D<T>
+class ijoint_container2D : virtual public kit::identifiable<std::string>,
+                           virtual public kit::toggleable,
+                           virtual public kit::yaml::codecable
+{
+  public:
+    virtual ~ijoint_container2D() = default;
+
+    virtual void on_body_removal_validation(body2D *body) = 0;
+    virtual bool remove(joint2D *joint) = 0;
+};
+
+template <Joint2D T> class joint_container2D : public manager2D<T>, public virtual ijoint_container2D
 {
   public:
     using specs = typename T::specs;
@@ -72,7 +84,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
         KIT_WARN("Joint not found in total joints");
         return true;
     }
-    bool remove(joint2D *joint)
+    bool remove(joint2D *joint) override
     {
         T *tjoint = dynamic_cast<T *>(joint);
         if (!tjoint)
@@ -96,7 +108,7 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
 
     static inline std::string s_name;
 
-    void on_body_removal_validation(body2D *body)
+    void on_body_removal_validation(body2D *body) override
     {
         const auto &joints = body->meta.joints;
         for (std::size_t i = joints.size() - 1; i < joints.size() && i >= 0; i--)
@@ -113,6 +125,17 @@ template <Joint2D T> class joint_container2D : public manager2D<T>
                 joints.push_back(joint);
         return joints;
     }
+
+#ifdef KIT_USE_YAML_CPP
+    virtual YAML::Node encode() const override
+    {
+        return kit::yaml::codec<joint_container2D<T>>::encode(*this);
+    }
+    virtual bool decode(const YAML::Node &node) override
+    {
+        return kit::yaml::codec<joint_container2D<T>>::decode(node, *this);
+    }
+#endif
 };
 
 } // namespace ppx
