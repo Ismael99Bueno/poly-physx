@@ -1,10 +1,27 @@
 #pragma once
 
+#include "ppx/joints/joint2D.hpp"
 #include "ppx/collision/collision2D.hpp"
+#include "ppx/constraints/pvconstraint2D.hpp"
+#include "ppx/actuators/actuator2D.hpp"
 
 namespace ppx
 {
-class contact2D
+class contact2D;
+
+template <typename T>
+concept IContact2D = IJoint2D<T> && kit::DerivedFrom<T, contact2D>;
+
+template <typename T>
+concept ContactConstraint2D = IContact2D<T> && IPVConstraint2D<T>; // Use IVCConstraint2D instead of IPVConstraint2D?
+
+template <typename T>
+concept ContactActuator2D = IContact2D<T> && IActuator2D<T>;
+
+template <typename T>
+concept Contact2D = ContactConstraint2D<T> || ContactActuator2D<T>;
+
+class contact2D : virtual public joint2D
 {
   public:
     virtual ~contact2D() = default;
@@ -34,16 +51,4 @@ class contact2D
     std::size_t m_manifold_index;
     bool m_is_new = true;
 };
-
-class contact_joint2D;
-class contact_constraint2D;
-
-template <typename T>
-concept ContactJoint2D = kit::DerivedFrom<T, contact_joint2D>;
-
-template <typename T>
-concept ContactConstraint2D = kit::DerivedFrom<T, contact_constraint2D>;
-
-template <typename T>
-concept Contact2D = ContactJoint2D<T> || ContactConstraint2D<T>;
 } // namespace ppx

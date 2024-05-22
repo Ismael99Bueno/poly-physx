@@ -4,7 +4,9 @@
 namespace ppx
 {
 contact2D::contact2D(const collision2D *collision, std::size_t manifold_index)
-    : m_collision(collision), m_collider1(collision->collider1), m_collider2(collision->collider2),
+    : joint2D(world, collision->collider1->body(), collision->collider2->body(),
+              collision->manifold[manifold_index].point),
+      m_collision(collision), m_collider1(collision->collider1), m_collider2(collision->collider2),
       m_manifold_index(manifold_index)
 {
 }

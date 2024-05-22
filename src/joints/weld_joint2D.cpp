@@ -6,7 +6,7 @@
 namespace ppx
 {
 weld_joint2D::weld_joint2D(world2D &world, const specs &spc)
-    : pvconstraint2D<2, 1>(world, spc, spc.ganchor),
+    : joint2D(world, spc, spc.ganchor),
       m_target_relangle(m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation())
 {
 }

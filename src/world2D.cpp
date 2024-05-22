@@ -121,8 +121,8 @@ std::vector<float> world2D::create_state_derivative() const
 
 void world2D::on_body_removal_validation(body2D *body)
 {
-    joints.constraint_based.on_body_removal_validation(body);
-    joints.non_constraint_based.on_body_removal_validation(body);
+    joints.constraints.on_body_removal_validation(body);
+    joints.actuators.on_body_removal_validation(body);
     behaviours.on_body_removal_validation(body);
 }
 
@@ -179,9 +179,9 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         joints.solve_islands();
     else
     {
-        joints.non_constraint_based.solve();
+        joints.actuators.solve();
         bodies.prepare_constraint_states();
-        joints.constraint_based.solve();
+        joints.constraints.solve();
     }
     return create_state_derivative();
 }

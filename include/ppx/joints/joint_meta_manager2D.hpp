@@ -1,21 +1,21 @@
 #pragma once
 
-#include "ppx/joints/joint_manager2D.hpp"
+#include "ppx/actuators/actuator_manager2D.hpp"
 #include "ppx/constraints/constraint_manager2D.hpp"
 #include <typeinfo>
 
 namespace ppx
 {
 class constraint_driven_resolution2D;
-class joint_driven_resolution2D;
+class actuator_driven_resolution2D;
 template <typename T>
-concept IManager = std::is_same_v<T, ijoint_manager2D> || std::is_same_v<T, iconstraint_manager2D>;
+concept IManager = std::is_same_v<T, iactuator_manager2D> || std::is_same_v<T, iconstraint_manager2D>;
 
-template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
+template <IManager IM> class joint_meta_manager2D : public idmanager2D<kit::scope<IM>>
 {
     template <Joint2D T> using manager_t = typename IM::template manager_t<T>;
 
-    meta_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents)
+    joint_meta_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents)
         : idmanager2D<kit::scope<IM>>(world), m_total_joints(total_joints), m_jevents(jevents)
     {
     }
@@ -66,19 +66,19 @@ template <IManager IM> class meta_manager2D : public idmanager2D<kit::scope<IM>>
     friend class joint_repository2D;
 };
 
-class joint_meta_manager2D final : public meta_manager2D<ijoint_manager2D>
+class actuator_meta_manager2D final : public joint_meta_manager2D<iactuator_manager2D>
 {
-    using meta_manager2D<ijoint_manager2D>::meta_manager2D;
-    joint_driven_resolution2D *m_resolution = nullptr;
+    using joint_meta_manager2D<iactuator_manager2D>::joint_meta_manager2D;
+    actuator_driven_resolution2D *m_resolution = nullptr;
 
     void solve();
     friend class world2D;
     friend class collision_manager2D;
 };
 
-class constraint_meta_manager2D final : public meta_manager2D<iconstraint_manager2D>
+class constraint_meta_manager2D final : public joint_meta_manager2D<iconstraint_manager2D>
 {
-    using meta_manager2D<iconstraint_manager2D>::meta_manager2D;
+    using joint_meta_manager2D<iconstraint_manager2D>::joint_meta_manager2D;
     constraint_driven_resolution2D *m_resolution = nullptr;
 
     void solve();

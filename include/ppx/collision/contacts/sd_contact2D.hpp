@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ppx/collision/contacts/contact_joint2D.hpp"
+#include "ppx/collision/contacts/contact2D.hpp"
 
 namespace ppx
 {
-class sd_contact2D final : public contact_joint2D
+class sd_contact2D final : public contact2D, public actuator2D
 {
   public:
     static inline float rigidity = 2000.f;

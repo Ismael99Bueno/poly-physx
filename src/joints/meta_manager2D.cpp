@@ -1,11 +1,11 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/joints/meta_manager2D.hpp"
+#include "ppx/joints/joint_meta_manager2D.hpp"
 #include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
 #include "ppx/world2D.hpp"
 
 namespace ppx
 {
-template <IManager IM> bool meta_manager2D<IM>::remove(std::size_t index)
+template <IManager IM> bool joint_meta_manager2D<IM>::remove(std::size_t index)
 {
     if (index >= this->m_elements.size())
         return false;
@@ -13,7 +13,7 @@ template <IManager IM> bool meta_manager2D<IM>::remove(std::size_t index)
     return true;
 }
 
-template <IManager IM> bool meta_manager2D<IM>::remove(joint2D *joint)
+template <IManager IM> bool joint_meta_manager2D<IM>::remove(joint2D *joint)
 {
     for (const auto &manager : this->m_elements)
         if (manager->remove(joint))
@@ -21,7 +21,7 @@ template <IManager IM> bool meta_manager2D<IM>::remove(joint2D *joint)
     return false;
 }
 
-void joint_meta_manager2D::solve()
+void actuator_meta_manager2D::solve()
 {
     KIT_PERF_SCOPE("Joints solve")
     if (m_resolution)
@@ -64,7 +64,7 @@ void constraint_meta_manager2D::solve()
     }
 }
 
-template class meta_manager2D<ijoint_manager2D>;
-template class meta_manager2D<iconstraint_manager2D>;
+template class joint_meta_manager2D<iactuator_manager2D>;
+template class joint_meta_manager2D<iconstraint_manager2D>;
 
 } // namespace ppx

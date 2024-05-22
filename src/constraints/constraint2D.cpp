@@ -12,11 +12,9 @@ bool constraint2D::is_constraint() const
 {
     return true;
 }
-
-void constraint2D::solve()
+bool constraint2D::is_actuator() const
 {
-    solve_velocities();
-    solve_positions();
+    return false;
 }
 
 } // namespace ppx

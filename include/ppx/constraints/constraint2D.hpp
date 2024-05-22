@@ -4,7 +4,11 @@
 
 namespace ppx
 {
-class constraint2D : public joint2D
+class constraint2D;
+template <typename T>
+concept IConstraint2D = kit::DerivedFrom<T, constraint2D>;
+
+class constraint2D : virtual public joint2D
 {
   public:
     using joint2D::joint2D;
@@ -14,8 +18,6 @@ class constraint2D : public joint2D
 
     virtual bool solve_positions();
     bool is_constraint() const override;
-
-  private:
-    virtual void solve() override;
+    bool is_actuator() const override;
 };
 } // namespace ppx

@@ -10,8 +10,11 @@ namespace ppx
 class joint2D;
 
 template <typename T>
+concept IJoint2D = kit::DerivedFrom<T, joint2D>;
+
+template <typename T>
 concept Joint2D = requires() {
-    requires kit::DerivedFrom<T, joint2D>;
+    requires IJoint2D<T>;
     typename T::specs;
     requires kit::DerivedFrom<typename T::specs, specs::joint2D>;
 };
@@ -43,8 +46,8 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 
     bool contains(const body2D *body) const;
 
-    virtual bool is_constraint() const;
-    virtual void solve() = 0;
+    virtual bool is_constraint() const = 0;
+    virtual bool is_actuator() const = 0;
 
   protected:
     joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2);
@@ -69,7 +72,7 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
     void add_to_bodies();
     void remove_from_bodies();
 
-    template <Joint2D T> friend class joint_container2D;
+    template <Joint2D T> friend class joint_manager2D;
 };
 
 } // namespace ppx

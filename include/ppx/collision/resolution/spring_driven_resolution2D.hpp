@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ppx/collision/resolution/joint_driven_resolution2D.hpp"
+#include "ppx/collision/resolution/actuator_driven_resolution2D.hpp"
 #include "ppx/collision/contacts/sd_contact2D.hpp"
 
 namespace ppx
 {
-class spring_driven_resolution2D final : public joint_driven_resolution2D
+class spring_driven_resolution2D final : public actuator_driven_resolution2D
 {
-    using joint_driven_resolution2D::joint_driven_resolution2D;
+    using actuator_driven_resolution2D::actuator_driven_resolution2D;
 
     jd_contact_manager<sd_contact2D> m_contacts{world};
 

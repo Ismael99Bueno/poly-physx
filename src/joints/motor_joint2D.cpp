@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-motor_joint2D::motor_joint2D(world2D &world, const specs &spc) : vconstraint2D<2, 0>(world, spc), props(spc.props)
+motor_joint2D::motor_joint2D(world2D &world, const specs &spc) : joint2D(world, spc), props(spc.props)
 {
 }
 

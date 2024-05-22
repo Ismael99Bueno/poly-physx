@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppx/joints/meta_manager2D.hpp"
+#include "ppx/joints/joint_meta_manager2D.hpp"
 #include "ppx/joints/island2D.hpp"
 
 namespace ppx
@@ -8,8 +8,8 @@ namespace ppx
 class joint_repository2D final : public manager2D<joint2D>
 {
   public:
-    joint_meta_manager2D non_constraint_based;
-    constraint_meta_manager2D constraint_based;
+    actuator_meta_manager2D actuators;
+    constraint_meta_manager2D constraints;
 
     void solve_islands();
 
@@ -25,43 +25,43 @@ class joint_repository2D final : public manager2D<joint2D>
 
     template <Joint2D T> auto add_manager(const std::string &name)
     {
-        if constexpr (VConstraint2D<T>)
+        if constexpr (Constraint2D<T>)
             return add_manager<T, constraint_manager2D<T>>(name);
         else
-            return add_manager<T, joint_manager2D<T>>(name);
+            return add_manager<T, actuator_manager2D<T>>(name);
     }
 
-    template <Joint2D T, kit::DerivedFrom<joint_manager2D<T>> Manager> Manager *add_manager(const std::string &name)
+    template <Joint2D T, kit::DerivedFrom<actuator_manager2D<T>> Manager> Manager *add_manager(const std::string &name)
     {
-        return non_constraint_based.add_manager<T, Manager>(name);
+        return actuators.add_manager<T, Manager>(name);
     }
     template <Joint2D T, kit::DerivedFrom<constraint_manager2D<T>> Manager>
     Manager *add_manager(const std::string &name)
     {
-        return constraint_based.add_manager<T, Manager>(name);
+        return constraints.add_manager<T, Manager>(name);
     }
 
     template <Joint2D T> auto manager() const
     {
-        if constexpr (VConstraint2D<T>)
-            return constraint_based.manager<T>();
+        if constexpr (Constraint2D<T>)
+            return constraints.manager<T>();
         else
-            return non_constraint_based.manager<T>();
+            return actuators.manager<T>();
     }
     template <Joint2D T> auto manager()
     {
-        if constexpr (VConstraint2D<T>)
-            return constraint_based.manager<T>();
+        if constexpr (Constraint2D<T>)
+            return constraints.manager<T>();
         else
-            return non_constraint_based.manager<T>();
+            return actuators.manager<T>();
     }
 
     template <Joint2D T> bool remove_manager()
     {
-        if constexpr (VConstraint2D<T>)
-            return constraint_based.remove<T>();
+        if constexpr (Constraint2D<T>)
+            return constraints.remove<T>();
         else
-            return non_constraint_based.remove<T>();
+            return actuators.remove<T>();
     }
     using manager2D<joint2D>::remove;
     bool remove(std::size_t index) override;

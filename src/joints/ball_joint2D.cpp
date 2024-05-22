@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-ball_joint2D::ball_joint2D(world2D &world, const specs &spc) : pvconstraint2D<0, 1>{world, spc}, props{spc.props}
+ball_joint2D::ball_joint2D(world2D &world, const specs &spc) : joint2D{world, spc}, props{spc.props}
 {
     if (spc.deduce_angle)
     {

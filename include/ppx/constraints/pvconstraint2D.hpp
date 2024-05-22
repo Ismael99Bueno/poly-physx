@@ -9,12 +9,15 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 class pvconstraint2D;
 
 template <typename T>
-concept PVConstraint2D = requires() {
-    requires Joint2D<T>;
+concept IPVConstraint2D = requires() {
+    requires IConstraint2D<T>;
     requires kit::DerivedFrom<T, pvconstraint2D<1, 0>> || kit::DerivedFrom<T, pvconstraint2D<0, 1>> ||
                  kit::DerivedFrom<T, pvconstraint2D<1, 1>> || kit::DerivedFrom<T, pvconstraint2D<2, 0>> ||
                  kit::DerivedFrom<T, pvconstraint2D<2, 1>>;
 };
+
+template <typename T>
+concept PVConstraint2D = Joint2D<T> && IPVConstraint2D<T>;
 
 template <typename T>
 concept Constraint2D = VConstraint2D<T> || PVConstraint2D<T>;

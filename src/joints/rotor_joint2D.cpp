@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-rotor_joint2D::rotor_joint2D(world2D &world, const specs &spc) : vconstraint2D<0, 1>(world, spc), props(spc.props)
+rotor_joint2D::rotor_joint2D(world2D &world, const specs &spc) : joint2D(world, spc), props(spc.props)
 {
 }
 

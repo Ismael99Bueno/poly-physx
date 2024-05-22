@@ -8,7 +8,6 @@
 
 namespace ppx
 {
-
 spring_joint2D::spring_joint2D(world2D &world, const specs &spc)
     : joint2D(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props)
 {

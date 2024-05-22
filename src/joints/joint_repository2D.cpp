@@ -5,7 +5,7 @@
 namespace ppx
 {
 joint_repository2D::joint_repository2D(world2D &world)
-    : manager2D(world), non_constraint_based(world, m_elements, events), constraint_based(world, m_elements, events)
+    : manager2D(world), actuators(world, m_elements, events), constraints(world, m_elements, events)
 {
 }
 
@@ -84,9 +84,9 @@ void joint_repository2D::build_islands_from_existing_simulation()
 
                 joint->meta.island_flag = true;
                 if (joint->is_constraint())
-                    island->m_constraints.push_back((constraint2D *)joint);
+                    island->m_constraints.push_back(dynamic_cast<constraint2D *>(joint));
                 else
-                    island->m_joints.push_back(joint);
+                    island->m_actuators.push_back(dynamic_cast<actuator2D *>(joint));
                 body2D *other = joint->body1() == current ? joint->body2() : joint->body1();
                 if (!other->meta.island_flag && other->is_dynamic())
                     stack.push(other);
@@ -127,7 +127,7 @@ bool joint_repository2D::split_island(island2D *island)
         KIT_ASSERT_ERROR(body->is_dynamic(), "Body must be dynamic");
         body->meta.island_flag = false;
     }
-    for (joint2D *joint : island->m_joints)
+    for (joint2D *joint : island->m_actuators)
         joint->meta.island_flag = false;
     for (constraint2D *constraint : island->m_constraints)
         constraint->meta.island_flag = false;
@@ -154,9 +154,9 @@ bool joint_repository2D::split_island(island2D *island)
                 joint->meta.island_flag = true;
 
                 if (joint->is_constraint())
-                    new_island->m_constraints.push_back((constraint2D *)joint);
+                    new_island->m_constraints.push_back(dynamic_cast<constraint2D *>(joint));
                 else
-                    new_island->m_joints.push_back(joint);
+                    new_island->m_actuators.push_back(dynamic_cast<actuator2D *>(joint));
                 body2D *other = joint->body1() == current ? joint->body2() : joint->body1();
                 if (!other->meta.island_flag && other->is_dynamic())
                     stack.push(other);
@@ -180,9 +180,9 @@ bool joint_repository2D::split_island(island2D *island)
 
 bool joint_repository2D::remove(std::size_t index)
 {
-    if (non_constraint_based.remove(index))
+    if (actuators.remove(index))
         return true;
-    return constraint_based.remove(index);
+    return constraints.remove(index);
 }
 
 } // namespace ppx

@@ -13,12 +13,15 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 class vconstraint2D;
 
 template <typename T>
-concept VConstraint2D = requires() {
-    requires Joint2D<T>;
+concept IVConstraint2D = requires() {
+    requires IConstraint2D<T>;
     requires kit::DerivedFrom<T, vconstraint2D<1, 0>> || kit::DerivedFrom<T, vconstraint2D<0, 1>> ||
                  kit::DerivedFrom<T, vconstraint2D<1, 1>> || kit::DerivedFrom<T, vconstraint2D<2, 0>> ||
                  kit::DerivedFrom<T, vconstraint2D<2, 1>>;
 };
+
+template <typename T>
+concept VConstraint2D = Joint2D<T> && IVConstraint2D<T>;
 
 template <std::size_t Degrees> struct degree_types
 {

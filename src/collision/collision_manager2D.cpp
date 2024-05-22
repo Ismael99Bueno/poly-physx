@@ -50,14 +50,14 @@ bool collision_manager2D::contains(const collider2D *collider1, const collider2D
 
 void collision_manager2D::set_resolution_constraint_based(constraint_driven_resolution2D *resolution)
 {
-    world.joints.constraint_based.m_resolution = resolution;
-    world.joints.non_constraint_based.m_resolution = nullptr;
+    world.joints.constraints.m_resolution = resolution;
+    world.joints.actuators.m_resolution = nullptr;
 }
 
-void collision_manager2D::set_resolution_non_constraint_based(joint_driven_resolution2D *resolution)
+void collision_manager2D::set_resolution_actuator_based(actuator_driven_resolution2D *resolution)
 {
-    world.joints.non_constraint_based.m_resolution = resolution;
-    world.joints.constraint_based.m_resolution = nullptr;
+    world.joints.actuators.m_resolution = resolution;
+    world.joints.constraints.m_resolution = nullptr;
 }
 
 void collision_manager2D::detect_and_resolve()

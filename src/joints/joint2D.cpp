@@ -81,10 +81,6 @@ bool joint2D::contains(const body2D *body) const
 {
     return body == m_body1 || body == m_body2;
 }
-bool joint2D::is_constraint() const
-{
-    return false;
-}
 
 void joint2D::add_to_bodies()
 {

@@ -438,9 +438,9 @@ template <> struct kit::yaml::codec<ppx::behaviour_manager2D>
     }
 };
 
-template <ppx::Joint2D T> struct kit::yaml::codec<ppx::joint_container2D<T>>
+template <ppx::Joint2D T> struct kit::yaml::codec<ppx::joint_manager2D<T>>
 {
-    static YAML::Node encode(const ppx::joint_container2D<T> &jc)
+    static YAML::Node encode(const ppx::joint_manager2D<T> &jc)
     {
         YAML::Node node;
         using specs = typename T::specs;
@@ -460,7 +460,7 @@ template <ppx::Joint2D T> struct kit::yaml::codec<ppx::joint_container2D<T>>
             return node;
         }
     }
-    static bool decode(const YAML::Node &node, ppx::joint_container2D<T> &jc)
+    static bool decode(const YAML::Node &node, ppx::joint_manager2D<T> &jc)
     {
         using specs = typename T::specs;
         if constexpr (kit::yaml::Decodeable<specs>)
@@ -482,16 +482,16 @@ template <ppx::Joint2D T> struct kit::yaml::codec<ppx::joint_container2D<T>>
     }
 };
 
-template <ppx::IManager IM> struct kit::yaml::codec<ppx::meta_manager2D<IM>>
+template <ppx::IManager IM> struct kit::yaml::codec<ppx::joint_meta_manager2D<IM>>
 {
-    static YAML::Node encode(const ppx::meta_manager2D<IM> &mm)
+    static YAML::Node encode(const ppx::joint_meta_manager2D<IM> &mm)
     {
         YAML::Node node;
         for (const auto &mng : mm)
             node["Managers"][mng->id] = *mng;
         return node;
     }
-    static bool decode(const YAML::Node &node, ppx::meta_manager2D<IM> &mm)
+    static bool decode(const YAML::Node &node, ppx::joint_meta_manager2D<IM> &mm)
     {
         if (node["Managers"])
             for (auto it = node["Managers"].begin(); it != node["Managers"].end(); ++it)
@@ -513,20 +513,18 @@ template <> struct kit::yaml::codec<ppx::joint_repository2D>
     static YAML::Node encode(const ppx::joint_repository2D &jr)
     {
         YAML::Node node;
-        node["Non constraint based"] =
-            kit::yaml::codec<ppx::meta_manager2D<ppx::ijoint_manager2D>>::encode(jr.non_constraint_based);
-        node["Constraint based"] =
-            kit::yaml::codec<ppx::meta_manager2D<ppx::iconstraint_manager2D>>::encode(jr.constraint_based);
+        node["Actuators"] = kit::yaml::codec<ppx::joint_meta_manager2D<ppx::iactuator_manager2D>>::encode(jr.actuators);
+        node["Constraints"] =
+            kit::yaml::codec<ppx::joint_meta_manager2D<ppx::iconstraint_manager2D>>::encode(jr.constraints);
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::joint_repository2D &jr)
     {
         if (!node.IsMap() || node.size() != 2)
             return false;
-        kit::yaml::codec<ppx::meta_manager2D<ppx::ijoint_manager2D>>::decode(node["Non constraint based"],
-                                                                             jr.non_constraint_based);
-        kit::yaml::codec<ppx::meta_manager2D<ppx::iconstraint_manager2D>>::decode(node["Constraint based"],
-                                                                                  jr.constraint_based);
+        kit::yaml::codec<ppx::joint_meta_manager2D<ppx::iactuator_manager2D>>::decode(node["Actuators"], jr.actuators);
+        kit::yaml::codec<ppx::joint_meta_manager2D<ppx::iconstraint_manager2D>>::decode(node["Constraints"],
+                                                                                        jr.constraints);
         return true;
     }
 };

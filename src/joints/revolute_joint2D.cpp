@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-revolute_joint2D::revolute_joint2D(world2D &world, const specs &spc) : pvconstraint2D<2, 0>(world, spc, spc.ganchor)
+revolute_joint2D::revolute_joint2D(world2D &world, const specs &spc) : joint2D(world, spc, spc.ganchor)
 {
 }
 

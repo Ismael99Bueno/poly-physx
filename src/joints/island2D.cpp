@@ -44,7 +44,7 @@ void island2D::merge(island2D &island)
         m_bodies.push_back(body);
         body->meta.island = this;
     }
-    m_joints.insert(m_joints.end(), island.m_joints.begin(), island.m_joints.end());
+    m_actuators.insert(m_actuators.end(), island.m_actuators.begin(), island.m_actuators.end());
     m_constraints.insert(m_constraints.end(), island.m_constraints.begin(), island.m_constraints.end());
     island.merged = true;
     awake();
@@ -57,9 +57,9 @@ void island2D::prepare_constraint_states()
 
 void island2D::solve()
 {
-    for (joint2D *joint : m_joints)
-        if (joint->enabled)
-            joint->solve();
+    for (actuator2D *actuator : m_actuators)
+        if (actuator->enabled)
+            actuator->solve();
 
     prepare_constraint_states();
     const std::size_t viters = world.constraints.velocity_iterations;
@@ -100,11 +100,11 @@ void island2D::solve()
 
 bool island2D::empty() const
 {
-    return m_bodies.empty() && m_joints.empty() && m_constraints.empty();
+    return m_bodies.empty() && m_actuators.empty() && m_constraints.empty();
 }
 std::size_t island2D::size() const
 {
-    return m_bodies.size() + m_joints.size() + m_constraints.size();
+    return m_bodies.size() + m_actuators.size() + m_constraints.size();
 }
 
 island2D *island2D::handle_island_merge_encounter(island2D *island1, island2D *island2)

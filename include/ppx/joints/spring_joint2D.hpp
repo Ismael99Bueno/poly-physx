@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ppx/joints/joint2D.hpp"
+#include "ppx/actuators/actuator2D.hpp"
 #include "ppx/common/specs2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 
 namespace ppx
 {
-class spring_joint2D : public joint2D, kit::non_copyable
+class spring_joint2D : public actuator2D, kit::non_copyable
 {
   public:
     static inline constexpr std::uint8_t ANCHORS = 2;

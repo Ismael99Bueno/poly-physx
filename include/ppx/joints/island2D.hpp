@@ -1,13 +1,11 @@
 #pragma once
 
-#include "ppx/collision/contacts/contact_joint2D.hpp"
-#include "ppx/collision/contacts/contact_constraint2D.hpp"
+#include "ppx/actuators/actuator2D.hpp"
+#include "ppx/constraints/constraint2D.hpp"
+#include "ppx/body/body2D.hpp"
 
 namespace ppx
 {
-template <typename T>
-concept ValidJoint = kit::DerivedFrom<T, joint2D>;
-
 class island2D : public worldref2D
 {
   public:
@@ -27,14 +25,14 @@ class island2D : public worldref2D
     void prepare_constraint_states();
     void solve();
 
-    template <ValidJoint VJ> static void add(VJ *joint)
+    template <IJoint2D Joint> static void add(Joint *joint)
     {
         island2D *island = get_effective_island(joint);
         if (!island)
             return;
 
         island->awake();
-        if constexpr (kit::DerivedFrom<VJ, constraint2D>)
+        if constexpr (IConstraint2D<Joint>)
         {
             if (std::find(island->m_constraints.begin(), island->m_constraints.end(), joint) ==
                 island->m_constraints.end())
@@ -42,12 +40,12 @@ class island2D : public worldref2D
         }
         else
         {
-            if (std::find(island->m_joints.begin(), island->m_joints.end(), joint) == island->m_joints.end())
-                island->m_joints.push_back(joint);
+            if (std::find(island->m_actuators.begin(), island->m_actuators.end(), joint) == island->m_actuators.end())
+                island->m_actuators.push_back(joint);
         }
     }
 
-    template <ValidJoint VJ> static void remove(VJ *joint)
+    template <IJoint2D Joint> static void remove(Joint *joint)
     {
         const body2D *body1 = joint->body1();
         const body2D *body2 = joint->body2();
@@ -60,7 +58,7 @@ class island2D : public worldref2D
                          "The joint's bodies must share the same island");
         if (!island)
             return;
-        if constexpr (kit::DerivedFrom<VJ, constraint2D>)
+        if constexpr (IConstraint2D<Joint>)
         {
             for (std::size_t i = 0; i < island->m_constraints.size(); i++)
                 if (island->m_constraints[i] == joint)
@@ -72,10 +70,10 @@ class island2D : public worldref2D
                 }
         }
         else
-            for (std::size_t i = 0; i < island->m_joints.size(); i++)
-                if (island->m_joints[i] == joint)
+            for (std::size_t i = 0; i < island->m_actuators.size(); i++)
+                if (island->m_actuators[i] == joint)
                 {
-                    island->m_joints.erase(island->m_joints.begin() + i);
+                    island->m_actuators.erase(island->m_actuators.begin() + i);
                     island->awake();
                     island->may_split = body1->is_dynamic() && body2->is_dynamic();
                     return;
@@ -89,10 +87,10 @@ class island2D : public worldref2D
   private:
     std::vector<body2D *> m_bodies;
 
-    std::vector<joint2D *> m_joints;
+    std::vector<actuator2D *> m_actuators;
     std::vector<constraint2D *> m_constraints;
 
-    template <ValidJoint VJ> static island2D *get_effective_island(VJ *joint)
+    template <IJoint2D Joint> static island2D *get_effective_island(Joint *joint)
     {
         const body2D *body1 = joint->body1();
         const body2D *body2 = joint->body2();

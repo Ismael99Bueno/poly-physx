@@ -6,7 +6,9 @@
 namespace ppx
 {
 si_contact2D::si_contact2D(world2D &world, const collision2D *collision, const std::size_t manifold_index)
-    : contact_constraint2D(world, collision, manifold_index), m_restitution(collision->restitution),
+    : joint2D(world, collision->collider1->body(), collision->collider2->body(),
+              collision->manifold[manifold_index].point),
+      contact2D(collision, manifold_index), m_restitution(collision->restitution),
       m_penetration(collision->manifold[manifold_index].penetration), m_nmtv(glm::normalize(collision->mtv)),
       m_friction(world, collision, m_nmtv, manifold_index), m_has_friction(!kit::approaches_zero(collision->friction))
 {

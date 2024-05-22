@@ -1,11 +1,11 @@
 #pragma once
 
 #include "ppx/collision/contacts/si_friction2D.hpp"
-#include "ppx/collision/contacts/contact_constraint2D.hpp"
+#include "ppx/collision/contacts/contact2D.hpp"
 
 namespace ppx
 {
-class si_contact2D final : public contact_constraint2D
+class si_contact2D final : public contact2D, public pvconstraint2D<1, 0>
 {
   public:
     si_contact2D(world2D &world, const collision2D *collision, std::size_t manifold_index);

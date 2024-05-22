@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ppx/collision/resolution/collision_resolution2D.hpp"
-#include "ppx/collision/contacts/contact_constraint2D.hpp"
+#include "ppx/collision/contacts/contact2D.hpp"
 
 namespace ppx
 {

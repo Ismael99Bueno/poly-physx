@@ -6,7 +6,7 @@
 namespace ppx
 {
 distance_joint2D::distance_joint2D(world2D &world, const specs &spc)
-    : pvconstraint2D<1, 0>(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props),
+    : joint2D(world, spc, spc.ganchor1, spc.ganchor2), props(spc.props),
       m_length(glm::distance(spc.ganchor1, spc.ganchor2))
 {
     if (spc.deduce_distance)
