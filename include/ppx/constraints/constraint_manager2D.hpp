@@ -16,7 +16,6 @@ class iconstraint_manager2D : public virtual ijoint_container2D
     virtual ~iconstraint_manager2D() = default;
 
     virtual void startup() = 0;
-    virtual void warmup() = 0;
     virtual void solve_velocities() = 0;
     virtual bool solve_positions() = 0;
 };
@@ -39,13 +38,6 @@ template <VConstraint2D T> class constraint_manager2D : public joint_container2D
         for (T *constraint : this->m_elements)
             if (constraint->enabled)
                 constraint->startup();
-    }
-
-    virtual void warmup() override
-    {
-        for (T *constraint : this->m_elements)
-            if (constraint->enabled)
-                constraint->warmup();
     }
 
     virtual void solve_velocities() override
