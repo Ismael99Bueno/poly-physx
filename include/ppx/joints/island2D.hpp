@@ -25,6 +25,10 @@ class island2D : public worldref2D
     void prepare_constraint_states();
     void solve();
 
+    const std::vector<body2D *> &bodies() const;
+    const std::vector<actuator2D *> &actuators() const;
+    const std::vector<constraint2D *> &constraints() const;
+
     template <IJoint2D Joint> static void add(Joint *joint)
     {
         island2D *island = get_effective_island(joint);

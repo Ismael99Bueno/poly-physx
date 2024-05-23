@@ -63,7 +63,9 @@ class joint_repository2D final : public manager2D<joint2D>
         else
             return actuators.remove<T>();
     }
-    using manager2D<joint2D>::remove;
+    bool remove_manager(std::size_t index);
+
+    bool remove(joint2D *joint) override;
     bool remove(std::size_t index) override;
 
     template <Joint2D T> bool remove(const std::size_t index)
@@ -76,6 +78,9 @@ class joint_repository2D final : public manager2D<joint2D>
         auto mng = manager<T>();
         return mng ? mng->remove(joint) : false;
     }
+
+    const std::vector<island2D *> &islands() const;
+    bool island_checksum() const;
 
   private:
     joint_repository2D(world2D &world);

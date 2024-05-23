@@ -34,6 +34,7 @@ void island2D::remove_body(body2D *body)
             may_split = true;
             return;
         }
+    KIT_WARN("Body not found in island");
 }
 
 void island2D::merge(island2D &island)
@@ -53,6 +54,19 @@ void island2D::merge(island2D &island)
 void island2D::prepare_constraint_states()
 {
     body_manager2D::prepare_constraint_states(m_bodies, world.rk_substep_timestep(), world.semi_implicit_integration);
+}
+
+const std::vector<body2D *> &island2D::bodies() const
+{
+    return m_bodies;
+}
+const std::vector<actuator2D *> &island2D::actuators() const
+{
+    return m_actuators;
+}
+const std::vector<constraint2D *> &island2D::constraints() const
+{
+    return m_constraints;
 }
 
 void island2D::solve()

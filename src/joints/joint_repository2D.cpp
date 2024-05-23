@@ -9,21 +9,25 @@ joint_repository2D::joint_repository2D(world2D &world)
 {
 }
 
+const std::vector<island2D *> &joint_repository2D::islands() const
+{
+    return m_islands;
+}
+
 void joint_repository2D::solve_islands() // PARALLELIZE THIS
 {
-    for (auto it = m_islands.begin(); it != m_islands.end(); ++it)
+    for (auto it = m_islands.begin(); it != m_islands.end();)
     {
         island2D *island = *it;
         if (island->merged || island->empty())
         {
             allocator<island2D>::destroy(island);
             it = m_islands.erase(it);
-            if (it == m_islands.end())
-                return;
-            island = *it;
+            continue;
         }
         if (!island->asleep())
             island->solve();
+        ++it;
     }
 }
 
@@ -65,7 +69,7 @@ void joint_repository2D::build_islands_from_existing_simulation()
     std::stack<body2D *> stack;
     for (body2D *body : world.bodies)
     {
-        if (body->meta.island_flag)
+        if (body->meta.island_flag || !body->is_dynamic())
             continue;
         island2D *island = create_island();
         stack.push(body);
@@ -178,11 +182,40 @@ bool joint_repository2D::split_island(island2D *island)
     return split_count > 1;
 }
 
-bool joint_repository2D::remove(std::size_t index)
+bool joint_repository2D::island_checksum() const
+{
+    const std::size_t bodies = world.bodies.size();
+    std::size_t count = 0;
+    for (island2D *island : m_islands)
+    {
+        count += island->m_bodies.size();
+        for (body2D *body : island->m_bodies)
+            if (body->meta.island != island)
+            {
+                KIT_ERROR("Checkusm failed: Body island mismatch")
+                return false;
+            }
+    }
+    KIT_ASSERT_ERROR(count == bodies, "Checkusm failed: Body count mismatch")
+    return count == bodies;
+}
+
+bool joint_repository2D::remove_manager(const std::size_t index)
 {
     if (actuators.remove(index))
         return true;
     return constraints.remove(index);
+}
+
+bool joint_repository2D::remove(joint2D *joint)
+{
+    if (actuators.remove(joint))
+        return true;
+    return constraints.remove(joint);
+}
+bool joint_repository2D::remove(const std::size_t index)
+{
+    return remove(m_elements[index]);
 }
 
 } // namespace ppx

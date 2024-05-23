@@ -15,10 +15,8 @@
 #include "ppx/collision/detection/sort_sweep_detection2D.hpp"
 #include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
 
-#include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
-#include "ppx/collision/resolution/spring_driven_resolution2D.hpp"
-
 #include "ppx/collision/contacts/sd_contact2D.hpp"
+#include "ppx/collision/contacts/si_contact2D.hpp"
 
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
@@ -496,13 +494,13 @@ template <ppx::IManager IM> struct kit::yaml::codec<ppx::joint_meta_manager2D<IM
         if (node["Managers"])
             for (auto it = node["Managers"].begin(); it != node["Managers"].end(); ++it)
             {
-                const auto solver = mm[it->first.as<std::string>()];
-                KIT_ASSERT_WARN(solver,
+                const auto manager = mm[it->first.as<std::string>()];
+                KIT_ASSERT_WARN(manager,
                                 "The joint manager {0} does not exist in the current simulation, so it will not be "
                                 "deserialized. Consider adding it before deserialization",
                                 it->first.as<std::string>())
-                if (solver)
-                    it->second.as<IM>(*solver);
+                if (manager)
+                    it->second.as<IM>(*manager);
             }
         return true;
     }
@@ -568,15 +566,15 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         else if (cm.detection()->pp_manifold_algorithm<ppx::mtv_support_manifold2D>())
             ndet["P-P Algorithm"] = 1;
 
-        YAML::Node nres = node["Resolution"];
-        if (auto colres = cm.resolution<ppx::sequential_impulses_resolution2D>())
-            nres["Detection method"] = 0;
-        else if (auto colres = cm.resolution<ppx::spring_driven_resolution2D>())
-            nres["Detection method"] = 1;
+        YAML::Node nsolv = node["Contacts"];
+        if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::si_contact2D>>())
+            nsolv["Solver method"] = 0;
+        else if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::sd_contact2D>>())
+            nsolv["Detection method"] = 1;
 
-        nres["Rigidity"] = ppx::sd_contact2D::rigidity;
-        nres["Max normal damping"] = ppx::sd_contact2D::max_normal_damping;
-        nres["Max tangent damping"] = ppx::sd_contact2D::max_tangent_damping;
+        nsolv["Rigidity"] = ppx::sd_contact2D::rigidity;
+        nsolv["Max normal damping"] = ppx::sd_contact2D::max_normal_damping;
+        nsolv["Max tangent damping"] = ppx::sd_contact2D::max_tangent_damping;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::collision_manager2D &cm)
@@ -620,19 +618,19 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 cm.detection()->set_pp_manifold_algorithm<ppx::mtv_support_manifold2D>();
         }
 
-        const YAML::Node nres = node["Resolution"];
-        if (nres["Detection method"])
+        const YAML::Node nsolv = node["Contacts"];
+        if (nsolv["Solver method"])
         {
-            const int method = nres["Detection method"].as<int>();
+            const int method = nsolv["Solver method"].as<int>();
             if (method == 0)
-                cm.set_resolution<ppx::sequential_impulses_resolution2D>();
+                cm.set_contact_solver<ppx::contact_solver2D<ppx::si_contact2D>>();
             else if (method == 1)
-                cm.set_resolution<ppx::spring_driven_resolution2D>();
+                cm.set_contact_solver<ppx::contact_solver2D<ppx::sd_contact2D>>();
         }
 
-        ppx::sd_contact2D::rigidity = nres["Rigidity"].as<float>();
-        ppx::sd_contact2D::max_normal_damping = nres["Max normal damping"].as<float>();
-        ppx::sd_contact2D::max_tangent_damping = nres["Max tangent damping"].as<float>();
+        ppx::sd_contact2D::rigidity = nsolv["Rigidity"].as<float>();
+        ppx::sd_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();
+        ppx::sd_contact2D::max_tangent_damping = nsolv["Max tangent damping"].as<float>();
         return true;
     }
 };
@@ -660,6 +658,11 @@ template <> struct kit::yaml::codec<ppx::world2D>
         ctrs["Max position correction"] = world.constraints.max_position_correction;
         ctrs["Position resolution speed"] = world.constraints.position_resolution_speed;
 
+        YAML::Node islands = node["Island settings"];
+        islands["Enabled"] = world.islands.enabled();
+        islands["Sleep energy threshold"] = world.islands.sleep_energy_threshold;
+        islands["Sleep time threshold"] = world.islands.sleep_time_threshold;
+
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::world2D &world)
@@ -684,6 +687,11 @@ template <> struct kit::yaml::codec<ppx::world2D>
         world.constraints.slop = ctrs["Slop"].as<float>();
         world.constraints.max_position_correction = ctrs["Max position correction"].as<float>();
         world.constraints.position_resolution_speed = ctrs["Position resolution speed"].as<float>();
+
+        const YAML::Node islands = node["Island settings"];
+        world.islands.enabled(islands["Enabled"].as<bool>());
+        world.islands.sleep_energy_threshold = islands["Sleep energy threshold"].as<float>();
+        world.islands.sleep_time_threshold = islands["Sleep time threshold"].as<float>();
 
         return true;
     }

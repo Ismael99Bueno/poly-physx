@@ -6,8 +6,8 @@
 
 namespace ppx
 {
-class constraint_driven_resolution2D;
-class actuator_driven_resolution2D;
+class contact_constraint_solver2D;
+class contact_actuator_solver2D;
 template <typename T>
 concept IManager = std::is_same_v<T, iactuator_manager2D> || std::is_same_v<T, iconstraint_manager2D>;
 
@@ -69,7 +69,7 @@ template <IManager IM> class joint_meta_manager2D : public idmanager2D<kit::scop
 class actuator_meta_manager2D final : public joint_meta_manager2D<iactuator_manager2D>
 {
     using joint_meta_manager2D<iactuator_manager2D>::joint_meta_manager2D;
-    actuator_driven_resolution2D *m_resolution = nullptr;
+    contact_actuator_solver2D *m_contact_solver = nullptr;
 
     void solve();
     friend class world2D;
@@ -79,7 +79,7 @@ class actuator_meta_manager2D final : public joint_meta_manager2D<iactuator_mana
 class constraint_meta_manager2D final : public joint_meta_manager2D<iconstraint_manager2D>
 {
     using joint_meta_manager2D<iconstraint_manager2D>::joint_meta_manager2D;
-    constraint_driven_resolution2D *m_resolution = nullptr;
+    contact_constraint_solver2D *m_contact_solver = nullptr;
 
     void solve();
     friend class world2D;

@@ -89,7 +89,7 @@ template <typename T> class manager2D : public worldref2D, kit::non_copyable
     }
 
     virtual bool remove(std::size_t index) = 0;
-    bool remove(value_t *element)
+    virtual bool remove(value_t *element)
     {
         for (std::size_t i = 0; i < m_elements.size(); i++)
             if (element == type_wrapper<T>::ptr(m_elements[i]))

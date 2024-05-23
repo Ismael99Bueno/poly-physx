@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/joints/joint_meta_manager2D.hpp"
-#include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
+#include "ppx/collision/contacts/contact_solver2D.hpp"
 #include "ppx/world2D.hpp"
 
 namespace ppx
@@ -24,8 +24,8 @@ template <IManager IM> bool joint_meta_manager2D<IM>::remove(joint2D *joint)
 void actuator_meta_manager2D::solve()
 {
     KIT_PERF_SCOPE("Joints solve")
-    if (m_resolution)
-        m_resolution->solve();
+    if (m_contact_solver)
+        m_contact_solver->solve();
     for (const auto &manager : m_elements)
         if (manager->enabled)
             manager->solve();
@@ -36,8 +36,8 @@ void constraint_meta_manager2D::solve()
     KIT_PERF_SCOPE("Constraints solve")
     const std::size_t viters = world.constraints.velocity_iterations;
     const std::size_t piters = world.constraints.position_iterations;
-    if (m_resolution)
-        m_resolution->startup();
+    if (m_contact_solver)
+        m_contact_solver->startup();
 
     for (const auto &manager : this->m_elements)
         if (manager->enabled)
@@ -45,8 +45,8 @@ void constraint_meta_manager2D::solve()
 
     for (std::size_t i = 0; i < viters; i++)
     {
-        if (m_resolution)
-            m_resolution->solve_velocities();
+        if (m_contact_solver)
+            m_contact_solver->solve_velocities();
         for (const auto &manager : this->m_elements)
             if (manager->enabled)
                 manager->solve_velocities();
@@ -57,8 +57,8 @@ void constraint_meta_manager2D::solve()
         for (const auto &manager : this->m_elements)
             if (manager->enabled)
                 solved &= manager->solve_positions();
-        if (m_resolution)
-            solved &= m_resolution->solve_positions();
+        if (m_contact_solver)
+            solved &= m_contact_solver->solve_positions();
         if (solved)
             break;
     }

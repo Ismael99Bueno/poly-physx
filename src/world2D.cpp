@@ -68,7 +68,7 @@ void world2D::pre_step_preparation()
 #ifdef DEBUG
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
-
+    KIT_ASSERT_ERROR(!joints.islands_enabled() || joints.island_checksum(), "Checksum failed")
     collisions.detection()->flag_new_step();
     bodies.send_data_to_state(integrator.state);
     if (joints.islands_enabled())
@@ -80,6 +80,7 @@ void world2D::post_step_setup()
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     m_previous_timestep = integrator.ts.value;
 
+    KIT_ASSERT_ERROR(!joints.islands_enabled() || joints.island_checksum(), "Checksum failed")
 #ifdef DEBUG
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif

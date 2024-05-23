@@ -2,12 +2,12 @@
 #include "ppx/collision/collision_manager2D.hpp"
 
 #include "ppx/collision/detection/quad_tree_detection2D.hpp"
-#include "ppx/collision/resolution/sequential_impulses_resolution2D.hpp"
-
 #include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
 
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
+
+#include "ppx/collision/contacts/si_contact2D.hpp"
 
 #include "ppx/world2D.hpp"
 
@@ -16,7 +16,7 @@ namespace ppx
 collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
 {
     set_detection<quad_tree_detection2D>();
-    set_resolution<sequential_impulses_resolution2D>();
+    set_contact_solver<contact_solver2D<si_contact2D>>();
 
     m_detection->set_cp_narrow_detection<gjk_epa_detection2D>();
     m_detection->set_pp_narrow_detection<gjk_epa_detection2D>();
@@ -48,16 +48,16 @@ bool collision_manager2D::contains(const collider2D *collider1, const collider2D
     return m_detection->collisions().contains({collider1, collider2});
 }
 
-void collision_manager2D::set_resolution_constraint_based(constraint_driven_resolution2D *resolution)
+void collision_manager2D::set_constraint_based_contact_solver(contact_constraint_solver2D *solver)
 {
-    world.joints.constraints.m_resolution = resolution;
-    world.joints.actuators.m_resolution = nullptr;
+    world.joints.constraints.m_contact_solver = solver;
+    world.joints.actuators.m_contact_solver = nullptr;
 }
 
-void collision_manager2D::set_resolution_actuator_based(actuator_driven_resolution2D *resolution)
+void collision_manager2D::set_actuator_based_contact_solver(contact_actuator_solver2D *solver)
 {
-    world.joints.actuators.m_resolution = resolution;
-    world.joints.constraints.m_resolution = nullptr;
+    world.joints.actuators.m_contact_solver = solver;
+    world.joints.constraints.m_contact_solver = nullptr;
 }
 
 void collision_manager2D::detect_and_resolve()
@@ -66,8 +66,8 @@ void collision_manager2D::detect_and_resolve()
     if (!m_detection->enabled)
         return;
     const auto &collisions = m_detection->detect_collisions_cached();
-    if (m_resolution->enabled)
-        m_resolution->resolve_contacts(collisions);
+    if (m_contacts->enabled)
+        m_contacts->create_contacts_from_collisions(collisions);
 }
 
 std::size_t collision_manager2D::size() const

@@ -5,9 +5,8 @@
 #include "kit/interface/toggleable.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "ppx/collision/detection/collision_detection2D.hpp"
-#include "ppx/collision/resolution/collision_resolution2D.hpp"
-#include "ppx/collision/resolution/constraint_driven_resolution2D.hpp"
-#include "ppx/collision/resolution/actuator_driven_resolution2D.hpp"
+#include "ppx/collision/contacts/collision_contacts2D.hpp"
+#include "ppx/collision/contacts/contact_solver2D.hpp"
 #include "ppx/internal/worldref.hpp"
 
 namespace ppx
@@ -15,8 +14,8 @@ namespace ppx
 class world2D;
 
 template <typename T>
-concept Resolution =
-    kit::DerivedFrom<T, constraint_driven_resolution2D> || kit::DerivedFrom<T, actuator_driven_resolution2D>;
+concept ContactSolver2D =
+    kit::DerivedFrom<T, contact_constraint_solver2D> || kit::DerivedFrom<T, contact_actuator_solver2D>;
 
 class collision_manager2D : public kit::toggleable, public worldref2D
 {
@@ -62,13 +61,13 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     {
         return kit::get_casted_raw_ptr<T>(m_detection);
     }
-    template <kit::DerivedFrom<collision_resolution2D> T = collision_resolution2D> const T *resolution() const
+    template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> const T *contacts() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_resolution);
+        return kit::const_get_casted_raw_ptr<T>(m_contacts);
     }
-    template <kit::DerivedFrom<collision_resolution2D> T = collision_resolution2D> T *resolution()
+    template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> T *contacts()
     {
-        return kit::get_casted_raw_ptr<T>(m_resolution);
+        return kit::get_casted_raw_ptr<T>(m_contacts);
     }
 
     template <kit::DerivedFrom<collision_detection2D> T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
@@ -83,17 +82,17 @@ class collision_manager2D : public kit::toggleable, public worldref2D
         m_detection->on_attach();
         return ptr;
     }
-    template <Resolution T, class... ColSolvArgs> T *set_resolution(ColSolvArgs &&...args)
+    template <ContactSolver2D T, class... SolvArgs> T *set_contact_solver(SolvArgs &&...args)
     {
-        auto colres = kit::make_scope<T>(world, std::forward<ColSolvArgs>(args)...);
-        T *ptr = colres.get();
-        if constexpr (kit::DerivedFrom<T, constraint_driven_resolution2D>)
-            set_resolution_constraint_based(ptr);
-        else if constexpr (kit::DerivedFrom<T, actuator_driven_resolution2D>)
-            set_resolution_actuator_based(ptr);
+        auto contacts = kit::make_scope<T>(world, std::forward<SolvArgs>(args)...);
+        T *ptr = contacts.get();
+        if constexpr (kit::DerivedFrom<T, contact_constraint_solver2D>)
+            set_constraint_based_contact_solver(ptr);
+        else if constexpr (kit::DerivedFrom<T, contact_actuator_solver2D>)
+            set_actuator_based_contact_solver(ptr);
 
-        m_resolution = std::move(colres);
-        m_resolution->on_attach();
+        m_contacts = std::move(contacts);
+        m_contacts->on_attach();
         return ptr;
     }
 
@@ -104,10 +103,10 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     collision_manager2D(world2D &world);
 
     kit::scope<collision_detection2D> m_detection;
-    kit::scope<collision_resolution2D> m_resolution;
+    kit::scope<collision_contacts2D> m_contacts;
 
-    void set_resolution_constraint_based(constraint_driven_resolution2D *resolution);
-    void set_resolution_actuator_based(actuator_driven_resolution2D *resolution);
+    void set_constraint_based_contact_solver(contact_constraint_solver2D *contacts);
+    void set_actuator_based_contact_solver(contact_actuator_solver2D *contacts);
     void detect_and_resolve();
     friend class world2D;
 };
