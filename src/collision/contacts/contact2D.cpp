@@ -23,7 +23,7 @@ void contact2D::update(const collision2D *collision, std::size_t manifold_index)
     m_penetration = collision->manifold[manifold_index].penetration;
     m_restitution = collision->restitution;
     m_friction = collision->friction;
-    m_lifetime = 0;
+    m_lifetime = 0.f;
     enabled = true;
 }
 
@@ -61,15 +61,19 @@ float contact2D::friction() const
 
 void contact2D::increment_lifetime()
 {
-    m_lifetime++;
+    m_lifetime += world.rk_substep_timestep();
 }
 bool contact2D::recently_updated() const
 {
-    return m_lifetime == 0;
+    return m_lifetime == 0.f;
 }
 bool contact2D::expired() const
 {
     return m_lifetime >= world.collisions.contacts()->contact_lifetime;
+}
+bool contact2D::asleep() const
+{
+    return m_collider1->body()->asleep() && m_collider2->body()->asleep();
 }
 
 } // namespace ppx

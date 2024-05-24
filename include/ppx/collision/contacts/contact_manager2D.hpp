@@ -60,6 +60,8 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         for (const auto &pair : collisions)
         {
             const collision2D &collision = pair.second;
+            if (collision.asleep)
+                continue;
             for (std::size_t i = 0; i < collision.manifold.size(); i++)
             {
                 const contact_key hash{collision.collider1, collision.collider2, collision.manifold[i].id.key};
@@ -73,6 +75,12 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         for (auto it = m_contacts.begin(); it != m_contacts.end();)
         {
             Contact *contact = it->second;
+            if (contact->asleep())
+            {
+                contact->enabled = false;
+                ++it;
+                continue;
+            }
             if (contact->expired())
             {
                 destroy_contact(contact);

@@ -39,6 +39,7 @@ class contact2D : virtual public joint2D
     void increment_lifetime();
     bool recently_updated() const;
     bool expired() const;
+    bool asleep() const;
 
   protected:
     contact2D(const collision2D *collision, std::size_t manifold_index);
@@ -48,7 +49,7 @@ class contact2D : virtual public joint2D
     collider2D *m_collider1;
     collider2D *m_collider2;
 
-    std::uint32_t m_lifetime = 0;
+    float m_lifetime = 0.f;
 
     glm::vec2 m_point;
     glm::vec2 m_mtv;

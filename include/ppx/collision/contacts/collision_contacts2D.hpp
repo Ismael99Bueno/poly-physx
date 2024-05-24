@@ -19,7 +19,7 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     collision_contacts2D(world2D &world);
     virtual ~collision_contacts2D() = default;
 
-    std::uint32_t contact_lifetime = 5;
+    float contact_lifetime = 2.f;
 
     virtual void remove_any_contacts_with(const collider2D *collider) = 0;
 
