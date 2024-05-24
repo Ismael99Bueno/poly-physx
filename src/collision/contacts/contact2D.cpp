@@ -9,7 +9,7 @@ contact2D::contact2D(const collision2D *collision, std::size_t manifold_index)
               collision->manifold[manifold_index].point),
       m_collider1(collision->collider1), m_collider2(collision->collider2),
       m_point(collision->manifold[manifold_index].point), m_mtv(collision->mtv),
-      m_normal(glm::normalize(collision->mtv)), m_penetration(glm::length(collision->mtv)),
+      m_normal(glm::normalize(collision->mtv)), m_penetration(collision->manifold[manifold_index].penetration),
       m_restitution(collision->restitution), m_friction(collision->friction)
 {
 }
@@ -20,7 +20,7 @@ void contact2D::update(const collision2D *collision, std::size_t manifold_index)
     m_collider2 = collision->collider2;
     m_point = collision->manifold[manifold_index].point;
     m_normal = glm::normalize(collision->mtv);
-    m_penetration = glm::length(collision->mtv);
+    m_penetration = collision->manifold[manifold_index].penetration;
     m_restitution = collision->restitution;
     m_friction = collision->friction;
     m_lifetime = 0;
