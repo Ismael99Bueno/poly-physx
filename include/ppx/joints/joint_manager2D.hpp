@@ -74,15 +74,16 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
             this->m_elements[index]->index = index;
         }
         this->m_elements.pop_back();
-        allocator<T>::destroy(joint);
 
         for (std::size_t i = 0; i < m_total_joints.size(); i++)
             if (m_total_joints[i] == joint)
             {
                 m_total_joints.erase(m_total_joints.begin() + i);
+                allocator<T>::destroy(joint);
                 return true;
             }
         KIT_WARN("Joint not found in total joints");
+        allocator<T>::destroy(joint);
         return true;
     }
     bool remove(joint2D *joint) override

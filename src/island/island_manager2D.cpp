@@ -6,6 +6,13 @@ namespace ppx
 {
 void island_manager2D::solve() // PARALLELIZE THIS
 {
+    for (island2D *island : m_elements)
+        if (!island->asleep())
+            island->solve();
+}
+
+void island_manager2D::remove_invalid()
+{
     for (auto it = m_elements.begin(); it != m_elements.end();)
     {
         island2D *island = *it;
@@ -13,11 +20,9 @@ void island_manager2D::solve() // PARALLELIZE THIS
         {
             allocator<island2D>::destroy(island);
             it = m_elements.erase(it);
-            continue;
         }
-        if (!island->asleep())
-            island->solve();
-        ++it;
+        else
+            ++it;
     }
 }
 
@@ -49,6 +54,50 @@ island2D *island_manager2D::create()
     return island;
 }
 
+island2D *island_manager2D::create_island_from_body(body2D *body)
+{
+    if (body->meta.island_flag || !body->is_dynamic())
+        return nullptr;
+    island2D *island = create();
+
+    body->meta.island_flag = true;
+
+    std::stack<body2D *> stack;
+    stack.push(body);
+    while (!stack.empty())
+    {
+        body2D *current = stack.top();
+        stack.pop();
+        island->add_body(current);
+
+        const auto process_joint = [current, island, &stack](joint2D *joint) {
+            if (joint->meta.island_flag)
+                return;
+            joint->meta.island_flag = true;
+
+            if (joint->is_constraint())
+                island->m_constraints.push_back(dynamic_cast<constraint2D *>(joint));
+            else
+                island->m_actuators.push_back(dynamic_cast<actuator2D *>(joint));
+            body2D *other = joint->body1() == current ? joint->body2() : joint->body1();
+            if (!other->meta.island_flag && other->is_dynamic())
+            {
+                other->meta.island_flag = true;
+                stack.push(other);
+            }
+        };
+        for (joint2D *joint : current->meta.joints)
+            process_joint(joint);
+        for (contact2D *contact : current->meta.contacts)
+        {
+            joint2D *joint = dynamic_cast<joint2D *>(contact);
+            KIT_ASSERT_ERROR(joint, "Contact is not a joint");
+            process_joint(joint);
+        }
+    }
+    return island;
+}
+
 bool island_manager2D::remove(const std::size_t index)
 {
     if (index >= m_elements.size())
@@ -65,46 +114,15 @@ void island_manager2D::build_from_existing_simulation()
         body->meta.island_flag = false;
     for (joint2D *joint : world.joints)
         joint->meta.island_flag = false;
-
-    std::stack<body2D *> stack;
-    for (body2D *body : world.bodies)
+    for (contact2D *contact : world.collisions.contacts()->create_contacts_list())
     {
-        if (body->meta.island_flag || !body->is_dynamic())
-            continue;
-        island2D *island = create();
-        stack.push(body);
-        while (!stack.empty())
-        {
-            body2D *current = stack.top();
-            stack.pop();
-            if (current->meta.island_flag)
-                continue;
-            current->meta.island_flag = true;
-            island->add_body(current);
-
-            const auto process_joint = [current, island, &stack](joint2D *joint) {
-                if (joint->meta.island_flag)
-                    return;
-
-                joint->meta.island_flag = true;
-                if (joint->is_constraint())
-                    island->m_constraints.push_back(dynamic_cast<constraint2D *>(joint));
-                else
-                    island->m_actuators.push_back(dynamic_cast<actuator2D *>(joint));
-                body2D *other = joint->body1() == current ? joint->body2() : joint->body1();
-                if (!other->meta.island_flag && other->is_dynamic())
-                    stack.push(other);
-            };
-            for (joint2D *joint : current->meta.joints)
-                process_joint(joint);
-            for (contact2D *contact : current->meta.contacts)
-            {
-                joint2D *joint = dynamic_cast<joint2D *>(contact);
-                KIT_ASSERT_ERROR(joint, "Contact is not a joint");
-                process_joint(joint);
-            }
-        }
+        joint2D *joint = dynamic_cast<joint2D *>(contact);
+        KIT_ASSERT_ERROR(joint, "Contact is not a joint");
+        joint->meta.island_flag = false;
     }
+
+    for (body2D *body : world.bodies)
+        create_island_from_body(body);
 }
 
 void island_manager2D::try_split(std::uint32_t max_splits)
@@ -126,6 +144,9 @@ void island_manager2D::try_split(std::uint32_t max_splits)
 
 bool island_manager2D::split(island2D *island)
 {
+    const bool was_asleep = island->asleep();
+    const float time_still = island->m_time_still;
+
     for (body2D *body : island->m_bodies)
     {
         KIT_ASSERT_ERROR(body->is_dynamic(), "Body must be dynamic");
@@ -137,43 +158,13 @@ bool island_manager2D::split(island2D *island)
         constraint->meta.island_flag = false;
     std::uint32_t split_count = 0;
 
-    std::stack<body2D *> stack;
     for (body2D *body : island->m_bodies)
     {
-        if (body->meta.island_flag)
+        island2D *new_island = create_island_from_body(body);
+        if (!new_island)
             continue;
-        island2D *new_island = create();
-        split_count++;
-        stack.push(body);
-        while (!stack.empty())
-        {
-            body2D *current = stack.top();
-            stack.pop();
-            current->meta.island_flag = true;
-            new_island->add_body(current);
-
-            const auto process_joint = [current, new_island, &stack](joint2D *joint) {
-                if (joint->meta.island_flag)
-                    return;
-                joint->meta.island_flag = true;
-
-                if (joint->is_constraint())
-                    new_island->m_constraints.push_back(dynamic_cast<constraint2D *>(joint));
-                else
-                    new_island->m_actuators.push_back(dynamic_cast<actuator2D *>(joint));
-                body2D *other = joint->body1() == current ? joint->body2() : joint->body1();
-                if (!other->meta.island_flag && other->is_dynamic())
-                    stack.push(other);
-            };
-            for (joint2D *joint : current->meta.joints)
-                process_joint(joint);
-            for (contact2D *contact : current->meta.contacts)
-            {
-                joint2D *joint = dynamic_cast<joint2D *>(contact);
-                KIT_ASSERT_ERROR(joint, "Contact is not a joint");
-                process_joint(joint);
-            }
-        }
+        new_island->m_asleep = was_asleep;
+        new_island->m_time_still = time_still;
     }
 
     allocator<island2D>::destroy(island);

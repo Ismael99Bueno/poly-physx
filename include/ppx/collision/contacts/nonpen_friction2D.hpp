@@ -8,13 +8,14 @@ namespace ppx
 class nonpen_friction2D final : public vconstraint2D<1, 0>
 {
   public:
-    nonpen_friction2D(world2D &world, const collision2D *collision, const glm::vec2 &nmtv, std::size_t manifold_index);
+    nonpen_friction2D(world2D &world, const collision2D *collision, const glm::vec2 &normal,
+                      std::size_t manifold_index);
 
     float max_impulse;
 
     float constraint_velocity() const override;
     void solve_velocities() override;
-    void update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &nmtv);
+    void update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &normal);
 
   private:
     float m_friction;

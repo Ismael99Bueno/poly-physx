@@ -55,12 +55,9 @@ void world2D::pre_step_preparation()
 #ifdef DEBUG
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
-    KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
-    KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
-    KIT_ASSERT_ERROR(collisions.contacts()->checksum(), "Contacts checksum failed")
     collisions.detection()->flag_new_step();
     bodies.send_data_to_state(integrator.state);
-    if (islands.enabled())
+    if (islands.enabled() && islands.enable_split)
         islands.try_split(1);
 }
 void world2D::post_step_setup()
@@ -68,6 +65,9 @@ void world2D::post_step_setup()
     bodies.reset_instant_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     m_previous_timestep = integrator.ts.value;
+    KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
+    KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
+    KIT_ASSERT_ERROR(collisions.contacts()->checksum(), "Contacts checksum failed")
 #ifdef DEBUG
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
@@ -164,7 +164,10 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         collisions.detect_and_resolve();
 
     if (islands.enabled())
+    {
+        islands.remove_invalid();
         islands.solve();
+    }
     else
     {
         joints.actuators.solve();

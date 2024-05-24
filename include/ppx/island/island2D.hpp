@@ -58,7 +58,7 @@ class island2D : public worldref2D
             std::swap(body1, body2);
 
         island2D *island = body1->meta.island;
-        KIT_ASSERT_ERROR(island == joint->body2()->meta.island || !body2->is_dynamic(),
+        KIT_ASSERT_ERROR(island == body2->meta.island || !body2->is_dynamic(),
                          "The joint's bodies must share the same island");
         if (!island)
             return;

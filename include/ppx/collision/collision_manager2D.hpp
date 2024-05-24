@@ -85,6 +85,9 @@ class collision_manager2D : public kit::toggleable, public worldref2D
     template <ContactSolver2D T, class... SolvArgs> T *set_contact_solver(SolvArgs &&...args)
     {
         auto contacts = kit::make_scope<T>(world, std::forward<SolvArgs>(args)...);
+        if (m_contacts)
+            contacts->inherit(std::move(*m_contacts));
+
         T *ptr = contacts.get();
         if constexpr (kit::DerivedFrom<T, contact_constraint_solver2D>)
             set_constraint_based_contact_solver(ptr);

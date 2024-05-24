@@ -26,29 +26,36 @@ class contact2D : virtual public joint2D
   public:
     virtual ~contact2D() = default;
 
-    bool recently_updated = true;
+    collider2D *collider1() const;
+    collider2D *collider2() const;
 
-    const collision2D *collision() const;
+    const glm::vec2 &point() const;
+    const glm::vec2 &normal() const;
+    float penetration() const;
 
-    const collider2D *collider1() const;
-    const collider2D *collider2() const;
+    float restitution() const;
+    float friction() const;
 
-    collider2D *collider1();
-    collider2D *collider2();
-
-    std::size_t manifold_index() const;
-    bool is_new() const;
+    void increment_lifetime();
+    bool recently_updated() const;
+    bool expired() const;
 
   protected:
     contact2D(const collision2D *collision, std::size_t manifold_index);
 
     virtual void update(const collision2D *collision, std::size_t manifold_index);
 
-    const collision2D *m_collision;
     collider2D *m_collider1;
     collider2D *m_collider2;
 
-    std::size_t m_manifold_index;
-    bool m_is_new = true;
+    std::uint32_t m_lifetime = 0;
+
+    glm::vec2 m_point;
+    glm::vec2 m_mtv;
+    glm::vec2 m_normal;
+    float m_penetration;
+
+    float m_restitution;
+    float m_friction;
 };
 } // namespace ppx

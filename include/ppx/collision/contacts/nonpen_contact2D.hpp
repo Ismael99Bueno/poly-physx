@@ -18,11 +18,8 @@ class nonpen_contact2D final : public contact2D, public pvconstraint2D<1, 0>
     void update(const collision2D *collision, std::size_t manifold_index) override;
 
   private:
-    float m_restitution;
-    float m_penetration;
     float m_pntr_correction = 0.f;
-    glm::vec2 m_nmtv;
-    nonpen_friction2D m_friction;
+    nonpen_friction2D m_friction_contact;
 
     bool m_has_friction;
     bool m_is_adjusting_positions = false;

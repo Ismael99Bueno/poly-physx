@@ -13,10 +13,14 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         destroy_all_contacts();
     }
 
-    using key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
-    using contact_map = std::unordered_map<key, Contact *>;
+    using contact_map = std::unordered_map<contact_key, Contact *>;
 
     using collision_contacts2D::collision_contacts2D;
+
+    const contact_map &contacts() const
+    {
+        return m_contacts;
+    }
 
     std::vector<contact2D *> create_contacts_list() const override
     {
@@ -58,7 +62,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             const collision2D &collision = pair.second;
             for (std::size_t i = 0; i < collision.manifold.size(); i++)
             {
-                const key hash{collision.collider1, collision.collider2, collision.manifold[i].id.key};
+                const contact_key hash{collision.collider1, collision.collider2, collision.manifold[i].id.key};
                 const auto old_contact = m_contacts.find(hash);
                 if (old_contact != m_contacts.end())
                     old_contact->second->update(&collision, i);
@@ -69,20 +73,20 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         for (auto it = m_contacts.begin(); it != m_contacts.end();)
         {
             Contact *contact = it->second;
-            if (!contact->recently_updated)
+            if (contact->expired())
             {
                 destroy_contact(contact);
                 it = m_contacts.erase(it);
+                continue;
             }
-            else
-            {
-                contact->recently_updated = false;
-                ++it;
-            }
+            if (!contact->recently_updated())
+                contact->enabled = false;
+            contact->increment_lifetime();
+            ++it;
         }
     }
 
-    void create_contact(const key &hash, const collision2D *collision, std::size_t manifold_index)
+    void create_contact(const contact_key &hash, const collision2D *collision, std::size_t manifold_index)
     {
         Contact *contact = allocator<Contact>::create(world, collision, manifold_index);
         m_contacts.emplace(hash, contact);

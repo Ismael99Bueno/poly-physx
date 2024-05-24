@@ -8,7 +8,6 @@ namespace ppx
 void island2D::add_body(body2D *body)
 {
     KIT_ASSERT_ERROR(body->is_dynamic(), "Body must be dynamic")
-    KIT_ASSERT_ERROR(!body->meta.island, "Body has already been added to an island")
     KIT_ASSERT_ERROR(body->meta.island != this, "Body already in island")
     KIT_ASSERT_ERROR(std::find(m_bodies.begin(), m_bodies.end(), body) == m_bodies.end(),
                      "Body already in island, but not labeled as such")

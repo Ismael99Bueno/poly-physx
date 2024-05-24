@@ -159,9 +159,10 @@ bool body_manager2D::remove(const std::size_t index)
 
     KIT_ASSERT_ERROR(body->meta.island || !body->is_dynamic() || !world.islands.enabled(),
                      "Body is not in an island when it should be!")
+
+    world.on_body_removal_validation(body);
     if (body->meta.island)
         body->meta.island->remove_body(body);
-    world.on_body_removal_validation(body);
     allocator<body2D>::destroy(body);
     return true;
 }

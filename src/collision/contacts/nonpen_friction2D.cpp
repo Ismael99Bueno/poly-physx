@@ -5,13 +5,13 @@
 
 namespace ppx
 {
-nonpen_friction2D::nonpen_friction2D(world2D &world, const collision2D *collision, const glm::vec2 &nmtv,
+nonpen_friction2D::nonpen_friction2D(world2D &world, const collision2D *collision, const glm::vec2 &normal,
                                      const std::size_t manifold_index)
     : joint2D(world, collision->collider1->body(), collision->collider2->body(),
               collision->manifold[manifold_index].point),
       m_friction(collision->friction)
 {
-    m_tangent = glm::vec2(-nmtv.y, nmtv.x);
+    m_tangent = glm::vec2(-normal.y, normal.x);
     m_use_both_anchors = false;
 }
 float nonpen_friction2D::constraint_velocity() const
@@ -26,13 +26,13 @@ void nonpen_friction2D::solve_velocities()
     solve_velocities_clamped(-mu, mu);
 }
 
-void nonpen_friction2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &nmtv)
+void nonpen_friction2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &normal)
 {
     m_body1 = collision->collider1->body();
     m_body2 = collision->collider2->body();
     m_friction = collision->friction;
     m_lanchor1 = lanchor1;
-    m_tangent = glm::vec2(-nmtv.y, nmtv.x);
+    m_tangent = glm::vec2(-normal.y, normal.x);
 }
 
 glm::vec2 nonpen_friction2D::direction() const
