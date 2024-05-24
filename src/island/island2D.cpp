@@ -102,6 +102,9 @@ void island2D::solve()
         if (solved)
             break;
     }
+    if (world.rk_subset_index() != 0)
+        return;
+
     float energy = 0.f;
     for (body2D *body : m_bodies)
         energy += body->kinetic_energy();

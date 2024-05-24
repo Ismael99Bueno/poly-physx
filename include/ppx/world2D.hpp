@@ -47,6 +47,8 @@ class world2D : kit::non_copyable
     bool semi_implicit_integration = true;
 
     void add(const specs::contraption2D &contraption);
+    std::uint32_t rk_subset_index() const;
+    std::uint32_t rk_subsets() const;
 
     bool step();
 
@@ -64,6 +66,7 @@ class world2D : kit::non_copyable
   private:
     float m_previous_timestep = 0.f;
     float m_rk_substep_timestep = integrator.ts.value;
+    std::uint32_t m_rk_subset_index = 0;
 
     void pre_step_preparation();
     void post_step_setup();

@@ -667,7 +667,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
     }
     static bool decode(const YAML::Node &node, ppx::world2D &world)
     {
-        if (!node.IsMap() || node.size() != 7)
+        if (!node.IsMap() || node.size() != 8)
             return false;
 
         world.semi_implicit_integration = node["Semi-implicit integration"].as<bool>();

@@ -42,6 +42,15 @@ void world2D::add(const specs::contraption2D &contraption)
         joints.add<prismatic_joint2D>(joint);
 }
 
+std::uint32_t world2D::rk_subset_index() const
+{
+    return m_rk_subset_index;
+}
+std::uint32_t world2D::rk_subsets() const
+{
+    return integrator.tableau().stages;
+}
+
 bool world2D::step()
 {
     pre_step_preparation();
@@ -55,7 +64,8 @@ void world2D::pre_step_preparation()
 #ifdef DEBUG
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
-    collisions.detection()->flag_new_step();
+    m_rk_subset_index = 0;
+    collisions.detection()->update_last_collisions();
     bodies.send_data_to_state(integrator.state);
     if (islands.enabled() && islands.enable_split)
         islands.try_split(1);
@@ -85,6 +95,8 @@ std::vector<float> world2D::create_state_derivative() const
 
     for (const body2D *body : bodies)
     {
+        if (body->asleep())
+            continue;
         const std::size_t index = 6 * body->index;
 
         const glm::vec2 &accel = body->force() * body->props().dynamic.inv_mass;
@@ -161,7 +173,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
 
     behaviours.apply_forces();
     if (collisions.enabled)
-        collisions.detect_and_resolve();
+        collisions.detect_and_create_contacts();
 
     if (islands.enabled())
     {
@@ -174,6 +186,8 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         bodies.prepare_constraint_states();
         joints.constraints.solve();
     }
+
+    m_rk_subset_index++;
     return create_state_derivative();
 }
 } // namespace ppx

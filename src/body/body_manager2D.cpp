@@ -36,9 +36,9 @@ void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
     for (body2D *body : m_elements)
     {
         body->reset_simulation_forces();
-        body->retrieve_data_from_state_variables(vars_buffer);
         if (!body->asleep())
         {
+            body->retrieve_data_from_state_variables(vars_buffer);
             body->apply_simulation_force(body->instant_force() + body->persistent_force());
             body->apply_simulation_torque(body->instant_torque() + body->persistent_torque());
         }

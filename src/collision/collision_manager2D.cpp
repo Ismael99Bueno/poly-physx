@@ -60,7 +60,7 @@ void collision_manager2D::set_actuator_based_contact_solver(contact_actuator_sol
     world.joints.constraints.m_contact_solver = nullptr;
 }
 
-void collision_manager2D::detect_and_resolve()
+void collision_manager2D::detect_and_create_contacts()
 {
     KIT_PERF_SCOPE("Collision solve")
     if (!m_detection->enabled)

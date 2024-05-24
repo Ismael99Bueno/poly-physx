@@ -15,10 +15,9 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
 #ifdef KIT_PROFILE
     KIT_ASSERT_ERROR(!multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
 #endif
-    if (m_new_step)
+    if (world.rk_subset_index() == 0)
     {
         detect_collisions();
-        m_new_step = false;
         return m_collisions;
     }
 
@@ -38,9 +37,8 @@ const collision_detection2D::collision_map &collision_detection2D::collisions() 
     return m_collisions;
 }
 
-void collision_detection2D::flag_new_step()
+void collision_detection2D::update_last_collisions()
 {
-    m_new_step = true;
     m_last_collisions.swap(m_collisions);
     m_collisions.clear();
     for (auto &pairs : m_mt_collisions)

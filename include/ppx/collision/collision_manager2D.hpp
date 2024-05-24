@@ -110,7 +110,7 @@ class collision_manager2D : public kit::toggleable, public worldref2D
 
     void set_constraint_based_contact_solver(contact_constraint_solver2D *contacts);
     void set_actuator_based_contact_solver(contact_actuator_solver2D *contacts);
-    void detect_and_resolve();
+    void detect_and_create_contacts();
     friend class world2D;
 };
 } // namespace ppx
