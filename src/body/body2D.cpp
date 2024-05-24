@@ -316,9 +316,9 @@ void body2D::type(btype type)
 
     if (is_dynamic())
     {
-        if (world.joints.islands_enabled())
+        if (world.islands.enabled())
         {
-            island2D *island = world.joints.create_island();
+            island2D *island = world.islands.create();
             island->add_body(this);
         }
         return;

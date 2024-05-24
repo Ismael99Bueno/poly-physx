@@ -4,7 +4,7 @@
 #include "ppx/joints/joint2D.hpp"
 #include "ppx/body/body2D.hpp"
 #include "ppx/common/alias.hpp"
-#include "ppx/joints/island2D.hpp"
+#include "ppx/island/island2D.hpp"
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/indexable.hpp"
@@ -21,6 +21,7 @@ class ijoint_manager2D : virtual public kit::identifiable<std::string>,
 
     virtual void on_body_removal_validation(body2D *body) = 0;
     virtual bool remove(joint2D *joint) = 0;
+    virtual std::size_t joint_count() const = 0;
 };
 
 template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public ijoint_manager2D
@@ -90,6 +91,11 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
         if (!tjoint)
             return false;
         return remove(tjoint);
+    }
+
+    std::size_t joint_count() const override
+    {
+        return this->m_elements.size();
     }
 
     static const std::string &name()

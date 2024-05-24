@@ -4,7 +4,7 @@
 #include "ppx/collision/detection/collision_detection2D.hpp"
 #include "ppx/internal/worldref.hpp"
 #include "ppx/collision/contacts/contact2D.hpp"
-#include "ppx/joints/island2D.hpp"
+#include "ppx/island/island2D.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/container/hashable_tuple.hpp"
 #include "kit/utility/type_constraints.hpp"
@@ -22,7 +22,7 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     virtual std::vector<contact2D *> create_contacts_list() const = 0;
     virtual std::size_t size() const = 0;
 
-    bool contacts_checksum() const;
+    bool checksum() const;
 
   protected:
     static void global_on_contact_enter(world2D &world, contact2D *contact);

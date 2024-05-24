@@ -22,6 +22,8 @@ class body_manager2D final : public manager2D<body2D>
     using manager2D<body2D>::remove;
     bool remove(std::size_t index) override;
 
+    bool checksum() const;
+
     static void prepare_constraint_states(const std::vector<body2D *> &bodies, float ts, bool semi_implicit);
 
   private:

@@ -7,7 +7,7 @@
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 
-#include "ppx/collision/contacts/si_contact2D.hpp"
+#include "ppx/collision/contacts/nonpen_contact2D.hpp"
 
 #include "ppx/world2D.hpp"
 
@@ -16,7 +16,7 @@ namespace ppx
 collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
 {
     set_detection<quad_tree_detection2D>();
-    set_contact_solver<contact_solver2D<si_contact2D>>();
+    set_contact_solver<contact_solver2D<nonpen_contact2D>>();
 
     m_detection->set_cp_narrow_detection<gjk_epa_detection2D>();
     m_detection->set_pp_narrow_detection<gjk_epa_detection2D>();

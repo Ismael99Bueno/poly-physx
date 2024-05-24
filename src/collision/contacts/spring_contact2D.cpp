@@ -1,9 +1,9 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/contacts/sd_contact2D.hpp"
+#include "ppx/collision/contacts/spring_contact2D.hpp"
 
 namespace ppx
 {
-sd_contact2D::sd_contact2D(world2D &world, const collision2D *collision, std::size_t manifold_index)
+spring_contact2D::spring_contact2D(world2D &world, const collision2D *collision, std::size_t manifold_index)
     : joint2D(world, collision->collider1->body(), collision->collider2->body(),
               collision->manifold[manifold_index].point),
       contact2D(collision, manifold_index)
@@ -11,19 +11,19 @@ sd_contact2D::sd_contact2D(world2D &world, const collision2D *collision, std::si
     compute_parameters();
 }
 
-void sd_contact2D::compute_parameters()
+void spring_contact2D::compute_parameters()
 {
     m_normal_damping = (1.f - m_collision->restitution) * max_normal_damping;
     m_tangent_damping = m_collision->friction * max_tangent_damping;
 }
 
-void sd_contact2D::update(const collision2D *collision, const std::size_t manifold_index)
+void spring_contact2D::update(const collision2D *collision, const std::size_t manifold_index)
 {
     contact2D::update(collision, manifold_index);
     compute_parameters();
 }
 
-void sd_contact2D::solve()
+void spring_contact2D::solve()
 {
     body2D *body1 = m_collider1->body();
     body2D *body2 = m_collider2->body();

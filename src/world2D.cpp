@@ -42,19 +42,6 @@ void world2D::add(const specs::contraption2D &contraption)
         joints.add<prismatic_joint2D>(joint);
 }
 
-world2D::island_settings::island_settings(joint_repository2D &jr) : m_joints(jr)
-{
-}
-
-bool world2D::island_settings::enabled() const
-{
-    return m_joints.islands_enabled();
-}
-void world2D::island_settings::enabled(bool enable)
-{
-    m_joints.islands_enabled(enable);
-}
-
 bool world2D::step()
 {
     pre_step_preparation();
@@ -68,19 +55,19 @@ void world2D::pre_step_preparation()
 #ifdef DEBUG
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
-    KIT_ASSERT_ERROR(!joints.islands_enabled() || joints.island_checksum(), "Checksum failed")
+    KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
+    KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
+    KIT_ASSERT_ERROR(collisions.contacts()->checksum(), "Contacts checksum failed")
     collisions.detection()->flag_new_step();
     bodies.send_data_to_state(integrator.state);
-    if (joints.islands_enabled())
-        joints.try_split_islands(1);
+    if (islands.enabled())
+        islands.try_split(1);
 }
 void world2D::post_step_setup()
 {
     bodies.reset_instant_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     m_previous_timestep = integrator.ts.value;
-
-    KIT_ASSERT_ERROR(!joints.islands_enabled() || joints.island_checksum(), "Checksum failed")
 #ifdef DEBUG
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
@@ -176,8 +163,8 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     if (collisions.enabled)
         collisions.detect_and_resolve();
 
-    if (joints.islands_enabled())
-        joints.solve_islands();
+    if (islands.enabled())
+        islands.solve();
     else
     {
         joints.actuators.solve();

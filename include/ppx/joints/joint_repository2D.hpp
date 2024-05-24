@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ppx/joints/joint_meta_manager2D.hpp"
-#include "ppx/joints/island2D.hpp"
 
 namespace ppx
 {
@@ -10,11 +9,6 @@ class joint_repository2D final : public manager2D<joint2D>
   public:
     actuator_meta_manager2D actuators;
     constraint_meta_manager2D constraints;
-
-    void solve_islands();
-
-    bool islands_enabled() const;
-    void islands_enabled(bool enable);
 
     template <Joint2D T> T *add(const typename T::specs &spc)
     {
@@ -79,23 +73,8 @@ class joint_repository2D final : public manager2D<joint2D>
         return mng ? mng->remove(joint) : false;
     }
 
-    const std::vector<island2D *> &islands() const;
-    bool island_checksum() const;
-
   private:
     joint_repository2D(world2D &world);
-
-    island2D *create_island();
-    void try_split_islands(std::uint32_t max_tries);
-    bool split_island(island2D *island);
-    void build_islands_from_existing_simulation();
-
-    std::vector<island2D *> m_islands;
-    bool m_enable_islands = true;
-    std::size_t m_island_to_split = 0;
-
     friend class world2D;
-    friend class body_manager2D;
-    friend class body2D;
 };
 } // namespace ppx

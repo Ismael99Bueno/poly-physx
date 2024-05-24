@@ -5,6 +5,7 @@
 #include "ppx/collider/collider_manager2D.hpp"
 #include "ppx/collision/collision_manager2D.hpp"
 #include "ppx/behaviours/behaviour_manager2D.hpp"
+#include "ppx/island/island_manager2D.hpp"
 #include "ppx/joints/joint_repository2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/utility/utils.hpp"
@@ -17,7 +18,7 @@ class world2D : kit::non_copyable
     template <class... IntegArgs>
     world2D(IntegArgs &&...args)
         : integrator(std::forward<IntegArgs>(args)...), bodies(*this), colliders(*this), joints(*this),
-          behaviours(*this), collisions(*this), m_previous_timestep(integrator.ts.value)
+          behaviours(*this), collisions(*this), islands(*this), m_previous_timestep(integrator.ts.value)
     {
     }
 
@@ -27,6 +28,7 @@ class world2D : kit::non_copyable
     joint_repository2D joints;
     behaviour_manager2D behaviours;
     collision_manager2D collisions;
+    island_manager2D islands;
     struct
     {
         std::uint32_t velocity_iterations = 8;
@@ -41,20 +43,6 @@ class world2D : kit::non_copyable
         float max_position_correction = 0.2f;
         float position_resolution_speed = 0.2f;
     } constraints;
-
-    struct island_settings
-    {
-        island_settings(joint_repository2D &jr);
-
-        bool enabled() const;
-        void enabled(bool enable);
-
-        float sleep_energy_threshold = 0.6f;
-        float sleep_time_threshold = 1.f;
-
-      private:
-        joint_repository2D &m_joints;
-    } islands{joints};
 
     bool semi_implicit_integration = true;
 

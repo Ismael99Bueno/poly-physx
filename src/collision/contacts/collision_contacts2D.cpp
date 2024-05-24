@@ -8,15 +8,16 @@ collision_contacts2D::collision_contacts2D(world2D &world) : worldref2D(world)
 {
 }
 
-bool collision_contacts2D::contacts_checksum() const
+bool collision_contacts2D::checksum() const
 {
-    std::size_t count = 0;
+    std::unordered_set<contact2D *> contacts;
+    contacts.reserve(size());
     for (const body2D *body : world.bodies)
-        count += body->meta.contacts.size();
-    KIT_ASSERT_ERROR(count == size(),
+        contacts.insert(body->meta.contacts.begin(), body->meta.contacts.end());
+    KIT_ASSERT_ERROR(contacts.size() == size(),
                      "Checksum failed: Contact count mismatch. Contacts count: {0} Body contacts count: {1}", size(),
-                     count);
-    return count == size();
+                     contacts.size());
+    return contacts.size() == size();
 }
 
 void collision_contacts2D::global_on_contact_enter(world2D &world, contact2D *contact)

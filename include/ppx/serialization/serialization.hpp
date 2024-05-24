@@ -15,8 +15,8 @@
 #include "ppx/collision/detection/sort_sweep_detection2D.hpp"
 #include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
 
-#include "ppx/collision/contacts/sd_contact2D.hpp"
-#include "ppx/collision/contacts/si_contact2D.hpp"
+#include "ppx/collision/contacts/spring_contact2D.hpp"
+#include "ppx/collision/contacts/nonpen_contact2D.hpp"
 
 #include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
 #include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
@@ -567,14 +567,14 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["P-P Algorithm"] = 1;
 
         YAML::Node nsolv = node["Contacts"];
-        if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::si_contact2D>>())
+        if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::nonpen_contact2D>>())
             nsolv["Solver method"] = 0;
-        else if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::sd_contact2D>>())
+        else if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::spring_contact2D>>())
             nsolv["Detection method"] = 1;
 
-        nsolv["Rigidity"] = ppx::sd_contact2D::rigidity;
-        nsolv["Max normal damping"] = ppx::sd_contact2D::max_normal_damping;
-        nsolv["Max tangent damping"] = ppx::sd_contact2D::max_tangent_damping;
+        nsolv["Rigidity"] = ppx::spring_contact2D::rigidity;
+        nsolv["Max normal damping"] = ppx::spring_contact2D::max_normal_damping;
+        nsolv["Max tangent damping"] = ppx::spring_contact2D::max_tangent_damping;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::collision_manager2D &cm)
@@ -623,14 +623,14 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             const int method = nsolv["Solver method"].as<int>();
             if (method == 0)
-                cm.set_contact_solver<ppx::contact_solver2D<ppx::si_contact2D>>();
+                cm.set_contact_solver<ppx::contact_solver2D<ppx::nonpen_contact2D>>();
             else if (method == 1)
-                cm.set_contact_solver<ppx::contact_solver2D<ppx::sd_contact2D>>();
+                cm.set_contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>();
         }
 
-        ppx::sd_contact2D::rigidity = nsolv["Rigidity"].as<float>();
-        ppx::sd_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();
-        ppx::sd_contact2D::max_tangent_damping = nsolv["Max tangent damping"].as<float>();
+        ppx::spring_contact2D::rigidity = nsolv["Rigidity"].as<float>();
+        ppx::spring_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();
+        ppx::spring_contact2D::max_tangent_damping = nsolv["Max tangent damping"].as<float>();
         return true;
     }
 };

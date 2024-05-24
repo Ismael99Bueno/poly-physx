@@ -118,6 +118,6 @@ class island2D : public worldref2D
     float m_time_still = 0.f;
     bool m_asleep = false;
 
-    friend class joint_repository2D;
+    friend class island_manager2D;
 };
 } // namespace ppx

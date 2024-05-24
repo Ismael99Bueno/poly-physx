@@ -17,9 +17,9 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     state.append({body->centroid().x, body->centroid().y, body->rotation(), body->velocity().x, body->velocity().y,
                   body->angular_velocity()});
 
-    if (world.joints.islands_enabled() && body->is_dynamic())
+    if (world.islands.enabled() && body->is_dynamic())
     {
-        island2D *island = world.joints.create_island();
+        island2D *island = world.islands.create();
         island->add_body(body);
     }
 
@@ -115,6 +115,24 @@ std::vector<const body2D *> body_manager2D::operator[](const glm::vec2 &point) c
 std::vector<body2D *> body_manager2D::operator[](const glm::vec2 &point)
 {
     return at_point<body2D, collider2D>(m_elements, point);
+}
+
+bool body_manager2D::checksum() const
+{
+    const std::size_t colliders = world.colliders.size();
+    std::size_t collider_count1 = 0;
+    std::size_t collider_count2 = 0;
+
+    for (const body2D *body : m_elements)
+    {
+        collider_count1 += body->size();
+        for (const collider2D *collider : *body)
+        {
+            (void)collider;
+            collider_count2++;
+        }
+    }
+    return collider_count1 == collider_count2 && collider_count1 == colliders;
 }
 
 bool body_manager2D::remove(const std::size_t index)
