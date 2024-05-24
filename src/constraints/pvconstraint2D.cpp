@@ -87,28 +87,26 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::
     {
         this->m_body1->meta.ctr_state.centroid.translate(dpos1);
         this->m_body1->velocity(this->m_body1->velocity() + dpos1 / this->world.rk_substep_timestep());
+        if (!this->m_no_anchors)
+        {
+            const float da1 =
+                -this->m_body1->props().dynamic.inv_inertia * kit::cross2D(this->m_offset1, lincorrection);
+            this->m_body1->meta.ctr_state.centroid.rotate(da1);
+            this->m_body1->angular_velocity(this->m_body1->angular_velocity() +
+                                            da1 / this->world.rk_substep_timestep());
+        }
     }
     if (this->m_body2->is_dynamic())
     {
         this->m_body2->meta.ctr_state.centroid.translate(dpos2);
         this->m_body2->velocity(this->m_body2->velocity() + dpos2 / this->world.rk_substep_timestep());
-    }
-
-    if (this->m_no_anchors)
-        return;
-
-    const float da1 = -this->m_body1->props().dynamic.inv_inertia * kit::cross2D(this->m_offset1, lincorrection);
-    const float da2 = this->m_body2->props().dynamic.inv_inertia * kit::cross2D(this->m_offset2, lincorrection);
-
-    if (this->m_body1->is_dynamic())
-    {
-        this->m_body1->meta.ctr_state.centroid.rotate(da1);
-        this->m_body1->angular_velocity(this->m_body1->angular_velocity() + da1 / this->world.rk_substep_timestep());
-    }
-    if (this->m_body2->is_dynamic())
-    {
-        this->m_body2->meta.ctr_state.centroid.rotate(da2);
-        this->m_body2->angular_velocity(this->m_body2->angular_velocity() + da2 / this->world.rk_substep_timestep());
+        if (!this->m_no_anchors)
+        {
+            const float da2 = this->m_body2->props().dynamic.inv_inertia * kit::cross2D(this->m_offset2, lincorrection);
+            this->m_body2->meta.ctr_state.centroid.rotate(da2);
+            this->m_body2->angular_velocity(this->m_body2->angular_velocity() +
+                                            da2 / this->world.rk_substep_timestep());
+        }
     }
 }
 
@@ -120,16 +118,16 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_angular_correction(float angc
     {
         KIT_ERROR("Angular correction can only be applied when the angular degrees of the constraint is equal to 1")
     }
-    const float da1 = -this->m_body1->props().dynamic.inv_inertia * angcorrection;
-    const float da2 = this->m_body2->props().dynamic.inv_inertia * angcorrection;
 
     if (this->m_body1->is_dynamic())
     {
+        const float da1 = -this->m_body1->props().dynamic.inv_inertia * angcorrection;
         this->m_body1->meta.ctr_state.centroid.rotate(da1);
         this->m_body1->angular_velocity(this->m_body1->angular_velocity() + da1 / this->world.rk_substep_timestep());
     }
     if (this->m_body2->is_dynamic())
     {
+        const float da2 = this->m_body2->props().dynamic.inv_inertia * angcorrection;
         this->m_body2->meta.ctr_state.centroid.rotate(da2);
         this->m_body2->angular_velocity(this->m_body2->angular_velocity() + da2 / this->world.rk_substep_timestep());
     }

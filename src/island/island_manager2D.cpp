@@ -6,9 +6,37 @@ namespace ppx
 {
 void island_manager2D::solve()
 {
-    for (island2D *island : m_elements)
+    if (m_elements.empty())
+        return;
+    if (m_elements.size() == 1)
+    {
+        island2D *island = m_elements[0];
         if (!island->asleep())
             island->solve();
+        return;
+    }
+    if (!multithreaded)
+    {
+        for (island2D *island : m_elements)
+            if (!island->asleep())
+                island->solve();
+        return;
+    }
+
+    std::vector<island2D *> awake_islands;
+    awake_islands.reserve(m_elements.size());
+    for (island2D *island : m_elements)
+        if (!island->asleep())
+            awake_islands.push_back(island);
+    if (awake_islands.empty())
+        return;
+    if (awake_islands.size() == 1)
+    {
+        awake_islands[0]->solve();
+        return;
+    }
+    kit::mt::for_each<PPX_THREAD_COUNT>(awake_islands,
+                                        [](const std::size_t thread_idx, island2D *island) { island->solve(); });
 }
 
 void island_manager2D::remove_invalid()
