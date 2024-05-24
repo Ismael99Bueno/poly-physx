@@ -13,6 +13,7 @@ class island_manager2D final : public manager2D<island2D>
     float sleep_energy_threshold = 2.f;
     float sleep_time_threshold = 0.65f;
     bool enable_split = true;
+    bool multithreaded = true;
 
     bool enabled() const;
     void enabled(bool enable);

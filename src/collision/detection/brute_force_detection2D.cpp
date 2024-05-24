@@ -28,7 +28,7 @@ void brute_force_detection2D::detect_collisions_st()
 
 void brute_force_detection2D::detect_collisions_mt()
 {
-    kit::mt::for_each(PPX_THREAD_COUNT, world.colliders, [this](const std::size_t thread_idx, collider2D *collider1) {
+    kit::mt::for_each<PPX_THREAD_COUNT>(world.colliders, [this](const std::size_t thread_idx, collider2D *collider1) {
         for (std::size_t j = 0; j < world.colliders.size(); j++)
         {
             collider2D *collider2 = world.colliders[j];

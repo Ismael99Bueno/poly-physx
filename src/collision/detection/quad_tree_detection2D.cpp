@@ -33,7 +33,7 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const qtparti
 }
 void quad_tree_detection2D::detect_collisions_mt(const std::vector<const qtpartition *> &partitions)
 {
-    kit::mt::for_each(PPX_THREAD_COUNT, partitions, [this](const std::size_t thread_idx, const qtpartition *partition) {
+    kit::mt::for_each<PPX_THREAD_COUNT>(partitions, [this](const std::size_t thread_idx, const qtpartition *partition) {
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
             {

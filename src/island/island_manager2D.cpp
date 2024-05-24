@@ -4,7 +4,7 @@
 
 namespace ppx
 {
-void island_manager2D::solve() // PARALLELIZE THIS
+void island_manager2D::solve()
 {
     for (island2D *island : m_elements)
         if (!island->asleep())
