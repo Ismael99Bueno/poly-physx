@@ -186,6 +186,9 @@ shape2D &collider2D::mutable_shape()
     case stype::CIRCLE:
         return std::get<circle>(m_shape);
     }
+    if (polygon *shape = std::get_if<polygon>(&m_shape))
+        return *shape;
+    return std::get<circle>(m_shape);
 }
 
 collider2D::stype collider2D::shape_type() const
