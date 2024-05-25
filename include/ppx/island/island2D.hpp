@@ -123,6 +123,7 @@ class island2D : public worldref2D
     static island2D *handle_island_merge_encounter(island2D *island1, island2D *island2);
 
     float m_time_still = 0.f;
+    float m_energy = 0.f;
     bool m_asleep = false;
 
     friend class island_manager2D;

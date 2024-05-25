@@ -105,12 +105,12 @@ void island2D::solve()
     if (world.rk_subset_index() != 0)
         return;
 
-    float energy = 0.f;
+    m_energy = 0.f;
     for (body2D *body : m_bodies)
-        energy += body->kinetic_energy();
-    energy /= m_bodies.size();
+        m_energy += body->kinetic_energy();
+    m_energy /= m_bodies.size();
 
-    if (energy < world.islands.sleep_energy_threshold)
+    if (m_energy < world.islands.sleep_energy_threshold)
     {
         m_time_still += world.rk_substep_timestep();
         m_asleep = solved && m_time_still >= world.islands.sleep_time_threshold;
