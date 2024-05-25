@@ -10,7 +10,7 @@ class island_manager2D final : public manager2D<island2D>
   public:
     using manager2D::manager2D;
 
-    float sleep_energy_threshold = 0.35f;
+    float sleep_energy_threshold = 0.05f;
     float sleep_time_threshold = 1.5f;
     bool enable_split = true;
     bool multithreaded = true;
