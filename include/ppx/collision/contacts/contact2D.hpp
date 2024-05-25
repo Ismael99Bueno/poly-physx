@@ -29,9 +29,8 @@ class contact2D : virtual public joint2D
     collider2D *collider1() const;
     collider2D *collider2() const;
 
-    const glm::vec2 &point() const;
+    const geo::contact_point2D &point() const;
     const glm::vec2 &normal() const;
-    float penetration() const;
 
     float restitution() const;
     float friction() const;
@@ -40,6 +39,7 @@ class contact2D : virtual public joint2D
     bool recently_updated() const;
     bool expired() const;
     bool asleep() const;
+    float lifetime_left() const;
 
   protected:
     contact2D(const collision2D *collision, std::size_t manifold_index);
@@ -51,10 +51,9 @@ class contact2D : virtual public joint2D
 
     float m_lifetime = 0.f;
 
-    glm::vec2 m_point;
+    geo::contact_point2D m_point;
     glm::vec2 m_mtv;
     glm::vec2 m_normal;
-    float m_penetration;
 
     float m_restitution;
     float m_friction;

@@ -19,7 +19,7 @@ nonpen_contact2D::nonpen_contact2D(world2D &world, const collision2D *collision,
 
 float nonpen_contact2D::constraint_position() const
 {
-    return m_penetration + m_pntr_correction;
+    return m_point.penetration + m_pntr_correction;
 }
 float nonpen_contact2D::constraint_velocity() const
 {

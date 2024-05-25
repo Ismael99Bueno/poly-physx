@@ -92,14 +92,14 @@ void island2D::solve()
             if (constraint->enabled)
                 constraint->solve_velocities();
 
-    bool solved = true;
+    m_solved_positions = true;
     for (std::size_t i = 0; i < piters; i++)
     {
-        solved = true;
+        m_solved_positions = true;
         for (constraint2D *constraint : m_constraints)
             if (constraint->enabled)
-                solved &= constraint->solve_positions();
-        if (solved)
+                m_solved_positions &= constraint->solve_positions();
+        if (m_solved_positions)
             break;
     }
     if (world.rk_subset_index() != 0)
@@ -113,7 +113,7 @@ void island2D::solve()
     if (m_energy < world.islands.sleep_energy_threshold)
     {
         m_time_still += world.rk_substep_timestep();
-        m_asleep = solved && m_time_still >= world.islands.sleep_time_threshold;
+        m_asleep = m_solved_positions && m_time_still >= world.islands.sleep_time_threshold;
     }
     else
         m_time_still = 0.f;
@@ -126,6 +126,19 @@ bool island2D::empty() const
 std::size_t island2D::size() const
 {
     return m_bodies.size() + m_actuators.size() + m_constraints.size();
+}
+
+float island2D::time_still() const
+{
+    return m_time_still;
+}
+float island2D::energy() const
+{
+    return m_energy;
+}
+bool island2D::solved_positions() const
+{
+    return m_solved_positions;
 }
 
 island2D *island2D::handle_island_merge_encounter(island2D *island1, island2D *island2)

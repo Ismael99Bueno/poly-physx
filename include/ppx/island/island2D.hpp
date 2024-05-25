@@ -26,6 +26,10 @@ class island2D : public worldref2D
     void prepare_constraint_states();
     void solve();
 
+    float time_still() const;
+    float energy() const;
+    bool solved_positions() const;
+
     const std::vector<body2D *> &bodies() const;
     const std::vector<actuator2D *> &actuators() const;
     const std::vector<constraint2D *> &constraints() const;
@@ -124,6 +128,7 @@ class island2D : public worldref2D
 
     float m_time_still = 0.f;
     float m_energy = 0.f;
+    bool m_solved_positions = false;
     bool m_asleep = false;
 
     friend class island_manager2D;

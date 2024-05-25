@@ -8,8 +8,7 @@ contact2D::contact2D(const collision2D *collision, std::size_t manifold_index)
     : joint2D(world, collision->collider1->body(), collision->collider2->body(),
               collision->manifold[manifold_index].point),
       m_collider1(collision->collider1), m_collider2(collision->collider2),
-      m_point(collision->manifold[manifold_index].point), m_mtv(collision->mtv),
-      m_normal(glm::normalize(collision->mtv)), m_penetration(collision->manifold[manifold_index].penetration),
+      m_point(collision->manifold[manifold_index]), m_mtv(collision->mtv), m_normal(glm::normalize(collision->mtv)),
       m_restitution(collision->restitution), m_friction(collision->friction)
 {
 }
@@ -18,9 +17,8 @@ void contact2D::update(const collision2D *collision, std::size_t manifold_index)
 {
     m_collider1 = collision->collider1;
     m_collider2 = collision->collider2;
-    m_point = collision->manifold[manifold_index].point;
+    m_point = collision->manifold[manifold_index];
     m_normal = glm::normalize(collision->mtv);
-    m_penetration = collision->manifold[manifold_index].penetration;
     m_restitution = collision->restitution;
     m_friction = collision->friction;
     m_lifetime = 0.f;
@@ -37,7 +35,7 @@ collider2D *contact2D::collider2() const
     return m_collider2;
 }
 
-const glm::vec2 &contact2D::point() const
+const geo::contact_point2D &contact2D::point() const
 {
     return m_point;
 }
@@ -45,10 +43,6 @@ const glm::vec2 &contact2D::point() const
 const glm::vec2 &contact2D::normal() const
 {
     return m_normal;
-}
-float contact2D::penetration() const
-{
-    return m_penetration;
 }
 float contact2D::restitution() const
 {
@@ -74,6 +68,10 @@ bool contact2D::expired() const
 bool contact2D::asleep() const
 {
     return m_collider1->body()->asleep() && m_collider2->body()->asleep();
+}
+float contact2D::lifetime_left() const
+{
+    return world.collisions.contacts()->contact_lifetime - m_lifetime;
 }
 
 } // namespace ppx

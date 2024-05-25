@@ -163,7 +163,7 @@ void island_manager2D::try_split(std::uint32_t max_splits)
     while (iters++ < size && max_splits > 0)
     {
         island2D *island = m_elements[m_island_to_split];
-        if (island->may_split && island->m_energy > world.islands.sleep_energy_threshold && !island->merged &&
+        if (island->may_split && island->energy() > world.islands.sleep_energy_threshold && !island->merged &&
             !island->empty() && split(island))
             max_splits--;
         if (m_island_to_split-- == 0)
@@ -174,7 +174,7 @@ void island_manager2D::try_split(std::uint32_t max_splits)
 bool island_manager2D::split(island2D *island)
 {
     const bool was_asleep = island->asleep();
-    const float time_still = island->m_time_still;
+    const float time_still = island->time_still();
 
     for (body2D *body : island->m_bodies)
     {

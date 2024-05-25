@@ -28,8 +28,8 @@ void spring_contact2D::solve()
     body2D *body1 = m_collider1->body();
     body2D *body2 = m_collider2->body();
 
-    const glm::vec2 &touch1 = m_point;
-    const glm::vec2 touch2 = m_point - m_mtv;
+    const glm::vec2 &touch1 = m_point.point;
+    const glm::vec2 touch2 = m_point.point - m_mtv;
 
     const glm::vec2 offset1 = touch1 - body1->centroid();
     const glm::vec2 offset2 = touch2 - body2->centroid();
