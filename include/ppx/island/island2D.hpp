@@ -3,6 +3,7 @@
 #include "ppx/actuators/actuator2D.hpp"
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/body/body2D.hpp"
+#include "ppx/collision/contacts/contact2D.hpp"
 
 namespace ppx
 {
@@ -34,17 +35,22 @@ class island2D : public worldref2D
         island2D *island = get_effective_island(joint);
         if (!island)
             return;
+        if constexpr (!Contact2D<Joint>)
+            island->awake();
 
         if constexpr (IConstraint2D<Joint>)
         {
-            if (std::find(island->m_constraints.begin(), island->m_constraints.end(), joint) ==
-                island->m_constraints.end())
-                island->m_constraints.push_back(joint);
+            KIT_ASSERT_ERROR(std::find(island->m_constraints.begin(), island->m_constraints.end(), joint) ==
+                                 island->m_constraints.end(),
+                             "Joint already exists on island")
+            island->m_constraints.push_back(joint);
         }
         else
         {
-            if (std::find(island->m_actuators.begin(), island->m_actuators.end(), joint) == island->m_actuators.end())
-                island->m_actuators.push_back(joint);
+            KIT_ASSERT_ERROR(std::find(island->m_actuators.begin(), island->m_actuators.end(), joint) ==
+                                 island->m_actuators.end(),
+                             "Joint already exists on island")
+            island->m_actuators.push_back(joint);
         }
     }
 
@@ -67,7 +73,7 @@ class island2D : public worldref2D
                 if (island->m_constraints[i] == joint)
                 {
                     island->m_constraints.erase(island->m_constraints.begin() + i);
-                    if (!body2->is_dynamic() || island != body2->meta.island)
+                    if (!Contact2D<Joint> || !body2->is_dynamic() || island != body2->meta.island)
                         island->awake();
                     island->may_split = body2->is_dynamic();
                     return;
@@ -78,7 +84,7 @@ class island2D : public worldref2D
                 if (island->m_actuators[i] == joint)
                 {
                     island->m_actuators.erase(island->m_actuators.begin() + i);
-                    if (!body2->is_dynamic() || island != body2->meta.island)
+                    if (!Contact2D<Joint> || !body2->is_dynamic() || island != body2->meta.island)
                         island->awake();
                     island->may_split = body2->is_dynamic();
                     return;
