@@ -41,8 +41,9 @@ bool interaction2D::remove(std::size_t index)
 {
     if (!behaviour2D::remove(index))
         return false;
-    for (body2D *body : m_bodies)
-        body->awake();
+    if (enabled)
+        for (body2D *body : m_bodies)
+            body->awake();
     return true;
 }
 
