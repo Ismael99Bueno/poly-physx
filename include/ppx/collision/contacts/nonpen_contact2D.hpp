@@ -3,6 +3,11 @@
 #include "ppx/collision/contacts/nonpen_friction2D.hpp"
 #include "ppx/collision/contacts/contact2D.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(push) // Inheritance via dominance is intended
+#pragma warning(disable : 4250)
+#endif
+
 namespace ppx
 {
 class nonpen_contact2D final : public contact2D, public pvconstraint2D<1, 0>
@@ -31,3 +36,7 @@ class nonpen_contact2D final : public contact2D, public pvconstraint2D<1, 0>
     glm::vec2 direction() const override;
 };
 } // namespace ppx
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

@@ -4,6 +4,11 @@
 #include "ppx/constraints/pvconstraint2D.hpp"
 #include "kit/serialization/yaml/codec.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(push) // Inheritance via dominance is intended
+#pragma warning(disable : 4250)
+#endif
+
 namespace ppx
 {
 template <Constraint2D T> class constraint_manager2D;
@@ -63,3 +68,7 @@ template <Constraint2D T> class constraint_manager2D : public joint_manager2D<T>
 };
 
 } // namespace ppx
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

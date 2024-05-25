@@ -2,6 +2,11 @@
 
 #include "ppx/collision/contacts/contact2D.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(push) // Inheritance via dominance is intended
+#pragma warning(disable : 4250)
+#endif
+
 namespace ppx
 {
 class spring_contact2D final : public contact2D, public actuator2D
@@ -23,3 +28,7 @@ class spring_contact2D final : public contact2D, public actuator2D
     void compute_parameters();
 };
 } // namespace ppx
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
