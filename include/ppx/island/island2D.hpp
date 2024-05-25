@@ -35,7 +35,6 @@ class island2D : public worldref2D
         if (!island)
             return;
 
-        island->awake();
         if constexpr (IConstraint2D<Joint>)
         {
             if (std::find(island->m_constraints.begin(), island->m_constraints.end(), joint) ==
@@ -68,8 +67,9 @@ class island2D : public worldref2D
                 if (island->m_constraints[i] == joint)
                 {
                     island->m_constraints.erase(island->m_constraints.begin() + i);
-                    island->awake();
-                    island->may_split = body1->is_dynamic() && body2->is_dynamic();
+                    if (!body2->is_dynamic() || island != body2->meta.island)
+                        island->awake();
+                    island->may_split = body2->is_dynamic();
                     return;
                 }
         }
@@ -78,8 +78,9 @@ class island2D : public worldref2D
                 if (island->m_actuators[i] == joint)
                 {
                     island->m_actuators.erase(island->m_actuators.begin() + i);
-                    island->awake();
-                    island->may_split = body1->is_dynamic() && body2->is_dynamic();
+                    if (!body2->is_dynamic() || island != body2->meta.island)
+                        island->awake();
+                    island->may_split = body2->is_dynamic();
                     return;
                 }
         KIT_WARN("Joint not found in island");
