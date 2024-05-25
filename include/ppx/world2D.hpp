@@ -38,7 +38,7 @@ class world2D : kit::non_copyable
 
         float baumgarte_coef = 0.035f;
         float baumgarte_threshold = 0.1f;
-        float slop = 0.12f;
+        float slop = 0.08f;
 
         float max_position_correction = 0.2f;
         float position_resolution_speed = 0.2f;
