@@ -177,6 +177,8 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     bool density_updating() const;
     bool spatial_updating() const;
 
+    void prepare_constraint_states();
+
     const std::vector<joint2D *> &joints() const;
     const std::vector<contact2D *> &contacts() const;
 

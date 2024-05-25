@@ -261,6 +261,16 @@ bool body2D::spatial_updating() const
     return m_spatial_update;
 }
 
+void body2D::prepare_constraint_states()
+{
+    meta.ctr_state = m_state;
+    if (is_dynamic() && world.semi_implicit_integration)
+    {
+        meta.ctr_state.velocity += m_props.dynamic.inv_mass * m_force * world.rk_substep_timestep();
+        meta.ctr_state.angular_velocity += m_props.dynamic.inv_inertia * m_torque * world.rk_substep_timestep();
+    }
+}
+
 const std::vector<joint2D *> &body2D::joints() const
 {
     return meta.joints;

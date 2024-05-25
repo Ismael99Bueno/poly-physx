@@ -23,7 +23,6 @@ class island2D : public worldref2D
 
     void merge(island2D &island);
 
-    void prepare_constraint_states();
     void solve();
 
     float time_still() const;

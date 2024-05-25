@@ -42,6 +42,8 @@ void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
             body->apply_simulation_force(body->instant_force() + body->persistent_force());
             body->apply_simulation_torque(body->instant_torque() + body->persistent_torque());
         }
+        else if (body->is_static() && world.islands.enabled())
+            body->prepare_constraint_states();
     }
 }
 
@@ -195,23 +197,10 @@ void body_manager2D::retrieve_data_from_state_variables(const std::vector<float>
             body->retrieve_data_from_state_variables(vars_buffer);
 }
 
-void body_manager2D::prepare_constraint_states(const std::vector<body2D *> &bodies, const float ts,
-                                               const bool semi_implicit)
-{
-    for (body2D *body : bodies)
-    {
-        body->meta.ctr_state = body->m_state;
-        if (semi_implicit)
-        {
-            body->meta.ctr_state.velocity += body->props().dynamic.inv_mass * body->force() * ts;
-            body->meta.ctr_state.angular_velocity += body->props().dynamic.inv_inertia * body->torque() * ts;
-        }
-    }
-}
-
 void body_manager2D::prepare_constraint_states()
 {
-    prepare_constraint_states(m_elements, world.rk_substep_timestep(), world.semi_implicit_integration);
+    for (body2D *body : m_elements)
+        body->prepare_constraint_states();
 }
 
 } // namespace ppx

@@ -55,11 +55,6 @@ void island2D::merge(island2D &island)
     awake();
 }
 
-void island2D::prepare_constraint_states()
-{
-    body_manager2D::prepare_constraint_states(m_bodies, world.rk_substep_timestep(), world.semi_implicit_integration);
-}
-
 const std::vector<body2D *> &island2D::bodies() const
 {
     return m_bodies;
@@ -79,7 +74,8 @@ void island2D::solve()
         if (actuator->enabled)
             actuator->solve();
 
-    prepare_constraint_states();
+    for (body2D *body : m_bodies)
+        body->prepare_constraint_states();
     const std::size_t viters = world.constraints.velocity_iterations;
     const std::size_t piters = world.constraints.position_iterations;
 
