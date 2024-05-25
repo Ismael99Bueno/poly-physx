@@ -107,7 +107,7 @@ island2D *island_manager2D::create_island_from_body(body2D *body)
                 island->m_constraints.push_back(dynamic_cast<constraint2D *>(joint));
             else
                 island->m_actuators.push_back(dynamic_cast<actuator2D *>(joint));
-            body2D *other = joint->body1() == current ? joint->body2() : joint->body1();
+            body2D *other = joint->other(current);
             if (!other->meta.island_flag && other->is_dynamic())
             {
                 other->meta.island_flag = true;

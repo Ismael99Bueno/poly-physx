@@ -34,9 +34,11 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 
     const body2D *body1() const;
     const body2D *body2() const;
+    const body2D *other(const body2D *body) const;
 
     body2D *body1();
     body2D *body2();
+    body2D *other(const body2D *body);
 
     const glm::vec2 &lanchor1() const;
     const glm::vec2 &lanchor2() const;

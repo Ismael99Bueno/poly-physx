@@ -95,7 +95,7 @@ std::vector<float> world2D::create_state_derivative() const
 
     for (const body2D *body : bodies)
     {
-        if (body->asleep())
+        if (body->is_static() || body->asleep())
             continue;
         const std::size_t index = 6 * body->index;
 

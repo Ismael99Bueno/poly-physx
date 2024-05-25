@@ -93,10 +93,19 @@ std::size_t body2D::size() const
     return m_colliders.size();
 }
 
-void body2D::awake()
+void body2D::awake(const bool even_if_non_dynamic)
 {
-    if (m_awake_allowed && meta.island)
+    if (!m_awake_allowed)
+        return;
+    if (meta.island)
         meta.island->awake();
+    else if (even_if_non_dynamic && world.islands.enabled())
+    {
+        for (joint2D *joint : meta.joints)
+            joint->other(this)->awake();
+        for (contact2D *contact : meta.contacts)
+            contact->other(this)->awake();
+    }
 }
 bool body2D::asleep() const
 {
@@ -104,7 +113,7 @@ bool body2D::asleep() const
         return meta.island->asleep();
     return !is_dynamic();
 }
-void body2D::put_to_sleep()
+void body2D::stop_all_motion()
 {
     m_state.velocity = glm::vec2(0.f);
     m_state.angular_velocity = 0.f;
@@ -159,6 +168,7 @@ void body2D::full_update()
     update_centroids();
     update_inertia();
     update_colliders();
+    awake(true);
 }
 
 void body2D::update_colliders()
@@ -459,12 +469,12 @@ float body2D::angular_velocity() const
 void body2D::velocity(const glm::vec2 &velocity)
 {
     m_state.velocity = velocity;
-    awake();
+    awake(true);
 }
 void body2D::angular_velocity(const float angular_velocity)
 {
     m_state.angular_velocity = angular_velocity;
-    awake();
+    awake(true);
 }
 
 void body2D::translate(const glm::vec2 &dpos)
@@ -473,7 +483,7 @@ void body2D::translate(const glm::vec2 &dpos)
     m_state.gposition += dpos;
     m_charge_centroid += dpos;
     update_colliders();
-    awake();
+    awake(true);
 }
 void body2D::rotate(const float dangle)
 {
@@ -491,7 +501,7 @@ void body2D::centroid_transform(const transform2D &centroid)
     m_charge_centroid += dpos;
     m_state.centroid = centroid;
     update_colliders();
-    awake();
+    awake(true);
 }
 
 const glm::vec2 &body2D::centroid() const
@@ -556,7 +566,7 @@ void body2D::centroid(const glm::vec2 &centroid)
     m_charge_centroid += dpos;
     m_state.centroid.position(centroid);
     update_colliders();
-    awake();
+    awake(true);
 }
 
 void body2D::gposition(const glm::vec2 &gposition)
@@ -566,13 +576,13 @@ void body2D::gposition(const glm::vec2 &gposition)
     m_charge_centroid += dpos;
     m_state.gposition = gposition;
     update_colliders();
-    awake();
+    awake(true);
 }
 void body2D::origin(const glm::vec2 &origin)
 {
     m_state.centroid.origin(origin);
     update_colliders();
-    awake();
+    awake(true);
 }
 void body2D::rotation(const float rotation)
 {
@@ -581,7 +591,7 @@ void body2D::rotation(const float rotation)
     m_charge_centroid = m_state.centroid.position() + rmat * (m_charge_centroid - m_state.centroid.position());
     m_state.centroid.rotation(rotation);
     update_colliders();
-    awake();
+    awake(true);
 }
 
 void body2D::mass(const float mass)
@@ -613,7 +623,7 @@ void body2D::reset_dynamic_properties()
         m_props.dynamic.inertia = FLT_MAX;
         m_props.dynamic.inv_inertia = 0.f;
         if (is_static() || (is_dynamic() && asleep()))
-            put_to_sleep();
+            stop_all_motion();
     }
 }
 

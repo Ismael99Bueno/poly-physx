@@ -81,7 +81,7 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     bool empty() const;
     std::size_t size() const;
 
-    void awake();
+    void awake(bool even_if_non_dynamic = false);
     bool asleep() const;
 
     bool is_dynamic() const;
@@ -205,7 +205,7 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
 
     void reset_dynamic_properties();
-    void put_to_sleep();
+    void stop_all_motion();
 
     friend class collider_manager2D;
     friend class body_manager2D;

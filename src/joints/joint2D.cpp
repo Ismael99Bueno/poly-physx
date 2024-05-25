@@ -50,6 +50,11 @@ const body2D *joint2D::body2() const
 {
     return m_body2;
 }
+const body2D *joint2D::other(const body2D *body) const
+{
+    return body == m_body1 ? m_body2 : m_body1;
+}
+
 body2D *joint2D::body1()
 {
     return m_body1;
@@ -57,6 +62,10 @@ body2D *joint2D::body1()
 body2D *joint2D::body2()
 {
     return m_body2;
+}
+body2D *joint2D::other(const body2D *body)
+{
+    return body == m_body1 ? m_body2 : m_body1;
 }
 
 const glm::vec2 &joint2D::lanchor1() const
