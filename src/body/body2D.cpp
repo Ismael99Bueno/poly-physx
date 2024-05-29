@@ -329,13 +329,18 @@ void body2D::type(btype type)
 
     const bool non_dynamic_change =
         (type == btype::KINEMATIC && is_static()) || (type == btype::STATIC && is_kinematic());
-    m_type = type;
-    reset_dynamic_properties();
-    if (non_dynamic_change)
-        return;
 
-    if (is_dynamic())
+    if (non_dynamic_change)
     {
+        m_type = type;
+        reset_dynamic_properties();
+        return;
+    }
+
+    if (type == btype::DYNAMIC)
+    {
+        m_type = type;
+        reset_dynamic_properties();
         if (world.islands.enabled())
         {
             island2D *island = world.islands.create();
@@ -354,6 +359,8 @@ void body2D::type(btype type)
         if (!joint->body1()->is_dynamic() && !joint->body2()->is_dynamic())
             world.joints.remove(joint);
     }
+    m_type = type;
+    reset_dynamic_properties();
 }
 
 float body2D::kinetic_energy() const
