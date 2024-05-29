@@ -86,6 +86,15 @@ glm::vec2 joint2D::ganchor2() const
     return m_no_anchors ? m_body2->centroid() : m_body2->global_position_point(m_lanchor2);
 }
 
+const glm::vec2 &joint2D::reactive_force() const
+{
+    return m_force;
+}
+float joint2D::reactive_torque() const
+{
+    return m_torque;
+}
+
 bool joint2D::contains(const body2D *body) const
 {
     return body == m_body1 || body == m_body2;

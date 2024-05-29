@@ -19,6 +19,8 @@ class actuator2D : virtual public joint2D
     bool is_constraint() const override;
     bool is_actuator() const override;
 
-    virtual void solve() = 0;
+    void solve();
+
+    virtual glm::vec4 compute_force() const = 0;
 };
 } // namespace ppx

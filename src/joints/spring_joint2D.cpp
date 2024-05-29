@@ -33,7 +33,7 @@ glm::vec2 spring_joint2D::non_linear_displacement(const glm::vec2 &displacement)
     return nl_cummulative;
 }
 
-glm::vec4 spring_joint2D::force() const
+glm::vec4 spring_joint2D::compute_force() const
 {
     KIT_ASSERT_ERROR(props.frequency >= 0.f, "Frequency must be non-negative: {0}", props.frequency)
     KIT_ASSERT_ERROR(props.damping_ratio >= 0.f, "Damping ratio must be non-negative: {0}", props.damping_ratio)
@@ -48,7 +48,7 @@ glm::vec4 spring_joint2D::force() const
 
     const float length = glm::length(relpos);
     if (length >= props.min_length && length <= props.max_length)
-        return {0.f, 0.f, 0.f, 0.f};
+        return glm::vec4(0.f);
     const float efflength = length < props.min_length ? props.min_length : props.max_length;
 
     const glm::vec2 offset1 = ga1 - m_body1->centroid();
@@ -66,11 +66,11 @@ glm::vec4 spring_joint2D::force() const
     const auto [stiffness, damping] = stiffness_and_damping(props.frequency, props.damping_ratio, meff);
 
     const glm::vec2 force =
-        stiffness * (props.non_linear_terms != 0 ? non_linear_displacement(displacement) : displacement) +
-        damping * relvel;
+        -(stiffness * (props.non_linear_terms != 0 ? non_linear_displacement(displacement) : displacement) +
+          damping * relvel);
 
-    const float torque1 = kit::cross2D(offset1, force);
-    const float torque2 = kit::cross2D(force, offset2);
+    const float torque1 = kit::cross2D(force, offset1);
+    const float torque2 = kit::cross2D(offset2, force);
     return {force, torque1, torque2};
 }
 
@@ -92,16 +92,6 @@ float spring_joint2D::potential_energy() const
 float spring_joint2D::energy() const
 {
     return kinetic_energy() + potential_energy();
-}
-
-void spring_joint2D::solve()
-{
-    const glm::vec4 f = force();
-    m_body1->apply_simulation_force(glm::vec2(f));
-    m_body2->apply_simulation_force(-glm::vec2(f));
-
-    m_body1->apply_simulation_torque(f.z);
-    m_body2->apply_simulation_torque(f.w);
 }
 
 std::pair<float, float> spring_joint2D::frequency_and_ratio(float stiffness, float damping, float mass)

@@ -46,6 +46,9 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
     glm::vec2 ganchor1() const;
     glm::vec2 ganchor2() const;
 
+    const glm::vec2 &reactive_force() const;
+    float reactive_torque() const;
+
     bool contains(const body2D *body) const;
 
     virtual bool is_constraint() const = 0;
@@ -66,6 +69,9 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 
     glm::vec2 m_lanchor1;
     glm::vec2 m_lanchor2;
+
+    glm::vec2 m_force{0.f};
+    float m_torque = 0.f;
 
   protected:
     bool m_no_anchors; // joint is not anchored (e.g. rotor or motor)
