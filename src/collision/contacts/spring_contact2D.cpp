@@ -23,10 +23,10 @@ void spring_contact2D::update(const collision2D *collision, const std::size_t ma
     compute_parameters();
 }
 
-void spring_contact2D::solve()
+glm::vec3 spring_contact2D::compute_force() const
 {
-    body2D *body1 = m_collider1->body();
-    body2D *body2 = m_collider2->body();
+    const body2D *body1 = m_collider1->body();
+    const body2D *body2 = m_collider2->body();
 
     const glm::vec2 &touch1 = m_point.point;
     const glm::vec2 touch2 = m_point.point - m_mtv;
@@ -40,12 +40,7 @@ void spring_contact2D::solve()
     const glm::vec2 normal_vel = glm::dot(m_normal, relvel) * m_normal;
     const glm::vec2 tangent_vel = relvel - normal_vel;
 
-    const glm::vec2 force = -m_mtv * rigidity + normal_vel * m_normal_damping + tangent_vel * m_tangent_damping;
-    const float torque1 = kit::cross2D(offset1, force);
-    const float torque2 = kit::cross2D(force, offset2);
-    body1->apply_simulation_force(force);
-    body2->apply_simulation_force(-force);
-    body1->apply_simulation_torque(torque1);
-    body2->apply_simulation_torque(torque2);
+    const glm::vec2 force = m_mtv * rigidity + normal_vel * m_normal_damping - tangent_vel * m_tangent_damping;
+    return glm::vec3(force, 0.f);
 }
 } // namespace ppx

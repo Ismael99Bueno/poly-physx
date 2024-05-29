@@ -73,8 +73,16 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
     glm::vec2 m_force{0.f};
     float m_torque = 0.f;
 
-  protected:
-    bool m_no_anchors; // joint is not anchored (e.g. rotor or motor)
+    bool m_no_anchors = false; // joint is not anchored (e.g. rotor or motor)
+    bool m_use_both_anchors = true;
+
+    glm::vec2 m_ganchor1;
+    glm::vec2 m_ganchor2;
+
+    glm::vec2 m_offset1;
+    glm::vec2 m_offset2;
+
+    void compute_anchors_and_offsets();
 
   private:
     void add_to_bodies();

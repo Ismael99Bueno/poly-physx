@@ -19,7 +19,7 @@ class spring_contact2D final : public contact2D, public actuator2D
     spring_contact2D(world2D &world, const collision2D *collision, std::size_t manifold_index);
 
     void update(const collision2D *collision, std::size_t manifold_index) override;
-    void solve() override;
+    glm::vec3 compute_force() const override;
 
   private:
     float m_normal_damping;

@@ -33,7 +33,7 @@ glm::vec2 spring_joint2D::non_linear_displacement(const glm::vec2 &displacement)
     return nl_cummulative;
 }
 
-glm::vec4 spring_joint2D::compute_force() const
+glm::vec3 spring_joint2D::compute_force() const
 {
     KIT_ASSERT_ERROR(props.frequency >= 0.f, "Frequency must be non-negative: {0}", props.frequency)
     KIT_ASSERT_ERROR(props.damping_ratio >= 0.f, "Damping ratio must be non-negative: {0}", props.damping_ratio)
@@ -42,22 +42,16 @@ glm::vec4 spring_joint2D::compute_force() const
     KIT_ASSERT_ERROR(props.non_linear_contribution >= 0.f, "Non linear contribution must be non-negative: {0}",
                      props.non_linear_contribution)
 
-    const glm::vec2 ga1 = ganchor1();
-    const glm::vec2 ga2 = ganchor2();
-    const glm::vec2 relpos = ga2 - ga1;
-
+    const glm::vec2 relpos = m_ganchor2 - m_ganchor1;
     const float length = glm::length(relpos);
     if (length >= props.min_length && length <= props.max_length)
-        return glm::vec4(0.f);
+        return glm::vec3(0.f);
     const float efflength = length < props.min_length ? props.min_length : props.max_length;
-
-    const glm::vec2 offset1 = ga1 - m_body1->centroid();
-    const glm::vec2 offset2 = ga2 - m_body2->centroid();
 
     const glm::vec2 direction =
         !kit::approaches_zero(glm::length2(relpos)) ? glm::normalize(relpos) : glm::vec2(1.f, 0.f);
-    const glm::vec2 relvel = direction * glm::dot(m_body2->velocity_at_centroid_offset(offset2) -
-                                                      m_body1->velocity_at_centroid_offset(offset1),
+    const glm::vec2 relvel = direction * glm::dot(m_body2->velocity_at_centroid_offset(m_offset2) -
+                                                      m_body1->velocity_at_centroid_offset(m_offset1),
                                                   direction);
     const glm::vec2 vlen = efflength * direction;
     const glm::vec2 displacement = relpos - vlen;
@@ -68,10 +62,7 @@ glm::vec4 spring_joint2D::compute_force() const
     const glm::vec2 force =
         -(stiffness * (props.non_linear_terms != 0 ? non_linear_displacement(displacement) : displacement) +
           damping * relvel);
-
-    const float torque1 = kit::cross2D(force, offset1);
-    const float torque2 = kit::cross2D(offset2, force);
-    return {force, torque1, torque2};
+    return glm::vec3(force, 0.f);
 }
 
 float spring_joint2D::kinetic_energy() const
@@ -80,7 +71,7 @@ float spring_joint2D::kinetic_energy() const
 }
 float spring_joint2D::potential_energy() const
 {
-    const glm::vec2 ga1 = ganchor1();
+    const glm::vec2 ga1 = ganchor1(); // anchors may have changed by user
     const glm::vec2 ga2 = ganchor2();
 
     const float length = glm::distance(ga1, ga2);

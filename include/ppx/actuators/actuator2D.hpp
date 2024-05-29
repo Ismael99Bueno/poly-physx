@@ -21,6 +21,6 @@ class actuator2D : virtual public joint2D
 
     void solve();
 
-    virtual glm::vec4 compute_force() const = 0;
+    virtual glm::vec3 compute_force() const = 0;
 };
 } // namespace ppx

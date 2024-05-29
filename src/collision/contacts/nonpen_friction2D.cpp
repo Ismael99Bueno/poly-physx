@@ -12,7 +12,6 @@ nonpen_friction2D::nonpen_friction2D(world2D &world, const collision2D *collisio
       m_friction(collision->friction)
 {
     m_tangent = glm::vec2(-normal.y, normal.x);
-    m_use_both_anchors = false;
 }
 float nonpen_friction2D::constraint_velocity() const
 {

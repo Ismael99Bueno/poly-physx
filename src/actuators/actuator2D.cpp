@@ -15,15 +15,19 @@ bool actuator2D::is_actuator() const
 
 void actuator2D::solve()
 {
-    const glm::vec4 f = compute_force();
+    compute_anchors_and_offsets();
+    const glm::vec3 f = compute_force();
     m_force = glm::vec2(f);
-    m_torque = f.z + f.w;
+    m_torque = f.z;
 
     m_body1->apply_simulation_force(-m_force);
     m_body2->apply_simulation_force(m_force);
 
-    m_body1->apply_simulation_torque(f.z);
-    m_body2->apply_simulation_torque(f.w);
+    const float t1 = kit::cross2D(m_force, m_offset1);
+    const float t2 = kit::cross2D(m_offset2, m_force);
+
+    m_body1->apply_simulation_torque(t1);
+    m_body2->apply_simulation_torque(t2);
 }
 
 } // namespace ppx

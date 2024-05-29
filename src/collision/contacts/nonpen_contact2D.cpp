@@ -12,7 +12,6 @@ nonpen_contact2D::nonpen_contact2D(world2D &world, const collision2D *collision,
       m_has_friction(!kit::approaches_zero(collision->friction))
 {
     m_ganchor1 = collision->manifold[manifold_index].point;
-    m_use_both_anchors = false;
     if (!kit::approaches_zero(m_restitution))
         m_init_ctr_vel = glm::dot(m_normal, m_body2->gvelocity_at(m_ganchor1) - m_body1->gvelocity_at(m_ganchor1));
 }

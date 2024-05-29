@@ -71,12 +71,6 @@ class vconstraint2D : public constraint2D, public auxiliar_1D_direction<LinDegre
     using constraint2D::constraint2D;
     flat_t m_cumimpulse{0.f};
 
-    glm::vec2 m_ganchor1;
-    glm::vec2 m_ganchor2;
-
-    glm::vec2 m_offset1;
-    glm::vec2 m_offset2;
-
     square_t m_mass;
     bool m_use_both_anchors = true;
 

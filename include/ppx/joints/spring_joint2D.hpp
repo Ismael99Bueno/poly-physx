@@ -16,7 +16,7 @@ class spring_joint2D : public actuator2D, kit::non_copyable
 
     specs::properties props;
 
-    glm::vec4 compute_force() const override;
+    glm::vec3 compute_force() const override;
 
     float kinetic_energy() const;
     float potential_energy() const;
