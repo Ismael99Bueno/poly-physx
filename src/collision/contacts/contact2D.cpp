@@ -69,7 +69,7 @@ bool contact2D::asleep() const
 {
     return m_collider1->body()->asleep() && m_collider2->body()->asleep();
 }
-float contact2D::lifetime_left() const
+float contact2D::life_expectancy() const
 {
     return world.collisions.contacts()->contact_lifetime - m_lifetime;
 }

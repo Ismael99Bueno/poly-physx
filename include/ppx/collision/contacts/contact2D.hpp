@@ -39,7 +39,7 @@ class contact2D : virtual public joint2D
     bool recently_updated() const;
     bool expired() const;
     bool asleep() const;
-    float lifetime_left() const;
+    float life_expectancy() const;
 
   protected:
     contact2D(const collision2D *collision, std::size_t manifold_index);
