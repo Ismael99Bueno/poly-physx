@@ -35,6 +35,8 @@ void island2D::remove_body(body2D *body)
             body->meta.island = nullptr;
             awake();
             may_split = true;
+            if (no_bodies())
+                world.islands.remove(this);
             return;
         }
     KIT_WARN("Body not found in island");
@@ -115,10 +117,19 @@ void island2D::solve()
         m_time_still = 0.f;
 }
 
-bool island2D::empty() const
+bool island2D::is_void() const
 {
-    return m_bodies.empty() && m_actuators.empty() && m_constraints.empty();
+    return no_bodies() && no_joints();
 }
+bool island2D::no_bodies() const
+{
+    return m_bodies.empty();
+}
+bool island2D::no_joints() const
+{
+    return m_actuators.empty() && m_constraints.empty();
+}
+
 std::size_t island2D::size() const
 {
     return m_bodies.size() + m_actuators.size() + m_constraints.size();

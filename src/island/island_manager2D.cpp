@@ -44,7 +44,7 @@ void island_manager2D::remove_invalid()
     for (auto it = m_elements.begin(); it != m_elements.end();)
     {
         island2D *island = *it;
-        if (island->merged || island->empty())
+        if (island->merged || island->is_void())
         {
             allocator<island2D>::destroy(island);
             it = m_elements.erase(it);
@@ -164,7 +164,7 @@ void island_manager2D::try_split(std::uint32_t max_splits)
     {
         island2D *island = m_elements[m_island_to_split];
         if (island->may_split && island->energy() > world.islands.sleep_energy_threshold && !island->merged &&
-            !island->empty() && split(island))
+            !island->is_void() && split(island))
             max_splits--;
         if (m_island_to_split-- == 0)
             m_island_to_split = m_elements.size() - 1;
@@ -218,6 +218,10 @@ bool island_manager2D::checksum() const
 
     for (island2D *island : m_elements)
     {
+        if (island->no_bodies())
+        {
+            KIT_ASSERT_ERROR(island->no_joints(), "Cannot have an island that has no bodies but does have joints")
+        }
         body_count += island->m_bodies.size();
         for (body2D *body : island->m_bodies)
             if (body->is_dynamic() && body->meta.island != island)

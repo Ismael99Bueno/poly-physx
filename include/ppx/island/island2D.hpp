@@ -96,7 +96,9 @@ class island2D : public worldref2D
     }
 
     std::size_t size() const;
-    bool empty() const;
+    bool is_void() const;
+    bool no_bodies() const;
+    bool no_joints() const;
 
   private:
     std::vector<body2D *> m_bodies;

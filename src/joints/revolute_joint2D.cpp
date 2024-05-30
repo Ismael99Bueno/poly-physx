@@ -6,6 +6,7 @@ namespace ppx
 {
 revolute_joint2D::revolute_joint2D(world2D &world, const specs &spc) : joint2D(world, spc, spc.ganchor)
 {
+    m_use_both_anchors = true;
 }
 
 glm::vec2 revolute_joint2D::constraint_position() const

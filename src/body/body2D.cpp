@@ -348,17 +348,18 @@ void body2D::type(btype type)
         }
         return;
     }
-    if (meta.island)
-    {
-        meta.island->remove_body(this);
-        meta.island = nullptr;
-    }
     for (std::size_t i = meta.joints.size() - 1; i < meta.joints.size() && i >= 0; i--)
     {
         joint2D *joint = meta.joints[i];
-        if (!joint->body1()->is_dynamic() && !joint->body2()->is_dynamic())
+        if (!joint->other(this)->is_dynamic())
             world.joints.remove(joint);
     }
+
+    if (meta.island)
+        meta.island->remove_body(this);
+    for (collider2D *collider : *this)
+        world.collisions.contacts()->remove_any_contacts_with(collider);
+
     m_type = type;
     reset_dynamic_properties();
 }
