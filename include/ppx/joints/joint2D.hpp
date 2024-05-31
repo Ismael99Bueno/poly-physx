@@ -50,6 +50,8 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
     float reactive_torque() const;
 
     bool contains(const body2D *body) const;
+    void awake();
+    bool asleep() const;
 
     virtual bool is_constraint() const = 0;
     virtual bool is_actuator() const = 0;

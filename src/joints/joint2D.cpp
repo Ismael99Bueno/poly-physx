@@ -101,6 +101,16 @@ bool joint2D::contains(const body2D *body) const
     return body == m_body1 || body == m_body2;
 }
 
+void joint2D::awake()
+{
+    m_body1->awake();
+    m_body2->awake();
+}
+bool joint2D::asleep() const
+{
+    return m_body1->asleep() && m_body2->asleep();
+}
+
 void joint2D::compute_anchors_and_offsets()
 {
     if (m_no_anchors)
