@@ -99,8 +99,8 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         Contact *contact = allocator<Contact>::create(world, collision, manifold_index);
         m_contacts.emplace(hash, contact);
         island2D::add(contact);
-        collision->collider1->body()->meta.contacts.push_back(contact);
-        collision->collider2->body()->meta.contacts.push_back(contact);
+        contact->body1()->meta.contacts.push_back(contact);
+        contact->body2()->meta.contacts.push_back(contact);
         collision->collider1->events.on_contact_enter(contact);
         collision->collider2->events.on_contact_enter(contact);
         global_on_contact_enter(world, contact);
@@ -110,8 +110,8 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         contact->collider1()->events.on_contact_exit(*contact);
         contact->collider2()->events.on_contact_exit(*contact);
         global_on_contact_exit(world, *contact);
-        contact->collider1()->body()->meta.remove_contact(contact);
-        contact->collider2()->body()->meta.remove_contact(contact);
+        contact->body1()->meta.remove_contact(contact);
+        contact->body2()->meta.remove_contact(contact);
         island2D::remove(contact);
         allocator<Contact>::destroy(contact);
     }

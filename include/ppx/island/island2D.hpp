@@ -33,6 +33,8 @@ class island2D : public worldref2D
     const std::vector<actuator2D *> &actuators() const;
     const std::vector<constraint2D *> &constraints() const;
 
+    bool checksum() const;
+
     template <IJoint2D Joint> static void add(Joint *joint)
     {
         island2D *island = get_effective_island(joint);

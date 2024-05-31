@@ -127,6 +127,8 @@ bool body_manager2D::checksum() const
 
     for (const body2D *body : m_elements)
     {
+        if (!body->checksum())
+            return false;
         collider_count1 += body->size();
         for (const collider2D *collider : *body)
         {
@@ -134,6 +136,7 @@ bool body_manager2D::checksum() const
             collider_count2++;
         }
     }
+    KIT_ASSERT_ERROR(collider_count1 == collider_count2 && collider_count1 == colliders, "Collider count mismatch")
     return collider_count1 == collider_count2 && collider_count1 == colliders;
 }
 

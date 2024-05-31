@@ -182,6 +182,8 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
     const std::vector<joint2D *> &joints() const;
     const std::vector<contact2D *> &contacts() const;
 
+    bool checksum() const;
+
   private:
     state2D m_state;
     properties m_props;

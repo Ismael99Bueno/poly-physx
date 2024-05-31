@@ -73,6 +73,8 @@ class joint_repository2D final : public manager2D<joint2D>
         return mng ? mng->remove(joint) : false;
     }
 
+    bool checksum() const;
+
   private:
     joint_repository2D(world2D &world);
     friend class world2D;

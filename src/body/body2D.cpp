@@ -282,6 +282,19 @@ const std::vector<contact2D *> &body2D::contacts() const
     return meta.contacts;
 }
 
+bool body2D::checksum() const
+{
+    const std::unordered_set<const collider2D *> colliders{m_colliders.begin(), m_colliders.end()};
+    const std::unordered_set<const joint2D *> joints{meta.joints.begin(), meta.joints.end()};
+    const std::unordered_set<const contact2D *> contacts{meta.contacts.begin(), meta.contacts.end()};
+
+    KIT_ASSERT_ERROR(colliders.size() == m_colliders.size(), "Duplicate colliders in body")
+    KIT_ASSERT_ERROR(joints.size() == meta.joints.size(), "Duplicate joints in body")
+    KIT_ASSERT_ERROR(contacts.size() == meta.contacts.size(), "Duplicate contacts in body")
+    return colliders.size() == m_colliders.size() && joints.size() == meta.joints.size() &&
+           contacts.size() == meta.contacts.size();
+}
+
 void body2D::reset_simulation_forces()
 {
     m_force = glm::vec2(0.f);

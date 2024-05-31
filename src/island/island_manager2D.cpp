@@ -216,19 +216,16 @@ bool island_manager2D::checksum() const
     std::size_t contact_count = 0;
     std::size_t joint_count = 0;
 
-    for (island2D *island : m_elements)
+    for (const island2D *island : m_elements)
     {
-        if (island->no_bodies())
+        if (!island->checksum())
+            return false;
+        if (island->no_bodies() && !island->no_joints())
         {
-            KIT_ASSERT_ERROR(island->no_joints(), "Cannot have an island that has no bodies but does have joints")
+            KIT_ERROR("Cannot have an island that has no bodies but does have joints")
+            return false;
         }
         body_count += island->m_bodies.size();
-        for (body2D *body : island->m_bodies)
-            if (body->is_dynamic() && body->meta.island != island)
-            {
-                KIT_ERROR("Island checkusm failed: Body island mismatch")
-                return false;
-            }
         for (actuator2D *actuator : island->m_actuators)
             if (dynamic_cast<contact2D *>(actuator))
                 contact_count++;
@@ -240,10 +237,14 @@ bool island_manager2D::checksum() const
             else
                 joint_count++;
     }
+
+    const std::unordered_set<const island2D *> islands(m_elements.begin(), m_elements.end());
     KIT_ASSERT_ERROR(body_count == dynamic_bodies, "Island checksum failed: Body count mismatch")
     KIT_ASSERT_ERROR(contact_count == contacts, "Island checksum failed: Contact count mismatch")
     KIT_ASSERT_ERROR(joint_count == joints, "Island checksum failed: Joint count mismatch")
-    return body_count == dynamic_bodies && contact_count == contacts && joint_count == joints;
+    KIT_ASSERT_ERROR(islands.size() == m_elements.size(), "Island checksum failed: Duplicate islands found")
+    return body_count == dynamic_bodies && contact_count == contacts && joint_count == joints &&
+           islands.size() == m_elements.size();
 }
 
 } // namespace ppx

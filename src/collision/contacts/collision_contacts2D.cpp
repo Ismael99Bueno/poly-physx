@@ -15,14 +15,32 @@ void collision_contacts2D::inherit(collision_contacts2D &&contacts)
 
 bool collision_contacts2D::checksum() const
 {
-    std::unordered_set<contact2D *> contacts;
-    contacts.reserve(size());
+    std::unordered_set<const contact2D *> body_contacts;
+    body_contacts.reserve(size());
+
+    const auto contact_list = create_contacts_list();
+    const std::unordered_set<const contact2D *> contacts(contact_list.begin(), contact_list.end());
     for (const body2D *body : world.bodies)
-        contacts.insert(body->meta.contacts.begin(), body->meta.contacts.end());
-    KIT_ASSERT_ERROR(contacts.size() == size(),
+        for (const contact2D *contact : body->meta.contacts)
+        {
+            if (!contact->contains(body))
+            {
+                KIT_ERROR("Contact checksum failed: Contact does not contain body")
+                return false;
+            }
+            if (!contacts.contains(contact))
+            {
+                KIT_ERROR("Contact checksum failed: Contact not found in contact list")
+                return false;
+            }
+            body_contacts.insert(contact);
+        }
+
+    KIT_ASSERT_ERROR(contacts.size() == size(), "Found duplicate contacts in contact list")
+    KIT_ASSERT_ERROR(body_contacts.size() == size(),
                      "Checksum failed: Contact count mismatch. Contacts count: {0} Body contacts count: {1}", size(),
-                     contacts.size());
-    return contacts.size() == size();
+                     body_contacts.size());
+    return body_contacts.size() == size() && contacts.size() == size();
 }
 
 void collision_contacts2D::global_on_contact_enter(world2D &world, contact2D *contact)

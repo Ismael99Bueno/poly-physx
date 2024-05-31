@@ -70,6 +70,94 @@ const std::vector<constraint2D *> &island2D::constraints() const
     return m_constraints;
 }
 
+bool island2D::checksum() const
+{
+    const std::unordered_set<const body2D *> bodies(m_bodies.begin(), m_bodies.end());
+    const std::unordered_set<const actuator2D *> actuators(m_actuators.begin(), m_actuators.end());
+    const std::unordered_set<const constraint2D *> constraints(m_constraints.begin(), m_constraints.end());
+
+    std::unordered_set<const actuator2D *> body_actuators;
+    std::unordered_set<const constraint2D *> body_constraints;
+    for (const body2D *body : m_bodies)
+    {
+        if (!body->is_dynamic())
+        {
+            KIT_ERROR("Island checksum failed: Body is not dynamic")
+            return false;
+        }
+        if (body->meta.island != this)
+        {
+            KIT_ERROR("Island checkusm failed: Body island mismatch")
+            return false;
+        }
+
+        for (const joint2D *joint : body->meta.joints)
+        {
+            if (auto act = dynamic_cast<const actuator2D *>(joint))
+            {
+                if (!actuators.contains(act))
+                {
+                    KIT_ERROR("Island checksum failed: Actuator not found in actuator list")
+                    return false;
+                }
+                body_actuators.insert(act);
+            }
+            else if (auto con = dynamic_cast<const constraint2D *>(joint))
+            {
+                if (!constraints.contains(con))
+                {
+                    KIT_ERROR("Island checksum failed: Constraint not found in constraint list")
+                    return false;
+                }
+                body_constraints.insert(con);
+            }
+            if ((joint->body1()->is_dynamic() && !bodies.contains(joint->body1())) ||
+                (joint->body2()->is_dynamic() && !bodies.contains(joint->body2())))
+            {
+                KIT_ERROR("Island checksum failed: A body's joint is not contained in the island's body list")
+                return false;
+            }
+        }
+        for (const contact2D *contact : body->meta.contacts)
+        {
+            if (auto act = dynamic_cast<const actuator2D *>(contact))
+            {
+                if (!actuators.contains(act))
+                {
+                    KIT_ERROR("Island checksum failed: Actuator not found in actuator list")
+                    return false;
+                }
+                body_actuators.insert(act);
+            }
+            else if (auto con = dynamic_cast<const constraint2D *>(contact))
+            {
+                if (!constraints.contains(con))
+                {
+                    KIT_ERROR("Island checksum failed: Constraint not found in constraint list")
+                    return false;
+                }
+                body_constraints.insert(con);
+            }
+            if ((contact->body1()->is_dynamic() && !bodies.contains(contact->body1())) ||
+                (contact->body2()->is_dynamic() && !bodies.contains(contact->body2())))
+            {
+                KIT_ERROR("Island checksum failed: A body's contact is not contained in the island's body list")
+                return false;
+            }
+        }
+    }
+
+    KIT_ASSERT_ERROR(body_actuators.size() == m_actuators.size(), "Island checksum failed: Actuator count mismatch")
+    KIT_ASSERT_ERROR(body_constraints.size() == m_constraints.size(),
+                     "Island checksum failed: Constraint count mismatch")
+    KIT_ASSERT_ERROR(bodies.size() == m_bodies.size(), "Island checksum failed: Duplicate bodies found")
+    KIT_ASSERT_ERROR(actuators.size() == m_actuators.size(), "Island checksum failed: Duplicate actuators found")
+    KIT_ASSERT_ERROR(constraints.size() == m_constraints.size(), "Island checksum failed: Duplicate constraints found")
+    return bodies.size() == m_bodies.size() && actuators.size() == m_actuators.size() &&
+           constraints.size() == m_constraints.size() && body_actuators.size() == m_actuators.size() &&
+           body_constraints.size() == m_constraints.size();
+}
+
 void island2D::solve()
 {
     for (actuator2D *actuator : m_actuators)

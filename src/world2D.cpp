@@ -69,15 +69,17 @@ void world2D::pre_step_preparation()
     bodies.send_data_to_state(integrator.state);
     if (islands.enabled() && islands.enable_split)
         islands.try_split(1);
+    KIT_ASSERT_ERROR(collisions.contacts()->checksum(), "Contacts checksum failed")
+    KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
+    KIT_ASSERT_ERROR(joints.checksum(), "Joints checksum failed")
 }
 void world2D::post_step_setup()
 {
     bodies.reset_instant_forces();
     bodies.retrieve_data_from_state_variables(integrator.state.vars());
     m_previous_timestep = integrator.ts.value;
-    KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
+
     KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
-    KIT_ASSERT_ERROR(collisions.contacts()->checksum(), "Contacts checksum failed")
 #ifdef DEBUG
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
