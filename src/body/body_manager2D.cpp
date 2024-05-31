@@ -42,7 +42,7 @@ void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
             body->apply_simulation_force(body->instant_force() + body->persistent_force());
             body->apply_simulation_torque(body->instant_torque() + body->persistent_torque());
         }
-        else if (body->is_static() && world.islands.enabled())
+        if (!body->is_dynamic() && world.islands.enabled())
             body->prepare_constraint_states();
     }
 }
