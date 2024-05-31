@@ -14,18 +14,21 @@ class spring_joint2D : public actuator2D, kit::non_copyable
 
     spring_joint2D(world2D &world, const specs &spc);
 
-    specs::properties props;
-
     glm::vec3 compute_force() const override;
 
     float kinetic_energy() const;
     float potential_energy() const;
     float energy() const;
 
+    const specs::properties &props() const;
+    void props(const specs::properties &props);
+
     static std::pair<float, float> frequency_and_ratio(float stiffness, float damping, float mass);
     static std::pair<float, float> stiffness_and_damping(float frequency, float damping_ratio, float mass);
 
   private:
+    specs::properties m_props;
+
     glm::vec2 non_linear_displacement(const glm::vec2 &displacement) const;
 };
 

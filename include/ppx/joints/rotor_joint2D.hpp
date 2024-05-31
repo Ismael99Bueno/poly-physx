@@ -13,14 +13,16 @@ class rotor_joint2D final : public vconstraint2D<0, 1>, kit::non_copyable
 
     rotor_joint2D(world2D &world, const specs &spc);
 
-    specs::properties props;
-
     float constraint_velocity() const override;
     void solve_velocities() override;
+
+    const specs::properties &props() const;
+    void props(const specs::properties &props);
 
   private:
     void update_constraint_data() override;
 
+    specs::properties m_props;
     float m_correction;
     float m_relangle;
     bool m_legal_angle;

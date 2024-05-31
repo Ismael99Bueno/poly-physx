@@ -52,21 +52,21 @@ body2D body2D::from_instance(const ppx::body2D &body)
 
 rotor_joint2D rotor_joint2D::from_instance(const ppx::rotor_joint2D &rotj)
 {
-    rotor_joint2D specs{{rotj.body1()->index, rotj.body2()->index}, rotj.props};
+    rotor_joint2D specs{{rotj.body1()->index, rotj.body2()->index}, rotj.props()};
     specs.bodies_collide = rotj.bodies_collide;
     return specs;
 }
 
 motor_joint2D motor_joint2D::from_instance(const ppx::motor_joint2D &motj)
 {
-    motor_joint2D specs{{motj.body1()->index, motj.body2()->index}, motj.props};
+    motor_joint2D specs{{motj.body1()->index, motj.body2()->index}, motj.props()};
     specs.bodies_collide = motj.bodies_collide;
     return specs;
 }
 
 distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj)
 {
-    distance_joint2D specs{{dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), false, dj.props};
+    distance_joint2D specs{{dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), false, dj.props()};
     specs.bodies_collide = dj.bodies_collide;
     return specs;
 }
@@ -87,21 +87,21 @@ weld_joint2D weld_joint2D::from_instance(const ppx::weld_joint2D &weldj)
 
 ball_joint2D ball_joint2D::from_instance(const ppx::ball_joint2D &bj)
 {
-    ball_joint2D specs{{bj.body1()->index, bj.body2()->index}, false, bj.props};
+    ball_joint2D specs{{bj.body1()->index, bj.body2()->index}, false, bj.props()};
     specs.bodies_collide = bj.bodies_collide;
     return specs;
 }
 
 prismatic_joint2D prismatic_joint2D::from_instance(const ppx::prismatic_joint2D &pj)
 {
-    prismatic_joint2D specs{{pj.body1()->index, pj.body2()->index}, pj.ganchor1(), pj.ganchor2(), false, pj.props};
+    prismatic_joint2D specs{{pj.body1()->index, pj.body2()->index}, pj.ganchor1(), pj.ganchor2(), false, pj.props()};
     specs.bodies_collide = pj.bodies_collide;
     return specs;
 }
 
 spring_joint2D spring_joint2D::from_instance(const ppx::spring_joint2D &sp)
 {
-    spring_joint2D specs{{sp.body1()->index, sp.body2()->index}, sp.ganchor1(), sp.ganchor2(), false, sp.props};
+    spring_joint2D specs{{sp.body1()->index, sp.body2()->index}, sp.ganchor1(), sp.ganchor2(), false, sp.props()};
     specs.bodies_collide = sp.bodies_collide;
     return specs;
 }

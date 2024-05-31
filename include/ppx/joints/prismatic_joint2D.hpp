@@ -13,14 +13,16 @@ class prismatic_joint2D final : public pvconstraint2D<1, 1>, kit::non_copyable
 
     prismatic_joint2D(world2D &world, const specs &spc);
 
-    specs::properties props;
-
     glm::vec2 constraint_position() const override;
     glm::vec2 constraint_velocity() const override;
 
     static glm::vec2 axis_from_angle(float radians);
 
+    const specs::properties &props() const;
+    void props(const specs::properties &props);
+
   private:
+    specs::properties m_props;
     float m_target_relangle;
 
     glm::vec2 direction() const override;
