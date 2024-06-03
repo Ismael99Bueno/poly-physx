@@ -370,10 +370,10 @@ void body2D::type(btype type)
             world.joints.remove(joint);
     }
 
-    if (meta.island)
-        meta.island->remove_body(this);
     for (collider2D *collider : *this)
         world.collisions.contacts()->remove_any_contacts_with(collider);
+    if (meta.island)
+        meta.island->remove_body(this);
 
     m_type = type;
     reset_dynamic_properties();
