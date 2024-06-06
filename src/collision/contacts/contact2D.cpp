@@ -63,7 +63,7 @@ bool contact2D::recently_updated() const
 }
 bool contact2D::expired() const
 {
-    return m_lifetime >= world.collisions.contacts()->contact_lifetime;
+    return m_lifetime >= world.collisions.contacts()->params.lifetime;
 }
 bool contact2D::asleep() const
 {
@@ -71,7 +71,7 @@ bool contact2D::asleep() const
 }
 float contact2D::life_expectancy() const
 {
-    return world.collisions.contacts()->contact_lifetime - m_lifetime;
+    return world.collisions.contacts()->params.lifetime - m_lifetime;
 }
 
 } // namespace ppx

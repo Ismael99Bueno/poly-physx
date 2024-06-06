@@ -13,7 +13,7 @@ void quad_tree_detection2D::detect_collisions()
 
     const auto partitions = m_quad_tree.collect_partitions();
 
-    if (multithreaded)
+    if (params.multithreaded)
         detect_collisions_mt(partitions);
     else
         detect_collisions_st(partitions);

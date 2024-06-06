@@ -3,6 +3,7 @@
 #include "ppx/common/alias.hpp"
 #include "ppx/collision/filter.hpp"
 #include "kit/container/dynarray.hpp"
+#include "rk/integration/integrator.hpp"
 
 namespace ppx
 {
@@ -168,6 +169,62 @@ struct spring_joint2D : joint2D
     } props;
 
     static spring_joint2D from_instance(const ppx::spring_joint2D &sp);
+};
+
+struct joint_manager2D
+{
+    struct constraints2D
+    {
+        std::uint32_t velocity_iterations = 8;
+        std::uint32_t position_iterations = 3;
+        bool warmup = true;
+        bool baumgarte_correction = true;
+
+        float baumgarte_coef = 0.035f;
+        float baumgarte_threshold = 0.1f;
+        float slop = 0.15f;
+
+        float max_position_correction = 0.2f;
+        float position_resolution_speed = 0.2f;
+    } constraints;
+};
+
+struct island_manager2D
+{
+    float sleep_energy_threshold = 0.01f;
+    float sleep_time_threshold = 1.5f;
+    bool enable_split = true;
+    bool multithreaded = true;
+};
+
+struct collision_manager2D
+{
+    struct detection2D
+    {
+#ifdef KIT_PROFILE
+        bool multithreaded = false;
+#else
+        bool multithreaded = true;
+#endif
+    } detection;
+
+    struct contacts2D
+    {
+        float lifetime = 0.4f;
+    } contacts;
+};
+
+struct world2D
+{
+    struct
+    {
+        bool semi_implicit_integration = true;
+        rk::butcher_tableau<float> tableau = rk::butcher_tableau<float>::rk1;
+        rk::timestep<float> timestep{1.e-3f};
+    } integrator;
+    joint_manager2D joints;
+    island_manager2D islands;
+    collision_manager2D collision;
 };
 
 struct contraption2D

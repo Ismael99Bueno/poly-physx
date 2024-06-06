@@ -10,7 +10,7 @@ collision_contacts2D::collision_contacts2D(world2D &world) : worldref2D(world)
 
 void collision_contacts2D::inherit(collision_contacts2D &&contacts)
 {
-    contact_lifetime = contacts.contact_lifetime;
+    params = contacts.params;
 }
 
 bool collision_contacts2D::checksum() const

@@ -15,12 +15,7 @@ namespace ppx
 class world2D : kit::non_copyable
 {
   public:
-    template <class... IntegArgs>
-    world2D(IntegArgs &&...args)
-        : integrator(std::forward<IntegArgs>(args)...), bodies(*this), colliders(*this), joints(*this),
-          behaviours(*this), collisions(*this), islands(*this), m_previous_timestep(integrator.ts.value)
-    {
-    }
+    world2D(const specs::world2D &spc = {});
 
     rk::integrator<float> integrator;
     body_manager2D bodies;
@@ -29,20 +24,6 @@ class world2D : kit::non_copyable
     behaviour_manager2D behaviours;
     collision_manager2D collisions;
     island_manager2D islands;
-    struct
-    {
-        std::uint32_t velocity_iterations = 8;
-        std::uint32_t position_iterations = 3;
-        bool warmup = true;
-        bool baumgarte_correction = true;
-
-        float baumgarte_coef = 0.035f;
-        float baumgarte_threshold = 0.1f;
-        float slop = 0.15f;
-
-        float max_position_correction = 0.2f;
-        float position_resolution_speed = 0.2f;
-    } constraints;
 
     bool semi_implicit_integration = true;
 

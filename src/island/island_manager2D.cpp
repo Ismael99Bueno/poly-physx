@@ -15,7 +15,7 @@ void island_manager2D::solve()
             island->solve();
         return;
     }
-    if (!multithreaded)
+    if (!params.multithreaded)
     {
         for (island2D *island : m_elements)
             if (!island->asleep())
@@ -163,7 +163,7 @@ void island_manager2D::try_split(std::uint32_t max_splits)
     while (iters++ < size && max_splits > 0)
     {
         island2D *island = m_elements[m_island_to_split];
-        if (island->may_split && island->energy() > world.islands.sleep_energy_threshold && !island->merged &&
+        if (island->may_split && island->energy() > params.sleep_energy_threshold && !island->merged &&
             !island->is_void() && split(island))
             max_splits--;
         if (m_island_to_split-- == 0)

@@ -9,7 +9,7 @@ namespace ppx
 void brute_force_detection2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
-    if (multithreaded)
+    if (params.multithreaded)
         detect_collisions_mt();
     else
         detect_collisions_st();

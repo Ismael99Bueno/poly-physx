@@ -78,6 +78,10 @@ class actuator_meta_manager2D final : public joint_meta_manager2D<iactuator_mana
 
 class constraint_meta_manager2D final : public joint_meta_manager2D<iconstraint_manager2D>
 {
+  public:
+    specs::joint_manager2D::constraints2D params;
+
+  private:
     using joint_meta_manager2D<iconstraint_manager2D>::joint_meta_manager2D;
     contact_constraint_solver2D *m_contact_solver = nullptr;
 

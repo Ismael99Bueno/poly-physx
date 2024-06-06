@@ -27,14 +27,10 @@ class collision_detection2D : public worldref2D, public kit::toggleable, kit::no
     using collision_map =
         std::unordered_map<kit::commutative_tuple<const collider2D *, const collider2D *>, collision2D>;
 
+    specs::collision_manager2D::detection2D params;
+
     collision_detection2D(world2D &world);
     virtual ~collision_detection2D() = default;
-
-#ifdef KIT_PROFILE
-    bool multithreaded = false;
-#else
-    bool multithreaded = true;
-#endif
 
     template <kit::DerivedFrom<cp_narrow_detection2D> T = cp_narrow_detection2D> const T *cp_narrow_detection() const
     {

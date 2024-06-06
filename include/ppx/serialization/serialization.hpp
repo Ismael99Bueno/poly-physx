@@ -534,7 +534,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         YAML::Node node;
         YAML::Node ndet = node["Detection"];
 
-        ndet["Multithreading"] = cm.detection()->multithreaded;
+        ndet["Multithreading"] = cm.detection()->params.multithreaded;
         if (cm.detection<ppx::brute_force_detection2D>())
             ndet["Detection method"] = 0;
         else if (auto coldet = cm.detection<ppx::quad_tree_detection2D>())
@@ -567,7 +567,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             ndet["P-P Algorithm"] = 1;
 
         YAML::Node nsolv = node["Contacts"];
-        nsolv["Contact lifetime"] = cm.contacts()->contact_lifetime;
+        nsolv["Contact lifetime"] = cm.contacts()->params.lifetime;
         if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::nonpen_contact2D>>())
             nsolv["Solver method"] = 0;
         else if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::spring_contact2D>>())
@@ -585,7 +585,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
         const YAML::Node ndet = node["Detection"];
 
-        cm.detection()->multithreaded = ndet["Multithreading"].as<bool>();
+        cm.detection()->params.multithreaded = ndet["Multithreading"].as<bool>();
         if (ndet["Detection method"])
         {
             const int method = ndet["Detection method"].as<int>();
@@ -628,7 +628,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             else if (method == 1)
                 cm.set_contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>();
         }
-        cm.contacts()->contact_lifetime = nsolv["Contact lifetime"].as<float>();
+        cm.contacts()->params.lifetime = nsolv["Contact lifetime"].as<float>();
 
         ppx::spring_contact2D::rigidity = nsolv["Rigidity"].as<float>();
         ppx::spring_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();
@@ -650,20 +650,22 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Joints repository"] = world.joints;
 
         YAML::Node ctrs = node["Constraint settings"];
-        ctrs["Velocity iterations"] = world.constraints.velocity_iterations;
-        ctrs["Position iterations"] = world.constraints.position_iterations;
-        ctrs["Warmup"] = world.constraints.warmup;
-        ctrs["Baumgarte correction"] = world.constraints.baumgarte_correction;
-        ctrs["Baumgarte coef"] = world.constraints.baumgarte_coef;
-        ctrs["Baumgarte threshold"] = world.constraints.baumgarte_threshold;
-        ctrs["Slop"] = world.constraints.slop;
-        ctrs["Max position correction"] = world.constraints.max_position_correction;
-        ctrs["Position resolution speed"] = world.constraints.position_resolution_speed;
+        ctrs["Velocity iterations"] = world.joints.constraints.params.velocity_iterations;
+        ctrs["Position iterations"] = world.joints.constraints.params.position_iterations;
+        ctrs["Warmup"] = world.joints.constraints.params.warmup;
+        ctrs["Baumgarte correction"] = world.joints.constraints.params.baumgarte_correction;
+        ctrs["Baumgarte coef"] = world.joints.constraints.params.baumgarte_coef;
+        ctrs["Baumgarte threshold"] = world.joints.constraints.params.baumgarte_threshold;
+        ctrs["Slop"] = world.joints.constraints.params.slop;
+        ctrs["Max position correction"] = world.joints.constraints.params.max_position_correction;
+        ctrs["Position resolution speed"] = world.joints.constraints.params.position_resolution_speed;
 
         YAML::Node islands = node["Island settings"];
         islands["Enabled"] = world.islands.enabled();
-        islands["Sleep energy threshold"] = world.islands.sleep_energy_threshold;
-        islands["Sleep time threshold"] = world.islands.sleep_time_threshold;
+        islands["Enable split"] = world.islands.params.enable_split;
+        islands["Multithreaded"] = world.islands.params.multithreaded;
+        islands["Sleep energy threshold"] = world.islands.params.sleep_energy_threshold;
+        islands["Sleep time threshold"] = world.islands.params.sleep_time_threshold;
 
         return node;
     }
@@ -680,20 +682,22 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Joints repository"].as<ppx::joint_repository2D>(world.joints);
 
         const YAML::Node ctrs = node["Constraint settings"];
-        world.constraints.velocity_iterations = ctrs["Velocity iterations"].as<std::uint32_t>();
-        world.constraints.position_iterations = ctrs["Position iterations"].as<std::uint32_t>();
-        world.constraints.warmup = ctrs["Warmup"].as<bool>();
-        world.constraints.baumgarte_correction = ctrs["Baumgarte correction"].as<bool>();
-        world.constraints.baumgarte_coef = ctrs["Baumgarte coef"].as<float>();
-        world.constraints.baumgarte_threshold = ctrs["Baumgarte threshold"].as<float>();
-        world.constraints.slop = ctrs["Slop"].as<float>();
-        world.constraints.max_position_correction = ctrs["Max position correction"].as<float>();
-        world.constraints.position_resolution_speed = ctrs["Position resolution speed"].as<float>();
+        world.joints.constraints.params.velocity_iterations = ctrs["Velocity iterations"].as<std::uint32_t>();
+        world.joints.constraints.params.position_iterations = ctrs["Position iterations"].as<std::uint32_t>();
+        world.joints.constraints.params.warmup = ctrs["Warmup"].as<bool>();
+        world.joints.constraints.params.baumgarte_correction = ctrs["Baumgarte correction"].as<bool>();
+        world.joints.constraints.params.baumgarte_coef = ctrs["Baumgarte coef"].as<float>();
+        world.joints.constraints.params.baumgarte_threshold = ctrs["Baumgarte threshold"].as<float>();
+        world.joints.constraints.params.slop = ctrs["Slop"].as<float>();
+        world.joints.constraints.params.max_position_correction = ctrs["Max position correction"].as<float>();
+        world.joints.constraints.params.position_resolution_speed = ctrs["Position resolution speed"].as<float>();
 
         const YAML::Node islands = node["Island settings"];
         world.islands.enabled(islands["Enabled"].as<bool>());
-        world.islands.sleep_energy_threshold = islands["Sleep energy threshold"].as<float>();
-        world.islands.sleep_time_threshold = islands["Sleep time threshold"].as<float>();
+        world.islands.params.enable_split = islands["Enable split"].as<bool>();
+        world.islands.params.multithreaded = islands["Multithreaded"].as<bool>();
+        world.islands.params.sleep_energy_threshold = islands["Sleep energy threshold"].as<float>();
+        world.islands.params.sleep_time_threshold = islands["Sleep time threshold"].as<float>();
 
         return true;
     }

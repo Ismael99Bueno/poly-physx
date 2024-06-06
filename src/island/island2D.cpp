@@ -166,8 +166,8 @@ void island2D::solve()
 
     for (body2D *body : m_bodies)
         body->prepare_constraint_states();
-    const std::size_t viters = world.constraints.velocity_iterations;
-    const std::size_t piters = world.constraints.position_iterations;
+    const std::size_t viters = world.joints.constraints.params.velocity_iterations;
+    const std::size_t piters = world.joints.constraints.params.position_iterations;
 
     for (constraint2D *constraint : m_constraints)
         if (constraint->enabled)
@@ -196,10 +196,10 @@ void island2D::solve()
         m_energy += body->kinetic_energy();
     m_energy /= m_bodies.size();
 
-    if (m_energy < world.islands.sleep_energy_threshold)
+    if (m_energy < world.islands.params.sleep_energy_threshold)
     {
         m_time_still += world.rk_substep_timestep();
-        m_asleep = m_solved_positions && m_time_still >= world.islands.sleep_time_threshold;
+        m_asleep = m_solved_positions && m_time_still >= world.islands.params.sleep_time_threshold;
     }
     else
         m_time_still = 0.f;

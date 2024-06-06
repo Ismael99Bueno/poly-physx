@@ -10,8 +10,9 @@ typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<LinDegree
                                                                        AngDegrees>::compute_constraint_impulse() const
 {
     flat_t cvel = this->constraint_velocity();
-    if (this->world.constraints.baumgarte_correction && glm::length(m_c) > this->world.constraints.baumgarte_threshold)
-        cvel += this->world.constraints.baumgarte_coef * m_c / this->world.rk_substep_timestep();
+    if (this->world.joints.constraints.params.baumgarte_correction &&
+        glm::length(m_c) > this->world.joints.constraints.params.baumgarte_threshold)
+        cvel += this->world.joints.constraints.params.baumgarte_coef * m_c / this->world.rk_substep_timestep();
 
     if constexpr (LinDegrees + AngDegrees == 1)
         return -cvel * this->m_mass;
@@ -24,16 +25,18 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<
     LinDegrees, AngDegrees>::compute_constraint_correction() const
 {
-    const float max_correction = this->world.constraints.max_position_correction;
-    const float resol_speed = this->world.constraints.position_resolution_speed;
+    const float max_correction = this->world.joints.constraints.params.max_position_correction;
+    const float resol_speed = this->world.joints.constraints.params.position_resolution_speed;
     if constexpr (LinDegrees + AngDegrees == 1)
     {
-        const float signed_slop = m_c > 0.f ? -this->world.constraints.slop : this->world.constraints.slop;
+        const float signed_slop =
+            m_c > 0.f ? -this->world.joints.constraints.params.slop : this->world.joints.constraints.params.slop;
         return -std::clamp(resol_speed * (m_c + signed_slop), -max_correction, max_correction) * this->m_mass;
     }
     else
     {
-        const flat_t correction = resol_speed * (glm::normalize(m_c) * this->world.constraints.slop - m_c);
+        const flat_t correction =
+            resol_speed * (glm::normalize(m_c) * this->world.joints.constraints.params.slop - m_c);
         if (glm::length2(correction) > max_correction * max_correction)
             return this->m_mass * max_correction * glm::normalize(correction);
 
@@ -138,7 +141,7 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 bool pvconstraint2D<LinDegrees, AngDegrees>::solve_positions()
 {
     update_position_data();
-    if (glm::length(m_c) < this->world.constraints.slop)
+    if (glm::length(m_c) < this->world.joints.constraints.params.slop)
         return true;
 
     const flat_t ccorrection = compute_constraint_correction();

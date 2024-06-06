@@ -34,8 +34,6 @@ void actuator_meta_manager2D::solve()
 void constraint_meta_manager2D::solve()
 {
     KIT_PERF_SCOPE("Constraints solve")
-    const std::size_t viters = world.constraints.velocity_iterations;
-    const std::size_t piters = world.constraints.position_iterations;
     if (m_contact_solver)
         m_contact_solver->startup();
 
@@ -43,7 +41,7 @@ void constraint_meta_manager2D::solve()
         if (manager->enabled)
             manager->startup();
 
-    for (std::size_t i = 0; i < viters; i++)
+    for (std::size_t i = 0; i < params.velocity_iterations; i++)
     {
         if (m_contact_solver)
             m_contact_solver->solve_velocities();
@@ -51,7 +49,7 @@ void constraint_meta_manager2D::solve()
             if (manager->enabled)
                 manager->solve_velocities();
     }
-    for (std::size_t i = 0; i < piters; i++)
+    for (std::size_t i = 0; i < params.position_iterations; i++)
     {
         bool solved = true;
         for (const auto &manager : this->m_elements)

@@ -47,7 +47,7 @@ void collision_detection2D::update_last_collisions()
 
 void collision_detection2D::inherit(collision_detection2D &&coldet)
 {
-    multithreaded = coldet.multithreaded;
+    params = coldet.params;
     m_cp_narrow = std::move(coldet.m_cp_narrow);
     m_pp_narrow = std::move(coldet.m_pp_narrow);
 
