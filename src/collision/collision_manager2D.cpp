@@ -66,7 +66,7 @@ void collision_manager2D::detect_and_create_contacts()
     if (!m_detection->enabled)
         return;
     const auto &collisions = m_detection->detect_collisions_cached();
-    if (m_contacts->enabled)
+    if (m_contacts->enabled())
         m_contacts->create_contacts_from_collisions(collisions);
 }
 
@@ -77,6 +77,17 @@ std::size_t collision_manager2D::size() const
 bool collision_manager2D::empty() const
 {
     return m_detection->collisions().empty();
+}
+
+bool collision_manager2D::enabled() const
+{
+    return m_enabled;
+}
+void collision_manager2D::enabled(const bool enabled)
+{
+    m_enabled = enabled;
+    if (!enabled)
+        m_contacts->destroy_all_contacts();
 }
 
 } // namespace ppx

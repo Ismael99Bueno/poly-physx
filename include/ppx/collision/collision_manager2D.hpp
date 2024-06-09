@@ -17,7 +17,7 @@ template <typename T>
 concept ContactSolver2D =
     kit::DerivedFrom<T, contact_constraint_solver2D> || kit::DerivedFrom<T, contact_actuator_solver2D>;
 
-class collision_manager2D : public kit::toggleable, public worldref2D
+class collision_manager2D : public worldref2D
 {
   public:
     struct
@@ -101,12 +101,15 @@ class collision_manager2D : public kit::toggleable, public worldref2D
 
     std::size_t size() const;
     bool empty() const;
+    bool enabled() const;
+    void enabled(bool enable);
 
   private:
     collision_manager2D(world2D &world);
 
     kit::scope<collision_detection2D> m_detection;
     kit::scope<collision_contacts2D> m_contacts;
+    bool m_enabled = true;
 
     void set_constraint_based_contact_solver(contact_constraint_solver2D *contacts);
     void set_actuator_based_contact_solver(contact_actuator_solver2D *contacts);

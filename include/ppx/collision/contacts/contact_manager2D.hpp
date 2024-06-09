@@ -117,12 +117,12 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     }
 
   private:
-    void destroy_all_contacts()
+    void destroy_all_contacts() override
     {
         for (auto &pair : m_contacts)
             destroy_contact(pair.second); // this is expensive, for every contact a call to remove_contact for
                                           // colliders and bodies. it shouldnt matter because this is almost never
-                                          // called (only when user changes contact solver)
+                                          // called (only when user changes contact solver or disables collisions)
         m_contacts.clear();
     }
 };

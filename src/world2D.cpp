@@ -185,7 +185,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     bodies.prepare_for_next_substep(vars);
 
     behaviours.apply_forces();
-    if (collisions.enabled)
+    if (collisions.enabled())
         collisions.detect_and_create_contacts();
 
     if (islands.enabled())

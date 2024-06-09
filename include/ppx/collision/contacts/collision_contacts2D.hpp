@@ -11,7 +11,7 @@
 
 namespace ppx
 {
-class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non_copyable
+class collision_contacts2D : public worldref2D, kit::non_copyable
 {
   public:
     using contact_key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
@@ -29,6 +29,9 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     bool checksum() const;
     void inherit(collision_contacts2D &&contacts);
 
+    bool enabled() const;
+    void enabled(bool enable);
+
   protected:
     static void global_on_contact_enter(world2D &world, contact2D *contact);
     static void global_on_contact_exit(world2D &world, contact2D &contact);
@@ -36,10 +39,13 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     static void global_on_contact_post_solve(world2D &world, contact2D *contact);
 
   private:
+    bool m_enabled = true;
+
     virtual void on_attach()
     {
     }
 
+    virtual void destroy_all_contacts() = 0;
     virtual void create_contacts_from_collisions(const collision_detection2D::collision_map &collisions) = 0;
 
     friend class collision_manager2D;

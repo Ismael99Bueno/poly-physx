@@ -532,6 +532,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     static YAML::Node encode(const ppx::collision_manager2D &cm)
     {
         YAML::Node node;
+        node["Enabled"] = cm.enabled();
         YAML::Node ndet = node["Detection"];
 
         ndet["Multithreading"] = cm.detection()->params.multithreaded;
@@ -541,6 +542,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             ndet["Detection method"] = 1;
             ndet["Force square"] = coldet->force_square_shape;
+            ndet["Include non dynamic"] = coldet->include_non_dynamic;
 
             const auto &props = coldet->quad_tree().props();
             ndet["Max colliders"] = props.elements_per_quad;
@@ -580,9 +582,10 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     }
     static bool decode(const YAML::Node &node, ppx::collision_manager2D &cm)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() != 3)
             return false;
 
+        cm.enabled(node["Enabled"].as<bool>());
         const YAML::Node ndet = node["Detection"];
 
         cm.detection()->params.multithreaded = ndet["Multithreading"].as<bool>();
@@ -595,6 +598,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             {
                 auto qtdet = cm.set_detection<ppx::quad_tree_detection2D>();
                 qtdet->force_square_shape = ndet["Force square"].as<bool>();
+                qtdet->include_non_dynamic = ndet["Include non dynamic"].as<bool>();
 
                 auto &props = qtdet->quad_tree().props();
                 props.elements_per_quad = ndet["Max colliders"].as<std::size_t>();

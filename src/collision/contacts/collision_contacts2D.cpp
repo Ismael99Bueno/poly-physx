@@ -13,6 +13,18 @@ void collision_contacts2D::inherit(collision_contacts2D &&contacts)
     params = contacts.params;
 }
 
+bool collision_contacts2D::enabled() const
+{
+    return m_enabled;
+}
+
+void collision_contacts2D::enabled(bool enable)
+{
+    m_enabled = enable;
+    if (!enable)
+        destroy_all_contacts();
+}
+
 bool collision_contacts2D::checksum() const
 {
     std::unordered_set<const contact2D *> body_contacts;
