@@ -11,7 +11,9 @@ class quad_tree_detection2D final : public collision_detection2D
     using collision_detection2D::collision_detection2D;
     const ppx::quad_tree &quad_tree() const;
     ppx::quad_tree &quad_tree();
+
     bool force_square_shape = false;
+    bool include_non_dynamic = false;
 
   private:
     using qtpartition = ppx::quad_tree::partition;

@@ -51,7 +51,7 @@ ray2D::hit<collider2D> collider_manager2D::cast(const ray2D &ray) const
     ray2D::hit<collider2D> closest;
     closest.distance = FLT_MAX;
     const auto qtdet = world.collisions.detection<quad_tree_detection2D>();
-    if (!qtdet)
+    if (!qtdet || !qtdet->include_non_dynamic)
         for (collider2D *collider : m_elements)
             cast_check(collider, ray, closest);
     else
@@ -87,7 +87,7 @@ static std::vector<Collider *> in_area(const world2D &world, C &elements, const 
     const polygon aabb_poly{bl, br, tr, tl};
 
     const auto qtdet = world.collisions.detection<quad_tree_detection2D>();
-    if (!qtdet)
+    if (!qtdet || !qtdet->include_non_dynamic)
     {
         for (Collider *collider : elements)
             if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
