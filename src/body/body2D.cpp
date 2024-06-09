@@ -114,7 +114,7 @@ bool body2D::asleep() const
     if (meta.island)
         return meta.island->asleep();
     if (is_kinematic())
-        return kinetic_energy() < world.islands.params.sleep_energy_threshold;
+        return kinetic_energy() < world.islands.params.lower_sleep_energy_threshold;
     return true;
 }
 void body2D::stop_all_motion()

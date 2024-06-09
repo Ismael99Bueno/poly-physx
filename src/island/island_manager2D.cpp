@@ -54,6 +54,15 @@ void island_manager2D::remove_invalid()
     }
 }
 
+float island_manager2D::sleep_energy_threshold(const island2D *island) const
+{
+    const float lower = params.lower_sleep_energy_threshold;
+    const float upper = params.upper_sleep_energy_threshold;
+    const float bcount = (float)island->m_bodies.size();
+    const float t = bcount / (bcount + (float)params.body_count_mid_threshold_reference);
+    return lower + t * (upper - lower);
+}
+
 bool island_manager2D::enabled() const
 {
     return m_enable;
@@ -163,7 +172,7 @@ void island_manager2D::try_split(std::uint32_t max_splits)
     while (iters++ < size && max_splits > 0)
     {
         island2D *island = m_elements[m_island_to_split];
-        if (island->may_split && !island->merged && !island->is_void() && !island->about_to_sleep() && split(island))
+        if (island->can_split() && split(island))
             max_splits--;
         if (m_island_to_split-- == 0)
             m_island_to_split = m_elements.size() - 1;

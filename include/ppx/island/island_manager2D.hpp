@@ -21,6 +21,8 @@ class island_manager2D final : public manager2D<island2D>
     bool remove(std::size_t index);
     void remove_invalid();
 
+    float sleep_energy_threshold(const island2D *island) const;
+
   private:
     bool m_enable = true;
     std::size_t m_island_to_split = 0;

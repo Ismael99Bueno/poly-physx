@@ -27,8 +27,12 @@ bool island2D::asleep() const
 }
 bool island2D::about_to_sleep() const
 {
-    const float percent = 0.05f;
-    return m_solved_positions && percent * m_energy < world.islands.params.sleep_energy_threshold;
+    const float percent = 0.35f;
+    return m_solved_positions && percent * m_energy < world.islands.sleep_energy_threshold(this);
+}
+bool island2D::can_split() const
+{
+    return may_split && !merged && !is_void() && !about_to_sleep();
 }
 
 void island2D::remove_body(body2D *body)
@@ -201,7 +205,7 @@ void island2D::solve()
         m_energy += body->kinetic_energy();
     m_energy /= m_bodies.size();
 
-    if (m_energy < world.islands.params.sleep_energy_threshold)
+    if (m_energy < world.islands.sleep_energy_threshold(this))
     {
         m_time_still += world.rk_substep_timestep();
         m_asleep = m_solved_positions && m_time_still >= world.islands.params.sleep_time_threshold;

@@ -18,6 +18,7 @@ class island2D : public worldref2D
     void awake();
     bool asleep() const;
     bool about_to_sleep() const;
+    bool can_split() const;
 
     void add_body(body2D *body);
     void remove_body(body2D *body);
