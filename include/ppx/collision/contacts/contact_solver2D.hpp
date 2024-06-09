@@ -37,6 +37,8 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
     {
         for (auto &pair : this->m_contacts)
         {
+            if (!pair.second->enabled)
+                continue;
             pair.second->collider1()->events.on_contact_pre_solve(pair.second);
             pair.second->collider2()->events.on_contact_pre_solve(pair.second);
             contact_manager2D<Contact>::global_on_contact_pre_solve(this->world, pair.second);
@@ -47,14 +49,16 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
     void solve_velocities() override
     {
         for (auto &pair : this->m_contacts)
-            pair.second->solve_velocities();
+            if (pair.second->enabled)
+                pair.second->solve_velocities();
     }
 
     bool solve_positions() override
     {
         bool solved = true;
         for (auto &pair : this->m_contacts)
-            solved &= pair.second->solve_positions();
+            if (pair.second->enabled)
+                solved &= pair.second->solve_positions();
         return solved;
     }
 
@@ -62,6 +66,8 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
     {
         for (auto &pair : this->m_contacts)
         {
+            if (!pair.second->enabled)
+                continue;
             pair.second->collider1()->events.on_contact_post_solve(pair.second);
             pair.second->collider2()->events.on_contact_post_solve(pair.second);
             contact_manager2D<Contact>::global_on_contact_post_solve(this->world, pair.second);
@@ -79,6 +85,9 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
     {
         for (auto &pair : this->m_contacts)
         {
+            if (!pair.second->enabled)
+                continue;
+
             pair.second->collider1()->events.on_contact_pre_solve(pair.second);
             pair.second->collider2()->events.on_contact_pre_solve(pair.second);
             contact_manager2D<Contact>::global_on_contact_pre_solve(this->world, pair.second);

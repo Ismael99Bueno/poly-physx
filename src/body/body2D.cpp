@@ -109,6 +109,8 @@ void body2D::awake(const bool even_if_non_dynamic)
 }
 bool body2D::asleep() const
 {
+    if (!world.islands.enabled())
+        return false;
     if (meta.island)
         return meta.island->asleep();
     if (is_kinematic())

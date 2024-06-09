@@ -13,7 +13,7 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
 {
     KIT_PERF_FUNCTION()
 #ifdef KIT_PROFILE
-    KIT_ASSERT_ERROR(!multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
+    KIT_ASSERT_ERROR(!params.multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
 #endif
     if (world.rk_subset_index() == 0)
     {
