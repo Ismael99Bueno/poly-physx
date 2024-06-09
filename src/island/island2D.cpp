@@ -25,6 +25,11 @@ bool island2D::asleep() const
 {
     return m_asleep;
 }
+bool island2D::about_to_sleep() const
+{
+    const float percent = 0.05f;
+    return m_solved_positions && percent * m_energy < world.islands.params.sleep_energy_threshold;
+}
 
 void island2D::remove_body(body2D *body)
 {

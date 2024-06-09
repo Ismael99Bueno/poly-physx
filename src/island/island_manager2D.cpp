@@ -163,8 +163,7 @@ void island_manager2D::try_split(std::uint32_t max_splits)
     while (iters++ < size && max_splits > 0)
     {
         island2D *island = m_elements[m_island_to_split];
-        if (island->may_split && island->energy() > params.sleep_energy_threshold && !island->merged &&
-            !island->is_void() && split(island))
+        if (island->may_split && !island->merged && !island->is_void() && !island->about_to_sleep() && split(island))
             max_splits--;
         if (m_island_to_split-- == 0)
             m_island_to_split = m_elements.size() - 1;
