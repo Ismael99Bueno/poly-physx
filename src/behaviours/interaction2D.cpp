@@ -37,6 +37,16 @@ float interaction2D::potential_energy() const
     return pot;
 }
 
+bool interaction2D::add(body2D *body)
+{
+    if (!behaviour2D::add(body))
+        return false;
+    if (enabled)
+        for (body2D *b : m_bodies)
+            b->awake();
+    return true;
+}
+
 bool interaction2D::remove(std::size_t index)
 {
     if (!behaviour2D::remove(index))

@@ -12,9 +12,12 @@ behaviour2D::behaviour2D(world2D &world, const std::string &name)
 {
 }
 
-void behaviour2D::add(body2D *body)
+bool behaviour2D::add(body2D *body)
 {
+    if (contains(body))
+        return false;
     m_bodies.push_back(body);
+    return true;
 }
 bool behaviour2D::remove(std::size_t index)
 {

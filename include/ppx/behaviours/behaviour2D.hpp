@@ -20,7 +20,7 @@ class behaviour2D : kit::non_copyable,
     behaviour2D(world2D &world, const std::string &name);
     virtual ~behaviour2D() = default;
 
-    void add(body2D *body);
+    virtual bool add(body2D *body);
     bool contains(const body2D *body) const;
 
     virtual bool remove(std::size_t index);
