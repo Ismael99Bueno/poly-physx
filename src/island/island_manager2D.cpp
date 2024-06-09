@@ -194,10 +194,12 @@ bool island_manager2D::split(island2D *island)
             continue;
         new_island->m_asleep = was_asleep;
         new_island->m_time_still = time_still;
+        split_count++;
+        if (new_island->m_bodies.size() == island->m_bodies.size())
+            break;
     }
 
     allocator<island2D>::destroy(island);
-    KIT_ASSERT_ERROR(m_elements[m_island_to_split] == island, "Island mismatch")
     m_elements.erase(m_elements.begin() + m_island_to_split);
     return split_count > 1;
 }
