@@ -43,9 +43,9 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             Contact *contact = it->second;
             if (contact->collider1() == collider || contact->collider2() == collider)
             {
-                destroy_contact(contact);
                 if (contact->enabled)
                     contact->on_exit();
+                destroy_contact(contact);
                 it = m_contacts.erase(it);
             }
             else
@@ -123,9 +123,13 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     void destroy_all_contacts() override
     {
         for (auto &pair : m_contacts)
-            destroy_contact(pair.second); // this is expensive, for every contact a call to remove_contact for
-                                          // colliders and bodies. it shouldnt matter because this is almost never
-                                          // called (only when user changes contact solver or disables collisions)
+        {
+            if (pair.second->enabled)
+                pair.second->on_exit();
+            destroy_contact(pair.second);
+        } // this is expensive, for every contact a call to remove_contact for
+          // colliders and bodies. it shouldnt matter because this is almost never
+          // called (only when user changes contact solver or disables collisions)
         m_contacts.clear();
     }
 };

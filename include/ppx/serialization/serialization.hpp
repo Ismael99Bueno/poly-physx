@@ -345,7 +345,7 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
     {
-        if (!node.IsMap() || node.size() != 6)
+        if (!node.IsMap() || node.size() != 5)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], dj))
@@ -529,7 +529,7 @@ template <> struct kit::yaml::codec<ppx::spring_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::spring_joint2D::specs &sp)
     {
-        if (!node.IsMap() || node.size() != 10)
+        if (!node.IsMap() || node.size() != 4)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], sp))
