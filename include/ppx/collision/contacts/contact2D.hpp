@@ -41,6 +41,14 @@ class contact2D : virtual public joint2D
     bool asleep() const;
     float life_expectancy() const;
 
+    void on_enter();
+    void on_exit();
+
+    void on_pre_solve();
+    void on_post_solve();
+
+    bool is_contact() const override;
+
   protected:
     contact2D(const collision2D *collision, std::size_t manifold_index);
 

@@ -18,6 +18,5 @@ class constraint2D : virtual public joint2D
 
     virtual bool solve_positions();
     bool is_constraint() const override;
-    bool is_actuator() const override;
 };
 } // namespace ppx

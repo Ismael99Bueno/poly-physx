@@ -16,7 +16,6 @@ class actuator2D : virtual public joint2D
   public:
     using joint2D::joint2D;
 
-    bool is_constraint() const override;
     bool is_actuator() const override;
 
     void solve();

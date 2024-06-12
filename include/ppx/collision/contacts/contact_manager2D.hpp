@@ -44,6 +44,8 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             if (contact->collider1() == collider || contact->collider2() == collider)
             {
                 destroy_contact(contact);
+                if (contact->enabled)
+                    contact->on_exit();
                 it = m_contacts.erase(it);
             }
             else
@@ -67,7 +69,11 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
                 const contact_key hash{collision.collider1, collision.collider2, collision.manifold[i].id.key};
                 const auto old_contact = m_contacts.find(hash);
                 if (old_contact != m_contacts.end())
+                {
+                    if (!old_contact->second->enabled)
+                        old_contact->second->on_enter();
                     old_contact->second->update(&collision, i);
+                }
                 else
                     create_contact(hash, &collision, i);
             }
@@ -77,7 +83,6 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             Contact *contact = it->second;
             if (contact->asleep())
             {
-                contact->enabled = false;
                 ++it;
                 continue;
             }
@@ -88,7 +93,10 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
                 continue;
             }
             if (!contact->recently_updated())
+            {
                 contact->enabled = false;
+                contact->on_exit();
+            }
             contact->increment_lifetime();
             ++it;
         }
@@ -101,15 +109,10 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         island2D::add(contact);
         contact->body1()->meta.contacts.push_back(contact);
         contact->body2()->meta.contacts.push_back(contact);
-        collision->collider1->events.on_contact_enter(contact);
-        collision->collider2->events.on_contact_enter(contact);
-        global_on_contact_enter(world, contact);
+        contact->on_enter();
     }
     void destroy_contact(Contact *contact)
     {
-        contact->collider1()->events.on_contact_exit(*contact);
-        contact->collider2()->events.on_contact_exit(*contact);
-        global_on_contact_exit(world, *contact);
         contact->body1()->meta.remove_contact(contact);
         contact->body2()->meta.remove_contact(contact);
         island2D::remove(contact);

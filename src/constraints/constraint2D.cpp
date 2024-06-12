@@ -12,9 +12,5 @@ bool constraint2D::is_constraint() const
 {
     return true;
 }
-bool constraint2D::is_actuator() const
-{
-    return false;
-}
 
 } // namespace ppx

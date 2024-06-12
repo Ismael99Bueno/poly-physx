@@ -53,8 +53,9 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
     void awake();
     bool asleep() const;
 
-    virtual bool is_constraint() const = 0;
-    virtual bool is_actuator() const = 0;
+    virtual bool is_constraint() const;
+    virtual bool is_actuator() const;
+    virtual bool is_contact() const;
 
   protected:
     joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2);

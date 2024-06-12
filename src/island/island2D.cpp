@@ -62,6 +62,7 @@ void island2D::merge(island2D &island)
     }
     m_actuators.insert(m_actuators.end(), island.m_actuators.begin(), island.m_actuators.end());
     m_constraints.insert(m_constraints.end(), island.m_constraints.begin(), island.m_constraints.end());
+    m_contacts.insert(m_contacts.end(), island.m_contacts.begin(), island.m_contacts.end());
     island.merged = true;
     awake();
 }
@@ -84,9 +85,11 @@ bool island2D::checksum() const
     const std::unordered_set<const body2D *> bodies(m_bodies.begin(), m_bodies.end());
     const std::unordered_set<const actuator2D *> actuators(m_actuators.begin(), m_actuators.end());
     const std::unordered_set<const constraint2D *> constraints(m_constraints.begin(), m_constraints.end());
+    const std::unordered_set<const contact2D *> contacts(m_contacts.begin(), m_contacts.end());
 
     std::unordered_set<const actuator2D *> body_actuators;
     std::unordered_set<const constraint2D *> body_constraints;
+    std::unordered_set<const contact2D *> body_contacts;
     for (const body2D *body : m_bodies)
     {
         if (!body->is_dynamic())
@@ -129,6 +132,12 @@ bool island2D::checksum() const
         }
         for (const contact2D *contact : body->meta.contacts)
         {
+            if (!contacts.contains(contact))
+            {
+                KIT_ERROR("Island checksum failed: Contact not found in contact list")
+                return false;
+            }
+            body_contacts.insert(contact);
             if (auto act = dynamic_cast<const actuator2D *>(contact))
             {
                 if (!actuators.contains(act))
@@ -159,16 +168,23 @@ bool island2D::checksum() const
     KIT_ASSERT_ERROR(body_actuators.size() == m_actuators.size(), "Island checksum failed: Actuator count mismatch")
     KIT_ASSERT_ERROR(body_constraints.size() == m_constraints.size(),
                      "Island checksum failed: Constraint count mismatch")
+    KIT_ASSERT_ERROR(body_contacts.size() == m_contacts.size(), "Island checksum failed: Contact count mismatch")
+
     KIT_ASSERT_ERROR(bodies.size() == m_bodies.size(), "Island checksum failed: Duplicate bodies found")
     KIT_ASSERT_ERROR(actuators.size() == m_actuators.size(), "Island checksum failed: Duplicate actuators found")
     KIT_ASSERT_ERROR(constraints.size() == m_constraints.size(), "Island checksum failed: Duplicate constraints found")
+    KIT_ASSERT_ERROR(contacts.size() == m_contacts.size(), "Island checksum failed: Duplicate contacts found")
+
     return bodies.size() == m_bodies.size() && actuators.size() == m_actuators.size() &&
-           constraints.size() == m_constraints.size() && body_actuators.size() == m_actuators.size() &&
-           body_constraints.size() == m_constraints.size();
+           constraints.size() == m_constraints.size() && contacts.size() == m_contacts.size() &&
+           body_actuators.size() == m_actuators.size() && body_constraints.size() == m_constraints.size() &&
+           body_contacts.size() == m_contacts.size();
 }
 
 void island2D::solve()
 {
+    for (contact2D *contact : m_contacts)
+        contact->on_pre_solve();
     for (actuator2D *actuator : m_actuators)
         if (actuator->enabled)
             actuator->solve();
@@ -197,6 +213,9 @@ void island2D::solve()
         if (m_solved_positions)
             break;
     }
+    for (contact2D *contact : m_contacts)
+        contact->on_post_solve();
+
     if (world.rk_subset_index() != 0)
         return;
 

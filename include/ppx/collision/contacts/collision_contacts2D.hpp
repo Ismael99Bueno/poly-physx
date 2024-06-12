@@ -32,12 +32,6 @@ class collision_contacts2D : public worldref2D, kit::non_copyable
     bool enabled() const;
     void enabled(bool enable);
 
-  protected:
-    static void global_on_contact_enter(world2D &world, contact2D *contact);
-    static void global_on_contact_exit(world2D &world, contact2D &contact);
-    static void global_on_contact_pre_solve(world2D &world, contact2D *contact);
-    static void global_on_contact_post_solve(world2D &world, contact2D *contact);
-
   private:
     bool m_enabled = true;
 

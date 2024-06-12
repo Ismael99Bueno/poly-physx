@@ -111,6 +111,19 @@ bool joint2D::asleep() const
     return m_body1->asleep() && m_body2->asleep();
 }
 
+bool joint2D::is_constraint() const
+{
+    return false;
+}
+bool joint2D::is_actuator() const
+{
+    return false;
+}
+bool joint2D::is_contact() const
+{
+    return false;
+}
+
 void joint2D::compute_anchors_and_offsets()
 {
     if (m_no_anchors)

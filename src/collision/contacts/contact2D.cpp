@@ -53,6 +53,37 @@ float contact2D::friction() const
     return m_friction;
 }
 
+void contact2D::on_enter()
+{
+    m_collider1->events.on_contact_enter(this);
+    m_collider2->events.on_contact_enter(this);
+    world.collisions.events.on_contact_enter(this);
+}
+void contact2D::on_exit()
+{
+    m_collider1->events.on_contact_exit(*this);
+    m_collider2->events.on_contact_exit(*this);
+    world.collisions.events.on_contact_exit(*this);
+}
+
+void contact2D::on_pre_solve()
+{
+    m_collider1->events.on_contact_pre_solve(this);
+    m_collider2->events.on_contact_pre_solve(this);
+    world.collisions.events.on_contact_pre_solve(this);
+}
+void contact2D::on_post_solve()
+{
+    m_collider1->events.on_contact_post_solve(this);
+    m_collider2->events.on_contact_post_solve(this);
+    world.collisions.events.on_contact_post_solve(this);
+}
+
+bool contact2D::is_contact() const
+{
+    return true;
+}
+
 void contact2D::increment_lifetime()
 {
     m_lifetime += world.rk_substep_timestep();

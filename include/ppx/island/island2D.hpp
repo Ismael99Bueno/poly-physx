@@ -44,6 +44,13 @@ class island2D : public worldref2D
             return;
         if constexpr (!Contact2D<Joint>)
             island->awake();
+        else
+        {
+            KIT_ASSERT_ERROR(std::find(island->m_contacts.begin(), island->m_contacts.end(), joint) ==
+                                 island->m_contacts.end(),
+                             "Contact already exists on island")
+            island->m_contacts.push_back(joint);
+        }
 
         if constexpr (IConstraint2D<Joint>)
         {
@@ -74,6 +81,13 @@ class island2D : public worldref2D
                          "The joint's bodies must share the same island");
         if (!island)
             return;
+        if constexpr (Contact2D<Joint>)
+            for (std::size_t i = 0; i < island->m_contacts.size(); i++)
+                if (island->m_contacts[i] == joint)
+                {
+                    island->m_contacts.erase(island->m_contacts.begin() + i);
+                    break;
+                }
         if constexpr (IConstraint2D<Joint>)
         {
             for (std::size_t i = 0; i < island->m_constraints.size(); i++)
@@ -109,6 +123,7 @@ class island2D : public worldref2D
 
     std::vector<actuator2D *> m_actuators;
     std::vector<constraint2D *> m_constraints;
+    std::vector<contact2D *> m_contacts;
 
     template <IJoint2D Joint> static island2D *get_effective_island(Joint *joint)
     {

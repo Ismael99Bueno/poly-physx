@@ -37,11 +37,9 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
     {
         for (auto &pair : this->m_contacts)
         {
-            if (!pair.second->enabled)
+            if (!pair.second->enabled) // no need to check sleep: if using this, islands are disabled
                 continue;
-            pair.second->collider1()->events.on_contact_pre_solve(pair.second);
-            pair.second->collider2()->events.on_contact_pre_solve(pair.second);
-            contact_manager2D<Contact>::global_on_contact_pre_solve(this->world, pair.second);
+            pair.second->on_pre_solve();
             pair.second->startup();
         }
     }
@@ -65,13 +63,8 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
     void on_post_solve() override
     {
         for (auto &pair : this->m_contacts)
-        {
-            if (!pair.second->enabled)
-                continue;
-            pair.second->collider1()->events.on_contact_post_solve(pair.second);
-            pair.second->collider2()->events.on_contact_post_solve(pair.second);
-            contact_manager2D<Contact>::global_on_contact_post_solve(this->world, pair.second);
-        }
+            if (pair.second->enabled)
+                pair.second->on_post_solve();
     }
 };
 
@@ -88,13 +81,11 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
             if (!pair.second->enabled)
                 continue;
 
-            pair.second->collider1()->events.on_contact_pre_solve(pair.second);
-            pair.second->collider2()->events.on_contact_pre_solve(pair.second);
-            contact_manager2D<Contact>::global_on_contact_pre_solve(this->world, pair.second);
+            // on islands, all pre solves are executed before the firs solve ever, but here the implementation differs.
+            // take into account for the future :)
+            pair.second->on_pre_solve();
             pair.second->solve();
-            pair.second->collider1()->events.on_contact_post_solve(pair.second);
-            pair.second->collider2()->events.on_contact_post_solve(pair.second);
-            contact_manager2D<Contact>::global_on_contact_post_solve(this->world, pair.second);
+            pair.second->on_post_solve();
         }
     }
 };

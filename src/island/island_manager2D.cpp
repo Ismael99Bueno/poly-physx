@@ -1,6 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/island/island_manager2D.hpp"
 #include "ppx/world2D.hpp"
+#include "kit/memory/allocator/stack_allocator.hpp"
 
 namespace ppx
 {
@@ -23,20 +24,44 @@ void island_manager2D::solve()
         return;
     }
 
-    std::vector<island2D *> awake_islands;
-    awake_islands.reserve(m_elements.size());
+    static kit::stack_allocator<island2D *> allocator(256);
+    island2D **awake_islands = allocator.ncreate(m_elements.size());
+
+    std::size_t size = 0;
     for (island2D *island : m_elements)
         if (!island->asleep())
-            awake_islands.push_back(island);
-    if (awake_islands.empty())
+            awake_islands[size++] = island;
+    if (size == 0)
         return;
-    if (awake_islands.size() == 1)
+    if (size == 1)
     {
         awake_islands[0]->solve();
         return;
     }
-    kit::mt::for_each<PPX_THREAD_COUNT>(awake_islands,
+
+    struct awake_container
+    {
+        island2D **islands;
+        std::size_t elems;
+
+        auto begin() const
+        {
+            return islands;
+        }
+        auto end() const
+        {
+            return islands + elems;
+        }
+        std::size_t size() const
+        {
+            return elems;
+        }
+    };
+
+    const awake_container awakes{awake_islands, size};
+    kit::mt::for_each<PPX_THREAD_COUNT>(awakes,
                                         [](const std::size_t thread_idx, island2D *island) { island->solve(); });
+    allocator.ndestroy(awake_islands, size);
 }
 
 void island_manager2D::remove_invalid()
@@ -116,6 +141,7 @@ island2D *island_manager2D::create_island_from_body(body2D *body)
                 island->m_constraints.push_back(dynamic_cast<constraint2D *>(joint));
             else
                 island->m_actuators.push_back(dynamic_cast<actuator2D *>(joint));
+
             body2D *other = joint->other(current);
             if (!other->meta.island_flag && other->is_dynamic())
             {
@@ -129,6 +155,8 @@ island2D *island_manager2D::create_island_from_body(body2D *body)
         {
             joint2D *joint = dynamic_cast<joint2D *>(contact);
             KIT_ASSERT_ERROR(joint, "Contact is not a joint");
+            if (!joint->meta.island_flag)
+                island->m_contacts.push_back(contact);
             process_joint(joint);
         }
     }

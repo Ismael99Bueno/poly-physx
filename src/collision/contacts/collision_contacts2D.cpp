@@ -55,23 +55,4 @@ bool collision_contacts2D::checksum() const
     return body_contacts.size() == size() && contacts.size() == size();
 }
 
-void collision_contacts2D::global_on_contact_enter(world2D &world, contact2D *contact)
-{
-    world.collisions.events.on_contact_enter(contact);
-}
-
-void collision_contacts2D::global_on_contact_pre_solve(world2D &world, contact2D *contact)
-{
-    world.collisions.events.on_contact_pre_solve(contact);
-}
-
-void collision_contacts2D::global_on_contact_post_solve(world2D &world, contact2D *contact)
-{
-    world.collisions.events.on_contact_post_solve(contact);
-}
-void collision_contacts2D::global_on_contact_exit(world2D &world, contact2D &contact)
-{
-    world.collisions.events.on_contact_exit(contact);
-}
-
 } // namespace ppx
