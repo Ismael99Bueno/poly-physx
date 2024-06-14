@@ -10,6 +10,6 @@ class mtv_support_manifold2D final : public pp_manifold_algorithm2D
     using pp_manifold_algorithm2D::pp_manifold_algorithm2D;
 
   private:
-    manifold2D polygon_polygon_contacts(const collision2D &current, const collision2D *previous) const override;
+    manifold2D polygon_polygon_contacts(const collision2D &current) const override;
 };
 } // namespace ppx
