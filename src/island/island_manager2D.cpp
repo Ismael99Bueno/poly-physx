@@ -1,7 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/island/island_manager2D.hpp"
 #include "ppx/world2D.hpp"
-#include "kit/memory/allocator/stack_allocator.hpp"
 
 namespace ppx
 {
@@ -24,44 +23,22 @@ void island_manager2D::solve()
         return;
     }
 
-    static kit::stack_allocator<island2D *> allocator(256);
-    island2D **awake_islands = allocator.ncreate(m_elements.size());
+    static std::vector<island2D *> awake_islands;
+    awake_islands.clear();
 
-    std::size_t size = 0;
     for (island2D *island : m_elements)
         if (!island->asleep())
-            awake_islands[size++] = island;
-    if (size == 0)
+            awake_islands.push_back(island);
+    if (awake_islands.empty())
         return;
-    if (size == 1)
+
+    if (awake_islands.size() == 1)
     {
         awake_islands[0]->solve();
         return;
     }
-
-    struct awake_container
-    {
-        island2D **islands;
-        std::size_t elems;
-
-        auto begin() const
-        {
-            return islands;
-        }
-        auto end() const
-        {
-            return islands + elems;
-        }
-        std::size_t size() const
-        {
-            return elems;
-        }
-    };
-
-    const awake_container awakes{awake_islands, size};
-    kit::mt::for_each<PPX_THREAD_COUNT>(awakes,
+    kit::mt::for_each<PPX_THREAD_COUNT>(awake_islands,
                                         [](const std::size_t thread_idx, island2D *island) { island->solve(); });
-    allocator.ndestroy(awake_islands, size);
 }
 
 void island_manager2D::remove_invalid()

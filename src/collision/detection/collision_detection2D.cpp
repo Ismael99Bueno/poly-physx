@@ -178,10 +178,7 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
         return;
 
     fill_collision_data(collision, collider1, collider2, nres.mtv);
-
-    const auto pcontact = m_last_collisions.find({collider1, collider2});
-    collision.manifold = m_pp_manifold->polygon_polygon_contacts(
-        collision, pcontact != m_last_collisions.end() ? &pcontact->second : nullptr);
+    collision.manifold = m_pp_manifold->polygon_polygon_contacts(collision);
     collision.collided = !collision.manifold.empty();
 }
 
