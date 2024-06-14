@@ -96,7 +96,7 @@ class island2D : public worldref2D
                     island->m_constraints.erase(island->m_constraints.begin() + i);
                     if (!Contact2D<Joint> || !body2->is_dynamic() || island != body2->meta.island)
                         island->awake();
-                    island->may_split = body2->is_dynamic();
+                    island->may_split |= body2->is_dynamic();
                     return;
                 }
         }
@@ -107,7 +107,7 @@ class island2D : public worldref2D
                     island->m_actuators.erase(island->m_actuators.begin() + i);
                     if (!Contact2D<Joint> || !body2->is_dynamic() || island != body2->meta.island)
                         island->awake();
-                    island->may_split = body2->is_dynamic();
+                    island->may_split |= body2->is_dynamic();
                     return;
                 }
         KIT_WARN("Joint not found in island");
