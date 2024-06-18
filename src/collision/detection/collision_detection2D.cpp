@@ -93,7 +93,8 @@ static bool elligible_for_collision(const collider2D *collider1, const collider2
     return collider1 != collider2 && body1 != body2 &&
            (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
            (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
-           geo::may_intersect(collider1->shape(), collider2->shape()) && !body1->joint_prevents_collision(body2);
+           geo::intersects(collider1->shape().bounding_box(), collider2->shape().bounding_box()) &&
+           !body1->joint_prevents_collision(body2);
 }
 
 collision2D collision_detection2D::generate_collision(collider2D *collider1, collider2D *collider2) const

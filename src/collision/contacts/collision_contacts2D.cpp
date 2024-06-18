@@ -25,6 +25,11 @@ void collision_contacts2D::enabled(bool enable)
         destroy_all_contacts();
 }
 
+float collision_contacts2D::contact_lifetime() const
+{
+    return params.base_lifetime / (1.f + params.per_contact_lifetime_reduction * size());
+}
+
 bool collision_contacts2D::checksum() const
 {
     std::unordered_set<const contact2D *> body_contacts;

@@ -32,6 +32,8 @@ class collision_contacts2D : public worldref2D, kit::non_copyable
     bool enabled() const;
     void enabled(bool enable);
 
+    float contact_lifetime() const;
+
   private:
     bool m_enabled = true;
 

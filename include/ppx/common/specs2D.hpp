@@ -212,7 +212,8 @@ struct collision_manager2D
 
     struct contacts2D
     {
-        float lifetime = 0.4f;
+        float base_lifetime = 0.4f;
+        float per_contact_lifetime_reduction = 0.1f;
     } contacts;
 };
 
