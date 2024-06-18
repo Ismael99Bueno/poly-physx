@@ -161,7 +161,7 @@ void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, col
     const circle &circ = collider1->shape<circle>();
     const polygon &poly = collider2->shape<polygon>();
 
-    const narrow_result nres = m_cp_narrow->circle_polygon(circ, poly);
+    const narrow_result2D nres = m_cp_narrow->circle_polygon(circ, poly);
     if (!nres)
         return;
 
@@ -174,7 +174,7 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     const polygon &poly1 = collider1->shape<polygon>();
     const polygon &poly2 = collider2->shape<polygon>();
 
-    const narrow_result nres = m_pp_narrow->polygon_polygon(poly1, poly2);
+    const narrow_result2D nres = m_pp_narrow->polygon_polygon(poly1, poly2);
     if (!nres)
         return;
 
