@@ -56,7 +56,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
   protected:
     contact_map m_contacts;
 
-    void create_contacts_from_collisions(const collision_detection2D::collision_map &collisions) override
+    void create_contacts_from_collisions(const broad_phase2D::collision_map &collisions) override
     {
         KIT_PERF_FUNCTION()
         for (const auto &pair : collisions)

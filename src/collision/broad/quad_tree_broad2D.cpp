@@ -1,12 +1,12 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/detection/quad_tree_detection2D.hpp"
+#include "ppx/collision/broad/quad_tree_broad2D.hpp"
 #include "ppx/world2D.hpp"
 
 #include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
 {
-void quad_tree_detection2D::detect_collisions()
+void quad_tree_broad2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
     update_quad_tree();
@@ -19,7 +19,7 @@ void quad_tree_detection2D::detect_collisions()
         detect_collisions_st(partitions);
 }
 
-void quad_tree_detection2D::detect_collisions_st(const std::vector<const qtpartition *> &partitions)
+void quad_tree_broad2D::detect_collisions_st(const std::vector<const qtpartition *> &partitions)
 {
     for (const qtpartition *partition : partitions)
         for (std::size_t i = 0; i < partition->size(); i++)
@@ -31,7 +31,7 @@ void quad_tree_detection2D::detect_collisions_st(const std::vector<const qtparti
             }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
-void quad_tree_detection2D::detect_collisions_mt(const std::vector<const qtpartition *> &partitions)
+void quad_tree_broad2D::detect_collisions_mt(const std::vector<const qtpartition *> &partitions)
 {
     kit::mt::for_each<PPX_THREAD_COUNT>(partitions, [this](const std::size_t thread_idx, const qtpartition *partition) {
         for (std::size_t i = 0; i < partition->size(); i++)
@@ -44,7 +44,7 @@ void quad_tree_detection2D::detect_collisions_mt(const std::vector<const qtparti
     });
     join_mt_collisions();
 }
-void quad_tree_detection2D::update_quad_tree()
+void quad_tree_broad2D::update_quad_tree()
 {
     m_quad_tree.clear();
 
@@ -85,11 +85,11 @@ void quad_tree_detection2D::update_quad_tree()
                            [](const collider2D *collider) -> const geo::aabb2D & { return collider->bounding_box(); });
 }
 
-const ppx::quad_tree &quad_tree_detection2D::quad_tree() const
+const ppx::quad_tree &quad_tree_broad2D::quad_tree() const
 {
     return m_quad_tree;
 }
-ppx::quad_tree &quad_tree_detection2D::quad_tree()
+ppx::quad_tree &quad_tree_broad2D::quad_tree()
 {
     return m_quad_tree;
 }

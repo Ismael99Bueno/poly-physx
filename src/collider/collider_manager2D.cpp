@@ -1,6 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/collider/collider_manager2D.hpp"
-#include "ppx/collision/detection/quad_tree_detection2D.hpp"
+#include "ppx/collision/broad/quad_tree_broad2D.hpp"
 #include "ppx/body/body2D.hpp"
 #include "ppx/world2D.hpp"
 #include "geo/algorithm/intersection2D.hpp"
@@ -50,12 +50,12 @@ ray2D::hit<collider2D> collider_manager2D::cast(const ray2D &ray) const
 {
     ray2D::hit<collider2D> closest;
     closest.distance = FLT_MAX;
-    const auto qtdet = world.collisions.detection<quad_tree_detection2D>();
-    if (!qtdet || !qtdet->include_non_dynamic)
+    const auto qtbroad = world.collisions.broad<quad_tree_broad2D>();
+    if (!qtbroad || !qtbroad->include_non_dynamic)
         for (collider2D *collider : m_elements)
             cast_check(collider, ray, closest);
     else
-        cast_qt_recursive(qtdet->quad_tree().root(), ray, closest);
+        cast_qt_recursive(qtbroad->quad_tree().root(), ray, closest);
     return closest;
 }
 
@@ -86,15 +86,15 @@ static std::vector<Collider *> in_area(const world2D &world, C &elements, const 
     const glm::vec2 br = {tr.x, bl.y};
     const polygon aabb_poly{bl, br, tr, tl};
 
-    const auto qtdet = world.collisions.detection<quad_tree_detection2D>();
-    if (!qtdet || !qtdet->include_non_dynamic)
+    const auto qtbroad = world.collisions.broad<quad_tree_broad2D>();
+    if (!qtbroad || !qtbroad->include_non_dynamic)
     {
         for (Collider *collider : elements)
             if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
                 in_area.emplace_back(collider);
     }
     else
-        in_area_qt_recursive(qtdet->quad_tree().root(), in_area, aabb, aabb_poly);
+        in_area_qt_recursive(qtbroad->quad_tree().root(), in_area, aabb, aabb_poly);
     return in_area;
 }
 
@@ -132,7 +132,7 @@ bool collider_manager2D::remove(const std::size_t index)
     collider2D *collider = m_elements[index];
     KIT_INFO("Removing collider with index {0}.", index)
 
-    world.collisions.contacts()->remove_any_contacts_with(collider);
+    world.collisions.contact_solver()->remove_any_contacts_with(collider);
     events.on_removal(*collider);
 
     body2D *parent = collider->body();

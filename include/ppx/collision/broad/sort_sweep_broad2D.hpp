@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ppx/collision/detection/collision_detection2D.hpp"
+#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 
 namespace ppx
 {
-class sort_sweep_detection2D final : public collision_detection2D
+class sort_sweep_broad2D final : public broad_phase2D
 {
     enum class end_side
     {
@@ -24,8 +24,8 @@ class sort_sweep_detection2D final : public collision_detection2D
     };
 
   public:
-    using collision_detection2D::collision_detection2D;
-    ~sort_sweep_detection2D();
+    using broad_phase2D::broad_phase2D;
+    ~sort_sweep_broad2D();
 
   private:
     std::vector<edge> m_edges;

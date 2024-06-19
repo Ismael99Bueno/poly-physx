@@ -10,16 +10,14 @@
 #include "ppx/joints/spring_joint2D.hpp"
 #include "ppx/joints/prismatic_joint2D.hpp"
 
-#include "ppx/collision/detection/quad_tree_detection2D.hpp"
-#include "ppx/collision/detection/brute_force_detection2D.hpp"
-#include "ppx/collision/detection/sort_sweep_detection2D.hpp"
-#include "ppx/collision/detection/narrow/gjk_epa_detection2D.hpp"
+#include "ppx/collision/broad/quad_tree_broad2D.hpp"
+#include "ppx/collision/broad/brute_force_broad2D.hpp"
+#include "ppx/collision/broad/sort_sweep_broad2D.hpp"
+#include "ppx/collision/narrow/gjk_epa_narrow2D.hpp"
+#include "ppx/collision/narrow/sat_narrow2D.hpp"
 
 #include "ppx/collision/contacts/spring_contact2D.hpp"
 #include "ppx/collision/contacts/nonpen_contact2D.hpp"
-
-#include "ppx/collision/manifold/clipping_algorithm_manifold2D.hpp"
-#include "ppx/collision/manifold/mtv_support_manifold2D.hpp"
 
 #include "rk/serialization/serialization.hpp"
 
@@ -682,47 +680,48 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     {
         YAML::Node node;
         node["Enabled"] = cm.enabled();
-        YAML::Node ndet = node["Detection"];
+        YAML::Node nbroad = node["Broad"];
 
-        ndet["Multithreading"] = cm.detection()->params.multithreaded;
-        if (cm.detection<ppx::brute_force_detection2D>())
-            ndet["Detection method"] = 0;
-        else if (auto coldet = cm.detection<ppx::quad_tree_detection2D>())
+        nbroad["Multithreading"] = cm.broad()->params.multithreaded;
+        if (cm.broad<ppx::brute_force_broad2D>())
+            nbroad["Method"] = 0;
+        else if (auto coldet = cm.broad<ppx::quad_tree_broad2D>())
         {
-            ndet["Detection method"] = 1;
-            ndet["Force square"] = coldet->force_square_shape;
-            ndet["Include non dynamic"] = coldet->include_non_dynamic;
+            nbroad["Method"] = 1;
+            nbroad["Force square"] = coldet->force_square_shape;
+            nbroad["Include non dynamic"] = coldet->include_non_dynamic;
 
             const auto &props = coldet->quad_tree().props();
-            ndet["Max colliders"] = props.elements_per_quad;
-            ndet["Max depth"] = props.max_depth;
-            ndet["Min size"] = props.min_quad_size;
+            nbroad["Max colliders"] = props.elements_per_quad;
+            nbroad["Max depth"] = props.max_depth;
+            nbroad["Min size"] = props.min_quad_size;
         }
-        else if (cm.detection<ppx::sort_sweep_detection2D>())
-            ndet["Detection method"] = 2;
+        else if (cm.broad<ppx::sort_sweep_broad2D>())
+            nbroad["Method"] = 2;
 
-        if (auto narrow = cm.detection()->cp_narrow_detection<ppx::gjk_epa_detection2D>())
+        YAML::Node nnarrow = node["Narrow"];
+        if (auto narrow = cm.cp_narrow<ppx::gjk_epa_narrow2D>())
         {
-            ndet["C-P Narrow"] = 0;
-            ndet["C-P EPA Threshold"] = narrow->epa_threshold;
+            nnarrow["C-P Method"] = 0;
+            nnarrow["C-P EPA Threshold"] = narrow->epa_threshold;
         }
-        if (auto narrow = cm.detection()->pp_narrow_detection<ppx::gjk_epa_detection2D>())
-        {
-            ndet["P-P Narrow"] = 0;
-            ndet["P-P EPA Threshold"] = narrow->epa_threshold;
-        }
+        else if (cm.cp_narrow<ppx::sat_narrow2D>())
+            nnarrow["C-P Method"] = 1;
 
-        if (auto clip = cm.detection()->pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>())
-            ndet["P-P Algorithm"] = 0;
-        else if (cm.detection()->pp_manifold_algorithm<ppx::mtv_support_manifold2D>())
-            ndet["P-P Algorithm"] = 1;
+        if (auto narrow = cm.pp_narrow<ppx::gjk_epa_narrow2D>())
+        {
+            nnarrow["P-P Method"] = 0;
+            nnarrow["P-P EPA Threshold"] = narrow->epa_threshold;
+        }
+        else if (cm.pp_narrow<ppx::sat_narrow2D>())
+            nnarrow["P-P Method"] = 1;
 
         YAML::Node nsolv = node["Contacts"];
-        nsolv["Base contact lifetime"] = cm.contacts()->params.base_lifetime;
-        nsolv["Per contact lifetime reduction"] = cm.contacts()->params.per_contact_lifetime_reduction;
-        if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::nonpen_contact2D>>())
+        nsolv["Base contact lifetime"] = cm.contact_solver()->params.base_lifetime;
+        nsolv["Per contact lifetime reduction"] = cm.contact_solver()->params.per_contact_lifetime_reduction;
+        if (auto colsolv = cm.contact_solver<ppx::contact_solver2D<ppx::nonpen_contact2D>>())
             nsolv["Solver method"] = 0;
-        else if (auto colsolv = cm.contacts<ppx::contact_solver2D<ppx::spring_contact2D>>())
+        else if (auto colsolv = cm.contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>())
             nsolv["Solver method"] = 1;
 
         nsolv["Rigidity"] = ppx::spring_contact2D::rigidity;
@@ -736,41 +735,45 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             return false;
 
         cm.enabled(node["Enabled"].as<bool>());
-        const YAML::Node ndet = node["Detection"];
+        const YAML::Node nbroad = node["Broad"];
 
-        cm.detection()->params.multithreaded = ndet["Multithreading"].as<bool>();
-        if (ndet["Detection method"])
+        cm.broad()->params.multithreaded = nbroad["Multithreading"].as<bool>();
+        if (nbroad["Method"])
         {
-            const int method = ndet["Detection method"].as<int>();
+            const int method = nbroad["Method"].as<int>();
             if (method == 0)
-                cm.set_detection<ppx::brute_force_detection2D>();
+                cm.set_broad<ppx::brute_force_broad2D>();
             else if (method == 1)
             {
-                auto qtdet = cm.set_detection<ppx::quad_tree_detection2D>();
-                qtdet->force_square_shape = ndet["Force square"].as<bool>();
-                qtdet->include_non_dynamic = ndet["Include non dynamic"].as<bool>();
+                auto qtdet = cm.set_broad<ppx::quad_tree_broad2D>();
+                qtdet->force_square_shape = nbroad["Force square"].as<bool>();
+                qtdet->include_non_dynamic = nbroad["Include non dynamic"].as<bool>();
 
                 auto &props = qtdet->quad_tree().props();
-                props.elements_per_quad = ndet["Max colliders"].as<std::size_t>();
-                props.max_depth = ndet["Max depth"].as<std::uint32_t>();
-                props.min_quad_size = ndet["Min size"].as<float>();
+                props.elements_per_quad = nbroad["Max colliders"].as<std::size_t>();
+                props.max_depth = nbroad["Max depth"].as<std::uint32_t>();
+                props.min_quad_size = nbroad["Min size"].as<float>();
             }
             else if (method == 2)
-                cm.set_detection<ppx::sort_sweep_detection2D>();
+                cm.set_broad<ppx::sort_sweep_broad2D>();
         }
 
-        if (ndet["C-P Narrow"]) // bc there is only one for now
-            cm.detection()->set_cp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["C-P EPA Threshold"].as<float>());
-        if (ndet["P-P Narrow"])
-            cm.detection()->set_pp_narrow_detection<ppx::gjk_epa_detection2D>(ndet["P-P EPA Threshold"].as<float>());
-
-        if (ndet["P-P Algorithm"])
+        YAML::Node nnarrow = node["Narrow"];
+        if (nnarrow["C-P Method"])
         {
-            const int alg = ndet["P-P Algorithm"].as<int>();
-            if (alg == 0)
-                cm.detection()->set_pp_manifold_algorithm<ppx::clipping_algorithm_manifold2D>();
-            else if (alg == 1)
-                cm.detection()->set_pp_manifold_algorithm<ppx::mtv_support_manifold2D>();
+            const int method = nnarrow["C-P Method"].as<int>();
+            if (method == 0)
+                cm.set_cp_narrow<ppx::gjk_epa_narrow2D>(nnarrow["C-P EPA Threshold"].as<float>());
+            else if (method == 1)
+                cm.set_cp_narrow<ppx::sat_narrow2D>();
+        }
+        if (nnarrow["P-P Method"])
+        {
+            const int method = nnarrow["P-P Method"].as<int>();
+            if (method == 0)
+                cm.set_pp_narrow<ppx::gjk_epa_narrow2D>(nnarrow["P-P EPA Threshold"].as<float>());
+            else if (method == 1)
+                cm.set_pp_narrow<ppx::sat_narrow2D>();
         }
 
         const YAML::Node nsolv = node["Contacts"];
@@ -782,8 +785,9 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             else if (method == 1)
                 cm.set_contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>();
         }
-        cm.contacts()->params.base_lifetime = nsolv["Base contact lifetime"].as<float>();
-        cm.contacts()->params.per_contact_lifetime_reduction = nsolv["Per contact lifetime reduction"].as<float>();
+        cm.contact_solver()->params.base_lifetime = nsolv["Base contact lifetime"].as<float>();
+        cm.contact_solver()->params.per_contact_lifetime_reduction =
+            nsolv["Per contact lifetime reduction"].as<float>();
 
         ppx::spring_contact2D::rigidity = nsolv["Rigidity"].as<float>();
         ppx::spring_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();

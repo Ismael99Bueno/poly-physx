@@ -26,8 +26,8 @@ world2D::world2D(const specs::world2D &spc)
       semi_implicit_integration(spc.integrator.semi_implicit_integration), m_previous_timestep(integrator.ts.value)
 {
     joints.constraints.params = spc.joints.constraints;
-    collisions.detection()->params = spc.collision.detection;
-    collisions.contacts()->params = spc.collision.contacts;
+    collisions.broad()->params = spc.collision.detection;
+    collisions.contact_solver()->params = spc.collision.contacts;
     islands.params = spc.islands;
 }
 
@@ -76,11 +76,11 @@ void world2D::pre_step_preparation()
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
     m_rk_subset_index = 0;
-    collisions.detection()->update_last_collisions();
+    collisions.broad()->update_last_collisions();
     bodies.send_data_to_state(integrator.state);
     if (islands.enabled() && islands.params.enable_split)
         islands.try_split(1);
-    KIT_ASSERT_ERROR(collisions.contacts()->checksum(), "Contacts checksum failed")
+    KIT_ASSERT_ERROR(collisions.contact_solver()->checksum(), "Contacts checksum failed")
     KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
     KIT_ASSERT_ERROR(joints.checksum(), "Joints checksum failed")
 }

@@ -4,7 +4,7 @@
 #include "kit/utility/utils.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/utility/type_constraints.hpp"
-#include "ppx/collision/detection/collision_detection2D.hpp"
+#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "ppx/collision/contacts/collision_contacts2D.hpp"
 #include "ppx/collision/contacts/contact_solver2D.hpp"
 #include "ppx/internal/worldref.hpp"
@@ -30,11 +30,11 @@ class collision_manager2D : public worldref2D
 
     auto begin() const
     {
-        return m_detection->collisions().begin();
+        return m_broad->collisions().begin();
     }
     auto end() const
     {
-        return m_detection->collisions().end();
+        return m_broad->collisions().end();
     }
 
     const collision2D &operator[](const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const;
@@ -46,42 +46,78 @@ class collision_manager2D : public worldref2D
 
     auto find(const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
     {
-        return m_detection->collisions().find(key);
+        return m_broad->collisions().find(key);
     }
     auto find(const collider2D *collider1, const collider2D *collider2) const
     {
-        return m_detection->collisions().find({collider1, collider2});
+        return m_broad->collisions().find({collider1, collider2});
     }
 
-    template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> const T *detection() const
+    template <kit::DerivedFrom<broad_phase2D> T = broad_phase2D> const T *broad() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_detection);
+        return kit::const_get_casted_raw_ptr<T>(m_broad);
     }
-    template <kit::DerivedFrom<collision_detection2D> T = collision_detection2D> T *detection()
+    template <kit::DerivedFrom<broad_phase2D> T = broad_phase2D> T *broad()
     {
-        return kit::get_casted_raw_ptr<T>(m_detection);
+        return kit::get_casted_raw_ptr<T>(m_broad);
     }
-    template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> const T *contacts() const
+
+    template <kit::DerivedFrom<cp_narrow_phase2D> T = cp_narrow_phase2D> const T *cp_narrow() const
+    {
+        return kit::const_get_casted_raw_ptr<T>(m_cp_narrow);
+    }
+    template <kit::DerivedFrom<cp_narrow_phase2D> T = cp_narrow_phase2D> T *cp_narrow()
+    {
+        return kit::get_casted_raw_ptr<T>(m_cp_narrow);
+    }
+    template <kit::DerivedFrom<pp_narrow_phase2D> T = pp_narrow_phase2D> const T *pp_narrow() const
+    {
+        return kit::const_get_casted_raw_ptr<T>(m_pp_narrow);
+    }
+    template <kit::DerivedFrom<pp_narrow_phase2D> T = pp_narrow_phase2D> T *pp_narrow()
+    {
+        return kit::get_casted_raw_ptr<T>(m_pp_narrow);
+    }
+
+    template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> const T *contact_solver() const
     {
         return kit::const_get_casted_raw_ptr<T>(m_contacts);
     }
-    template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> T *contacts()
+    template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> T *contact_solver()
     {
         return kit::get_casted_raw_ptr<T>(m_contacts);
     }
 
-    template <kit::DerivedFrom<collision_detection2D> T, class... ColDetArgs> T *set_detection(ColDetArgs &&...args)
+    template <kit::DerivedFrom<broad_phase2D> T, class... ColDetArgs> T *set_broad(ColDetArgs &&...args)
     {
         auto coldet = kit::make_scope<T>(world, std::forward<ColDetArgs>(args)...);
-        if (m_detection)
-            coldet->inherit(std::move(*m_detection));
+        if (m_broad)
+            coldet->inherit(std::move(*m_broad));
 
         T *ptr = coldet.get();
 
-        m_detection = std::move(coldet);
-        m_detection->on_attach();
+        m_broad = std::move(coldet);
+        m_broad->on_attach();
         return ptr;
     }
+
+    template <kit::DerivedFrom<cp_narrow_phase2D> T, class... NArgs> const T *set_cp_narrow(NArgs &&...args)
+    {
+        auto nalg = kit::make_scope<T>(std::forward<NArgs>(args)...);
+        T *ptr = nalg.get();
+
+        m_cp_narrow = std::move(nalg);
+        return ptr;
+    }
+    template <kit::DerivedFrom<pp_narrow_phase2D> T, class... NArgs> const T *set_pp_narrow(NArgs &&...args)
+    {
+        auto nalg = kit::make_scope<T>(std::forward<NArgs>(args)...);
+        T *ptr = nalg.get();
+
+        m_pp_narrow = std::move(nalg);
+        return ptr;
+    }
+
     template <ContactSolver2D T, class... SolvArgs> T *set_contact_solver(SolvArgs &&...args)
     {
         auto contacts = kit::make_scope<T>(world, std::forward<SolvArgs>(args)...);
@@ -107,7 +143,11 @@ class collision_manager2D : public worldref2D
   private:
     collision_manager2D(world2D &world);
 
-    kit::scope<collision_detection2D> m_detection;
+    kit::scope<broad_phase2D> m_broad;
+
+    kit::scope<cp_narrow_phase2D> m_cp_narrow;
+    kit::scope<pp_narrow_phase2D> m_pp_narrow;
+
     kit::scope<collision_contacts2D> m_contacts;
     bool m_enabled = true;
 

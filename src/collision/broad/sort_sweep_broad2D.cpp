@@ -1,10 +1,10 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/detection/sort_sweep_detection2D.hpp"
+#include "ppx/collision/broad/sort_sweep_broad2D.hpp"
 #include "ppx/world2D.hpp"
 
 namespace ppx
 {
-void sort_sweep_detection2D::on_attach()
+void sort_sweep_broad2D::on_attach()
 {
     m_add_edge = kit::callback<collider2D *>([this](collider2D *collider) {
         m_edges.push_back({collider, end_side::LEFT, FLT_MAX});
@@ -25,13 +25,13 @@ void sort_sweep_detection2D::on_attach()
         m_add_edge(collider);
 }
 
-sort_sweep_detection2D::~sort_sweep_detection2D()
+sort_sweep_broad2D::~sort_sweep_broad2D()
 {
     world.colliders.events.on_addition -= m_add_edge;
     world.colliders.events.on_removal -= m_remove_edge;
 }
 
-void sort_sweep_detection2D::detect_collisions()
+void sort_sweep_broad2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
 
@@ -49,7 +49,7 @@ void sort_sweep_detection2D::detect_collisions()
             m_eligible.erase(edg.collider);
 }
 
-void sort_sweep_detection2D::update_edges()
+void sort_sweep_broad2D::update_edges()
 {
     for (edge &edg : m_edges)
     {

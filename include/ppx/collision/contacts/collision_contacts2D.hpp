@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ppx/body/body2D.hpp"
-#include "ppx/collision/detection/collision_detection2D.hpp"
+#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "ppx/internal/worldref.hpp"
 #include "ppx/collision/contacts/contact2D.hpp"
 #include "ppx/island/island2D.hpp"
@@ -42,7 +42,7 @@ class collision_contacts2D : public worldref2D, kit::non_copyable
     }
 
     virtual void destroy_all_contacts() = 0;
-    virtual void create_contacts_from_collisions(const collision_detection2D::collision_map &collisions) = 0;
+    virtual void create_contacts_from_collisions(const broad_phase2D::collision_map &collisions) = 0;
 
     friend class collision_manager2D;
 };

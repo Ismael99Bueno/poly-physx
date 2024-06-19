@@ -156,7 +156,7 @@ void island_manager2D::build_from_existing_simulation()
         body->meta.island_flag = false;
     for (joint2D *joint : world.joints)
         joint->meta.island_flag = false;
-    for (contact2D *contact : world.collisions.contacts()->create_contacts_list())
+    for (contact2D *contact : world.collisions.contact_solver()->create_contacts_list())
     {
         joint2D *joint = dynamic_cast<joint2D *>(contact);
         KIT_ASSERT_ERROR(joint, "Contact is not a joint");
@@ -224,7 +224,7 @@ bool island_manager2D::checksum() const
         if (body->is_dynamic())
             dynamic_bodies++;
 
-    const std::size_t contacts = world.collisions.contacts()->size();
+    const std::size_t contacts = world.collisions.contact_solver()->size();
     const std::size_t joints = world.joints.size();
 
     std::size_t body_count = 0;

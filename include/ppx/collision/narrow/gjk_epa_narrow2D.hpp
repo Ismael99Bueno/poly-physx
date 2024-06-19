@@ -1,15 +1,14 @@
 #pragma once
 
-#include "ppx/collision/detection/narrow/narrow_detection2D.hpp"
+#include "ppx/collision/narrow/narrow_phase2D.hpp"
 
 namespace ppx
 {
-class gjk_epa_detection2D final : public cp_narrow_detection2D, public pp_narrow_detection2D
+class gjk_epa_narrow2D final : public cp_narrow_phase2D, public pp_narrow_phase2D
 {
   public:
-    gjk_epa_detection2D(float epa_threshold = 1.e-3f);
+    gjk_epa_narrow2D(float epa_threshold = 1.e-3f);
 
-    virtual ~gjk_epa_detection2D() = default;
     virtual narrow_result2D circle_polygon(const circle &circ, const polygon &poly) const override;
     virtual narrow_result2D polygon_polygon(const polygon &poly1, const polygon &poly2) const override;
 

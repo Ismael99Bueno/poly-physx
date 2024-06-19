@@ -1,20 +1,23 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/detection/collision_detection2D.hpp"
+#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "ppx/world2D.hpp"
 
 #include "geo/algorithm/intersection2D.hpp"
 
 namespace ppx
 {
-collision_detection2D::collision_detection2D(world2D &world) : worldref2D(world)
+broad_phase2D::broad_phase2D(world2D &world) : worldref2D(world)
 {
 }
-const collision_detection2D::collision_map &collision_detection2D::detect_collisions_cached()
+const broad_phase2D::collision_map &broad_phase2D::detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
+                                                                            const pp_narrow_phase2D *pp_narrow)
 {
     KIT_PERF_FUNCTION()
 #ifdef KIT_PROFILE
     KIT_ASSERT_ERROR(!params.multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
 #endif
+    m_cp_narrow = cp_narrow;
+    m_pp_narrow = pp_narrow;
     if (world.rk_subset_index() == 0)
     {
         detect_collisions();
@@ -32,12 +35,12 @@ const collision_detection2D::collision_map &collision_detection2D::detect_collis
     return m_collisions;
 }
 
-const collision_detection2D::collision_map &collision_detection2D::collisions() const
+const broad_phase2D::collision_map &broad_phase2D::collisions() const
 {
     return m_collisions;
 }
 
-void collision_detection2D::update_last_collisions()
+void broad_phase2D::update_last_collisions()
 {
     m_last_collisions.swap(m_collisions);
     m_collisions.clear();
@@ -45,19 +48,14 @@ void collision_detection2D::update_last_collisions()
         pairs.clear();
 }
 
-void collision_detection2D::inherit(collision_detection2D &&coldet)
+void broad_phase2D::inherit(broad_phase2D &&coldet)
 {
     params = coldet.params;
-    m_cp_narrow = std::move(coldet.m_cp_narrow);
-    m_pp_narrow = std::move(coldet.m_pp_narrow);
-
-    m_pp_manifold = std::move(coldet.m_pp_manifold);
-
     m_collisions = std::move(coldet.m_collisions);
     m_last_collisions = std::move(coldet.m_last_collisions);
 }
 
-void collision_detection2D::process_collision_st(collider2D *collider1, collider2D *collider2)
+void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *collider2)
 {
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
@@ -68,8 +66,7 @@ void collision_detection2D::process_collision_st(collider2D *collider1, collider
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
 }
-void collision_detection2D::process_collision_mt(collider2D *collider1, collider2D *collider2,
-                                                 const std::size_t thread_idx)
+void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *collider2, const std::size_t thread_idx)
 {
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
@@ -80,7 +77,7 @@ void collision_detection2D::process_collision_mt(collider2D *collider1, collider
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
 }
-void collision_detection2D::join_mt_collisions()
+void broad_phase2D::join_mt_collisions()
 {
     for (const auto &pairs : m_mt_collisions)
         m_collisions.insert(pairs.begin(), pairs.end());
@@ -97,7 +94,7 @@ static bool elligible_for_collision(const collider2D *collider1, const collider2
            !body1->joint_prevents_collision(body2);
 }
 
-collision2D collision_detection2D::generate_collision(collider2D *collider1, collider2D *collider2) const
+collision2D broad_phase2D::generate_collision(collider2D *collider1, collider2D *collider2) const
 {
     collision2D collision;
     const body2D *body1 = collider1->body();
@@ -130,7 +127,7 @@ collision2D collision_detection2D::generate_collision(collider2D *collider1, col
 }
 
 static void fill_collision_data(collision2D &collision, collider2D *collider1, collider2D *collider2,
-                                const glm::vec2 &mtv)
+                                const glm::vec2 &mtv, const manifold2D &manifold)
 {
     collision.collided = true;
     collision.collider1 = collider1;
@@ -138,10 +135,11 @@ static void fill_collision_data(collision2D &collision, collider2D *collider1, c
     collision.friction = sqrtf(collider1->friction * collider2->friction);
     collision.restitution = sqrtf(collider1->restitution * collider2->restitution);
     collision.mtv = mtv;
+    collision.manifold = manifold;
 }
 
-void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, collider2D *collider2,
-                                                      collision2D &collision) const
+void broad_phase2D::cc_narrow_collision_check(collider2D *collider1, collider2D *collider2,
+                                              collision2D &collision) const
 {
     const circle &circ1 = collider1->shape<circle>();
     const circle &circ2 = collider2->shape<circle>();
@@ -152,11 +150,11 @@ void collision_detection2D::cc_narrow_collision_check(collider2D *collider1, col
     if (!mres)
         return;
 
-    fill_collision_data(collision, collider1, collider2, mres.mtv);
-    collision.manifold = {geo::radius_distance_contact_point(circ1, circ2, mres.mtv)};
+    const manifold2D manifold = {geo::radius_distance_contact_point(circ1, circ2, mres.mtv)};
+    fill_collision_data(collision, collider1, collider2, mres.mtv, manifold);
 }
-void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
-                                                      collision2D &collision) const
+void broad_phase2D::cp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
+                                              collision2D &collision) const
 {
     const circle &circ = collider1->shape<circle>();
     const polygon &poly = collider2->shape<polygon>();
@@ -165,11 +163,10 @@ void collision_detection2D::cp_narrow_collision_check(collider2D *collider1, col
     if (!nres)
         return;
 
-    fill_collision_data(collision, collider1, collider2, nres.mtv);
-    collision.manifold = {geo::radius_penetration_contact_point(circ, nres.mtv)};
+    fill_collision_data(collision, collider1, collider2, nres.mtv, nres.manifold);
 }
-void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
-                                                      collision2D &collision) const
+void broad_phase2D::pp_narrow_collision_check(collider2D *collider1, collider2D *collider2,
+                                              collision2D &collision) const
 {
     const polygon &poly1 = collider1->shape<polygon>();
     const polygon &poly2 = collider2->shape<polygon>();
@@ -178,9 +175,7 @@ void collision_detection2D::pp_narrow_collision_check(collider2D *collider1, col
     if (!nres)
         return;
 
-    fill_collision_data(collision, collider1, collider2, nres.mtv);
-    collision.manifold = m_pp_manifold->polygon_polygon_contacts(collision);
-    collision.collided = !collision.manifold.empty();
+    fill_collision_data(collision, collider1, collider2, nres.mtv, nres.manifold);
 }
 
 } // namespace ppx

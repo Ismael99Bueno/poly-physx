@@ -1,14 +1,14 @@
 #pragma once
 
-#include "ppx/collision/detection/collision_detection2D.hpp"
+#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "ppx/common/alias.hpp"
 
 namespace ppx
 {
-class quad_tree_detection2D final : public collision_detection2D
+class quad_tree_broad2D final : public broad_phase2D
 {
   public:
-    using collision_detection2D::collision_detection2D;
+    using broad_phase2D::broad_phase2D;
     const ppx::quad_tree &quad_tree() const;
     ppx::quad_tree &quad_tree();
 

@@ -1,12 +1,12 @@
 #include "ppx/internal/pch.hpp"
-#include "ppx/collision/detection/brute_force_detection2D.hpp"
+#include "ppx/collision/broad/brute_force_broad2D.hpp"
 #include "ppx/world2D.hpp"
 
 #include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
 {
-void brute_force_detection2D::detect_collisions()
+void brute_force_broad2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
     if (params.multithreaded)
@@ -14,7 +14,7 @@ void brute_force_detection2D::detect_collisions()
     else
         detect_collisions_st();
 }
-void brute_force_detection2D::detect_collisions_st()
+void brute_force_broad2D::detect_collisions_st()
 {
     for (std::size_t i = 0; i < world.colliders.size(); i++)
         for (std::size_t j = i + 1; j < world.colliders.size(); j++)
@@ -26,7 +26,7 @@ void brute_force_detection2D::detect_collisions_st()
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
 
-void brute_force_detection2D::detect_collisions_mt()
+void brute_force_broad2D::detect_collisions_mt()
 {
     kit::mt::for_each<PPX_THREAD_COUNT>(world.colliders, [this](const std::size_t thread_idx, collider2D *collider1) {
         for (std::size_t j = 0; j < world.colliders.size(); j++)

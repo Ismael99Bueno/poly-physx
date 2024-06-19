@@ -1,14 +1,14 @@
 #pragma once
 
-#include "ppx/collision/detection/collision_detection2D.hpp"
+#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "ppx/collider/collider_manager2D.hpp"
 
 namespace ppx
 {
-class brute_force_detection2D final : public collision_detection2D
+class brute_force_broad2D final : public broad_phase2D
 {
   public:
-    using collision_detection2D::collision_detection2D;
+    using broad_phase2D::broad_phase2D;
 
   private:
     void detect_collisions() override;
