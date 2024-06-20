@@ -21,6 +21,7 @@ void quad_tree_broad2D::detect_collisions()
 
 void quad_tree_broad2D::detect_collisions_st(const std::vector<const qtpartition *> &partitions)
 {
+    KIT_PERF_SCOPE("quad_tree_broad2D::detect_collisions_st")
     for (const qtpartition *partition : partitions)
         for (std::size_t i = 0; i < partition->size(); i++)
             for (std::size_t j = i + 1; j < partition->size(); j++)
@@ -46,6 +47,7 @@ void quad_tree_broad2D::detect_collisions_mt(const std::vector<const qtpartition
 }
 void quad_tree_broad2D::update_quad_tree()
 {
+    KIT_PERF_FUNCTION()
     m_quad_tree.clear();
 
     aabb2D aabb;

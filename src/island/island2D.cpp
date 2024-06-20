@@ -18,6 +18,8 @@ void island2D::add_body(body2D *body)
 
 void island2D::awake()
 {
+    if (!m_asleep)
+        return;
     m_asleep = false;
     m_time_still = 0.f;
 }

@@ -8,7 +8,7 @@ namespace ppx
 {
 void brute_force_broad2D::detect_collisions()
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("brute_force_broad2D::detect_collisions")
     if (params.multithreaded)
         detect_collisions_mt();
     else
@@ -16,6 +16,7 @@ void brute_force_broad2D::detect_collisions()
 }
 void brute_force_broad2D::detect_collisions_st()
 {
+    KIT_PERF_SCOPE("brute_force_broad2D::detect_collisions_st")
     for (std::size_t i = 0; i < world.colliders.size(); i++)
         for (std::size_t j = i + 1; j < world.colliders.size(); j++)
         {
