@@ -196,12 +196,16 @@ struct island_manager2D
     std::size_t body_count_mid_threshold_reference = 100;
     float sleep_time_threshold = 1.5f;
     bool enable_split = true;
+#ifdef KIT_PROFILE
+    bool multithreaded = false;
+#else
     bool multithreaded = true;
+#endif
 };
 
 struct collision_manager2D
 {
-    struct detection2D
+    struct broad2D
     {
 #ifdef KIT_PROFILE
         bool multithreaded = false;

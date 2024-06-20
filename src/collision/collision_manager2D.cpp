@@ -56,7 +56,7 @@ void collision_manager2D::set_actuator_based_contact_solver(contact_actuator_sol
 
 void collision_manager2D::detect_and_create_contacts()
 {
-    KIT_PERF_SCOPE("Collision solve")
+    KIT_PERF_FUNCTION()
     if (!m_broad->enabled)
         return;
     const auto &collisions = m_broad->detect_collisions_cached(m_cp_narrow.get(), m_pp_narrow.get());

@@ -57,6 +57,7 @@ void broad_phase2D::inherit(broad_phase2D &&broad)
 
 void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *collider2)
 {
+    KIT_PERF_FUNCTION()
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
     {
@@ -68,6 +69,7 @@ void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *coll
 }
 void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *collider2, const std::size_t thread_idx)
 {
+    KIT_PERF_FUNCTION()
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
     {
@@ -85,6 +87,7 @@ void broad_phase2D::join_mt_collisions()
 
 static bool elligible_for_collision(const collider2D *collider1, const collider2D *collider2)
 {
+    KIT_PERF_FUNCTION()
     const body2D *body1 = collider1->body();
     const body2D *body2 = collider2->body();
     return body1 != body2 && (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
@@ -95,6 +98,7 @@ static bool elligible_for_collision(const collider2D *collider1, const collider2
 
 collision2D broad_phase2D::generate_collision(collider2D *collider1, collider2D *collider2) const
 {
+    KIT_PERF_FUNCTION()
     collision2D collision;
     const body2D *body1 = collider1->body();
     const body2D *body2 = collider2->body();

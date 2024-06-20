@@ -6,6 +6,10 @@ namespace ppx
 {
 void island_manager2D::solve()
 {
+#ifdef KIT_PROFILE
+    KIT_ASSERT_ERROR(!params.multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
+#endif
+
     if (m_elements.empty())
         return;
     if (m_elements.size() == 1)

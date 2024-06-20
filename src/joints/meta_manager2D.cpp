@@ -23,7 +23,7 @@ template <IManager IM> bool joint_meta_manager2D<IM>::remove(joint2D *joint)
 
 void actuator_meta_manager2D::solve()
 {
-    KIT_PERF_SCOPE("Joints solve")
+    KIT_PERF_SCOPE("actuator_meta_manager2D::solve")
     if (m_contact_solver)
         m_contact_solver->solve();
     for (const auto &manager : m_elements)
@@ -33,7 +33,7 @@ void actuator_meta_manager2D::solve()
 
 void constraint_meta_manager2D::solve()
 {
-    KIT_PERF_SCOPE("Constraints solve")
+    KIT_PERF_SCOPE("constraint_meta_manager2D::solve")
     if (m_contact_solver)
         m_contact_solver->startup();
 

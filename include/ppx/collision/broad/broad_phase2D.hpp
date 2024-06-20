@@ -26,7 +26,7 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     using collision_map =
         std::unordered_map<kit::commutative_tuple<const collider2D *, const collider2D *>, collision2D>;
 
-    specs::collision_manager2D::detection2D params;
+    specs::collision_manager2D::broad2D params;
 
     broad_phase2D(world2D &world);
     virtual ~broad_phase2D() = default;
