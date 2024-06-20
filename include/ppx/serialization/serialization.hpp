@@ -685,13 +685,13 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         nbroad["Multithreading"] = cm.broad()->params.multithreaded;
         if (cm.broad<ppx::brute_force_broad2D>())
             nbroad["Method"] = 0;
-        else if (auto coldet = cm.broad<ppx::quad_tree_broad2D>())
+        else if (auto broad = cm.broad<ppx::quad_tree_broad2D>())
         {
             nbroad["Method"] = 1;
-            nbroad["Force square"] = coldet->force_square_shape;
-            nbroad["Include non dynamic"] = coldet->include_non_dynamic;
+            nbroad["Force square"] = broad->force_square_shape;
+            nbroad["Include non dynamic"] = broad->include_non_dynamic;
 
-            const auto &props = coldet->quad_tree().props();
+            const auto &props = broad->quad_tree().props();
             nbroad["Max colliders"] = props.elements_per_quad;
             nbroad["Max depth"] = props.max_depth;
             nbroad["Min size"] = props.min_quad_size;
@@ -745,11 +745,11 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 cm.set_broad<ppx::brute_force_broad2D>();
             else if (method == 1)
             {
-                auto qtdet = cm.set_broad<ppx::quad_tree_broad2D>();
-                qtdet->force_square_shape = nbroad["Force square"].as<bool>();
-                qtdet->include_non_dynamic = nbroad["Include non dynamic"].as<bool>();
+                auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>();
+                qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
+                qtbroad->include_non_dynamic = nbroad["Include non dynamic"].as<bool>();
 
-                auto &props = qtdet->quad_tree().props();
+                auto &props = qtbroad->quad_tree().props();
                 props.elements_per_quad = nbroad["Max colliders"].as<std::size_t>();
                 props.max_depth = nbroad["Max depth"].as<std::uint32_t>();
                 props.min_quad_size = nbroad["Min size"].as<float>();

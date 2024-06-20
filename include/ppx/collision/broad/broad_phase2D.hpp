@@ -40,7 +40,7 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     {
     }
 
-    void inherit(broad_phase2D &&coldet);
+    void inherit(broad_phase2D &&broad);
 
   protected:
     void process_collision_st(collider2D *collider1, collider2D *collider2);

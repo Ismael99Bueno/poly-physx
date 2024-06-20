@@ -48,11 +48,11 @@ void broad_phase2D::update_last_collisions()
         pairs.clear();
 }
 
-void broad_phase2D::inherit(broad_phase2D &&coldet)
+void broad_phase2D::inherit(broad_phase2D &&broad)
 {
-    params = coldet.params;
-    m_collisions = std::move(coldet.m_collisions);
-    m_last_collisions = std::move(coldet.m_last_collisions);
+    params = broad.params;
+    m_collisions = std::move(broad.m_collisions);
+    m_last_collisions = std::move(broad.m_last_collisions);
 }
 
 void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *collider2)
@@ -87,8 +87,7 @@ static bool elligible_for_collision(const collider2D *collider1, const collider2
 {
     const body2D *body1 = collider1->body();
     const body2D *body2 = collider2->body();
-    return collider1 != collider2 && body1 != body2 &&
-           (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
+    return body1 != body2 && (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
            (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
            geo::intersects(collider1->shape().bounding_box(), collider2->shape().bounding_box()) &&
            !body1->joint_prevents_collision(body2);
@@ -158,6 +157,9 @@ void broad_phase2D::cp_narrow_collision_check(collider2D *collider1, collider2D 
 {
     const circle &circ = collider1->shape<circle>();
     const polygon &poly = collider2->shape<polygon>();
+    const float R = circ.radius() + poly.radius();
+    if (glm::distance2(circ.gcentroid(), poly.gcentroid()) > R * R)
+        return;
 
     const narrow_result2D nres = m_cp_narrow->circle_polygon(circ, poly);
     if (!nres)
@@ -170,6 +172,9 @@ void broad_phase2D::pp_narrow_collision_check(collider2D *collider1, collider2D 
 {
     const polygon &poly1 = collider1->shape<polygon>();
     const polygon &poly2 = collider2->shape<polygon>();
+    const float R = poly1.radius() + poly2.radius();
+    if (glm::distance2(poly1.gcentroid(), poly2.gcentroid()) > R * R)
+        return;
 
     const narrow_result2D nres = m_pp_narrow->polygon_polygon(poly1, poly2);
     if (!nres)

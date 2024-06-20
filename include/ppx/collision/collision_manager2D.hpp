@@ -90,13 +90,13 @@ class collision_manager2D : public worldref2D
 
     template <kit::DerivedFrom<broad_phase2D> T, class... ColDetArgs> T *set_broad(ColDetArgs &&...args)
     {
-        auto coldet = kit::make_scope<T>(world, std::forward<ColDetArgs>(args)...);
+        auto broad = kit::make_scope<T>(world, std::forward<ColDetArgs>(args)...);
         if (m_broad)
-            coldet->inherit(std::move(*m_broad));
+            broad->inherit(std::move(*m_broad));
 
-        T *ptr = coldet.get();
+        T *ptr = broad.get();
 
-        m_broad = std::move(coldet);
+        m_broad = std::move(broad);
         m_broad->on_attach();
         return ptr;
     }
