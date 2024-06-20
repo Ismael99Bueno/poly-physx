@@ -22,7 +22,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         return m_contacts;
     }
 
-    std::vector<contact2D *> create_contacts_list() const override
+    std::vector<contact2D *> create_contact_list() const override
     {
         std::vector<contact2D *> list;
         list.reserve(m_contacts.size());

@@ -37,21 +37,7 @@ class collision_manager2D : public worldref2D
         return m_broad->collisions().end();
     }
 
-    const collision2D &operator[](const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const;
-    const collision2D &at(const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const;
-    const collision2D &at(const collider2D *collider1, const collider2D *collider2) const;
-
-    bool contains(const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const;
-    bool contains(const collider2D *collider1, const collider2D *collider2) const;
-
-    auto find(const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
-    {
-        return m_broad->collisions().find(key);
-    }
-    auto find(const collider2D *collider1, const collider2D *collider2) const
-    {
-        return m_broad->collisions().find({collider1, collider2});
-    }
+    const collision2D &operator[](std::size_t index) const;
 
     template <kit::DerivedFrom<broad_phase2D> T = broad_phase2D> const T *broad() const
     {

@@ -18,30 +18,6 @@ collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
     set_contact_solver<contact_solver2D<nonpen_contact2D>>();
 }
 
-const collision2D &collision_manager2D::operator[](
-    const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
-{
-    return m_broad->collisions().at(key);
-}
-const collision2D &collision_manager2D::at(
-    const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
-{
-    return m_broad->collisions().at(key);
-}
-const collision2D &collision_manager2D::at(const collider2D *collider1, const collider2D *collider2) const
-{
-    return m_broad->collisions().at({collider1, collider2});
-}
-
-bool collision_manager2D::contains(const kit::commutative_tuple<const collider2D *, const collider2D *> &key) const
-{
-    return m_broad->collisions().contains(key);
-}
-bool collision_manager2D::contains(const collider2D *collider1, const collider2D *collider2) const
-{
-    return m_broad->collisions().contains({collider1, collider2});
-}
-
 void collision_manager2D::set_constraint_based_contact_solver(contact_constraint_solver2D *solver)
 {
     world.joints.constraints.m_contact_solver = solver;

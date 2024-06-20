@@ -23,7 +23,7 @@ class collision_contacts2D : public worldref2D, kit::non_copyable
 
     virtual void remove_any_contacts_with(const collider2D *collider) = 0;
 
-    virtual std::vector<contact2D *> create_contacts_list() const = 0;
+    virtual std::vector<contact2D *> create_contact_list() const = 0;
     virtual std::size_t size() const = 0;
 
     bool checksum() const;

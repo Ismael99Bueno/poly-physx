@@ -35,7 +35,7 @@ bool collision_contacts2D::checksum() const
     std::unordered_set<const contact2D *> body_contacts;
     body_contacts.reserve(size());
 
-    const auto contact_list = create_contacts_list();
+    const auto contact_list = create_contact_list();
     const std::unordered_set<const contact2D *> contacts(contact_list.begin(), contact_list.end());
     for (const body2D *body : world.bodies)
         for (const contact2D *contact : body->meta.contacts)
