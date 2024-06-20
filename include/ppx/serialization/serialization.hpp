@@ -731,7 +731,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     }
     static bool decode(const YAML::Node &node, ppx::collision_manager2D &cm)
     {
-        if (!node.IsMap() || node.size() != 3)
+        if (!node.IsMap() || node.size() != 4)
             return false;
 
         cm.enabled(node["Enabled"].as<bool>());
