@@ -42,7 +42,7 @@ class collision_contacts2D : public worldref2D, kit::non_copyable
     }
 
     virtual void destroy_all_contacts() = 0;
-    virtual void create_contacts_from_collisions(const broad_phase2D::collision_map &collisions) = 0;
+    virtual void create_contacts_from_collisions(const std::vector<collision2D> &collisions) = 0;
 
     friend class collision_manager2D;
 };

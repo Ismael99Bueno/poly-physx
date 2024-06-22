@@ -9,8 +9,8 @@ namespace ppx
 broad_phase2D::broad_phase2D(world2D &world) : worldref2D(world)
 {
 }
-const broad_phase2D::collision_map &broad_phase2D::detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
-                                                                            const pp_narrow_phase2D *pp_narrow)
+const std::vector<collision2D> &broad_phase2D::detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
+                                                                        const pp_narrow_phase2D *pp_narrow)
 {
     KIT_PERF_FUNCTION()
 #ifdef KIT_PROFILE
@@ -26,8 +26,8 @@ const broad_phase2D::collision_map &broad_phase2D::detect_collisions_cached(cons
 
     for (auto it = m_collisions.begin(); it != m_collisions.end();)
     {
-        it->second = generate_collision(it->second.collider1, it->second.collider2);
-        if (!it->second.collided)
+        *it = generate_collision(it->collider1, it->collider2);
+        if (!it->collided)
             it = m_collisions.erase(it);
         else
             ++it;
@@ -35,14 +35,16 @@ const broad_phase2D::collision_map &broad_phase2D::detect_collisions_cached(cons
     return m_collisions;
 }
 
-const broad_phase2D::collision_map &broad_phase2D::collisions() const
+const std::vector<collision2D> &broad_phase2D::collisions() const
 {
     return m_collisions;
 }
 
 void broad_phase2D::update_last_collisions()
 {
-    m_last_collisions.swap(m_collisions);
+    m_last_collisions.clear();
+    for (const collision2D &colis : m_collisions)
+        m_last_collisions[{colis.collider1, colis.collider2}] = colis;
     m_collisions.clear();
     for (auto &pairs : m_mt_collisions)
         pairs.clear();
@@ -61,8 +63,7 @@ void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *coll
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
     {
-        kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
-        m_collisions.emplace(hash, colis);
+        m_collisions.push_back(colis);
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
@@ -73,8 +74,7 @@ void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *coll
     const collision2D colis = generate_collision(collider1, collider2);
     if (colis.collided)
     {
-        kit::commutative_tuple<const collider2D *, const collider2D *> hash{collider1, collider2};
-        m_mt_collisions[thread_idx].emplace(hash, colis);
+        m_mt_collisions[thread_idx].push_back(colis);
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
@@ -82,7 +82,7 @@ void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *coll
 void broad_phase2D::join_mt_collisions()
 {
     for (const auto &pairs : m_mt_collisions)
-        m_collisions.insert(pairs.begin(), pairs.end());
+        m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
 }
 
 static bool elligible_for_collision(const collider2D *collider1, const collider2D *collider2)

@@ -40,6 +40,11 @@ void collision_manager2D::detect_and_create_contacts()
         m_contacts->create_contacts_from_collisions(collisions);
 }
 
+const collision2D &collision_manager2D::operator[](std::size_t index) const
+{
+    return m_broad->collisions()[index];
+}
+
 std::size_t collision_manager2D::size() const
 {
     return m_broad->collisions().size();
