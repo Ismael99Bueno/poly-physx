@@ -83,30 +83,31 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         }
 
         m_active_contacts.clear();
-        for (auto it = m_contacts.begin(); it != m_contacts.end();)
-        {
-            Contact *contact = it->second;
-            if (contact->asleep())
+        if (!collisions.empty())
+            for (auto it = m_contacts.begin(); it != m_contacts.end();)
             {
+                Contact *contact = it->second;
+                if (contact->asleep())
+                {
+                    ++it;
+                    continue;
+                }
+                if (contact->expired())
+                {
+                    destroy_contact(contact);
+                    it = m_contacts.erase(it);
+                    continue;
+                }
+                if (contact->recently_updated())
+                    m_active_contacts.push_back(contact);
+                else
+                {
+                    contact->enabled = false;
+                    contact->on_exit();
+                }
+                contact->increment_lifetime();
                 ++it;
-                continue;
             }
-            if (contact->expired())
-            {
-                destroy_contact(contact);
-                it = m_contacts.erase(it);
-                continue;
-            }
-            if (contact->recently_updated())
-                m_active_contacts.push_back(contact);
-            else
-            {
-                contact->enabled = false;
-                contact->on_exit();
-            }
-            contact->increment_lifetime();
-            ++it;
-        }
     }
 
     void create_contact(const contact_key &hash, const collision2D *collision, const std::size_t manifold_index)
