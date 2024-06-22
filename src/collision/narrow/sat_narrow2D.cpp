@@ -22,8 +22,7 @@ narrow_result2D sat_narrow2D::polygon_polygon(const polygon &poly1, const polygo
     geo::sat_result2D sat_result = geo::sat(poly1, poly2);
     if (!sat_result)
         return result;
-    result.manifold = geo::clipping_contacts(sat_result.reference_incident_flipped ? poly2 : poly1,
-                                             sat_result.reference_incident_flipped ? poly1 : poly2, sat_result.mtv);
+    result.manifold = geo::clipping_contacts(poly1, poly2, sat_result.mtv);
     if (result.manifold.empty())
         return result;
     result.intersects = true;
