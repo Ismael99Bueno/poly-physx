@@ -76,7 +76,7 @@ void world2D::pre_step_preparation()
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
     m_rk_subset_index = 0;
-    collisions.broad()->update_last_collisions();
+    collisions.broad()->flush_collisions();
     bodies.send_data_to_state(integrator.state);
     if (islands.enabled() && islands.params.enable_split)
         islands.try_split(1);

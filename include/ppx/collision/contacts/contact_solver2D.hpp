@@ -35,36 +35,36 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
 
     void startup() override
     {
-        for (auto &pair : this->m_contacts)
+        for (Contact *contact : this->m_active_contacts)
         {
-            if (!pair.second->enabled) // no need to check sleep: if using this, islands are disabled
+            if (!contact->enabled) // no need to check sleep: if using this, islands are disabled
                 continue;
-            pair.second->on_pre_solve();
-            pair.second->startup();
+            contact->on_pre_solve();
+            contact->startup();
         }
     }
 
     void solve_velocities() override
     {
-        for (auto &pair : this->m_contacts)
-            if (pair.second->enabled)
-                pair.second->solve_velocities();
+        for (Contact *contact : this->m_active_contacts)
+            if (contact->enabled)
+                contact->solve_velocities();
     }
 
     bool solve_positions() override
     {
         bool solved = true;
-        for (auto &pair : this->m_contacts)
-            if (pair.second->enabled)
-                solved &= pair.second->solve_positions();
+        for (Contact *contact : this->m_active_contacts)
+            if (contact->enabled)
+                solved &= contact->solve_positions();
         return solved;
     }
 
     void on_post_solve() override
     {
-        for (auto &pair : this->m_contacts)
-            if (pair.second->enabled)
-                pair.second->on_post_solve();
+        for (Contact *contact : this->m_active_contacts)
+            if (contact->enabled)
+                contact->on_post_solve();
     }
 };
 
@@ -76,16 +76,16 @@ class contact_solver2D<Contact> : public contact_manager2D<Contact>, public cont
 
     void solve() override
     {
-        for (auto &pair : this->m_contacts)
+        for (Contact *contact : this->m_active_contacts)
         {
-            if (!pair.second->enabled)
+            if (!contact->enabled)
                 continue;
 
             // on islands, all pre solves are executed before the firs solve ever, but here the implementation differs.
             // take into account for the future :)
-            pair.second->on_pre_solve();
-            pair.second->solve();
-            pair.second->on_post_solve();
+            contact->on_pre_solve();
+            contact->solve();
+            contact->on_post_solve();
         }
     }
 };

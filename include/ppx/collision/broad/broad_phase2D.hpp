@@ -31,7 +31,7 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     const std::vector<collision2D> &detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
                                                              const pp_narrow_phase2D *pp_narrow);
     const std::vector<collision2D> &collisions() const;
-    void update_last_collisions();
+    void flush_collisions();
 
     virtual void on_attach()
     {
@@ -45,11 +45,7 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     void join_mt_collisions();
 
   private:
-    using collision_map =
-        std::unordered_map<kit::commutative_tuple<const collider2D *, const collider2D *>, collision2D>;
-
     std::vector<collision2D> m_collisions;
-    collision_map m_last_collisions;
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
 
     const cp_narrow_phase2D *m_cp_narrow = nullptr;

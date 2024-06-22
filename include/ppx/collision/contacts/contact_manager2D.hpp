@@ -22,7 +22,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         return m_contacts;
     }
 
-    std::vector<contact2D *> create_contact_list() const override
+    std::vector<contact2D *> create_total_contacts_list() const override
     {
         std::vector<contact2D *> list;
         list.reserve(m_contacts.size());
@@ -30,10 +30,18 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             list.push_back(pair.second);
         return list;
     }
+    std::vector<contact2D *> create_active_contacts_list() const override
+    {
+        return std::vector<contact2D *>(m_active_contacts.begin(), m_active_contacts.end());
+    }
 
-    std::size_t size() const override
+    std::size_t total_contacts_count() const override
     {
         return m_contacts.size();
+    }
+    std::size_t active_contacts_count() const override
+    {
+        return m_active_contacts.size();
     }
 
     void remove_any_contacts_with(const collider2D *collider) override
@@ -55,28 +63,26 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
 
   protected:
     contact_map m_contacts;
+    std::vector<Contact *> m_active_contacts;
 
     void create_contacts_from_collisions(const std::vector<collision2D> &collisions) override
     {
         KIT_PERF_FUNCTION()
+
         for (const collision2D &collision : collisions)
         {
-            if (collision.asleep)
-                continue;
             for (std::size_t i = 0; i < collision.manifold.size(); i++)
             {
                 const contact_key hash{collision.collider1, collision.collider2, collision.manifold[i].id.key};
                 const auto old_contact = m_contacts.find(hash);
                 if (old_contact != m_contacts.end())
-                {
-                    if (!old_contact->second->enabled)
-                        old_contact->second->on_enter();
-                    old_contact->second->update(&collision, i);
-                }
+                    update_contact(old_contact->second, &collision, i);
                 else
                     create_contact(hash, &collision, i);
             }
         }
+
+        m_active_contacts.clear();
         for (auto it = m_contacts.begin(); it != m_contacts.end();)
         {
             Contact *contact = it->second;
@@ -91,7 +97,9 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
                 it = m_contacts.erase(it);
                 continue;
             }
-            if (!contact->recently_updated())
+            if (contact->recently_updated())
+                m_active_contacts.push_back(contact);
+            else
             {
                 contact->enabled = false;
                 contact->on_exit();
@@ -101,8 +109,9 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         }
     }
 
-    void create_contact(const contact_key &hash, const collision2D *collision, std::size_t manifold_index)
+    void create_contact(const contact_key &hash, const collision2D *collision, const std::size_t manifold_index)
     {
+        KIT_PERF_FUNCTION()
         Contact *contact = allocator<Contact>::create(world, collision, manifold_index);
         m_contacts.emplace(hash, contact);
         island2D::add(contact);
@@ -110,8 +119,17 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         contact->body2()->meta.contacts.push_back(contact);
         contact->on_enter();
     }
+    void update_contact(Contact *contact, const collision2D *collision, const std::size_t manifold_index)
+    {
+        KIT_PERF_FUNCTION()
+        const bool on_enter = !contact->enabled;
+        contact->update(collision, manifold_index);
+        if (on_enter)
+            contact->on_enter();
+    }
     void destroy_contact(Contact *contact)
     {
+        KIT_PERF_FUNCTION()
         contact->body1()->meta.remove_contact(contact);
         contact->body2()->meta.remove_contact(contact);
         island2D::remove(contact);
@@ -130,6 +148,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
           // colliders and bodies. it shouldnt matter because this is almost never
           // called (only when user changes contact solver or disables collisions)
         m_contacts.clear();
+        m_active_contacts.clear();
     }
 };
 } // namespace ppx

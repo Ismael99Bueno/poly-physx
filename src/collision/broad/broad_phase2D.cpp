@@ -40,11 +40,8 @@ const std::vector<collision2D> &broad_phase2D::collisions() const
     return m_collisions;
 }
 
-void broad_phase2D::update_last_collisions()
+void broad_phase2D::flush_collisions()
 {
-    m_last_collisions.clear();
-    for (const collision2D &colis : m_collisions)
-        m_last_collisions[{colis.collider1, colis.collider2}] = colis;
     m_collisions.clear();
     for (auto &pairs : m_mt_collisions)
         pairs.clear();
@@ -54,7 +51,6 @@ void broad_phase2D::inherit(broad_phase2D &&broad)
 {
     params = broad.params;
     m_collisions = std::move(broad.m_collisions);
-    m_last_collisions = std::move(broad.m_last_collisions);
 }
 
 void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *collider2)
@@ -90,7 +86,8 @@ static bool elligible_for_collision(const collider2D *collider1, const collider2
     KIT_PERF_FUNCTION()
     const body2D *body1 = collider1->body();
     const body2D *body2 = collider2->body();
-    return body1 != body2 && (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
+    return body1 != body2 && (body1->is_dynamic() || body2->is_dynamic()) && (!body1->asleep() || !body2->asleep()) &&
+           (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
            (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
            geo::intersects(collider1->shape().bounding_box(), collider2->shape().bounding_box()) &&
            !body1->joint_prevents_collision(body2);
@@ -100,22 +97,6 @@ collision2D broad_phase2D::generate_collision(collider2D *collider1, collider2D 
 {
     KIT_PERF_FUNCTION()
     collision2D collision;
-    const body2D *body1 = collider1->body();
-    const body2D *body2 = collider2->body();
-    if (!body1->is_dynamic() && !body2->is_dynamic())
-        return collision;
-
-    if (collider1->body()->asleep() && collider2->body()->asleep())
-    {
-        const auto last_collision = m_last_collisions.find({collider1, collider2});
-        if (last_collision != m_last_collisions.end())
-        {
-            collision = last_collision->second;
-            collision.asleep = true;
-            return collision;
-        }
-        return collision;
-    }
     if (!elligible_for_collision(collider1, collider2))
         return collision;
     if (collider1->is_circle() && collider2->is_circle())

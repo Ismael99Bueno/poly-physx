@@ -125,6 +125,17 @@ class island2D : public worldref2D
     std::vector<constraint2D *> m_constraints;
     std::vector<contact2D *> m_contacts;
 
+    std::vector<actuator2D *> m_active_actuators;
+    std::vector<constraint2D *> m_active_constraints;
+    std::vector<contact2D *> m_active_contacts;
+
+    float m_time_still = 0.f;
+    float m_energy = 0.f;
+    bool m_solved_positions = false;
+    bool m_asleep = false;
+
+    void collect_active_elements_and_call_pre_solve();
+
     template <IJoint2D Joint> static island2D *get_effective_island(Joint *joint)
     {
         const body2D *body1 = joint->body1();
@@ -145,11 +156,6 @@ class island2D : public worldref2D
     }
 
     static island2D *handle_island_merge_encounter(island2D *island1, island2D *island2);
-
-    float m_time_still = 0.f;
-    float m_energy = 0.f;
-    bool m_solved_positions = false;
-    bool m_asleep = false;
 
     friend class island_manager2D;
 };
