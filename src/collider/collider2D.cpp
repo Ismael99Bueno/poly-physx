@@ -168,27 +168,11 @@ void collider2D::origin(const glm::vec2 &origin)
 
 const shape2D &collider2D::shape() const
 {
-    switch (m_type)
-    {
-    case stype::POLYGON:
-        return std::get<polygon>(m_shape);
-    case stype::CIRCLE:
-        return std::get<circle>(m_shape);
-    }
-    throw std::bad_variant_access();
+    return std::visit<const shape2D &>([](const auto &shape) -> const shape2D & { return shape; }, m_shape);
 }
 shape2D &collider2D::mutable_shape()
 {
-    switch (m_type)
-    {
-    case stype::POLYGON:
-        return std::get<polygon>(m_shape);
-    case stype::CIRCLE:
-        return std::get<circle>(m_shape);
-    }
-    if (polygon *shape = std::get_if<polygon>(&m_shape))
-        return *shape;
-    return std::get<circle>(m_shape);
+    return std::visit<shape2D &>([](auto &shape) -> shape2D & { return shape; }, m_shape);
 }
 
 collider2D::stype collider2D::shape_type() const

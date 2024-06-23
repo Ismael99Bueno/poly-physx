@@ -19,29 +19,61 @@ void quad_tree_broad2D::detect_collisions()
         detect_collisions_st(partitions);
 }
 
-void quad_tree_broad2D::detect_collisions_st(const std::vector<const qtpartition *> &partitions)
+void quad_tree_broad2D::detect_collisions_st(const std::vector<qtpartition> &partitions)
 {
     KIT_PERF_SCOPE("quad_tree_broad2D::detect_collisions_st")
-    for (const qtpartition *partition : partitions)
-        for (std::size_t i = 0; i < partition->size(); i++)
-            for (std::size_t j = i + 1; j < partition->size(); j++)
+    for (const qtpartition &partition : partitions)
+        for (std::size_t i = 0; i < partition.elements->size(); i++)
+        {
+            for (std::size_t j = i + 1; j < partition.elements->size(); j++)
             {
-                collider2D *collider1 = (*partition)[i];
-                collider2D *collider2 = (*partition)[j];
+                collider2D *collider1 = (*partition.elements)[i];
+                collider2D *collider2 = (*partition.elements)[j];
                 process_collision_st(collider1, collider2);
             }
+#ifdef KIT_QT_COLLECT_ELEMENTS_COPY
+            for (collider2D *collider2 : partition.to_compare)
+            {
+                collider2D *collider1 = (*partition.elements)[i];
+                process_collision_st(collider1, collider2);
+            }
+#else
+            for (const auto &elems : partition.to_compare)
+                for (collider2D *collider2 : *elems)
+                {
+                    collider2D *collider1 = (*partition.elements)[i];
+                    process_collision_st(collider1, collider2);
+                }
+#endif
+        }
     // DEBUG COLLISION COUNT CHECK GOES HERE
 }
-void quad_tree_broad2D::detect_collisions_mt(const std::vector<const qtpartition *> &partitions)
+void quad_tree_broad2D::detect_collisions_mt(const std::vector<qtpartition> &partitions)
 {
-    kit::mt::for_each<PPX_THREAD_COUNT>(partitions, [this](const std::size_t thread_idx, const qtpartition *partition) {
-        for (std::size_t i = 0; i < partition->size(); i++)
-            for (std::size_t j = i + 1; j < partition->size(); j++)
+    kit::mt::for_each<PPX_THREAD_COUNT>(partitions, [this](const std::size_t thread_idx, const qtpartition &partition) {
+        for (std::size_t i = 0; i < partition.elements->size(); i++)
+        {
+            for (std::size_t j = i + 1; j < partition.elements->size(); j++)
             {
-                collider2D *collider1 = (*partition)[i];
-                collider2D *collider2 = (*partition)[j];
+                collider2D *collider1 = (*partition.elements)[i];
+                collider2D *collider2 = (*partition.elements)[j];
                 process_collision_mt(collider1, collider2, thread_idx);
             }
+#ifdef KIT_QT_COLLECT_ELEMENTS_COPY
+            for (collider2D *collider2 : partition.to_compare)
+            {
+                collider2D *collider1 = (*partition.elements)[i];
+                process_collision_mt(collider1, collider2, thread_idx);
+            }
+#else
+            for (const auto &elems : partition.to_compare)
+                for (collider2D *collider2 : *elems)
+                {
+                    collider2D *collider1 = (*partition.elements)[i];
+                    process_collision_mt(collider1, collider2, thread_idx);
+                }
+#endif
+        }
     });
     join_mt_collisions();
 }
