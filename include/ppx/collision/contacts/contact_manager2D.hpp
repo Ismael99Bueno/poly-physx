@@ -123,6 +123,8 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     void update_contact(Contact *contact, const collision2D *collision, const std::size_t manifold_index)
     {
         KIT_PERF_FUNCTION()
+        KIT_ASSERT_WARN(!contact->recently_updated(),
+                        "Contact was already updated. The corresponding collision is duplicated!")
         const bool on_enter = !contact->enabled;
         contact->update(collision, manifold_index);
         if (on_enter)
