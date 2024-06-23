@@ -10,8 +10,6 @@ class island_manager2D final : public manager2D<island2D>
   public:
     using manager2D::manager2D;
 
-    specs::island_manager2D params;
-
     bool enabled() const;
     void enabled(bool enable);
 
@@ -22,6 +20,8 @@ class island_manager2D final : public manager2D<island2D>
     void remove_invalid();
 
     float sleep_energy_threshold(const island2D *island) const;
+
+    specs::island_manager2D params;
 
   private:
     bool m_enable = true;

@@ -19,8 +19,6 @@ class collision_contacts2D : public worldref2D, kit::non_copyable
     collision_contacts2D(world2D &world);
     virtual ~collision_contacts2D() = default;
 
-    specs::collision_manager2D::contacts2D params;
-
     virtual void remove_any_contacts_with(const collider2D *collider) = 0;
 
     virtual std::vector<contact2D *> create_total_contacts_list() const = 0;
@@ -36,6 +34,8 @@ class collision_contacts2D : public worldref2D, kit::non_copyable
     void enabled(bool enable);
 
     float contact_lifetime() const;
+
+    specs::collision_manager2D::contacts2D params;
 
   private:
     bool m_enabled = true;

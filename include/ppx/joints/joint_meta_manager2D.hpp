@@ -83,9 +83,10 @@ class constraint_meta_manager2D final : public joint_meta_manager2D<iconstraint_
 
   private:
     using joint_meta_manager2D<iconstraint_manager2D>::joint_meta_manager2D;
+    void solve();
+
     contact_constraint_solver2D *m_contact_solver = nullptr;
 
-    void solve();
     friend class world2D;
     friend class collision_manager2D;
 };

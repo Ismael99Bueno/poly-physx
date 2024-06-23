@@ -23,8 +23,6 @@ class world2D;
 class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyable
 {
   public:
-    specs::collision_manager2D::broad2D params;
-
     broad_phase2D(world2D &world);
     virtual ~broad_phase2D() = default;
 
@@ -38,6 +36,8 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     }
 
     void inherit(broad_phase2D &&broad);
+
+    specs::collision_manager2D::broad2D params;
 
   protected:
     void process_collision_st(collider2D *collider1, collider2D *collider2);
