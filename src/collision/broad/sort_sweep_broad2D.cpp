@@ -7,10 +7,10 @@ namespace ppx
 void sort_sweep_broad2D::on_attach()
 {
     m_add_edge = kit::callback<collider2D *>([this](collider2D *collider) {
-        m_edges.push_back({collider, end_side::LEFT, FLT_MAX});
-        m_edges.push_back({collider, end_side::RIGHT, FLT_MAX});
+        m_edges.push_back({collider, end_side::LOWER, FLT_MAX});
+        m_edges.push_back({collider, end_side::UPPER, FLT_MAX});
     });
-    m_remove_edge = kit::callback<const collider2D &>([this](const collider2D &collider) {
+    m_remove_edge = kit::callback<collider2D &>([this](collider2D &collider) {
         for (auto it = m_edges.begin(); it != m_edges.end();)
             if (it->collider == &collider)
                 it = m_edges.erase(it);
@@ -34,12 +34,11 @@ sort_sweep_broad2D::~sort_sweep_broad2D()
 void sort_sweep_broad2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
-
     update_edges();
     m_eligible.clear();
 
     for (const edge &edg : m_edges)
-        if (edg.end == end_side::LEFT)
+        if (edg.end == end_side::LOWER)
         {
             for (collider2D *collider : m_eligible)
                 process_collision_st(collider, edg.collider);
@@ -51,10 +50,11 @@ void sort_sweep_broad2D::detect_collisions()
 
 void sort_sweep_broad2D::update_edges()
 {
+    KIT_PERF_FUNCTION()
     for (edge &edg : m_edges)
     {
         const aabb2D &bbox = edg.collider->bounding_box();
-        edg.value = edg.end == end_side::LEFT ? bbox.min.x : bbox.max.x;
+        edg.value = edg.end == end_side::LOWER ? bbox.min.x : bbox.max.x;
     }
     std::sort(m_edges.begin(), m_edges.end());
 }

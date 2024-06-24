@@ -14,7 +14,8 @@ const std::vector<collision2D> &broad_phase2D::detect_collisions_cached(const cp
 {
     KIT_PERF_FUNCTION()
 #ifdef KIT_PROFILE
-    KIT_ASSERT_ERROR(!params.multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
+    KIT_ASSERT_WARN(!params.multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
+    params.multithreaded = false;
 #endif
     m_cp_narrow = cp_narrow;
     m_pp_narrow = pp_narrow;

@@ -9,8 +9,8 @@ class sort_sweep_broad2D final : public broad_phase2D
 {
     enum class end_side
     {
-        LEFT,
-        RIGHT
+        LOWER,
+        UPPER
     };
     struct edge
     {
@@ -32,7 +32,7 @@ class sort_sweep_broad2D final : public broad_phase2D
     std::unordered_set<collider2D *> m_eligible;
 
     kit::callback<collider2D *> m_add_edge;
-    kit::callback<const collider2D &> m_remove_edge;
+    kit::callback<collider2D &> m_remove_edge;
 
     void detect_collisions() override;
     void on_attach() override;

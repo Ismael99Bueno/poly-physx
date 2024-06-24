@@ -98,7 +98,7 @@ bool contact2D::expired() const
 }
 bool contact2D::asleep() const
 {
-    return m_collider1->body()->asleep() && m_collider2->body()->asleep();
+    return m_body1->asleep() && m_body2->asleep();
 }
 float contact2D::life_expectancy() const
 {

@@ -822,6 +822,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
         YAML::Node islands = node["Island settings"];
         islands["Enabled"] = world.islands.enabled();
         islands["Enable split"] = world.islands.params.enable_split;
+        islands["Enable sleep"] = world.islands.params.enable_sleep;
         islands["Multithreaded"] = world.islands.params.multithreaded;
         islands["Lower sleep energy threshold"] = world.islands.params.lower_sleep_energy_threshold;
         islands["Upper sleep energy threshold"] = world.islands.params.upper_sleep_energy_threshold;
@@ -856,11 +857,12 @@ template <> struct kit::yaml::codec<ppx::world2D>
         const YAML::Node islands = node["Island settings"];
         world.islands.enabled(islands["Enabled"].as<bool>());
         world.islands.params.enable_split = islands["Enable split"].as<bool>();
+        world.islands.params.enable_sleep = islands["Enable sleep"].as<bool>();
         world.islands.params.multithreaded = islands["Multithreaded"].as<bool>();
         world.islands.params.lower_sleep_energy_threshold = islands["Lower sleep energy threshold"].as<float>();
         world.islands.params.upper_sleep_energy_threshold = islands["Upper sleep energy threshold"].as<float>();
         world.islands.params.body_count_mid_threshold_reference =
-            islands["Body count mid threshold reference"].as<std::size_t>();
+            islands["Body count mid threshold reference"].as<std::uint32_t>();
         world.islands.params.sleep_time_threshold = islands["Sleep time threshold"].as<float>();
 
         return true;

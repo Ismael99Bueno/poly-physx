@@ -25,7 +25,7 @@ void island2D::awake()
 }
 bool island2D::asleep() const
 {
-    return m_asleep;
+    return m_asleep && world.islands.params.enable_sleep;
 }
 bool island2D::about_to_sleep() const
 {

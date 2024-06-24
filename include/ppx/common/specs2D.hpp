@@ -191,11 +191,12 @@ struct joint_manager2D
 
 struct island_manager2D
 {
-    float lower_sleep_energy_threshold = 0.006f;
-    float upper_sleep_energy_threshold = 0.15f;
-    std::size_t body_count_mid_threshold_reference = 100;
+    float lower_sleep_energy_threshold = 0.001f;
+    float upper_sleep_energy_threshold = 0.012f;
+    std::uint32_t body_count_mid_threshold_reference = 100;
     float sleep_time_threshold = 1.5f;
     bool enable_split = true;
+    bool enable_sleep = true;
 #ifdef KIT_PROFILE
     bool multithreaded = false;
 #else
