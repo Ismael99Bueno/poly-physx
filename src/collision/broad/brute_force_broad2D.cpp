@@ -8,7 +8,6 @@ namespace ppx
 {
 void brute_force_broad2D::detect_collisions()
 {
-    KIT_PERF_SCOPE("brute_force_broad2D::detect_collisions")
     if (params.multithreaded)
         detect_collisions_mt();
     else

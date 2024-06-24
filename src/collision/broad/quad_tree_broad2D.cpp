@@ -8,7 +8,7 @@ namespace ppx
 {
 void quad_tree_broad2D::detect_collisions()
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("quad_tree_broad2D::detect_collisions")
     update_quad_tree();
 
     const auto partitions = m_quad_tree.collect_partitions();

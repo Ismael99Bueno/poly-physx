@@ -35,17 +35,18 @@ void sort_sweep_broad2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
     update_edges();
-    m_eligible.clear();
+    static std::unordered_set<collider2D *> eligible;
+    eligible.clear();
 
     for (const edge &edg : m_edges)
         if (edg.end == end_side::LOWER)
         {
-            for (collider2D *collider : m_eligible)
+            for (collider2D *collider : eligible)
                 process_collision_st(collider, edg.collider);
-            m_eligible.insert(edg.collider);
+            eligible.insert(edg.collider);
         }
         else
-            m_eligible.erase(edg.collider);
+            eligible.erase(edg.collider);
 }
 
 void sort_sweep_broad2D::update_edges()

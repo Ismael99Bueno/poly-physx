@@ -29,7 +29,6 @@ class sort_sweep_broad2D final : public broad_phase2D
 
   private:
     std::vector<edge> m_edges;
-    std::unordered_set<collider2D *> m_eligible;
 
     kit::callback<collider2D *> m_add_edge;
     kit::callback<collider2D &> m_remove_edge;
