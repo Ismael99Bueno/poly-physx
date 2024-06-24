@@ -46,6 +46,7 @@ broad_phase2D::metrics broad_phase2D::collision_metrics() const
 }
 std::array<broad_phase2D::metrics, PPX_THREAD_COUNT> broad_phase2D::collision_metrics_per_thread() const
 {
+    KIT_ASSERT_WARN(params.multithreaded, "Per-thread metrics are meaningless if the broad phase is not multithreaded")
     return m_mt_metrics;
 }
 
