@@ -35,6 +35,20 @@ const std::vector<collision2D> &broad_phase2D::detect_collisions_cached(const cp
     return m_collisions;
 }
 
+float broad_phase2D::metrics::accuracy() const
+{
+    return total_collision_checks > 0 ? (float)positive_collision_checks / (float)total_collision_checks : 0.f;
+}
+
+broad_phase2D::metrics broad_phase2D::collision_metrics() const
+{
+    return m_metrics;
+}
+std::array<broad_phase2D::metrics, PPX_THREAD_COUNT> broad_phase2D::collision_metrics_per_thread() const
+{
+    return m_mt_metrics;
+}
+
 const std::vector<collision2D> &broad_phase2D::collisions() const
 {
     return m_collisions;
@@ -43,8 +57,12 @@ const std::vector<collision2D> &broad_phase2D::collisions() const
 void broad_phase2D::flush_collisions()
 {
     m_collisions.clear();
-    for (auto &pairs : m_mt_collisions)
-        pairs.clear();
+    m_metrics = {};
+    for (std::size_t i = 0; i < PPX_THREAD_COUNT; i++)
+    {
+        m_mt_collisions[i].clear();
+        m_mt_metrics[i] = {};
+    }
 }
 
 void broad_phase2D::inherit(broad_phase2D &&broad)
@@ -57,9 +75,11 @@ void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *coll
 {
     KIT_PERF_FUNCTION()
     const collision2D colis = generate_collision(collider1, collider2);
+    m_metrics.total_collision_checks++;
     if (colis.collided)
     {
         m_collisions.push_back(colis);
+        m_metrics.positive_collision_checks++;
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
@@ -68,17 +88,25 @@ void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *coll
 {
     KIT_PERF_FUNCTION()
     const collision2D colis = generate_collision(collider1, collider2);
+    m_mt_metrics[thread_idx].total_collision_checks++;
     if (colis.collided)
     {
         m_mt_collisions[thread_idx].push_back(colis);
+        m_mt_metrics[thread_idx].positive_collision_checks++;
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
 }
 void broad_phase2D::join_mt_collisions()
 {
-    for (const auto &pairs : m_mt_collisions)
+    for (std::size_t i = 0; i < PPX_THREAD_COUNT; i++)
+    {
+        const auto &pairs = m_mt_collisions[i];
+        const metrics &m = m_mt_metrics[i];
         m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
+        m_metrics.total_collision_checks += m.total_collision_checks;
+        m_metrics.positive_collision_checks += m.positive_collision_checks;
+    }
 }
 
 static bool elligible_for_collision(const collider2D *collider1, const collider2D *collider2)

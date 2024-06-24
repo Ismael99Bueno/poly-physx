@@ -23,6 +23,12 @@ class world2D;
 class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyable
 {
   public:
+    struct metrics
+    {
+        std::uint32_t total_collision_checks = 0;
+        std::uint32_t positive_collision_checks = 0;
+        float accuracy() const;
+    };
     broad_phase2D(world2D &world);
     virtual ~broad_phase2D() = default;
 
@@ -34,6 +40,9 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     virtual void on_attach()
     {
     }
+
+    metrics collision_metrics() const;
+    std::array<metrics, PPX_THREAD_COUNT> collision_metrics_per_thread() const;
 
     void inherit(broad_phase2D &&broad);
 
@@ -47,6 +56,9 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
   private:
     std::vector<collision2D> m_collisions;
     std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
+
+    metrics m_metrics;
+    std::array<metrics, PPX_THREAD_COUNT> m_mt_metrics;
 
     const cp_narrow_phase2D *m_cp_narrow = nullptr;
     const pp_narrow_phase2D *m_pp_narrow = nullptr;
