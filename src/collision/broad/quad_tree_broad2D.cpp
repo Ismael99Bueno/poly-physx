@@ -27,21 +27,23 @@ void quad_tree_broad2D::detect_collisions_st(const std::vector<qtpartition> &par
         {
             for (std::size_t j = i + 1; j < partition.elements->size(); j++)
             {
-                collider2D *collider1 = (*partition.elements)[i];
-                collider2D *collider2 = (*partition.elements)[j];
+                collider2D *collider1 = (*partition.elements)[i].collider;
+                collider2D *collider2 = (*partition.elements)[j].collider;
                 process_collision_st(collider1, collider2);
             }
 #ifdef KIT_QT_COLLECT_ELEMENTS_COPY
-            for (collider2D *collider2 : partition.to_compare)
+            for (const qt_element &qtelm : partition.to_compare)
             {
-                collider2D *collider1 = (*partition.elements)[i];
+                collider2D *collider1 = (*partition.elements)[i].collider;
+                collider2D *collider2 = qtelm.collider;
                 process_collision_st(collider1, collider2);
             }
 #else
             for (const auto &elems : partition.to_compare)
-                for (collider2D *collider2 : *elems)
+                for (const qt_element &qtelm : *elems)
                 {
-                    collider2D *collider1 = (*partition.elements)[i];
+                    collider2D *collider1 = (*partition.elements)[i].collider;
+                    collider2D *collider2 = qtelm.collider;
                     process_collision_st(collider1, collider2);
                 }
 #endif
@@ -55,21 +57,23 @@ void quad_tree_broad2D::detect_collisions_mt(const std::vector<qtpartition> &par
         {
             for (std::size_t j = i + 1; j < partition.elements->size(); j++)
             {
-                collider2D *collider1 = (*partition.elements)[i];
-                collider2D *collider2 = (*partition.elements)[j];
+                collider2D *collider1 = (*partition.elements)[i].collider;
+                collider2D *collider2 = (*partition.elements)[j].collider;
                 process_collision_mt(collider1, collider2, thread_idx);
             }
 #ifdef KIT_QT_COLLECT_ELEMENTS_COPY
-            for (collider2D *collider2 : partition.to_compare)
+            for (const qt_element &qtelm : partition.to_compare)
             {
-                collider2D *collider1 = (*partition.elements)[i];
+                collider2D *collider1 = (*partition.elements)[i].collider;
+                collider2D *collider2 = qtelm.collider;
                 process_collision_mt(collider1, collider2, thread_idx);
             }
 #else
             for (const auto &elems : partition.to_compare)
-                for (collider2D *collider2 : *elems)
+                for (const qt_element &qtelm : *elems)
                 {
-                    collider2D *collider1 = (*partition.elements)[i];
+                    collider2D *collider1 = (*partition.elements)[i].collider;
+                    collider2D *collider2 = qtelm.collider;
                     process_collision_mt(collider1, collider2, thread_idx);
                 }
 #endif
@@ -115,8 +119,7 @@ void quad_tree_broad2D::update_quad_tree()
 
     m_quad_tree.bounds(aabb);
     for (collider2D *collider : world.colliders)
-        m_quad_tree.insert(collider,
-                           [](const collider2D *collider) -> const geo::aabb2D & { return collider->bounding_box(); });
+        m_quad_tree.insert(qt_element{collider});
 }
 
 const ppx::quad_tree &quad_tree_broad2D::quad_tree() const

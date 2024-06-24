@@ -38,8 +38,8 @@ static void cast_qt_recursive(const quad_tree::node &qtnode, const ray2D &ray, r
 {
     if (!geo::intersects(qtnode.aabb, ray))
         return;
-    for (collider2D *collider : qtnode.elements)
-        cast_check(collider, ray, closest);
+    for (const qt_element &qtelm : qtnode.elements)
+        cast_check(qtelm.collider, ray, closest);
     if (qtnode.partitioned)
         for (auto child : qtnode.children)
             cast_qt_recursive(*child, ray, closest);
@@ -64,9 +64,9 @@ static void in_area_qt_recursive(const quad_tree::node &qtnode, std::vector<Coll
 {
     if (!geo::intersects(qtnode.aabb, aabb))
         return;
-    for (collider2D *collider : qtnode.elements)
-        if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
-            in_area.push_back(collider);
+    for (const qt_element &qtelm : qtnode.elements)
+        if (geo::intersects(qtelm(), aabb) && geo::gjk(qtelm.collider->shape(), aabb_poly))
+            in_area.push_back(qtelm.collider);
     if (qtnode.partitioned)
         for (auto child : qtnode.children)
             in_area_qt_recursive(*child, in_area, aabb, aabb_poly);

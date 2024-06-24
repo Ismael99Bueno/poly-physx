@@ -46,5 +46,11 @@ template <typename T> class allocator
     static inline allocator_t<T> s_allocator;
 };
 
-using quad_tree = kit::quad_tree<collider2D *, allocator_t>;
+struct qt_element
+{
+    collider2D *collider = nullptr;
+    const geo::aabb2D &operator()() const;
+};
+
+using quad_tree = kit::quad_tree<qt_element, allocator_t>;
 } // namespace ppx
