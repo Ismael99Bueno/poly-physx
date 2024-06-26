@@ -4,6 +4,8 @@
 
 #include "kit/multithreading/mt_for_each.hpp"
 
+#include <numeric>
+
 namespace ppx
 {
 void brute_force_broad2D::detect_collisions()
