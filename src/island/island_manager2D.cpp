@@ -10,40 +10,34 @@ void island_manager2D::solve()
     KIT_ASSERT_WARN(!params.multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
     params.multithreaded = false;
 #endif
-
-    if (m_elements.empty())
-        return;
-    if (m_elements.size() == 1)
-    {
-        island2D *island = m_elements[0];
-        if (!island->asleep())
-            island->solve();
-        return;
-    }
-    if (!params.multithreaded)
-    {
-        for (island2D *island : m_elements)
-            if (!island->asleep())
-                island->solve();
-        return;
-    }
-
     static std::vector<island2D *> awake_islands;
     awake_islands.clear();
 
     for (island2D *island : m_elements)
         if (!island->asleep())
             awake_islands.push_back(island);
+
     if (awake_islands.empty())
         return;
-
     if (awake_islands.size() == 1)
     {
         awake_islands[0]->solve();
         return;
     }
-    kit::mt::for_each<PPX_THREAD_COUNT>(awake_islands,
-                                        [](const std::size_t thread_idx, island2D *island) { island->solve(); });
+
+    if (!params.multithreaded)
+    {
+        for (island2D *island : awake_islands)
+            island->solve();
+        return;
+    }
+
+    const auto task = [](island2D *island) { island->solve(); };
+    static kit::mt::thread_pool<decltype(task), island2D *> pool{PPX_THREAD_COUNT};
+
+    for (island2D *island : awake_islands)
+        pool.submit(task, island);
+    pool.await_pending();
 }
 
 void island_manager2D::remove_invalid()

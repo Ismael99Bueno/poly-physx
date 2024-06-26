@@ -45,7 +45,7 @@ broad_phase2D::metrics broad_phase2D::collision_metrics() const
 {
     return m_metrics;
 }
-std::array<broad_phase2D::metrics, PPX_THREAD_COUNT> broad_phase2D::collision_metrics_per_thread() const
+std::vector<broad_phase2D::metrics> broad_phase2D::collision_metrics_per_mt_submission() const
 {
     KIT_ASSERT_WARN(params.multithreaded, "Per-thread metrics are meaningless if the broad phase is not multithreaded")
     return m_mt_metrics;
@@ -60,7 +60,9 @@ void broad_phase2D::flush_collisions()
 {
     m_collisions.clear();
     m_metrics = {};
-    for (std::size_t i = 0; i < PPX_THREAD_COUNT; i++)
+    m_mt_collisions.resize(params.parallel_submissions);
+    m_mt_metrics.resize(params.parallel_submissions);
+    for (std::size_t i = 0; i < params.parallel_submissions; i++)
     {
         m_mt_collisions[i].clear();
         m_mt_metrics[i] = {};
@@ -86,22 +88,23 @@ void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *coll
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
 }
-void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *collider2, const std::size_t thread_idx)
+void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *collider2,
+                                         const std::size_t submission_index)
 {
     KIT_PERF_FUNCTION()
     const collision2D colis = generate_collision(collider1, collider2);
-    m_mt_metrics[thread_idx].total_collision_checks++;
+    m_mt_metrics[submission_index].total_collision_checks++;
     if (colis.collided)
     {
-        m_mt_collisions[thread_idx].push_back(colis);
-        m_mt_metrics[thread_idx].positive_collision_checks++;
+        m_mt_collisions[submission_index].push_back(colis);
+        m_mt_metrics[submission_index].positive_collision_checks++;
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
     }
 }
 void broad_phase2D::join_mt_collisions()
 {
-    for (std::size_t i = 0; i < PPX_THREAD_COUNT; i++)
+    for (std::size_t i = 0; i < params.parallel_submissions; i++)
     {
         const auto &pairs = m_mt_collisions[i];
         const metrics &m = m_mt_metrics[i];

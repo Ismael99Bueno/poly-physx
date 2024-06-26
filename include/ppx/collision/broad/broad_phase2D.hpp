@@ -13,10 +13,6 @@
 #include "kit/container/hashable_tuple.hpp"
 #include "kit/interface/toggleable.hpp"
 
-#ifndef PPX_THREAD_COUNT
-#define PPX_THREAD_COUNT 8
-#endif
-
 namespace ppx
 {
 class world2D;
@@ -42,7 +38,7 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     }
 
     metrics collision_metrics() const;
-    std::array<metrics, PPX_THREAD_COUNT> collision_metrics_per_thread() const;
+    std::vector<metrics> collision_metrics_per_mt_submission() const;
 
     void inherit(broad_phase2D &&broad);
 
@@ -50,15 +46,15 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
 
   protected:
     void process_collision_st(collider2D *collider1, collider2D *collider2);
-    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t thread_idx);
+    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t submission_index);
     void join_mt_collisions();
 
   private:
     std::vector<collision2D> m_collisions;
-    std::array<std::vector<collision2D>, PPX_THREAD_COUNT> m_mt_collisions;
+    std::vector<std::vector<collision2D>> m_mt_collisions;
 
     metrics m_metrics;
-    std::array<metrics, PPX_THREAD_COUNT> m_mt_metrics;
+    std::vector<metrics> m_mt_metrics;
 
     const cp_narrow_phase2D *m_cp_narrow = nullptr;
     const pp_narrow_phase2D *m_pp_narrow = nullptr;

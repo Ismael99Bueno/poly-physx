@@ -34,6 +34,9 @@ class sort_sweep_broad2D final : public broad_phase2D
     kit::callback<collider2D &> m_remove_edge;
 
     void detect_collisions() override;
+    void detect_collisions_st();
+    void detect_collisions_mt();
+
     void on_attach() override;
     void update_edges();
 };

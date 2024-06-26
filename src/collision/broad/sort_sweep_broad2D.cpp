@@ -35,6 +35,15 @@ void sort_sweep_broad2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
     update_edges();
+    if (params.multithreaded)
+        detect_collisions_mt();
+    else
+        detect_collisions_st();
+}
+
+void sort_sweep_broad2D::detect_collisions_st()
+{
+    KIT_PERF_FUNCTION()
     static std::unordered_set<collider2D *> eligible;
     eligible.clear();
 
@@ -47,6 +56,12 @@ void sort_sweep_broad2D::detect_collisions()
         }
         else
             eligible.erase(edg.collider);
+}
+
+void sort_sweep_broad2D::detect_collisions_mt()
+{
+    KIT_PERF_FUNCTION()
+    detect_collisions_st();
 }
 
 void sort_sweep_broad2D::update_edges()
