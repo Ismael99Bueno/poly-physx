@@ -13,7 +13,7 @@ void quad_tree_broad2D::detect_collisions()
 
     const auto partitions = m_quad_tree.collect_partitions();
 
-    if (params.multithreaded)
+    if (params.multithreaded && world.thread_pool)
         detect_collisions_mt(partitions);
     else
         detect_collisions_st(partitions);
@@ -52,23 +52,23 @@ void quad_tree_broad2D::detect_collisions_st(const std::vector<qtpartition> &par
 }
 void quad_tree_broad2D::detect_collisions_mt(const std::vector<qtpartition> &partitions)
 {
-    kit::mt::for_each<PPX_THREAD_COUNT>(
-        partitions,
-        [this](const std::size_t submission_index, const qtpartition &partition) {
+    kit::mt::for_each(
+        *world.thread_pool, partitions,
+        [this](const std::size_t workload_index, const qtpartition &partition) {
             for (std::size_t i = 0; i < partition.elements->size(); i++)
             {
                 for (std::size_t j = i + 1; j < partition.elements->size(); j++)
                 {
                     collider2D *collider1 = (*partition.elements)[i].collider;
                     collider2D *collider2 = (*partition.elements)[j].collider;
-                    process_collision_mt(collider1, collider2, submission_index);
+                    process_collision_mt(collider1, collider2, workload_index);
                 }
 #ifdef KIT_QT_COLLECT_ELEMENTS_COPY
                 for (const qt_element &qtelm : partition.to_compare)
                 {
                     collider2D *collider1 = (*partition.elements)[i].collider;
                     collider2D *collider2 = qtelm.collider;
-                    process_collision_mt(collider1, collider2, submission_index);
+                    process_collision_mt(collider1, collider2, workload_index);
                 }
 #else
                 for (const auto &elems : partition.to_compare)
@@ -76,12 +76,12 @@ void quad_tree_broad2D::detect_collisions_mt(const std::vector<qtpartition> &par
                     {
                         collider2D *collider1 = (*partition.elements)[i].collider;
                         collider2D *collider2 = qtelm.collider;
-                        process_collision_mt(collider1, collider2, submission_index);
+                        process_collision_mt(collider1, collider2, workload_index);
                     }
 #endif
             }
         },
-        params.parallel_submissions);
+        params.parallel_workloads);
     join_mt_collisions();
 }
 void quad_tree_broad2D::update_quad_tree()

@@ -38,7 +38,7 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     }
 
     metrics collision_metrics() const;
-    std::vector<metrics> collision_metrics_per_mt_submission() const;
+    std::vector<metrics> collision_metrics_per_mt_workload() const;
 
     void inherit(broad_phase2D &&broad);
 
@@ -46,7 +46,7 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
 
   protected:
     void process_collision_st(collider2D *collider1, collider2D *collider2);
-    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t submission_index);
+    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t workload_index);
     void join_mt_collisions();
 
   private:

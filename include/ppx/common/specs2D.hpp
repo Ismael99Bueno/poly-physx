@@ -4,10 +4,7 @@
 #include "ppx/collision/filter.hpp"
 #include "kit/container/dynarray.hpp"
 #include "rk/integration/integrator.hpp"
-
-#ifndef PPX_THREAD_COUNT
-#define PPX_THREAD_COUNT 8
-#endif
+#include <thread>
 
 namespace ppx
 {
@@ -217,7 +214,7 @@ struct collision_manager2D
 #else
         bool multithreaded = true;
 #endif
-        std::size_t parallel_submissions = PPX_THREAD_COUNT;
+        std::size_t parallel_workloads = std::thread::hardware_concurrency();
     } detection;
 
     struct contacts2D

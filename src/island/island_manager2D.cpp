@@ -25,19 +25,17 @@ void island_manager2D::solve()
         return;
     }
 
-    if (!params.multithreaded)
+    kit::mt::thread_pool *pool = world.thread_pool;
+    if (!params.multithreaded || !pool)
     {
         for (island2D *island : awake_islands)
             island->solve();
         return;
     }
 
-    const auto task = [](island2D *island) { island->solve(); };
-    static kit::mt::thread_pool<decltype(task), island2D *> pool{PPX_THREAD_COUNT};
-
     for (island2D *island : awake_islands)
-        pool.submit(task, island);
-    pool.await_pending();
+        pool->submit([](island2D *island) { island->solve(); }, island);
+    pool->await_pending();
 }
 
 void island_manager2D::remove_invalid()

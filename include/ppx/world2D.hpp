@@ -26,6 +26,7 @@ class world2D : kit::non_copyable
     island_manager2D islands;
 
     bool semi_implicit_integration = true;
+    kit::mt::thread_pool *thread_pool = nullptr;
 
     void add(const specs::contraption2D &contraption);
     std::uint32_t rk_subset_index() const;
