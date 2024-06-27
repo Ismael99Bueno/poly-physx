@@ -64,6 +64,8 @@ std::uint32_t world2D::rk_subsets() const
 
 bool world2D::step()
 {
+    if (islands.enabled() && islands.all_asleep())
+        return true;
     pre_step_preparation();
     const bool valid = integrator.raw_forward(*this);
     post_step_setup();

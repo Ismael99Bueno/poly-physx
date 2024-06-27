@@ -53,6 +53,14 @@ void island_manager2D::remove_invalid()
     }
 }
 
+bool island_manager2D::all_asleep() const
+{
+    for (const island2D *island : m_elements)
+        if (!island->asleep())
+            return false;
+    return true;
+}
+
 float island_manager2D::sleep_energy_threshold(const island2D *island) const
 {
     const float lower = params.lower_sleep_energy_threshold;

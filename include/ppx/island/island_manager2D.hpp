@@ -14,6 +14,7 @@ class island_manager2D final : public manager2D<island2D>
     void enabled(bool enable);
 
     bool checksum() const;
+    bool all_asleep() const;
 
     using manager2D::remove;
     bool remove(std::size_t index);
