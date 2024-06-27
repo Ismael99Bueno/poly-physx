@@ -11,12 +11,32 @@ concept IConstraint2D = kit::DerivedFrom<T, constraint2D>;
 class constraint2D : virtual public joint2D
 {
   public:
-    using joint2D::joint2D;
+    constraint2D(const specs::constraint2D::properties &cprops = {});
 
     virtual void startup() = 0;
     virtual void solve_velocities() = 0;
 
     virtual bool solve_positions();
+
     bool is_constraint() const override;
+
+    specs::constraint2D::properties cprops() const;
+    void cprops(const specs::constraint2D::properties &cprops);
+
+    bool is_soft() const;
+    void is_soft(bool is_soft);
+
+    float frequency() const;
+    void frequency(float frequency);
+
+    float damping_ratio() const;
+    void damping_ratio(float damping_ratio);
+
+  protected:
+    void fill_cprops(specs::constraint2D::properties &cprops) const;
+
+    bool m_is_soft;
+    float m_frequency;
+    float m_damping_ratio;
 };
 } // namespace ppx

@@ -30,13 +30,12 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
     using flat_t = typename degree_types<LinDegrees + AngDegrees>::flat_t;
     using square_t = typename degree_types<LinDegrees + AngDegrees>::square_t;
 
-    virtual ~pvconstraint2D() = default;
+    using vconstraint2D<LinDegrees, AngDegrees>::vconstraint2D;
 
     virtual bool solve_positions() override;
     virtual flat_t constraint_position() const = 0;
 
   protected:
-    using vconstraint2D<LinDegrees, AngDegrees>::vconstraint2D;
     flat_t m_c{0.f};
 
     virtual void update_constraint_data() override;

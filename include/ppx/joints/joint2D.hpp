@@ -30,8 +30,6 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
         bool island_flag = false;
     } meta;
 
-    bool bodies_collide;
-
     const body2D *body1() const;
     const body2D *body2() const;
     const body2D *other(const body2D *body) const;
@@ -53,19 +51,30 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
     void awake();
     bool asleep() const;
 
+    bool bodies_collide() const;
+    void bodies_collide(bool bodies_collide);
+
+    specs::joint2D::properties jprops() const;
+    void jprops(const specs::joint2D::properties &jprops);
+
     virtual bool is_constraint() const;
     virtual bool is_actuator() const;
     virtual bool is_contact() const;
 
   protected:
-    joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2);
-    joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor);
-    joint2D(world2D &world, const specs::joint2D &spc);
+    joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2,
+            const specs::joint2D::properties &jprops = {});
+    joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor,
+            const specs::joint2D::properties &jprops = {});
+    joint2D(world2D &world, const specs::joint2D &spc, const specs::joint2D::properties &jprops = {});
 
     joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2,
-            bool bodies_collide = true);
-    joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor, bool bodies_collide = true);
-    joint2D(world2D &world, body2D *body1, body2D *body2, bool bodies_collide = true);
+            const specs::joint2D::properties &jprops = {});
+    joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor,
+            const specs::joint2D::properties &jprops = {});
+    joint2D(world2D &world, body2D *body1, body2D *body2, const specs::joint2D::properties &jprops = {});
+
+    void fill_jprops(specs::joint2D::properties &jprops) const;
 
     body2D *m_body1;
     body2D *m_body2;
@@ -78,6 +87,7 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 
     bool m_no_anchors = false; // joint is not anchored (e.g. rotor or motor)
     bool m_use_both_anchors = true;
+    bool m_bodies_collide;
 
     glm::vec2 m_ganchor1;
     glm::vec2 m_ganchor2;

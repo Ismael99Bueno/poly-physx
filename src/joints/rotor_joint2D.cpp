@@ -4,36 +4,48 @@
 
 namespace ppx
 {
-rotor_joint2D::rotor_joint2D(world2D &world, const specs &spc) : joint2D(world, spc), m_props(spc.props)
+rotor_joint2D::rotor_joint2D(world2D &world, const specs &spc)
+    : joint2D(world, spc, spc.props), vconstraint2D(spc.props), m_torque(spc.props.torque),
+      m_correction_factor(spc.props.correction_factor), m_target_speed(spc.props.target_speed),
+      m_min_angle(spc.props.min_angle), m_max_angle(spc.props.max_angle),
+      m_spin_indefinitely(spc.props.spin_indefinitely)
 {
 }
 
 float rotor_joint2D::constraint_velocity() const
 {
     const float dw = m_body2->meta.ctr_state.angular_velocity - m_body1->meta.ctr_state.angular_velocity;
-    if (m_props.spin_indefinitely)
-        return dw - m_props.target_speed;
-    if (glm::abs(m_correction) > glm::abs(m_props.target_speed))
-        return dw + glm::abs(m_props.target_speed) * glm::sign(m_correction);
+    if (m_spin_indefinitely)
+        return dw - m_target_speed;
+    if (glm::abs(m_correction) > glm::abs(m_target_speed))
+        return dw + glm::abs(m_target_speed) * glm::sign(m_correction);
     return dw + m_correction;
 }
 
 void rotor_joint2D::solve_velocities()
 {
-    if (m_legal_angle && !m_props.spin_indefinitely)
+    if (m_legal_angle && !m_spin_indefinitely)
         return;
-    const float max_impulse = world.rk_substep_timestep() * m_props.torque;
-    if (m_props.spin_indefinitely || kit::approximately(m_props.max_angle, m_props.min_angle))
+    const float max_impulse = world.rk_substep_timestep() * m_torque;
+    if (m_spin_indefinitely || kit::approximately(m_max_angle, m_min_angle))
         vconstraint2D<0, 1>::solve_velocities_clamped(-max_impulse, max_impulse);
-    else if (m_relangle < m_props.min_angle)
+    else if (m_relangle < m_min_angle)
         vconstraint2D<0, 1>::solve_velocities_clamped(0.f, max_impulse);
     else
         vconstraint2D<0, 1>::solve_velocities_clamped(-max_impulse, 0.f);
 }
 
-const rotor_joint2D::specs::properties &rotor_joint2D::props() const
+rotor_joint2D::specs::properties rotor_joint2D::props() const
 {
-    return m_props;
+    specs::properties props;
+    fill_cprops(props);
+    props.torque = m_torque;
+    props.correction_factor = m_correction_factor;
+    props.target_speed = m_target_speed;
+    props.min_angle = m_min_angle;
+    props.max_angle = m_max_angle;
+    props.spin_indefinitely = m_spin_indefinitely;
+    return props;
 }
 void rotor_joint2D::props(const specs::properties &props)
 {
@@ -41,25 +53,92 @@ void rotor_joint2D::props(const specs::properties &props)
                      "Correction factor must be in the range [0, 1]: {0}", props.correction_factor);
     KIT_ASSERT_ERROR(props.min_angle <= props.max_angle, "Min angle must be less than max angle: {0} < {1}",
                      props.min_angle, props.max_angle);
-    m_props = props;
+    cprops(props);
+    m_torque = props.torque;
+    m_correction_factor = props.correction_factor;
+    m_target_speed = props.target_speed;
+    m_min_angle = props.min_angle;
+    m_max_angle = props.max_angle;
+    m_spin_indefinitely = props.spin_indefinitely;
+}
+
+float rotor_joint2D::torque() const
+{
+    return m_torque;
+}
+void rotor_joint2D::torque(const float torque)
+{
+    m_torque = torque;
+    awake();
+}
+
+float rotor_joint2D::correction_factor() const
+{
+    return m_correction_factor;
+}
+void rotor_joint2D::correction_factor(const float correction_factor)
+{
+    m_correction_factor = correction_factor;
+    awake();
+}
+
+float rotor_joint2D::target_speed() const
+{
+    return m_target_speed;
+}
+void rotor_joint2D::target_speed(const float target_speed)
+{
+    m_target_speed = target_speed;
+    awake();
+}
+
+float rotor_joint2D::min_angle() const
+{
+    return m_min_angle;
+}
+void rotor_joint2D::min_angle(const float min_angle)
+{
+    KIT_ASSERT_ERROR(min_angle <= m_max_angle, "Min angle must be less than max angle: {0} < {1}", min_angle,
+                     m_max_angle);
+    m_min_angle = min_angle;
+    awake();
+}
+
+float rotor_joint2D::max_angle() const
+{
+    return m_max_angle;
+}
+void rotor_joint2D::max_angle(const float max_angle)
+{
+    KIT_ASSERT_ERROR(m_min_angle <= max_angle, "Min angle must be less than max angle: {0} < {1}", m_min_angle,
+                     max_angle);
+    m_max_angle = max_angle;
+    awake();
+}
+
+bool rotor_joint2D::spin_indefinitely() const
+{
+    return m_spin_indefinitely;
+}
+void rotor_joint2D::spin_indefinitely(const bool spin_indefinitely)
+{
+    m_spin_indefinitely = spin_indefinitely;
     awake();
 }
 
 void rotor_joint2D::update_constraint_data()
 {
     vconstraint2D<0, 1>::update_constraint_data();
-    if (m_props.spin_indefinitely)
+    if (m_spin_indefinitely)
         return;
     float da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation();
     da -= glm::round(da / glm::two_pi<float>()) * glm::two_pi<float>();
     m_relangle = da;
 
-    if (da < m_props.min_angle)
-        da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation() -
-             m_props.min_angle;
-    else if (da > m_props.max_angle)
-        da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation() -
-             m_props.max_angle;
+    if (da < m_min_angle)
+        da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation() - m_min_angle;
+    else if (da > m_max_angle)
+        da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation() - m_max_angle;
     else
     {
         m_correction = 0.f;
@@ -68,7 +147,7 @@ void rotor_joint2D::update_constraint_data()
     }
 
     da -= glm::round(da / glm::two_pi<float>()) * glm::two_pi<float>();
-    m_correction = m_props.correction_factor * da / world.rk_substep_timestep();
+    m_correction = m_correction_factor * da / world.rk_substep_timestep();
     m_legal_angle = false;
 }
 } // namespace ppx

@@ -175,6 +175,49 @@ template <> struct kit::yaml::codec<ppx::body2D::specs>
     }
 };
 
+template <> struct kit::yaml::codec<ppx::specs::joint2D::properties>
+{
+    static YAML::Node encode(const ppx::specs::joint2D::properties &props)
+    {
+        YAML::Node node;
+        node["Bodies collide"] = props.bodies_collide;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::specs::joint2D::properties &props)
+    {
+        if (!node.IsMap() || node.size() < 1)
+            return false;
+
+        props.bodies_collide = node["Bodies collide"].as<bool>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::specs::constraint2D::properties>
+{
+    static YAML::Node encode(const ppx::specs::constraint2D::properties &props)
+    {
+        YAML::Node node = kit::yaml::codec<ppx::specs::joint2D::properties>::encode(props);
+        node["Is soft"] = props.is_soft;
+        node["Frequency"] = props.frequency;
+        node["Damping ratio"] = props.damping_ratio;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::specs::constraint2D::properties &props)
+    {
+        if (!kit::yaml::codec<ppx::specs::joint2D::properties>::decode(node, props))
+            return false;
+        if (!node.IsMap() || node.size() < 4)
+            return false;
+
+        props.is_soft = node["Is soft"].as<bool>();
+        props.frequency = node["Frequency"].as<float>();
+        props.damping_ratio = node["Damping ratio"].as<float>();
+
+        return true;
+    }
+};
+
 template <> struct kit::yaml::codec<ppx::specs::joint2D>
 {
     static YAML::Node encode(const ppx::specs::joint2D &joint)
@@ -188,13 +231,12 @@ template <> struct kit::yaml::codec<ppx::specs::joint2D>
             node["Index2"] = joint.bindex2;
         else
             node["Body2"] = joint.bspecs2;
-        node["Bodies collide"] = joint.bodies_collide;
 
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::specs::joint2D &joint)
     {
-        if (!node.IsMap() || node.size() != 3)
+        if (!node.IsMap() || node.size() != 2)
             return false;
 
         if (node["Index1"])
@@ -206,7 +248,6 @@ template <> struct kit::yaml::codec<ppx::specs::joint2D>
             joint.bindex2 = node["Index2"].as<std::size_t>();
         else
             joint.bspecs2 = node["Body2"].as<ppx::body2D::specs>();
-        joint.bodies_collide = node["Bodies collide"].as<bool>();
 
         return true;
     }
@@ -216,7 +257,7 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs::properties>
 {
     static YAML::Node encode(const ppx::rotor_joint2D::specs::properties &props)
     {
-        YAML::Node node;
+        YAML::Node node = kit::yaml::codec<ppx::specs::constraint2D::properties>::encode(props);
         node["Torque"] = props.torque;
         node["Correction factor"] = props.correction_factor;
         node["Target speed"] = props.target_speed;
@@ -227,7 +268,9 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs::properties>
     }
     static bool decode(const YAML::Node &node, ppx::rotor_joint2D::specs::properties &props)
     {
-        if (!node.IsMap() || node.size() != 6)
+        if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
+            return false;
+        if (!node.IsMap() || node.size() != 10)
             return false;
 
         props.torque = node["Torque"].as<float>();
@@ -262,13 +305,11 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs>
     }
 };
 
-// write the encode/decode functions for the specs properties struct
-
 template <> struct kit::yaml::codec<ppx::motor_joint2D::specs::properties>
 {
     static YAML::Node encode(const ppx::motor_joint2D::specs::properties &props)
     {
-        YAML::Node node;
+        YAML::Node node = kit::yaml::codec<ppx::specs::constraint2D::properties>::encode(props);
         node["Force"] = props.force;
         node["Correction factor"] = props.correction_factor;
         node["Target speed"] = props.target_speed;
@@ -277,7 +318,9 @@ template <> struct kit::yaml::codec<ppx::motor_joint2D::specs::properties>
     }
     static bool decode(const YAML::Node &node, ppx::motor_joint2D::specs::properties &props)
     {
-        if (!node.IsMap() || node.size() != 4)
+        if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
+            return false;
+        if (!node.IsMap() || node.size() != 8)
             return false;
 
         props.force = node["Force"].as<float>();
@@ -313,14 +356,16 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs::properties>
 {
     static YAML::Node encode(const ppx::distance_joint2D::specs::properties &props)
     {
-        YAML::Node node;
+        YAML::Node node = kit::yaml::codec<ppx::specs::constraint2D::properties>::encode(props);
         node["Min distance"] = props.min_distance;
         node["Max distance"] = props.max_distance;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs::properties &props)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
+            return false;
+        if (!node.IsMap() || node.size() != 6)
             return false;
 
         props.min_distance = node["Min distance"].as<float>();
@@ -360,14 +405,16 @@ template <> struct kit::yaml::codec<ppx::ball_joint2D::specs::properties>
 {
     static YAML::Node encode(const ppx::ball_joint2D::specs::properties &props)
     {
-        YAML::Node node;
+        YAML::Node node = kit::yaml::codec<ppx::specs::constraint2D::properties>::encode(props);
         node["Min angle"] = props.min_angle;
         node["Max angle"] = props.max_angle;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::ball_joint2D::specs::properties &props)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
+            return false;
+        if (!node.IsMap() || node.size() != 6)
             return false;
 
         props.min_angle = node["Min angle"].as<float>();
@@ -403,13 +450,15 @@ template <> struct kit::yaml::codec<ppx::prismatic_joint2D::specs::properties>
 {
     static YAML::Node encode(const ppx::prismatic_joint2D::specs::properties &props)
     {
-        YAML::Node node;
+        YAML::Node node = kit::yaml::codec<ppx::specs::constraint2D::properties>::encode(props);
         node["Axis"] = props.axis;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::prismatic_joint2D::specs::properties &props)
     {
-        if (!node.IsMap() || node.size() != 1)
+        if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
+            return false;
+        if (!node.IsMap() || node.size() != 5)
             return false;
 
         props.axis = node["Axis"].as<glm::vec2>();
@@ -451,16 +500,18 @@ template <> struct kit::yaml::codec<ppx::revolute_joint2D::specs>
         YAML::Node node;
         node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(revj);
         node["Anchor"] = revj.ganchor;
+        node["Properties"] = revj.props;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::revolute_joint2D::specs &revj)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() != 3)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], revj))
             return false;
         revj.ganchor = node["Anchor"].as<glm::vec2>();
+        revj.props = node["Properties"].as<ppx::revolute_joint2D::specs::properties>();
         return true;
     }
 };
@@ -472,16 +523,18 @@ template <> struct kit::yaml::codec<ppx::weld_joint2D::specs>
         YAML::Node node;
         node["Joint"] = kit::yaml::codec<ppx::specs::joint2D>::encode(weldj);
         node["Anchor"] = weldj.ganchor;
+        node["Properties"] = weldj.props;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::weld_joint2D::specs &weldj)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() != 3)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], weldj))
             return false;
         weldj.ganchor = node["Anchor"].as<glm::vec2>();
+        weldj.props = node["Properties"].as<ppx::weld_joint2D::specs::properties>();
         return true;
     }
 };
@@ -490,7 +543,7 @@ template <> struct kit::yaml::codec<ppx::spring_joint2D::specs::properties>
 {
     static YAML::Node encode(const ppx::spring_joint2D::specs::properties &props)
     {
-        YAML::Node node;
+        YAML::Node node = kit::yaml::codec<ppx::specs::joint2D::properties>::encode(props);
         node["Frequency"] = props.frequency;
         node["Damping ratio"] = props.damping_ratio;
         node["Min length"] = props.min_length;
@@ -501,7 +554,9 @@ template <> struct kit::yaml::codec<ppx::spring_joint2D::specs::properties>
     }
     static bool decode(const YAML::Node &node, ppx::spring_joint2D::specs::properties &props)
     {
-        if (!node.IsMap() || node.size() != 6)
+        if (!kit::yaml::codec<ppx::specs::joint2D::properties>::decode(node, props))
+            return false;
+        if (!node.IsMap() || node.size() != 7)
             return false;
 
         props.frequency = node["Frequency"].as<float>();

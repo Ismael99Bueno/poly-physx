@@ -5,12 +5,12 @@
 namespace ppx
 {
 prismatic_joint2D::prismatic_joint2D(world2D &world, const specs &spc)
-    : joint2D(world, spc, spc.ganchor1, spc.ganchor2), m_props(spc.props),
+    : joint2D(world, spc, spc.ganchor1, spc.ganchor2, spc.props), pvconstraint2D(spc.props), m_axis(spc.props.axis),
       m_target_relangle(m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation())
 
 {
     if (spc.deduce_axis)
-        m_props.axis = spc.ganchor2 - spc.ganchor1;
+        m_axis = spc.ganchor2 - spc.ganchor1;
 }
 
 glm::vec2 prismatic_joint2D::constraint_position() const
@@ -28,20 +28,34 @@ glm::vec2 prismatic_joint2D::constraint_velocity() const
     return {dv, dw};
 }
 
-const prismatic_joint2D::specs::properties &prismatic_joint2D::props() const
+prismatic_joint2D::specs::properties prismatic_joint2D::props() const
 {
-    return m_props;
+    specs::properties props;
+    fill_cprops(props);
+    props.axis = m_axis;
+    return props;
 }
 void prismatic_joint2D::props(const specs::properties &props)
 {
     KIT_ASSERT_ERROR(!kit::approaches_zero(glm::length2(props.axis)), "Axis must not be zero");
-    m_props = props;
+    cprops(props);
+    m_axis = props.axis;
+}
+
+const glm::vec2 &prismatic_joint2D::axis() const
+{
+    return m_axis;
+}
+void prismatic_joint2D::axis(const glm::vec2 &axis)
+{
+    KIT_ASSERT_ERROR(!kit::approaches_zero(glm::length2(axis)), "Axis must not be zero");
+    m_axis = axis;
     awake();
 }
 
 glm::vec2 prismatic_joint2D::direction() const
 {
-    return glm::normalize(glm::vec2(-m_props.axis.y, m_props.axis.x));
+    return glm::normalize(glm::vec2(-m_axis.y, m_axis.x));
 }
 
 glm::vec2 prismatic_joint2D::axis_from_angle(const float radians)

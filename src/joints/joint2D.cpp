@@ -4,42 +4,45 @@
 
 namespace ppx
 {
-joint2D::joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2)
+joint2D::joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2,
+                 const specs::joint2D::properties &jprops)
     : joint2D(world, spc.bindex1 != SIZE_MAX ? world.bodies[spc.bindex1] : world.bodies.add(spc.bspecs1),
               spc.bindex2 != SIZE_MAX ? world.bodies[spc.bindex2] : world.bodies.add(spc.bspecs2), ganchor1, ganchor2,
-              spc.bodies_collide)
+              jprops)
 {
 }
 
-joint2D::joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor)
-    : joint2D(world, spc, ganchor, ganchor)
+joint2D::joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &ganchor,
+                 const specs::joint2D::properties &jprops)
+    : joint2D(world, spc, ganchor, ganchor, jprops)
 {
     m_use_both_anchors = false;
 }
 
-joint2D::joint2D(world2D &world, const specs::joint2D &spc)
+joint2D::joint2D(world2D &world, const specs::joint2D &spc, const specs::joint2D::properties &jprops)
     : joint2D(world, spc.bindex1 != SIZE_MAX ? world.bodies[spc.bindex1] : world.bodies.add(spc.bspecs1),
-              spc.bindex2 != SIZE_MAX ? world.bodies[spc.bindex2] : world.bodies.add(spc.bspecs2), spc.bodies_collide)
+              spc.bindex2 != SIZE_MAX ? world.bodies[spc.bindex2] : world.bodies.add(spc.bspecs2), jprops)
 {
 }
 
 joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor1, const glm::vec2 &ganchor2,
-                 const bool bodies_collide)
-    : worldref2D(world), bodies_collide(bodies_collide), m_body1(body1), m_body2(body2),
-      m_lanchor1(body1->local_position_point(ganchor1)), m_lanchor2(body2->local_position_point(ganchor2))
+                 const specs::joint2D::properties &jprops)
+    : worldref2D(world), m_body1(body1), m_body2(body2), m_lanchor1(body1->local_position_point(ganchor1)),
+      m_lanchor2(body2->local_position_point(ganchor2)), m_bodies_collide(jprops.bodies_collide)
 {
     KIT_ASSERT_ERROR(body1 != body2, "Cannot create joint between the same body: {0}", body1->index);
 }
 
-joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor, const bool bodies_collide)
-    : joint2D(world, body1, body2, ganchor, ganchor)
+joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &ganchor,
+                 const specs::joint2D::properties &jprops)
+    : joint2D(world, body1, body2, ganchor, ganchor, jprops)
 {
     m_use_both_anchors = false;
 }
 
-joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const bool bodies_collide)
-    : worldref2D(world), bodies_collide(bodies_collide), m_body1(body1), m_body2(body2), m_lanchor1(0.f),
-      m_lanchor2(0.f), m_no_anchors(true), m_use_both_anchors(false)
+joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const specs::joint2D::properties &jprops)
+    : worldref2D(world), m_body1(body1), m_body2(body2), m_lanchor1(0.f), m_lanchor2(0.f), m_no_anchors(true),
+      m_use_both_anchors(false), m_bodies_collide(jprops.bodies_collide)
 {
 }
 
@@ -109,6 +112,31 @@ void joint2D::awake()
 bool joint2D::asleep() const
 {
     return m_body1->asleep() && m_body2->asleep();
+}
+
+bool joint2D::bodies_collide() const
+{
+    return m_bodies_collide;
+}
+void joint2D::bodies_collide(const bool bodies_collide)
+{
+    m_bodies_collide = bodies_collide;
+    awake();
+}
+
+specs::joint2D::properties joint2D::jprops() const
+{
+    return {m_bodies_collide};
+}
+void joint2D::jprops(const specs::joint2D::properties &jprops)
+{
+    m_bodies_collide = jprops.bodies_collide;
+    awake();
+}
+
+void joint2D::fill_jprops(specs::joint2D::properties &jprops) const
+{
+    jprops.bodies_collide = m_bodies_collide;
 }
 
 bool joint2D::is_constraint() const

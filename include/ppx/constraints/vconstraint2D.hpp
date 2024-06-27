@@ -59,7 +59,7 @@ class vconstraint2D : public constraint2D, public auxiliar_1D_direction<LinDegre
     using flat_t = typename degree_types<LinDegrees + AngDegrees>::flat_t;
     using square_t = typename degree_types<LinDegrees + AngDegrees>::square_t;
 
-    virtual ~vconstraint2D() = default;
+    using constraint2D::constraint2D;
 
     virtual flat_t constraint_velocity() const = 0;
 
@@ -68,7 +68,6 @@ class vconstraint2D : public constraint2D, public auxiliar_1D_direction<LinDegre
     virtual void warmup();
 
   protected:
-    using constraint2D::constraint2D;
     flat_t m_cumimpulse{0.f};
     square_t m_mass;
 

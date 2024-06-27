@@ -16,6 +16,9 @@ class weld_joint2D final : public pvconstraint2D<2, 1>, kit::non_copyable
     glm::vec3 constraint_position() const override;
     glm::vec3 constraint_velocity() const override;
 
+    specs::properties props() const;
+    void props(const specs::properties &props);
+
   private:
     float m_target_relangle;
 };

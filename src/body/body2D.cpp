@@ -319,7 +319,7 @@ bool body2D::is_static() const
 bool body2D::joint_prevents_collision(const body2D *body) const
 {
     for (const joint2D *joint : body->meta.joints)
-        if (!joint->bodies_collide && joint->contains(this))
+        if (!joint->bodies_collide() && joint->contains(this))
             return true;
     return false;
 }

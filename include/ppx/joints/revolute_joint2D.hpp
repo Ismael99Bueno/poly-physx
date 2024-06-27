@@ -15,5 +15,8 @@ class revolute_joint2D final : public pvconstraint2D<2, 0>, kit::non_copyable
 
     glm::vec2 constraint_position() const override;
     glm::vec2 constraint_velocity() const override;
+
+    specs::properties props() const;
+    void props(const specs::properties &props);
 };
 } // namespace ppx

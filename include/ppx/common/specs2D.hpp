@@ -76,12 +76,25 @@ struct joint2D
     body2D bspecs1{};
     body2D bspecs2{};
 
-    bool bodies_collide = true;
+    struct properties
+    {
+        bool bodies_collide = true;
+    };
 };
 
-struct rotor_joint2D : joint2D
+struct constraint2D : joint2D
 {
-    struct properties
+    struct properties : joint2D::properties
+    {
+        bool is_soft = false;
+        float frequency = 10.f;
+        float damping_ratio = 1.f;
+    };
+};
+
+struct rotor_joint2D : constraint2D
+{
+    struct properties : constraint2D::properties
     {
         float torque = 0.f;
         float correction_factor = 0.05f;
@@ -93,9 +106,9 @@ struct rotor_joint2D : joint2D
     static rotor_joint2D from_instance(const ppx::rotor_joint2D &rotj);
 };
 
-struct motor_joint2D : joint2D
+struct motor_joint2D : constraint2D
 {
-    struct properties
+    struct properties : constraint2D::properties
     {
         float force = 0.f;
         float correction_factor = 0.05f;
@@ -105,12 +118,12 @@ struct motor_joint2D : joint2D
     static motor_joint2D from_instance(const ppx::motor_joint2D &motj);
 };
 
-struct distance_joint2D : joint2D
+struct distance_joint2D : constraint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
     bool deduce_distance = true;
-    struct properties
+    struct properties : constraint2D::properties
     {
         float min_distance = 0.f;
         float max_distance = 0.f;
@@ -118,22 +131,24 @@ struct distance_joint2D : joint2D
     static distance_joint2D from_instance(const ppx::distance_joint2D &dj);
 };
 
-struct revolute_joint2D : joint2D
+struct revolute_joint2D : constraint2D
 {
     glm::vec2 ganchor{FLT_MAX};
+    properties props;
     static revolute_joint2D from_instance(const ppx::revolute_joint2D &revj);
 };
 
-struct weld_joint2D : joint2D
+struct weld_joint2D : constraint2D
 {
     glm::vec2 ganchor{FLT_MAX};
+    properties props;
     static weld_joint2D from_instance(const ppx::weld_joint2D &weldj);
 };
 
-struct ball_joint2D : joint2D
+struct ball_joint2D : constraint2D
 {
     bool deduce_angle = true;
-    struct properties
+    struct properties : constraint2D::properties
     {
         float min_angle = 0.f;
         float max_angle = 0.f;
@@ -141,12 +156,12 @@ struct ball_joint2D : joint2D
     static ball_joint2D from_instance(const ppx::ball_joint2D &bj);
 };
 
-struct prismatic_joint2D : joint2D
+struct prismatic_joint2D : constraint2D
 {
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
     bool deduce_axis = true;
-    struct properties
+    struct properties : constraint2D::properties
     {
         glm::vec2 axis{1.f, 0.f};
     } props;
@@ -158,7 +173,7 @@ struct spring_joint2D : joint2D
     glm::vec2 ganchor1{FLT_MAX};
     glm::vec2 ganchor2{FLT_MAX};
     bool deduce_length = false;
-    struct properties
+    struct properties : joint2D::properties
     {
         float frequency = 1.f;
         float damping_ratio = 0.2f;

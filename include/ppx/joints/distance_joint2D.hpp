@@ -19,14 +19,21 @@ class distance_joint2D final : public pvconstraint2D<1, 0>, kit::non_copyable
     bool solve_positions() override;
     void solve_velocities() override;
 
-    const specs::properties &props() const;
+    specs::properties props() const;
     void props(const specs::properties &props);
+
+    float min_distance() const;
+    void min_distance(float min_distance);
+
+    float max_distance() const;
+    void max_distance(float max_distance);
 
   private:
     void update_constraint_data() override;
     glm::vec2 direction() const override;
 
-    specs::properties m_props;
+    float m_min_distance;
+    float m_max_distance;
 
     float m_length;
     bool m_legal_length;
