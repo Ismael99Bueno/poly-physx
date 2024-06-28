@@ -1,5 +1,6 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/constraints/vconstraint2D.hpp"
+#include "ppx/joints/spring_joint2D.hpp"
 #include "ppx/world2D.hpp"
 #include "kit/utility/utils.hpp"
 
@@ -178,11 +179,39 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegrees, AngDegrees>::mass() const
 {
     if constexpr (LinDegrees + AngDegrees == 1)
-        return 1.f / default_inverse_mass();
+    {
+        const float invmass = default_inverse_mass();
+        const float mass = 1.f / invmass;
+        if (!m_is_soft)
+            return mass;
+
+        const float ts = world.rk_substep_timestep();
+        const auto [stiffness, damping] = spring_joint2D::stiffness_and_damping(m_frequency, m_damping_ratio, mass);
+        const float igamma = ts * (ts * stiffness + damping);
+        if (kit::approaches_zero(igamma))
+            return mass;
+
+        const float gamma = 1.f / igamma;
+        return 1.f / (invmass + gamma);
+    }
     else
     {
         const square_t invmass = default_inverse_mass();
-        return m_no_anchors ? invert_diagonal(invmass) : glm::inverse(invmass);
+        const square_t diagmass = invert_diagonal(invmass);
+        if (!m_is_soft)
+            return m_no_anchors ? diagmass : glm::inverse(invmass);
+
+        const float ts = world.rk_substep_timestep();
+        square_t gamma{0.f};
+        for (int i = 0; i < diagmass.length(); i++)
+        {
+            const auto [stiffness, damping] =
+                spring_joint2D::stiffness_and_damping(m_frequency, m_damping_ratio, diagmass[i][i]);
+            const float igamma = ts * (ts * stiffness + damping);
+            if (!kit::approaches_zero(igamma))
+                gamma[i][i] = 1.f / igamma;
+        }
+        return m_no_anchors ? invert_diagonal(invmass + gamma) : glm::inverse(invmass + gamma);
     }
 }
 

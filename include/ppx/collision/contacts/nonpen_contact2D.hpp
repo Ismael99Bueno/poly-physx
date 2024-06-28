@@ -22,6 +22,8 @@ class nonpen_contact2D final : public contact2D, public pvconstraint2D<1, 0>
     void solve_velocities() override;
     void update(const collision2D *collision, std::size_t manifold_index) override;
 
+    static inline specs::constraint2D::properties global_props{};
+
   private:
     float m_pntr_correction = 0.f;
     nonpen_friction2D m_friction_contact;

@@ -13,7 +13,11 @@ nonpen_contact2D::nonpen_contact2D(world2D &world, const collision2D *collision,
 {
     m_ganchor1 = collision->manifold[manifold_index].point;
     if (!kit::approaches_zero(m_restitution))
+    {
         m_init_ctr_vel = glm::dot(m_normal, m_body2->gvelocity_at(m_ganchor1) - m_body1->gvelocity_at(m_ganchor1));
+        if (glm::abs(m_init_ctr_vel) < 6.f)
+            m_init_ctr_vel = 0.f;
+    }
 }
 
 float nonpen_contact2D::constraint_position() const
@@ -71,6 +75,10 @@ void nonpen_contact2D::update(const collision2D *collision, const std::size_t ma
     m_is_adjusting_positions = false;
     m_pntr_correction = 0.f;
     m_has_friction = !kit::approaches_zero(collision->friction);
+
+    m_is_soft = global_props.is_soft;
+    m_frequency = global_props.frequency;
+    m_damping_ratio = global_props.damping_ratio;
 }
 
 glm::vec2 nonpen_contact2D::direction() const

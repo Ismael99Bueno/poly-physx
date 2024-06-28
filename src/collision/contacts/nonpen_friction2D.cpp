@@ -32,6 +32,10 @@ void nonpen_friction2D::update(const collision2D *collision, const glm::vec2 &la
     m_friction = collision->friction;
     m_lanchor1 = lanchor1;
     m_tangent = glm::vec2(-normal.y, normal.x);
+
+    m_is_soft = global_props.is_soft;
+    m_frequency = global_props.frequency;
+    m_damping_ratio = global_props.damping_ratio;
 }
 
 glm::vec2 nonpen_friction2D::direction() const
