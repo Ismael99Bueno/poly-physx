@@ -4,9 +4,11 @@
 #include "kit/utility/utils.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/utility/type_constraints.hpp"
-#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "ppx/collision/contacts/collision_contacts2D.hpp"
 #include "ppx/collision/contacts/contact_solver2D.hpp"
+#include "ppx/collision/broad/quad_tree_broad2D.hpp"
+#include "ppx/collision/broad/sort_sweep_broad2D.hpp"
+#include "ppx/collision/broad/brute_force_broad2D.hpp"
 #include "ppx/internal/worldref.hpp"
 
 namespace ppx
@@ -41,16 +43,16 @@ class collision_manager2D : public worldref2D
 
     template <kit::DerivedFrom<broad_phase2D> T = broad_phase2D> const T *broad() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_broad);
+        return kit::get_casted_raw_ptr<const T>(m_broad, m_known_broads);
     }
     template <kit::DerivedFrom<broad_phase2D> T = broad_phase2D> T *broad()
     {
-        return kit::get_casted_raw_ptr<T>(m_broad);
+        return kit::get_casted_raw_ptr<T>(m_broad, m_known_broads);
     }
 
     template <kit::DerivedFrom<cp_narrow_phase2D> T = cp_narrow_phase2D> const T *cp_narrow() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_cp_narrow);
+        return kit::get_casted_raw_ptr<const T>(m_cp_narrow);
     }
     template <kit::DerivedFrom<cp_narrow_phase2D> T = cp_narrow_phase2D> T *cp_narrow()
     {
@@ -58,7 +60,7 @@ class collision_manager2D : public worldref2D
     }
     template <kit::DerivedFrom<pp_narrow_phase2D> T = pp_narrow_phase2D> const T *pp_narrow() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_pp_narrow);
+        return kit::get_casted_raw_ptr<const T>(m_pp_narrow);
     }
     template <kit::DerivedFrom<pp_narrow_phase2D> T = pp_narrow_phase2D> T *pp_narrow()
     {
@@ -67,7 +69,7 @@ class collision_manager2D : public worldref2D
 
     template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> const T *contact_solver() const
     {
-        return kit::const_get_casted_raw_ptr<T>(m_contacts);
+        return kit::get_casted_raw_ptr<const T>(m_contacts);
     }
     template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> T *contact_solver()
     {
@@ -81,6 +83,10 @@ class collision_manager2D : public worldref2D
             broad->inherit(std::move(*m_broad));
 
         T *ptr = broad.get();
+
+        m_known_broads = {nullptr, nullptr, nullptr};
+        if constexpr (kit::tuple_has_type_v<T *, known_broads_t>)
+            std::get<T *>(m_known_broads) = ptr;
 
         m_broad = std::move(broad);
         m_broad->on_attach();
@@ -135,6 +141,9 @@ class collision_manager2D : public worldref2D
     kit::scope<pp_narrow_phase2D> m_pp_narrow;
 
     kit::scope<collision_contacts2D> m_contacts;
+
+    using known_broads_t = std::tuple<quad_tree_broad2D *, sort_sweep_broad2D *, brute_force_broad2D *>;
+    known_broads_t m_known_broads{nullptr, nullptr, nullptr};
     bool m_enabled = true;
 
     void set_constraint_based_contact_solver(contact_constraint_solver2D *contacts);

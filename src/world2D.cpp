@@ -66,10 +66,15 @@ bool world2D::step()
 {
     if (islands.enabled() && islands.all_asleep())
         return true;
+    m_step_count++;
     pre_step_preparation();
     const bool valid = integrator.raw_forward(*this);
     post_step_setup();
     return valid;
+}
+std::uint32_t world2D::step_count() const
+{
+    return m_step_count;
 }
 
 void world2D::pre_step_preparation()

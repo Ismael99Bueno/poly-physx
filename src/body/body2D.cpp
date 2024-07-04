@@ -140,6 +140,7 @@ void body2D::end_density_update()
     update_centroids();
     update_inertia();
     end_spatial_update();
+    awake(true);
 }
 
 void body2D::begin_spatial_update()
@@ -179,11 +180,20 @@ void body2D::update_colliders()
 {
     if (m_spatial_update)
         return;
+    quad_tree_broad2D *qt = world.collisions.broad<quad_tree_broad2D>();
+    const glm::vec2 enlargement = qt ? qt->enlargement_vector_from_velocity(m_state.velocity) : glm::vec2(0.f);
+
     for (collider2D *collider : *this)
     {
         shape2D &shape = collider->mutable_shape();
         KIT_ASSERT_ERROR(!shape.updating(), "Cannot update collider while it is already being updated")
         shape.update();
+        if (qt && shape.bounding_box_recently_updated())
+        {
+            collider->enlarge_bounding_box(enlargement);
+            qt->erase(collider);
+            qt->insert(collider);
+        }
     }
 }
 void body2D::update_centroids()

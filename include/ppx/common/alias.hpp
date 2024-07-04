@@ -50,7 +50,19 @@ struct qt_element
 {
     collider2D *collider = nullptr;
     const geo::aabb2D &operator()() const;
+    bool operator==(const qt_element &other) const;
 };
-
-using quad_tree = kit::quad_tree<qt_element, allocator_t>;
 } // namespace ppx
+
+namespace std
+{
+template <> struct hash<ppx::qt_element>
+{
+    std::size_t operator()(const ppx::qt_element &element) const;
+};
+} // namespace std
+
+namespace ppx
+{
+using quad_tree = kit::quad_tree<qt_element, allocator_t>;
+}

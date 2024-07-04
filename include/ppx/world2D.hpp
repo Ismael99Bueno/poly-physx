@@ -33,6 +33,7 @@ class world2D : kit::non_copyable
     std::uint32_t rk_subsets() const;
 
     bool step();
+    std::uint32_t step_count() const;
 
     float rk_substep_timestep() const;
 
@@ -49,6 +50,7 @@ class world2D : kit::non_copyable
     float m_previous_timestep = 0.f;
     float m_rk_substep_timestep = integrator.ts.value;
     std::uint32_t m_rk_subset_index = 0;
+    std::uint32_t m_step_count = 0;
 
     void pre_step_preparation();
     void post_step_setup();

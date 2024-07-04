@@ -83,6 +83,22 @@ void collider2D::end_update()
     mutable_shape().end_update();
 }
 
+bool collider2D::bound_if_needed()
+{
+    return mutable_shape().bound_if_needed();
+}
+void collider2D::bound()
+{
+    mutable_shape().bound();
+}
+void collider2D::enlarge_bounding_box(const glm::vec2 &enlarge_vector)
+{
+    shape2D &shape = mutable_shape();
+    shape.enlarge_bounding_box(0.01f);
+    shape.enlarge_bounding_box(enlarge_vector);
+    mutable_shape().enlarge_bounding_box(enlarge_vector);
+}
+
 float collider2D::area() const
 {
     return shape().area();

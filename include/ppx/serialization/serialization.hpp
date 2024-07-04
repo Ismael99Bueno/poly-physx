@@ -743,8 +743,9 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         else if (auto broad = cm.broad<ppx::quad_tree_broad2D>())
         {
             nbroad["Method"] = 1;
+            nbroad["Bounding box anticipation"] = broad->bounding_box_anticipation;
             nbroad["Force square"] = broad->force_square_shape;
-            nbroad["Include non dynamic"] = broad->include_non_dynamic;
+            nbroad["Rebuild time threshold"] = broad->rebuild_time_threshold;
 
             const auto &props = broad->quad_tree().props();
             nbroad["Max colliders"] = props.elements_per_quad;
@@ -801,13 +802,15 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             else if (method == 1)
             {
                 auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>();
+                qtbroad->bounding_box_anticipation = nbroad["Bounding box anticipation"].as<float>();
                 qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
-                qtbroad->include_non_dynamic = nbroad["Include non dynamic"].as<bool>();
+                qtbroad->rebuild_time_threshold = nbroad["Rebuild time threshold"].as<float>();
 
-                auto &props = qtbroad->quad_tree().props();
+                auto props = qtbroad->quad_tree().props();
                 props.elements_per_quad = nbroad["Max colliders"].as<std::size_t>();
                 props.max_depth = nbroad["Max depth"].as<std::uint32_t>();
                 props.min_quad_size = nbroad["Min size"].as<float>();
+                qtbroad->quad_tree().props(props);
             }
             else if (method == 2)
                 cm.set_broad<ppx::sort_sweep_broad2D>();

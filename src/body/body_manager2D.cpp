@@ -8,6 +8,8 @@ namespace ppx
 body2D *body_manager2D::add(const body2D::specs &spc)
 {
     body2D *body = allocator<body2D>::create(world, spc);
+    m_elements.push_back(body);
+
     body->begin_density_update();
     for (const auto &collider_spc : spc.props.colliders)
         body->add(collider_spc);
@@ -22,8 +24,6 @@ body2D *body_manager2D::add(const body2D::specs &spc)
         island2D *island = world.islands.create();
         island->add_body(body);
     }
-
-    m_elements.push_back(body);
 
     events.on_addition(body);
     KIT_INFO("Added body with index {0}.", m_elements.size() - 1)

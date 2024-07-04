@@ -49,6 +49,10 @@ class collider2D final : public kit::indexable, public worldref2D, kit::non_copy
     void begin_update();
     void end_update();
 
+    bool bound_if_needed();
+    void bound();
+    void enlarge_bounding_box(const glm::vec2 &enlarge_vector);
+
     void ltranslate(const glm::vec2 &dpos);
     void gtranslate(const glm::vec2 &dpos);
     void lrotate(float dangle);
