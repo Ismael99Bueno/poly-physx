@@ -62,6 +62,8 @@ template <typename Body, typename Collider, typename C>
 static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
 {
     std::vector<Body *> in_area;
+    if (kit::approaches_zero(aabb.area()))
+        return in_area;
     in_area.reserve(8);
 
     const glm::vec2 tr = aabb.max;

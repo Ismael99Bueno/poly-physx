@@ -20,7 +20,7 @@ class quad_tree_broad2D final : public broad_phase2D
     glm::vec2 enlargement_vector_from_velocity(const glm::vec2 &velocity) const;
     std::uint32_t rebuild_count() const;
 
-    float bounding_box_anticipation = 0.2f;
+    float bounding_box_anticipation = 0.1f;
     float rebuild_time_threshold = 5.f;
     bool force_square_shape = true;
 
