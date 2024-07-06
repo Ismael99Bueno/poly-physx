@@ -11,6 +11,8 @@ class quad_tree_broad2D final : public broad_phase2D
     quad_tree_broad2D(world2D &world);
     ~quad_tree_broad2D();
 
+    const char *name() const override;
+
     void insert(collider2D *collider);
     void erase(collider2D *collider);
 

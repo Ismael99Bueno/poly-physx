@@ -31,11 +31,16 @@ sort_sweep_broad2D::~sort_sweep_broad2D()
     world.colliders.events.on_removal -= m_remove_edge;
 }
 
+const char *sort_sweep_broad2D::name() const
+{
+    return "Sort and Sweep";
+}
+
 void sort_sweep_broad2D::detect_collisions()
 {
     KIT_PERF_FUNCTION()
     update_edges();
-    if (params.multithreaded)
+    if (params.multithreading)
         detect_collisions_mt();
     else
         detect_collisions_st();

@@ -27,6 +27,8 @@ class sort_sweep_broad2D final : public broad_phase2D
     using broad_phase2D::broad_phase2D;
     ~sort_sweep_broad2D();
 
+    const char *name() const override;
+
   private:
     std::vector<edge> m_edges;
 

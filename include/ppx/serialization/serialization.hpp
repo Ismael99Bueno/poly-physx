@@ -737,7 +737,8 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         node["Enabled"] = cm.enabled();
         YAML::Node nbroad = node["Broad"];
 
-        nbroad["Multithreading"] = cm.broad()->params.multithreaded;
+        nbroad["Multithreading"] = cm.broad()->params.multithreading;
+        nbroad["Name"] = cm.broad()->name();
         if (cm.broad<ppx::brute_force_broad2D>())
             nbroad["Method"] = 0;
         else if (auto broad = cm.broad<ppx::quad_tree_broad2D>())
@@ -756,6 +757,8 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             nbroad["Method"] = 2;
 
         YAML::Node nnarrow = node["Narrow"];
+        nnarrow["C-P Name"] = cm.cp_narrow()->name();
+
         if (auto narrow = cm.cp_narrow<ppx::gjk_epa_narrow2D>())
         {
             nnarrow["C-P Method"] = 0;
@@ -764,6 +767,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         else if (cm.cp_narrow<ppx::sat_narrow2D>())
             nnarrow["C-P Method"] = 1;
 
+        nnarrow["P-P Name"] = cm.pp_narrow()->name();
         if (auto narrow = cm.pp_narrow<ppx::gjk_epa_narrow2D>())
         {
             nnarrow["P-P Method"] = 0;
@@ -793,7 +797,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         cm.enabled(node["Enabled"].as<bool>());
         const YAML::Node nbroad = node["Broad"];
 
-        cm.broad()->params.multithreaded = nbroad["Multithreading"].as<bool>();
+        cm.broad()->params.multithreading = nbroad["Multithreading"].as<bool>();
         if (nbroad["Method"])
         {
             const int method = nbroad["Method"].as<int>();
@@ -854,6 +858,70 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     }
 };
 
+template <> struct kit::yaml::codec<ppx::specs::joint_manager2D::constraints2D>
+{
+    static YAML::Node encode(const ppx::specs::joint_manager2D::constraints2D &params)
+    {
+        YAML::Node node;
+        node["Velocity iterations"] = params.velocity_iterations;
+        node["Position iterations"] = params.position_iterations;
+        node["Warmup"] = params.warmup;
+        node["Baumgarte correction"] = params.baumgarte_correction;
+        node["Baumgarte coef"] = params.baumgarte_coef;
+        node["Baumgarte threshold"] = params.baumgarte_threshold;
+        node["Slop"] = params.slop;
+        node["Max position correction"] = params.max_position_correction;
+        node["Position resolution speed"] = params.position_resolution_speed;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::specs::joint_manager2D::constraints2D &params)
+    {
+        if (!node.IsMap() || node.size() != 9)
+            return false;
+
+        params.velocity_iterations = node["Velocity iterations"].as<std::uint32_t>();
+        params.position_iterations = node["Position iterations"].as<std::uint32_t>();
+        params.warmup = node["Warmup"].as<bool>();
+        params.baumgarte_correction = node["Baumgarte correction"].as<bool>();
+        params.baumgarte_coef = node["Baumgarte coef"].as<float>();
+        params.baumgarte_threshold = node["Baumgarte threshold"].as<float>();
+        params.slop = node["Slop"].as<float>();
+        params.max_position_correction = node["Max position correction"].as<float>();
+        params.position_resolution_speed = node["Position resolution speed"].as<float>();
+        return true;
+    }
+};
+
+template <> struct kit::yaml::codec<ppx::specs::island_manager2D>
+{
+    static YAML::Node encode(const ppx::specs::island_manager2D &params)
+    {
+        YAML::Node node;
+        node["Enable split"] = params.enable_split;
+        node["Enable sleep"] = params.enable_sleep;
+        node["Multithreading"] = params.multithreading;
+        node["Lower sleep energy threshold"] = params.lower_sleep_energy_threshold;
+        node["Upper sleep energy threshold"] = params.upper_sleep_energy_threshold;
+        node["Body count mid threshold reference"] = params.body_count_mid_threshold_reference;
+        node["Sleep time threshold"] = params.sleep_time_threshold;
+        return node;
+    }
+    static bool decode(const YAML::Node &node, ppx::specs::island_manager2D &params)
+    {
+        if (!node.IsMap() || node.size() != 8)
+            return false;
+
+        params.enable_split = node["Enable split"].as<bool>();
+        params.enable_sleep = node["Enable sleep"].as<bool>();
+        params.multithreading = node["Multithreading"].as<bool>();
+        params.lower_sleep_energy_threshold = node["Lower sleep energy threshold"].as<float>();
+        params.upper_sleep_energy_threshold = node["Upper sleep energy threshold"].as<float>();
+        params.body_count_mid_threshold_reference = node["Body count mid threshold reference"].as<std::uint32_t>();
+        params.sleep_time_threshold = node["Sleep time threshold"].as<float>();
+        return true;
+    }
+};
+
 template <> struct kit::yaml::codec<ppx::world2D>
 {
     static YAML::Node encode(const ppx::world2D &world)
@@ -866,26 +934,9 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Collision manager"] = world.collisions;
         node["Joints repository"] = world.joints;
 
-        YAML::Node ctrs = node["Constraint settings"];
-        ctrs["Velocity iterations"] = world.joints.constraints.params.velocity_iterations;
-        ctrs["Position iterations"] = world.joints.constraints.params.position_iterations;
-        ctrs["Warmup"] = world.joints.constraints.params.warmup;
-        ctrs["Baumgarte correction"] = world.joints.constraints.params.baumgarte_correction;
-        ctrs["Baumgarte coef"] = world.joints.constraints.params.baumgarte_coef;
-        ctrs["Baumgarte threshold"] = world.joints.constraints.params.baumgarte_threshold;
-        ctrs["Slop"] = world.joints.constraints.params.slop;
-        ctrs["Max position correction"] = world.joints.constraints.params.max_position_correction;
-        ctrs["Position resolution speed"] = world.joints.constraints.params.position_resolution_speed;
-
-        YAML::Node islands = node["Island settings"];
-        islands["Enabled"] = world.islands.enabled();
-        islands["Enable split"] = world.islands.params.enable_split;
-        islands["Enable sleep"] = world.islands.params.enable_sleep;
-        islands["Multithreaded"] = world.islands.params.multithreaded;
-        islands["Lower sleep energy threshold"] = world.islands.params.lower_sleep_energy_threshold;
-        islands["Upper sleep energy threshold"] = world.islands.params.upper_sleep_energy_threshold;
-        islands["Body count mid threshold reference"] = world.islands.params.body_count_mid_threshold_reference;
-        islands["Sleep time threshold"] = world.islands.params.sleep_time_threshold;
+        node["Constraint settings"] = world.joints.constraints.params;
+        node["Island settings"] = world.islands.params;
+        node["Island settings"]["Enabled"] = world.islands.enabled();
 
         return node;
     }
@@ -901,27 +952,9 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Collision manager"].as<ppx::collision_manager2D>(world.collisions);
         node["Joints repository"].as<ppx::joint_repository2D>(world.joints);
 
-        const YAML::Node ctrs = node["Constraint settings"];
-        world.joints.constraints.params.velocity_iterations = ctrs["Velocity iterations"].as<std::uint32_t>();
-        world.joints.constraints.params.position_iterations = ctrs["Position iterations"].as<std::uint32_t>();
-        world.joints.constraints.params.warmup = ctrs["Warmup"].as<bool>();
-        world.joints.constraints.params.baumgarte_correction = ctrs["Baumgarte correction"].as<bool>();
-        world.joints.constraints.params.baumgarte_coef = ctrs["Baumgarte coef"].as<float>();
-        world.joints.constraints.params.baumgarte_threshold = ctrs["Baumgarte threshold"].as<float>();
-        world.joints.constraints.params.slop = ctrs["Slop"].as<float>();
-        world.joints.constraints.params.max_position_correction = ctrs["Max position correction"].as<float>();
-        world.joints.constraints.params.position_resolution_speed = ctrs["Position resolution speed"].as<float>();
-
-        const YAML::Node islands = node["Island settings"];
-        world.islands.enabled(islands["Enabled"].as<bool>());
-        world.islands.params.enable_split = islands["Enable split"].as<bool>();
-        world.islands.params.enable_sleep = islands["Enable sleep"].as<bool>();
-        world.islands.params.multithreaded = islands["Multithreaded"].as<bool>();
-        world.islands.params.lower_sleep_energy_threshold = islands["Lower sleep energy threshold"].as<float>();
-        world.islands.params.upper_sleep_energy_threshold = islands["Upper sleep energy threshold"].as<float>();
-        world.islands.params.body_count_mid_threshold_reference =
-            islands["Body count mid threshold reference"].as<std::uint32_t>();
-        world.islands.params.sleep_time_threshold = islands["Sleep time threshold"].as<float>();
+        world.joints.constraints.params = node["Constraint settings"].as<ppx::specs::joint_manager2D::constraints2D>();
+        world.islands.params = node["Island settings"].as<ppx::specs::island_manager2D>();
+        world.islands.enabled(node["Island settings"]["Enabled"].as<bool>());
 
         return true;
     }

@@ -16,6 +16,11 @@ quad_tree_broad2D::~quad_tree_broad2D()
         collider->bound();
 }
 
+const char *quad_tree_broad2D::name() const
+{
+    return "Quad Tree";
+}
+
 void quad_tree_broad2D::insert(collider2D *collider)
 {
     m_needs_partition_update = true;
@@ -48,7 +53,7 @@ void quad_tree_broad2D::detect_collisions()
         m_needs_partition_update = false;
     }
 
-    if (params.multithreaded && world.thread_pool)
+    if (params.multithreading && world.thread_pool)
         detect_collisions_mt();
     else
         detect_collisions_st();

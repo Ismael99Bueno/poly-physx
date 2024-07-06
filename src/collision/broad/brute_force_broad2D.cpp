@@ -8,9 +8,14 @@
 
 namespace ppx
 {
+const char *brute_force_broad2D::name() const
+{
+    return "Brute Force";
+}
+
 void brute_force_broad2D::detect_collisions()
 {
-    if (params.multithreaded && world.thread_pool)
+    if (params.multithreading && world.thread_pool)
         detect_collisions_mt();
     else
         detect_collisions_st();

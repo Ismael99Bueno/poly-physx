@@ -9,13 +9,19 @@ namespace ppx
 broad_phase2D::broad_phase2D(world2D &world) : worldref2D(world)
 {
 }
+
+const char *broad_phase2D::name() const
+{
+    return "Unnamed";
+}
+
 const std::vector<collision2D> &broad_phase2D::detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
                                                                         const pp_narrow_phase2D *pp_narrow)
 {
     KIT_PERF_FUNCTION()
 #ifdef KIT_PROFILE
-    KIT_ASSERT_WARN(!params.multithreaded, "Cannot run multiple threads if the KIT profiling tools are enabled")
-    params.multithreaded = false;
+    KIT_ASSERT_WARN(!params.multithreading, "Cannot run multiple threads if the KIT profiling tools are enabled")
+    params.multithreading = false;
 #endif
     m_cp_narrow = cp_narrow;
     m_pp_narrow = pp_narrow;
@@ -47,7 +53,8 @@ broad_phase2D::metrics broad_phase2D::collision_metrics() const
 }
 std::vector<broad_phase2D::metrics> broad_phase2D::collision_metrics_per_mt_workload() const
 {
-    KIT_ASSERT_WARN(params.multithreaded, "Per-thread metrics are meaningless if the broad phase is not multithreaded")
+    KIT_ASSERT_WARN(params.multithreading,
+                    "Per-thread metrics are meaningless if the broad phase is not multithreading")
     return m_mt_metrics;
 }
 

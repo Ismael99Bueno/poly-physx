@@ -4,6 +4,11 @@
 
 namespace ppx
 {
+const char *sat_narrow2D::name() const
+{
+    return "SAT";
+}
+
 narrow_result2D sat_narrow2D::circle_polygon(const circle &circ, const polygon &poly) const
 {
     narrow_result2D result;

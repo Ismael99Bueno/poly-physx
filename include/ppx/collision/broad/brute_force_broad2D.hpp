@@ -10,6 +10,8 @@ class brute_force_broad2D final : public broad_phase2D
   public:
     using broad_phase2D::broad_phase2D;
 
+    const char *name() const override;
+
   private:
     void detect_collisions() override;
 

@@ -8,6 +8,11 @@ gjk_epa_narrow2D::gjk_epa_narrow2D(float epa_threshold) : epa_threshold(epa_thre
 {
 }
 
+const char *gjk_epa_narrow2D::name() const
+{
+    return "GJK-EPA";
+}
+
 narrow_result2D gjk_epa_narrow2D::circle_polygon(const circle &circ, const polygon &poly) const
 {
     narrow_result2D result = gjk_epa(circ, poly);

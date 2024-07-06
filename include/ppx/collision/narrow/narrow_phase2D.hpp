@@ -17,14 +17,23 @@ struct narrow_result2D
     }
 };
 
-class cp_narrow_phase2D
+class named // so stupid
+{
+  public:
+    virtual const char *name() const
+    {
+        return "Unnamed";
+    }
+};
+
+class cp_narrow_phase2D : public named
 {
   public:
     virtual ~cp_narrow_phase2D() = default;
     virtual narrow_result2D circle_polygon(const circle &circ, const polygon &poly) const = 0;
 };
 
-class pp_narrow_phase2D
+class pp_narrow_phase2D : public named
 {
   public:
     virtual ~pp_narrow_phase2D() = default;

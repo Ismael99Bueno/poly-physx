@@ -28,6 +28,8 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     broad_phase2D(world2D &world);
     virtual ~broad_phase2D() = default;
 
+    virtual const char *name() const;
+
     const std::vector<collision2D> &detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
                                                              const pp_narrow_phase2D *pp_narrow);
     const std::vector<collision2D> &collisions() const;
