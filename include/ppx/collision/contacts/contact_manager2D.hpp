@@ -51,7 +51,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             Contact *contact = it->second;
             if (contact->collider1() == collider || contact->collider2() == collider)
             {
-                if (contact->enabled())
+                if (contact->enabled()) [[likely]]
                     contact->on_exit();
                 destroy_contact(contact);
                 it = m_contacts.erase(it);
@@ -143,7 +143,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     {
         for (auto &pair : m_contacts)
         {
-            if (pair.second->enabled())
+            if (pair.second->enabled()) [[likely]]
                 pair.second->on_exit();
             destroy_contact(pair.second);
         } // this is expensive, for every contact a call to remove_contact for

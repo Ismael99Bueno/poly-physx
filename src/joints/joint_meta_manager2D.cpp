@@ -27,7 +27,7 @@ void actuator_meta_manager2D::solve()
     if (m_contact_solver)
         m_contact_solver->solve();
     for (const auto &manager : m_elements)
-        if (manager->enabled())
+        if (manager->enabled()) [[likely]]
             manager->solve();
 }
 
@@ -38,7 +38,7 @@ void constraint_meta_manager2D::solve()
         m_contact_solver->startup();
 
     for (const auto &manager : this->m_elements)
-        if (manager->enabled())
+        if (manager->enabled()) [[likely]]
             manager->startup();
 
     for (std::size_t i = 0; i < params.velocity_iterations; i++)
@@ -46,14 +46,14 @@ void constraint_meta_manager2D::solve()
         if (m_contact_solver)
             m_contact_solver->solve_velocities();
         for (const auto &manager : this->m_elements)
-            if (manager->enabled())
+            if (manager->enabled()) [[likely]]
                 manager->solve_velocities();
     }
     for (std::size_t i = 0; i < params.position_iterations; i++)
     {
         bool solved = true;
         for (const auto &manager : this->m_elements)
-            if (manager->enabled())
+            if (manager->enabled()) [[likely]]
                 solved &= manager->solve_positions();
         if (m_contact_solver)
             solved &= m_contact_solver->solve_positions();

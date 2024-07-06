@@ -237,16 +237,16 @@ void island2D::collect_active_elements_and_call_pre_solve()
     m_active_constraints.clear();
     m_active_contacts.clear();
     for (actuator2D *actuator : m_actuators)
-        if (actuator->enabled())
+        if (actuator->enabled()) [[likely]]
             m_active_actuators.push_back(actuator);
     for (constraint2D *constraint : m_constraints)
-        if (constraint->enabled())
+        if (constraint->enabled()) [[likely]]
             m_active_constraints.push_back(constraint);
     for (contact2D *contact : m_contacts)
-        if (contact->enabled())
+        if (contact->enabled()) [[likely]]
         {
             contact->on_pre_solve();
-            if (contact->enabled())
+            if (contact->enabled()) [[likely]]
                 m_active_contacts.push_back(contact);
         }
 }

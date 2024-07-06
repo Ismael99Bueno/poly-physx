@@ -33,10 +33,10 @@ void collision_manager2D::set_actuator_based_contact_solver(contact_actuator_sol
 void collision_manager2D::detect_and_create_contacts()
 {
     KIT_PERF_FUNCTION()
-    if (!m_broad->enabled())
+    if (!m_broad->enabled()) [[unlikely]]
         return;
     const auto &collisions = m_broad->detect_collisions_cached(m_cp_narrow.get(), m_pp_narrow.get());
-    if (m_contacts->enabled())
+    if (m_contacts->enabled()) [[likely]]
         m_contacts->create_contacts_from_collisions(collisions);
 }
 

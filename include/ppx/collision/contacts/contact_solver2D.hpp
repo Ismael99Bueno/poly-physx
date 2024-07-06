@@ -35,7 +35,7 @@ class contact_solver2D<Contact> final : public contact_manager2D<Contact>, publi
     {
         for (Contact *contact : this->m_active_contacts)
         {
-            if (!contact->enabled()) // no need to check sleep: if using this, islands are disabled
+            if (!contact->enabled()) [[likely]] // no need to check sleep: if using this, islands are disabled
                 continue;
             contact->on_pre_solve();
             contact->startup();
@@ -45,7 +45,7 @@ class contact_solver2D<Contact> final : public contact_manager2D<Contact>, publi
     void solve_velocities() override
     {
         for (Contact *contact : this->m_active_contacts)
-            if (contact->enabled())
+            if (contact->enabled()) [[likely]]
                 contact->solve_velocities();
     }
 
@@ -53,7 +53,7 @@ class contact_solver2D<Contact> final : public contact_manager2D<Contact>, publi
     {
         bool solved = true;
         for (Contact *contact : this->m_active_contacts)
-            if (contact->enabled())
+            if (contact->enabled()) [[likely]]
                 solved &= contact->solve_positions();
         return solved;
     }
@@ -61,7 +61,7 @@ class contact_solver2D<Contact> final : public contact_manager2D<Contact>, publi
     void on_post_solve() override
     {
         for (Contact *contact : this->m_active_contacts)
-            if (contact->enabled())
+            if (contact->enabled()) [[likely]]
                 contact->on_post_solve();
     }
 };
@@ -76,7 +76,7 @@ class contact_solver2D<Contact> final : public contact_manager2D<Contact>, publi
     {
         for (Contact *contact : this->m_active_contacts)
         {
-            if (!contact->enabled())
+            if (!contact->enabled()) [[likely]]
                 continue;
 
             // on islands, all pre solves are executed before the firs solve ever, but here the implementation differs.

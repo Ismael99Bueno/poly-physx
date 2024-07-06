@@ -38,7 +38,7 @@ template <Actuator2D T> class actuator_manager2D : public joint_manager2D<T>, pu
     virtual void solve() override
     {
         for (T *actuator : this->m_elements)
-            if (actuator->enabled())
+            if (actuator->enabled()) [[likely]]
                 actuator->solve();
     }
 };
