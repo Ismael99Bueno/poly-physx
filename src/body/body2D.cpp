@@ -8,11 +8,12 @@
 namespace ppx
 {
 body2D::body2D(world2D &world, const body2D::specs &spc)
-    : kit::indexable(world.bodies.size()), worldref2D(world),
+    : worldref2D(world),
       m_state({transform2D{kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()},
                spc.position, glm::vec2(0.f), spc.velocity, spc.angular_velocity}),
       m_charge_centroid(spc.position), m_charge(spc.props.charge), m_type(spc.props.type)
 {
+    meta.index = world.bodies.size();
     mass(spc.props.mass);
 }
 
@@ -156,7 +157,7 @@ void body2D::end_spatial_update()
 
 void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
 {
-    const std::size_t idx = 6 * index;
+    const std::size_t idx = 6 * meta.index;
     m_awake_allowed = false;
     begin_spatial_update();
     centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});

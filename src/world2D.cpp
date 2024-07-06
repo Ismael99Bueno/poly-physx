@@ -117,7 +117,7 @@ std::vector<float> world2D::create_state_derivative() const
     {
         if (body->is_static() || body->asleep())
             continue;
-        const std::size_t index = 6 * body->index;
+        const std::size_t index = 6 * body->meta.index;
 
         const glm::vec2 &accel = body->force() * body->props().dynamic.inv_mass;
         const float angaccel = body->torque() * body->props().dynamic.inv_inertia;
@@ -169,7 +169,7 @@ float world2D::potential_energy() const
 {
     float pot = 0.f;
     for (const auto &bhv : behaviours)
-        if (bhv->enabled)
+        if (bhv->enabled())
             pot += bhv->potential_energy();
     for (const spring_joint2D *sp : *joints.manager<spring_joint2D>())
         pot += sp->potential_energy();

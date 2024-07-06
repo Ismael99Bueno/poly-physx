@@ -37,6 +37,8 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     {
     }
 
+    KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
+
     metrics collision_metrics() const;
     std::vector<metrics> collision_metrics_per_mt_workload() const;
 

@@ -3,7 +3,6 @@
 #include "ppx/internal/worldref.hpp"
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/non_copyable.hpp"
-#include "kit/interface/indexable.hpp"
 #include "kit/memory/ptr/scope.hpp"
 #include "kit/events/event.hpp"
 #include <vector>
@@ -140,14 +139,14 @@ template <Identifiable T> class idmanager2D : public manager2D<T>
     const value_t *at(const id_t &id) const
     {
         for (const element_t &element : this->m_elements)
-            if (element->id == id)
+            if (element->id() == id)
                 return type_wrapper<T>::ptr(element);
         return nullptr;
     }
     value_t *at(const id_t &id)
     {
         for (const element_t &element : this->m_elements)
-            if (element->id == id)
+            if (element->id() == id)
                 return type_wrapper<T>::ptr(element);
         return nullptr;
     }
@@ -165,7 +164,7 @@ template <Identifiable T> class idmanager2D : public manager2D<T>
     bool remove(const id_t &id)
     {
         for (std::size_t i = 0; i < this->m_elements.size(); i++)
-            if (this->m_elements[i]->id == id)
+            if (this->m_elements[i]->id() == id)
                 return remove(i);
         return false;
     }

@@ -2,7 +2,6 @@
 
 #include "kit/memory/ptr/scope.hpp"
 #include "kit/utility/utils.hpp"
-#include "kit/interface/toggleable.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "ppx/collision/contacts/collision_contacts2D.hpp"
 #include "ppx/collision/contacts/contact_solver2D.hpp"
@@ -19,7 +18,7 @@ template <typename T>
 concept ContactSolver2D =
     kit::DerivedFrom<T, contact_constraint_solver2D> || kit::DerivedFrom<T, contact_actuator_solver2D>;
 
-class collision_manager2D : public worldref2D
+class collision_manager2D final : public worldref2D, public kit::toggleable
 {
   public:
     struct
@@ -129,8 +128,8 @@ class collision_manager2D : public worldref2D
 
     std::size_t size() const;
     bool empty() const;
-    bool enabled() const;
-    void enabled(bool enable);
+    using kit::toggleable::enabled;
+    void enabled(bool enable) override final;
 
   private:
     collision_manager2D(world2D &world);

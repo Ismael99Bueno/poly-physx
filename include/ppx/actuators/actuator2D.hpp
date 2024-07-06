@@ -14,7 +14,7 @@ concept Actuator2D = Joint2D<T> && IActuator2D<T>;
 class actuator2D : virtual public joint2D
 {
   public:
-    bool is_actuator() const override;
+    bool is_actuator() const override final;
 
     void solve();
 

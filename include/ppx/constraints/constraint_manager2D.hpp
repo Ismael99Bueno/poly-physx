@@ -41,14 +41,14 @@ template <Constraint2D T> class constraint_manager2D : public joint_manager2D<T>
     virtual void startup() override
     {
         for (T *constraint : this->m_elements)
-            if (constraint->enabled)
+            if (constraint->enabled())
                 constraint->startup();
     }
 
     virtual void solve_velocities() override
     {
         for (T *constraint : this->m_elements)
-            if (constraint->enabled)
+            if (constraint->enabled())
                 constraint->solve_velocities();
     }
 
@@ -58,7 +58,7 @@ template <Constraint2D T> class constraint_manager2D : public joint_manager2D<T>
         {
             bool solved = true;
             for (T *constraint : this->m_elements)
-                if (constraint->enabled)
+                if (constraint->enabled())
                     solved &= constraint->solve_positions();
             return solved;
         }

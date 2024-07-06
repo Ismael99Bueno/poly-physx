@@ -17,7 +17,7 @@ bool behaviour_manager2D::remove(std::size_t index)
 template <> behaviour2D *behaviour_manager2D::from_name(const std::string &name) const
 {
     for (const auto &bhv : m_elements)
-        if (name == bhv->id)
+        if (name == bhv->id())
             return bhv.get();
     return nullptr;
 }
@@ -32,7 +32,7 @@ void behaviour_manager2D::apply_forces()
 {
     KIT_PERF_FUNCTION()
     for (const auto &bhv : m_elements)
-        if (bhv->enabled)
+        if (bhv->enabled())
             bhv->apply_force_to_bodies();
 }
 

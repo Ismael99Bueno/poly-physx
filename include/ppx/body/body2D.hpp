@@ -5,7 +5,6 @@
 #include "ppx/body/state2D.hpp"
 #include "kit/utility/type_constraints.hpp"
 #include "kit/interface/non_copyable.hpp"
-#include "kit/interface/indexable.hpp"
 #include <variant>
 
 namespace ppx
@@ -15,7 +14,7 @@ class collider2D;
 class joint2D;
 class contact2D;
 class island2D;
-class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
+class body2D final : public worldref2D, kit::non_copyable
 {
   public:
     using specs = specs::body2D;
@@ -38,8 +37,8 @@ class body2D final : public kit::indexable, public worldref2D, kit::non_copyable
 
     struct metadata
     {
+        std::size_t index;
         state2D ctr_state;
-
         island2D *island = nullptr;
         bool island_flag = false;
 

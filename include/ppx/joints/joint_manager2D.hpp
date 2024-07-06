@@ -7,7 +7,6 @@
 #include "ppx/island/island2D.hpp"
 #include "kit/events/event.hpp"
 #include "kit/utility/type_constraints.hpp"
-#include "kit/interface/indexable.hpp"
 #include "kit/interface/toggleable.hpp"
 
 namespace ppx
@@ -22,6 +21,8 @@ class ijoint_manager2D : virtual public kit::identifiable<std::string>,
     virtual void on_body_removal_validation(body2D *body) = 0;
     virtual bool remove(joint2D *joint) = 0;
     virtual std::size_t joint_count() const = 0;
+
+    KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
 };
 
 template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public ijoint_manager2D
@@ -34,7 +35,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
     virtual T *add(const specs &spc)
     {
         T *joint = allocator<T>::create(this->world, spc);
-        joint->index = this->m_elements.size();
+        joint->meta.index = this->m_elements.size();
         this->m_elements.push_back(joint);
         m_total_joints.push_back(joint);
 
@@ -71,7 +72,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
         if (index != this->m_elements.size() - 1)
         {
             this->m_elements[index] = this->m_elements.back();
-            this->m_elements[index]->index = index;
+            this->m_elements[index]->meta.index = index;
         }
         this->m_elements.pop_back();
 
@@ -86,7 +87,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
         allocator<T>::destroy(joint);
         return true;
     }
-    bool remove(joint2D *joint) override
+    bool remove(joint2D *joint) override final
     {
         T *tjoint = dynamic_cast<T *>(joint);
         if (!tjoint)
@@ -94,7 +95,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
         return remove(tjoint);
     }
 
-    std::size_t joint_count() const override
+    std::size_t joint_count() const override final
     {
         return this->m_elements.size();
     }
@@ -115,7 +116,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
 
     static inline std::string s_name;
 
-    void on_body_removal_validation(body2D *body) override
+    void on_body_removal_validation(body2D *body) override final
     {
         const auto &joints = body->meta.joints;
         for (std::size_t i = joints.size() - 1; i < joints.size() && i >= 0; i--)

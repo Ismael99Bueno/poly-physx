@@ -29,10 +29,10 @@ template <> struct kit::yaml::codec<ppx::behaviour2D>
     static YAML::Node encode(const ppx::behaviour2D &bhv)
     {
         YAML::Node node;
-        node["Enabled"] = bhv.enabled;
+        node["Enabled"] = bhv.enabled();
 
         for (const auto &body : bhv)
-            node["Bodies"].push_back(body->index);
+            node["Bodies"].push_back(body->meta.index);
         node["Bodies"].SetStyle(YAML::EmitterStyle::Flow);
         return node;
     }
@@ -42,7 +42,7 @@ template <> struct kit::yaml::codec<ppx::behaviour2D>
             return false;
         bhv.clear();
 
-        bhv.enabled = node["Enabled"].as<bool>();
+        bhv.enabled(node["Enabled"].as<bool>());
         for (const YAML::Node &n : node["Bodies"])
             bhv.add(bhv.world.bodies[n.as<std::size_t>()]);
         return true;
@@ -622,7 +622,7 @@ template <> struct kit::yaml::codec<ppx::behaviour_manager2D>
     {
         YAML::Node node;
         for (const auto &bhv : bm)
-            node["Behaviours"][bhv->id] = *bhv;
+            node["Behaviours"][bhv->id()] = *bhv;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::behaviour_manager2D &bm)
@@ -688,7 +688,7 @@ template <ppx::IManager IM> struct kit::yaml::codec<ppx::joint_meta_manager2D<IM
     {
         YAML::Node node;
         for (const auto &mng : mm)
-            node["Managers"][mng->id] = *mng;
+            node["Managers"][mng->id()] = *mng;
         return node;
     }
     static bool decode(const YAML::Node &node, ppx::joint_meta_manager2D<IM> &mm)

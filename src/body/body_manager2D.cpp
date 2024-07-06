@@ -159,7 +159,7 @@ bool body_manager2D::remove(const std::size_t index)
         for (std::size_t i = 0; i < 6; i++)
             state[6 * index + i] = state[state.size() - 6 + i];
         m_elements[index] = m_elements.back();
-        m_elements[index]->index = index;
+        m_elements[index]->meta.index = index;
     }
     m_elements.pop_back();
     state.resize(6 * m_elements.size());
@@ -179,7 +179,7 @@ void body_manager2D::send_data_to_state(rk::state<float> &state)
     KIT_PERF_FUNCTION()
     for (body2D *body : m_elements)
     {
-        const std::size_t index = 6 * body->index;
+        const std::size_t index = 6 * body->meta.index;
         const glm::vec2 &centroid = body->centroid();
         if (body->is_static())
             body->stop_all_motion();

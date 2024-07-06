@@ -26,6 +26,8 @@ class behaviour2D : kit::non_copyable,
     virtual bool remove(std::size_t index);
     bool remove(body2D *body);
 
+    KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
+
     auto begin() const
     {
         return m_bodies.begin();
@@ -60,8 +62,8 @@ class behaviour2D : kit::non_copyable,
     std::size_t size() const;
 
 #ifdef KIT_USE_YAML_CPP
-    virtual YAML::Node encode() const;
-    virtual bool decode(const YAML::Node &node);
+    virtual YAML::Node encode() const override;
+    virtual bool decode(const YAML::Node &node) override;
 #endif
 
   protected:

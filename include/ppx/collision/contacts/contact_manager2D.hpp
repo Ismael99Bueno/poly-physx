@@ -22,7 +22,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         return m_contacts;
     }
 
-    std::vector<contact2D *> create_total_contacts_list() const override
+    std::vector<contact2D *> create_total_contacts_list() const override final
     {
         std::vector<contact2D *> list;
         list.reserve(m_contacts.size());
@@ -30,28 +30,28 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             list.push_back(pair.second);
         return list;
     }
-    std::vector<contact2D *> create_active_contacts_list() const override
+    std::vector<contact2D *> create_active_contacts_list() const override final
     {
         return std::vector<contact2D *>(m_active_contacts.begin(), m_active_contacts.end());
     }
 
-    std::size_t total_contacts_count() const override
+    std::size_t total_contacts_count() const override final
     {
         return m_contacts.size();
     }
-    std::size_t active_contacts_count() const override
+    std::size_t active_contacts_count() const override final
     {
         return m_active_contacts.size();
     }
 
-    void remove_any_contacts_with(const collider2D *collider) override
+    void remove_any_contacts_with(const collider2D *collider) override final
     {
         for (auto it = m_contacts.begin(); it != m_contacts.end();)
         {
             Contact *contact = it->second;
             if (contact->collider1() == collider || contact->collider2() == collider)
             {
-                if (contact->enabled)
+                if (contact->enabled())
                     contact->on_exit();
                 destroy_contact(contact);
                 it = m_contacts.erase(it);
@@ -65,7 +65,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     contact_map m_contacts;
     std::vector<Contact *> m_active_contacts;
 
-    void create_contacts_from_collisions(const std::vector<collision2D> &collisions) override
+    void create_contacts_from_collisions(const std::vector<collision2D> &collisions) override final
     {
         KIT_PERF_FUNCTION()
 
@@ -101,7 +101,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
                 m_active_contacts.push_back(contact);
             else
             {
-                contact->enabled = false;
+                contact->enabled(false);
                 contact->on_exit();
             }
             contact->increment_lifetime();
@@ -124,7 +124,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         KIT_PERF_FUNCTION()
         KIT_ASSERT_WARN(!contact->recently_updated(),
                         "Contact was already updated. The corresponding collision is duplicated!")
-        const bool on_enter = !contact->enabled;
+        const bool on_enter = !contact->enabled();
         contact->update(collision, manifold_index);
         if (on_enter)
             contact->on_enter();
@@ -139,11 +139,11 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     }
 
   private:
-    void destroy_all_contacts() override
+    void destroy_all_contacts() override final
     {
         for (auto &pair : m_contacts)
         {
-            if (pair.second->enabled)
+            if (pair.second->enabled())
                 pair.second->on_exit();
             destroy_contact(pair.second);
         } // this is expensive, for every contact a call to remove_contact for

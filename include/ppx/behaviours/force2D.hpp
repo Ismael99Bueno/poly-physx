@@ -14,6 +14,6 @@ class force2D : public behaviour2D
     {
         return 0.f;
     }
-    float potential_energy() const override;
+    float potential_energy() const override final;
 };
 } // namespace ppx

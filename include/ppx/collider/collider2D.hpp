@@ -2,14 +2,13 @@
 
 #include "ppx/body/body2D.hpp"
 #include "kit/interface/non_copyable.hpp"
-#include "kit/interface/indexable.hpp"
 #include "kit/events/event.hpp"
 #include <variant>
 
 namespace ppx
 {
 class contact2D;
-class collider2D final : public kit::indexable, public worldref2D, kit::non_copyable
+class collider2D final : public worldref2D, kit::non_copyable
 {
   public:
     using specs = specs::collider2D;
@@ -20,6 +19,11 @@ class collider2D final : public kit::indexable, public worldref2D, kit::non_copy
     float restitution;
     float friction;
     filter collision_filter;
+
+    struct metadata
+    {
+        std::size_t index;
+    } meta;
 
     struct
     {

@@ -156,7 +156,7 @@ bool collider_manager2D::remove(const std::size_t index)
     if (index != m_elements.size() - 1)
     {
         m_elements[index] = m_elements.back();
-        m_elements[index]->index = index;
+        m_elements[index]->meta.index = index;
     }
     m_elements.pop_back();
     parent->full_update();

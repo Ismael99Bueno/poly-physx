@@ -59,8 +59,8 @@ class joint_repository2D final : public manager2D<joint2D>
     }
     bool remove_manager(std::size_t index);
 
-    bool remove(joint2D *joint) override;
-    bool remove(std::size_t index) override;
+    bool remove(joint2D *joint) override final;
+    bool remove(std::size_t index) override final;
 
     template <Joint2D T> bool remove(const std::size_t index)
     {

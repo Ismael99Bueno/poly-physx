@@ -52,49 +52,52 @@ body2D body2D::from_instance(const ppx::body2D &body)
 
 rotor_joint2D rotor_joint2D::from_instance(const ppx::rotor_joint2D &rotj)
 {
-    rotor_joint2D specs{{rotj.body1()->index, rotj.body2()->index}, rotj.props()};
+    rotor_joint2D specs{{rotj.body1()->meta.index, rotj.body2()->meta.index}, rotj.props()};
     return specs;
 }
 
 motor_joint2D motor_joint2D::from_instance(const ppx::motor_joint2D &motj)
 {
-    motor_joint2D specs{{motj.body1()->index, motj.body2()->index}, motj.props()};
+    motor_joint2D specs{{motj.body1()->meta.index, motj.body2()->meta.index}, motj.props()};
     return specs;
 }
 
 distance_joint2D distance_joint2D::from_instance(const ppx::distance_joint2D &dj)
 {
-    distance_joint2D specs{{dj.body1()->index, dj.body2()->index}, dj.ganchor1(), dj.ganchor2(), false, dj.props()};
+    distance_joint2D specs{
+        {dj.body1()->meta.index, dj.body2()->meta.index}, dj.ganchor1(), dj.ganchor2(), false, dj.props()};
     return specs;
 }
 
 revolute_joint2D revolute_joint2D::from_instance(const ppx::revolute_joint2D &revj)
 {
-    revolute_joint2D specs{{revj.body1()->index, revj.body2()->index}, revj.ganchor1(), revj.props()};
+    revolute_joint2D specs{{revj.body1()->meta.index, revj.body2()->meta.index}, revj.ganchor1(), revj.props()};
     return specs;
 }
 
 weld_joint2D weld_joint2D::from_instance(const ppx::weld_joint2D &weldj)
 {
-    weld_joint2D specs{{weldj.body1()->index, weldj.body2()->index}, weldj.ganchor1(), weldj.props()};
+    weld_joint2D specs{{weldj.body1()->meta.index, weldj.body2()->meta.index}, weldj.ganchor1(), weldj.props()};
     return specs;
 }
 
 ball_joint2D ball_joint2D::from_instance(const ppx::ball_joint2D &bj)
 {
-    ball_joint2D specs{{bj.body1()->index, bj.body2()->index}, false, bj.props()};
+    ball_joint2D specs{{bj.body1()->meta.index, bj.body2()->meta.index}, false, bj.props()};
     return specs;
 }
 
 prismatic_joint2D prismatic_joint2D::from_instance(const ppx::prismatic_joint2D &pj)
 {
-    prismatic_joint2D specs{{pj.body1()->index, pj.body2()->index}, pj.ganchor1(), pj.ganchor2(), false, pj.props()};
+    prismatic_joint2D specs{
+        {pj.body1()->meta.index, pj.body2()->meta.index}, pj.ganchor1(), pj.ganchor2(), false, pj.props()};
     return specs;
 }
 
 spring_joint2D spring_joint2D::from_instance(const ppx::spring_joint2D &sp)
 {
-    spring_joint2D specs{{sp.body1()->index, sp.body2()->index}, sp.ganchor1(), sp.ganchor2(), false, sp.props()};
+    spring_joint2D specs{
+        {sp.body1()->meta.index, sp.body2()->meta.index}, sp.ganchor1(), sp.ganchor2(), false, sp.props()};
     return specs;
 }
 

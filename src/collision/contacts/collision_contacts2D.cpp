@@ -13,15 +13,10 @@ void collision_contacts2D::inherit(collision_contacts2D &&contacts)
     params = contacts.params;
 }
 
-bool collision_contacts2D::enabled() const
+void collision_contacts2D::enabled(const bool enabled)
 {
-    return m_enabled;
-}
-
-void collision_contacts2D::enabled(bool enable)
-{
-    m_enabled = enable;
-    if (!enable)
+    m_enabled = enabled;
+    if (!enabled)
         destroy_all_contacts();
 }
 

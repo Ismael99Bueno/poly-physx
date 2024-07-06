@@ -18,7 +18,7 @@ class constraint2D : virtual public joint2D
 
     virtual bool solve_positions();
 
-    bool is_constraint() const override;
+    bool is_constraint() const override final;
 
     specs::constraint2D::properties cprops() const;
     void cprops(const specs::constraint2D::properties &cprops);

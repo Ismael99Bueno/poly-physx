@@ -22,7 +22,7 @@ void contact2D::update(const collision2D *collision, std::size_t manifold_index)
     m_restitution = collision->restitution;
     m_friction = collision->friction;
     m_lifetime = 0.f;
-    enabled = true;
+    m_enabled = true;
 }
 
 collider2D *contact2D::collider1() const

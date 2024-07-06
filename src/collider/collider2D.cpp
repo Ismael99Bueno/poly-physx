@@ -5,10 +5,11 @@
 namespace ppx
 {
 collider2D::collider2D(world2D &world, body2D *body, const specs &spc)
-    : kit::indexable(world.colliders.size()), worldref2D(world), restitution(spc.props.restitution),
-      friction(spc.props.friction), collision_filter(spc.props.collision_filter), m_position(spc.position),
-      m_body(body), m_density(spc.props.density), m_charge_density(spc.props.charge_density), m_type(spc.props.shape)
+    : worldref2D(world), restitution(spc.props.restitution), friction(spc.props.friction),
+      collision_filter(spc.props.collision_filter), m_position(spc.position), m_body(body),
+      m_density(spc.props.density), m_charge_density(spc.props.charge_density), m_type(spc.props.shape)
 {
+    meta.index = world.colliders.size();
     transform2D transform{kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()};
     transform.parent(&body->centroid_transform());
 

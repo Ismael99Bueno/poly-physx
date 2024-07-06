@@ -41,7 +41,7 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
     virtual void update_constraint_data() override;
     virtual void update_position_data();
 
-    flat_t compute_constraint_impulse() const override;
+    flat_t compute_constraint_impulse() const override final;
     flat_t compute_constraint_correction() const;
 
     glm::vec2 compute_linear_correction(const flat_t &ccorrection) const;

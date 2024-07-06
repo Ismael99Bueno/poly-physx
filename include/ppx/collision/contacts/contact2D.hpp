@@ -47,7 +47,7 @@ class contact2D : virtual public joint2D
     void on_pre_solve();
     void on_post_solve();
 
-    bool is_contact() const override;
+    bool is_contact() const override final;
 
   protected:
     contact2D(const collision2D *collision, std::size_t manifold_index);

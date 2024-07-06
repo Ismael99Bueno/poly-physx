@@ -2,7 +2,6 @@
 
 #include "ppx/internal/worldref.hpp"
 #include "ppx/common/specs2D.hpp"
-#include "kit/interface/indexable.hpp"
 #include "kit/interface/toggleable.hpp"
 
 namespace ppx
@@ -20,13 +19,14 @@ concept Joint2D = requires() {
 };
 
 class body2D;
-class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
+class joint2D : public kit::toggleable, public worldref2D
 {
   public:
     virtual ~joint2D() = default;
 
     struct metadata
     {
+        std::size_t index;
         bool island_flag = false;
     } meta;
 
@@ -56,6 +56,8 @@ class joint2D : public kit::indexable, public kit::toggleable, public worldref2D
 
     specs::joint2D::properties jprops() const;
     void jprops(const specs::joint2D::properties &jprops);
+
+    KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
 
     virtual bool is_constraint() const;
     virtual bool is_actuator() const;
