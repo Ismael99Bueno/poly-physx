@@ -927,16 +927,16 @@ template <> struct kit::yaml::codec<ppx::world2D>
     static YAML::Node encode(const ppx::world2D &world)
     {
         YAML::Node node;
-        node["Integrator"] = world.integrator;
-        node["Semi-implicit integration"] = world.semi_implicit_integration;
-        node["Body manager"] = world.bodies;
-        node["Behaviour manager"] = world.behaviours;
-        node["Collision manager"] = world.collisions;
-        node["Joints repository"] = world.joints;
-
         node["Constraint settings"] = world.joints.constraints.params;
         node["Island settings"] = world.islands.params;
         node["Island settings"]["Enabled"] = world.islands.enabled();
+        node["Behaviour manager"] = world.behaviours;
+        node["Collision manager"] = world.collisions;
+
+        node["Semi-implicit integration"] = world.semi_implicit_integration;
+        node["Integrator"] = world.integrator;
+        node["Joints repository"] = world.joints;
+        node["Body manager"] = world.bodies;
 
         return node;
     }
