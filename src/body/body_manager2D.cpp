@@ -121,6 +121,14 @@ std::vector<body2D *> body_manager2D::operator[](const glm::vec2 &point)
     return at_point<body2D, collider2D>(m_elements, point);
 }
 
+bool body_manager2D::all_asleep() const
+{
+    for (const body2D *body : m_elements)
+        if (!body->asleep())
+            return false;
+    return true;
+}
+
 bool body_manager2D::checksum() const
 {
     const std::size_t colliders = world.colliders.size();

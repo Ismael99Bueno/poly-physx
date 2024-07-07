@@ -23,6 +23,7 @@ class body_manager2D final : public manager2D<body2D>
     bool remove(std::size_t index) override;
 
     bool checksum() const;
+    bool all_asleep() const;
 
   private:
     using manager2D<body2D>::manager2D;

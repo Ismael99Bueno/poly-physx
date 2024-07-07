@@ -64,7 +64,7 @@ std::uint32_t world2D::rk_subsets() const
 
 bool world2D::step()
 {
-    if (islands.enabled() && islands.all_asleep()) [[unlikely]]
+    if (islands.enabled() && bodies.all_asleep()) [[unlikely]]
         return true;
     m_step_count++;
     pre_step_preparation();
