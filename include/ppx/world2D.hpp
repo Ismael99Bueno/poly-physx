@@ -36,6 +36,8 @@ class world2D : kit::non_copyable
     std::uint32_t step_count() const;
 
     float rk_substep_timestep() const;
+    float timestep() const;
+    std::uint32_t hertz() const;
 
     float kinetic_energy() const;
     float potential_energy() const;

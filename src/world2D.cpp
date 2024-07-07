@@ -107,6 +107,16 @@ float world2D::rk_substep_timestep() const
 {
     return m_rk_substep_timestep;
 }
+float world2D::timestep() const
+{
+    return integrator.ts.value;
+}
+std::uint32_t world2D::hertz() const
+{
+    if (kit::approaches_zero(integrator.ts.value))
+        return 0;
+    return (std::uint32_t)(1.f / integrator.ts.value);
+}
 
 std::vector<float> world2D::create_state_derivative() const
 {
