@@ -846,7 +846,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             else if (method == 1)
                 cm.set_contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>();
         }
-        cm.contact_solver()->params.contact_lifetime = nsolv["Base contact lifetime"].as<std::uint32_t>();
+        cm.contact_solver()->params.contact_lifetime = nsolv["Contact lifetime"].as<std::uint32_t>();
 
         ppx::spring_contact2D::rigidity = nsolv["Rigidity"].as<float>();
         ppx::spring_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();
