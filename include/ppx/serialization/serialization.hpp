@@ -777,8 +777,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             nnarrow["P-P Method"] = 1;
 
         YAML::Node nsolv = node["Contacts"];
-        nsolv["Base contact lifetime"] = cm.contact_solver()->params.base_lifetime;
-        nsolv["Per contact lifetime reduction"] = cm.contact_solver()->params.per_contact_lifetime_reduction;
+        nsolv["Contact lifetime"] = cm.contact_solver()->params.contact_lifetime;
         if (auto colsolv = cm.contact_solver<ppx::contact_solver2D<ppx::nonpen_contact2D>>())
             nsolv["Solver method"] = 0;
         else if (auto colsolv = cm.contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>())
@@ -847,9 +846,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             else if (method == 1)
                 cm.set_contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>();
         }
-        cm.contact_solver()->params.base_lifetime = nsolv["Base contact lifetime"].as<float>();
-        cm.contact_solver()->params.per_contact_lifetime_reduction =
-            nsolv["Per contact lifetime reduction"].as<float>();
+        cm.contact_solver()->params.contact_lifetime = nsolv["Base contact lifetime"].as<std::uint32_t>();
 
         ppx::spring_contact2D::rigidity = nsolv["Rigidity"].as<float>();
         ppx::spring_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();

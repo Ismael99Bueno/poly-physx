@@ -20,9 +20,9 @@ void collision_contacts2D::enabled(const bool enabled)
         destroy_all_contacts();
 }
 
-float collision_contacts2D::contact_lifetime() const
+std::uint32_t collision_contacts2D::rk_substep_index() const
 {
-    return params.base_lifetime / (1.f + params.per_contact_lifetime_reduction * total_contacts_count());
+    return world.rk_subset_index();
 }
 
 bool collision_contacts2D::checksum() const

@@ -21,7 +21,7 @@ void contact2D::update(const collision2D *collision, std::size_t manifold_index)
     m_normal = glm::normalize(collision->mtv);
     m_restitution = collision->restitution;
     m_friction = collision->friction;
-    m_lifetime = 0.f;
+    m_age = 0;
     m_enabled = true;
 }
 
@@ -84,25 +84,25 @@ bool contact2D::is_contact() const
     return true;
 }
 
-void contact2D::increment_lifetime()
+void contact2D::increment_age()
 {
-    m_lifetime += world.rk_substep_timestep();
+    m_age++;
 }
 bool contact2D::recently_updated() const
 {
-    return m_lifetime == 0.f;
+    return m_age == 0;
 }
 bool contact2D::expired() const
 {
-    return m_lifetime >= world.collisions.contact_solver()->contact_lifetime();
+    return m_age >= world.collisions.contact_solver()->params.contact_lifetime;
 }
 bool contact2D::asleep() const
 {
     return m_body1->asleep() && m_body2->asleep();
 }
-float contact2D::life_expectancy() const
+std::uint32_t contact2D::life_expectancy() const
 {
-    return world.collisions.contact_solver()->contact_lifetime() - m_lifetime;
+    return world.collisions.contact_solver()->params.contact_lifetime - m_age;
 }
 
 } // namespace ppx

@@ -35,11 +35,11 @@ class contact2D : virtual public joint2D
     float restitution() const;
     float friction() const;
 
-    void increment_lifetime();
+    void increment_age();
     bool recently_updated() const;
     bool expired() const;
     bool asleep() const;
-    float life_expectancy() const;
+    std::uint32_t life_expectancy() const;
 
     void on_enter();
     void on_exit();
@@ -57,7 +57,7 @@ class contact2D : virtual public joint2D
     collider2D *m_collider1;
     collider2D *m_collider2;
 
-    float m_lifetime = 0.f;
+    std::uint32_t m_age = 0;
 
     geo::contact_point2D m_point;
     glm::vec2 m_mtv;

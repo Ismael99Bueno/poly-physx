@@ -68,6 +68,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     void create_contacts_from_collisions(const std::vector<collision2D> &collisions) override final
     {
         KIT_PERF_FUNCTION()
+        m_active_contacts.clear();
 
         for (const collision2D &collision : collisions)
         {
@@ -82,31 +83,29 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
             }
         }
 
-        m_active_contacts.clear();
-        for (auto it = m_contacts.begin(); it != m_contacts.end();)
-        {
-            Contact *contact = it->second;
-            if (contact->asleep())
+        if (rk_substep_index() == 0)
+            for (auto it = m_contacts.begin(); it != m_contacts.end();)
             {
+                Contact *contact = it->second;
+                if (contact->asleep())
+                {
+                    ++it;
+                    continue;
+                }
+                if (contact->expired())
+                {
+                    destroy_contact(contact);
+                    it = m_contacts.erase(it);
+                    continue;
+                }
+                if (!contact->recently_updated())
+                {
+                    contact->enabled(false);
+                    contact->on_exit();
+                }
+                contact->increment_age();
                 ++it;
-                continue;
             }
-            if (contact->expired())
-            {
-                destroy_contact(contact);
-                it = m_contacts.erase(it);
-                continue;
-            }
-            if (contact->recently_updated())
-                m_active_contacts.push_back(contact);
-            else
-            {
-                contact->enabled(false);
-                contact->on_exit();
-            }
-            contact->increment_lifetime();
-            ++it;
-        }
     }
 
     void create_contact(const contact_key &hash, const collision2D *collision, const std::size_t manifold_index)
@@ -118,16 +117,24 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         contact->body1()->meta.contacts.push_back(contact);
         contact->body2()->meta.contacts.push_back(contact);
         contact->on_enter();
+        if (contact->enabled()) [[likely]]
+            m_active_contacts.push_back(contact);
     }
     void update_contact(Contact *contact, const collision2D *collision, const std::size_t manifold_index)
     {
         KIT_PERF_FUNCTION()
+
         KIT_ASSERT_WARN(!contact->recently_updated(),
                         "Contact was already updated. The corresponding collision is duplicated!")
+        if (contact->recently_updated())
+            return;
+
         const bool on_enter = !contact->enabled();
         contact->update(collision, manifold_index);
         if (on_enter)
             contact->on_enter();
+        if (contact->enabled()) [[likely]]
+            m_active_contacts.push_back(contact);
     }
     void destroy_contact(Contact *contact)
     {
