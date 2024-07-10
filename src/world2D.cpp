@@ -79,7 +79,7 @@ std::uint32_t world2D::step_count() const
 
 void world2D::pre_step_preparation()
 {
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(_MSC_VER) // little fix, seems feenableexcept does not exist on windows
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
     m_rk_subset_index = 0;
@@ -98,7 +98,7 @@ void world2D::post_step_setup()
     m_previous_timestep = integrator.ts.value;
 
     KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(_MSC_VER)
     fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 }
