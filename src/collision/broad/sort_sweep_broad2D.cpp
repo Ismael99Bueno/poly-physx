@@ -38,7 +38,7 @@ const char *sort_sweep_broad2D::name() const
 
 void sort_sweep_broad2D::detect_collisions()
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("sort_sweep_broad2D::detect_collisions")
     update_edges();
     if (params.multithreading)
         detect_collisions_mt();
@@ -48,7 +48,7 @@ void sort_sweep_broad2D::detect_collisions()
 
 void sort_sweep_broad2D::detect_collisions_st()
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("sort_sweep_broad2D::detect_collisions_st")
     static std::unordered_set<collider2D *> eligible;
     eligible.clear();
 
@@ -65,13 +65,12 @@ void sort_sweep_broad2D::detect_collisions_st()
 
 void sort_sweep_broad2D::detect_collisions_mt()
 {
-    KIT_PERF_FUNCTION()
     detect_collisions_st();
 }
 
 void sort_sweep_broad2D::update_edges()
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("sort_sweep_broad2D::update_edges")
     for (edge &edg : m_edges)
     {
         const aabb2D &bbox = edg.collider->bounding_box();

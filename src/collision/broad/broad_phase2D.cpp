@@ -18,11 +18,7 @@ const char *broad_phase2D::name() const
 const std::vector<collision2D> &broad_phase2D::detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
                                                                         const pp_narrow_phase2D *pp_narrow)
 {
-    KIT_PERF_FUNCTION()
-#ifdef KIT_PROFILE
-    KIT_ASSERT_WARN(!params.multithreading, "Cannot run multiple threads if the KIT profiling tools are enabled")
-    params.multithreading = false;
-#endif
+    KIT_PERF_SCOPE("broad_phase2D")
     m_cp_narrow = cp_narrow;
     m_pp_narrow = pp_narrow;
     if (world.rk_subset_index() == 0)
@@ -84,7 +80,7 @@ void broad_phase2D::inherit(broad_phase2D &&broad)
 
 void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *collider2)
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("broad_phase2D::process_collision_st")
     const collision2D colis = generate_collision(collider1, collider2);
     m_metrics.total_collision_checks++;
     if (colis.collided)
@@ -97,7 +93,7 @@ void broad_phase2D::process_collision_st(collider2D *collider1, collider2D *coll
 }
 void broad_phase2D::process_collision_mt(collider2D *collider1, collider2D *collider2, const std::size_t workload_index)
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("broad_phase2D::process_collision_mt")
     const collision2D colis = generate_collision(collider1, collider2);
     m_mt_metrics[workload_index].total_collision_checks++;
     if (colis.collided)
@@ -122,7 +118,7 @@ void broad_phase2D::join_mt_collisions()
 
 static bool elligible_for_collision(const collider2D *collider1, const collider2D *collider2)
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("broad_phase2D::elligible_for_collision")
     const body2D *body1 = collider1->body();
     const body2D *body2 = collider2->body();
     return body1 != body2 && (body1->is_dynamic() || body2->is_dynamic()) && (!body1->asleep() || !body2->asleep()) &&
@@ -134,7 +130,7 @@ static bool elligible_for_collision(const collider2D *collider1, const collider2
 
 collision2D broad_phase2D::generate_collision(collider2D *collider1, collider2D *collider2) const
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("broad_phase2D::generate_collision")
     collision2D collision;
     if (!elligible_for_collision(collider1, collider2))
         return collision;

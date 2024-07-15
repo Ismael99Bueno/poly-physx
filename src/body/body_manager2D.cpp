@@ -7,6 +7,7 @@ namespace ppx
 {
 body2D *body_manager2D::add(const body2D::specs &spc)
 {
+    KIT_PERF_SCOPE("body_manager2D::add")
     body2D *body = allocator<body2D>::create(world, spc);
     m_elements.push_back(body);
 
@@ -32,7 +33,7 @@ body2D *body_manager2D::add(const body2D::specs &spc)
 
 void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buffer)
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("body_manager2D::prepare_for_next_substep")
     for (body2D *body : m_elements)
     {
         body->reset_simulation_forces();
@@ -49,7 +50,7 @@ void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
 
 void body_manager2D::reset_instant_forces()
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("body_manager2D::reset_instant_forces")
     for (body2D *body : m_elements)
     {
         // to avoid triggering awake
@@ -184,7 +185,7 @@ bool body_manager2D::remove(const std::size_t index)
 
 void body_manager2D::send_data_to_state(rk::state<float> &state)
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("body_manager2D::send_data_to_state")
     for (body2D *body : m_elements)
     {
         const std::size_t index = 6 * body->meta.index;
@@ -204,7 +205,7 @@ void body_manager2D::send_data_to_state(rk::state<float> &state)
 
 void body_manager2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("body_manager2D::retrieve_data_from_state_variables")
     for (body2D *body : m_elements)
         if (!body->is_static() && !body->asleep())
             body->retrieve_data_from_state_variables(vars_buffer);

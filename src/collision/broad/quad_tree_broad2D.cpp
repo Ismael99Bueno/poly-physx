@@ -105,7 +105,7 @@ void quad_tree_broad2D::detect_collisions_mt()
 }
 void quad_tree_broad2D::build_tree_from_scratch()
 {
-    KIT_PERF_FUNCTION()
+    KIT_PERF_SCOPE("quad_tree_broad2D::build_tree_from_scratch")
     KIT_ASSERT_ERROR(bounding_box_anticipation >= 0.f, "Expansion margin must be non-negative")
 
     m_may_rebuild = false;

@@ -6,10 +6,6 @@ namespace ppx
 {
 void island_manager2D::solve()
 {
-#ifdef KIT_PROFILE
-    KIT_ASSERT_WARN(!params.multithreading, "Cannot run multiple threads if the KIT profiling tools are enabled")
-    params.multithreading = false;
-#endif
     static std::vector<island2D *> awake_islands;
     awake_islands.clear();
 

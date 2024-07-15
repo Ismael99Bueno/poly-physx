@@ -213,22 +213,14 @@ struct island_manager2D
     float sleep_time_threshold = 1.5f;
     bool enable_split = true;
     bool enable_sleep = true;
-#ifdef KIT_PROFILE
-    bool multithreading = false;
-#else
     bool multithreading = true;
-#endif
 };
 
 struct collision_manager2D
 {
     struct broad2D
     {
-#ifdef KIT_PROFILE
-        bool multithreading = false;
-#else
         bool multithreading = true;
-#endif
         std::size_t parallel_workloads = std::thread::hardware_concurrency();
     } detection;
 
