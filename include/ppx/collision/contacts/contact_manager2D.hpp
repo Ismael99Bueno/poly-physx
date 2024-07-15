@@ -110,7 +110,6 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
 
     void create_contact(const contact_key &hash, const collision2D *collision, const std::size_t manifold_index)
     {
-        KIT_PERF_FUNCTION()
         Contact *contact = allocator<Contact>::create(world, collision, manifold_index);
         m_contacts.emplace(hash, contact);
         island2D::add(contact);
@@ -122,8 +121,6 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     }
     void update_contact(Contact *contact, const collision2D *collision, const std::size_t manifold_index)
     {
-        KIT_PERF_FUNCTION()
-
         KIT_ASSERT_WARN(!contact->recently_updated(),
                         "Contact was already updated. The corresponding collision is duplicated!")
         if (contact->recently_updated())
@@ -138,7 +135,6 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     }
     void destroy_contact(Contact *contact)
     {
-        KIT_PERF_FUNCTION()
         contact->body1()->meta.remove_contact(contact);
         contact->body2()->meta.remove_contact(contact);
         island2D::remove(contact);

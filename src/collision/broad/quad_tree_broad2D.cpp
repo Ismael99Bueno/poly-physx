@@ -41,7 +41,6 @@ void quad_tree_broad2D::erase(collider2D *collider)
 
 void quad_tree_broad2D::detect_collisions()
 {
-    KIT_PERF_SCOPE("quad_tree_broad2D::detect_collisions")
     // build_tree_from_scratch();
     m_rebuild_timer += world.rk_substep_timestep();
     if (m_may_rebuild && m_rebuild_timer > rebuild_time_threshold)
@@ -61,7 +60,6 @@ void quad_tree_broad2D::detect_collisions()
 
 void quad_tree_broad2D::detect_collisions_st()
 {
-    KIT_PERF_SCOPE("quad_tree_broad2D::detect_collisions_st")
     for (const qtpartition &partition : m_partitions)
         for (std::size_t i = 0; i < partition.elements->size(); i++)
         {
