@@ -6,6 +6,7 @@ namespace ppx
 {
 void island_manager2D::solve()
 {
+    KIT_PERF_SCOPE("island_manager2D::solve")
     static std::vector<island2D *> awake_islands;
     awake_islands.clear();
 
@@ -36,6 +37,7 @@ void island_manager2D::solve()
 
 void island_manager2D::remove_invalid()
 {
+    KIT_PERF_SCOPE("island_manager2D::remove_invalid")
     for (auto it = m_elements.begin(); it != m_elements.end();)
     {
         island2D *island = *it;
@@ -96,6 +98,7 @@ island2D *island_manager2D::create()
 
 island2D *island_manager2D::create_island_from_body(body2D *body)
 {
+    KIT_PERF_SCOPE("island_manager2D::create_island_from_body")
     if (body->meta.island_flag || !body->is_dynamic())
         return nullptr;
     island2D *island = create();
@@ -172,6 +175,8 @@ void island_manager2D::try_split(std::uint32_t max_splits)
 {
     if (m_elements.empty())
         return;
+    KIT_PERF_SCOPE("island_manager2D::try_split")
+
     std::size_t iters = 0;
     const std::size_t size = m_elements.size();
     m_island_to_split = glm::min(m_island_to_split, size - 1);
@@ -187,6 +192,7 @@ void island_manager2D::try_split(std::uint32_t max_splits)
 
 bool island_manager2D::split(island2D *island)
 {
+    KIT_PERF_SCOPE("island_manager2D::split")
     const bool was_asleep = island->asleep();
     const float time_still = island->time_still();
 
