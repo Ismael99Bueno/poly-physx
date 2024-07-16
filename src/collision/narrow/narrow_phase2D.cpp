@@ -10,8 +10,8 @@ const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::ve
     KIT_PERF_SCOPE("narrow_phase")
     if (world.rk_subset_index() == 0)
     {
-        flush_collisions();
-        if (params.multithreading)
+        m_collisions.clear();
+        if (params.multithreading && world.thread_pool)
             compute_collisions_mt(pairs);
         else
             compute_collisions_st(pairs);
@@ -32,15 +32,14 @@ const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::ve
 void narrow_phase2D::compute_collisions_st(const std::vector<cpair> &pairs)
 {
     for (const cpair &pair : pairs)
-        process_collision_st(pair.first, pair.second);
+        process_collision(pair.first, pair.second);
 }
 void narrow_phase2D::compute_collisions_mt(const std::vector<cpair> &pairs)
 {
     const auto lambda = [this](const std::size_t workload_index, const cpair &pair) {
-        process_collision_mt(pair.first, pair.second, workload_index);
+        process_collision(pair.first, pair.second);
     };
     kit::mt::for_each(*world.thread_pool, pairs, lambda, params.parallel_workloads);
-    join_mt_collisions();
 }
 
 const std::vector<collision2D> &narrow_phase2D::collisions() const
@@ -58,41 +57,17 @@ narrow_phase2D::result::operator bool() const
     return intersects;
 }
 
-void narrow_phase2D::flush_collisions()
+void narrow_phase2D::process_collision(collider2D *collider1, collider2D *collider2)
 {
-    m_collisions.clear();
-    m_mt_collisions.resize(params.parallel_workloads);
-    for (std::size_t i = 0; i < params.parallel_workloads; i++)
-        m_mt_collisions[i].clear();
-}
+    const collision2D colis = generate_collision(collider1, collider2);
+    if (colis.collided)
+    {
+        KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
+        KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
 
-void narrow_phase2D::process_collision_st(collider2D *collider1, collider2D *collider2)
-{
-    const collision2D colis = generate_collision(collider1, collider2);
-    if (colis.collided)
-    {
+        static std::mutex mutex;
+        std::scoped_lock lock(mutex);
         m_collisions.push_back(colis);
-        KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
-        KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
-    }
-}
-void narrow_phase2D::process_collision_mt(collider2D *collider1, collider2D *collider2,
-                                          const std::size_t workload_index)
-{
-    const collision2D colis = generate_collision(collider1, collider2);
-    if (colis.collided)
-    {
-        m_mt_collisions[workload_index].push_back(colis);
-        KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
-        KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
-    }
-}
-void narrow_phase2D::join_mt_collisions()
-{
-    for (std::size_t i = 0; i < params.parallel_workloads; i++)
-    {
-        const auto &pairs = m_mt_collisions[i];
-        m_collisions.insert(m_collisions.end(), pairs.begin(), pairs.end());
     }
 }
 

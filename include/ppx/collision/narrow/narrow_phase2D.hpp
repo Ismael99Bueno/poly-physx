@@ -35,8 +35,6 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     }
 
     const std::vector<collision2D> &collisions() const;
-    void flush_collisions();
-
     static bool is_potential_collision(const collider2D *collider1, const collider2D *collider2);
 
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
@@ -46,9 +44,7 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     void compute_collisions_st(const std::vector<cpair> &pairs);
     void compute_collisions_mt(const std::vector<cpair> &pairs);
 
-    void process_collision_st(collider2D *collider1, collider2D *collider2);
-    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t workload_index);
-    void join_mt_collisions();
+    void process_collision(collider2D *collider1, collider2D *collider2);
 
     collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
     void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
@@ -56,7 +52,6 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
 
     std::vector<collision2D> m_collisions;
-    std::vector<std::vector<collision2D>> m_mt_collisions; // test using a mutex maybe its just faster!
 };
 
 } // namespace ppx

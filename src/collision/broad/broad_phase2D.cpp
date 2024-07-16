@@ -70,8 +70,6 @@ static bool is_potential_pair(const collider2D *collider1, const collider2D *col
     return body1 != body2 && geo::intersects(collider1->fat_bbox(), collider2->fat_bbox());
 }
 
-static std::mutex mutex;
-
 void broad_phase2D::try_create_pair(collider2D *collider1, collider2D *collider2)
 {
     const bool flipped = collider1->meta.index > collider2->meta.index;
@@ -85,6 +83,7 @@ void broad_phase2D::try_create_pair(collider2D *collider1, collider2D *collider2
     if (flipped)
         std::swap(collider1, collider2);
 
+    static std::mutex mutex;
     std::scoped_lock lock(mutex);
     m_pair_flags[idx] = true;
     m_pairs.emplace_back(collider1, collider2);
