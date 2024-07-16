@@ -20,17 +20,18 @@ const std::vector<broad_phase2D::cpair> &broad_phase2D::update_pairs()
 {
     if (m_to_update.empty() || world.rk_subset_index() != 0)
         return m_pairs;
-    if (params.multithreading)
+
+    auto pool = world.thread_pool;
+    if (params.multithreading && pool)
+    {
+        m_mt_pairs.resize(pool->thread_count());
         for (auto &pairs : m_mt_pairs)
             pairs.clear();
+    }
 
     // i guess i could multithread this
     for (const collider2D *collider : m_to_update)
-        for (auto it = m_pairs.begin(); it != m_pairs.end();)
-            if (it->first == collider || it->second == collider)
-                it = m_pairs.erase(it);
-            else
-                ++it;
+        remove_pairs_containing(collider);
 
     update_pairs(m_to_update);
     clear_pending_updates();
@@ -53,6 +54,11 @@ void broad_phase2D::clear_pending_updates()
     for (collider2D *collider : m_to_update)
         collider->meta.broad_flag = false;
     m_to_update.clear();
+}
+
+std::size_t broad_phase2D::pending_updates() const
+{
+    return m_to_update.size();
 }
 
 const std::vector<broad_phase2D::cpair> &broad_phase2D::pairs() const
@@ -78,6 +84,15 @@ void broad_phase2D::try_create_pair_st(collider2D *collider1, collider2D *collid
             std::swap(collider1, collider2);
         m_pairs.emplace_back(collider1, collider2);
     }
+}
+
+void broad_phase2D::remove_pairs_containing(const collider2D *collider)
+{
+    for (auto it = m_pairs.begin(); it != m_pairs.end();)
+        if (it->first == collider || it->second == collider)
+            it = m_pairs.erase(it);
+        else
+            ++it;
 }
 
 void broad_phase2D::try_create_pair_mt(collider2D *collider1, collider2D *collider2, const std::size_t thread_index)

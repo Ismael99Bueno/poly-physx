@@ -793,21 +793,20 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 cm.set_broad<ppx::brute_force_broad2D>();
             else if (method == 1)
             {
-                auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>();
-                qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
-                qtbroad->rebuild_time_threshold = nbroad["Rebuild time threshold"].as<float>();
-
-                auto props = qtbroad->quad_tree().props();
+                ppx::quad_tree::properties props;
                 props.elements_per_quad = nbroad["Max colliders"].as<std::size_t>();
                 props.max_depth = nbroad["Max depth"].as<std::uint32_t>();
                 props.min_quad_size = nbroad["Min size"].as<float>();
-                qtbroad->quad_tree().props(props);
+
+                auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>(props);
+                qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
+                qtbroad->rebuild_time_threshold = nbroad["Rebuild time threshold"].as<float>();
             }
             else if (method == 2)
                 cm.set_broad<ppx::sort_sweep_broad2D>();
         }
 
-        YAML::Node nnarrow = node["Narrow"];
+        const YAML::Node nnarrow = node["Narrow"];
         if (nnarrow["Method"])
         {
             const int method = nnarrow["Method"].as<int>();
@@ -920,7 +919,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
     }
     static bool decode(const YAML::Node &node, ppx::world2D &world)
     {
-        if (!node.IsMap() || node.size() != 8)
+        if (!node.IsMap() || node.size() != 9)
             return false;
 
         world.semi_implicit_integration = node["Semi-implicit integration"].as<bool>();

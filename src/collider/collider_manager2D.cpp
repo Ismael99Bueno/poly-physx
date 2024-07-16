@@ -18,6 +18,7 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
 
     if (auto qt = world.collisions.broad<quad_tree_broad2D>())
         qt->insert(collider);
+    world.collisions.broad()->flag_update(collider);
 
     events.on_addition(collider);
     KIT_INFO("Added collider with index {0}.", m_elements.size() - 1)
@@ -48,8 +49,8 @@ static void cast_qt_recursive(const quad_tree::node &qtnode, ray2D &ray, ray2D::
         return;
     if (qtnode.leaf())
     {
-        for (collider2D *collider : qtnode.elements())
-            if (cast_check(collider, ray, closest))
+        for (auto &entry : qtnode.elements())
+            if (cast_check(entry.element, ray, closest))
                 ray.resize(closest.distance);
     }
     else
@@ -81,9 +82,9 @@ static void in_area_qt_recursive(const quad_tree::node &qtnode, std::vector<Coll
         return;
     if (qtnode.leaf())
     {
-        for (collider2D *collider : qtnode.elements())
-            if (geo::intersects(collider->tight_bbox(), aabb) && geo::gjk(collider->shape(), aabb_poly))
-                in_area.push_back(collider);
+        for (auto &entry : qtnode.elements())
+            if (geo::intersects(entry.element->tight_bbox(), aabb) && geo::gjk(entry.element->shape(), aabb_poly))
+                in_area.push_back(entry.element);
     }
     else
         for (auto child : qtnode.children())
@@ -152,6 +153,7 @@ bool collider_manager2D::remove(const std::size_t index)
 
     events.on_removal(*collider);
     world.collisions.contact_solver()->remove_any_contacts_with(collider);
+    world.collisions.broad()->remove_pairs_containing(collider);
 
     if (auto qt = world.collisions.broad<quad_tree_broad2D>())
         qt->erase(collider);

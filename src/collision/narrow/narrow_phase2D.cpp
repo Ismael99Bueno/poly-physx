@@ -40,6 +40,7 @@ void narrow_phase2D::compute_collisions_mt(const std::vector<cpair> &pairs)
         process_collision_mt(pair.first, pair.second, workload_index);
     };
     kit::mt::for_each(*world.thread_pool, pairs, lambda, params.parallel_workloads);
+    join_mt_collisions();
 }
 
 const std::vector<collision2D> &narrow_phase2D::collisions() const

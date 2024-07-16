@@ -28,13 +28,13 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     void clear_pending_updates();
 
     const std::vector<cpair> &pairs() const;
+    std::size_t pending_updates() const;
 
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
 
     void try_create_pair_st(collider2D *collider1, collider2D *collider2);
     void try_create_pair_mt(collider2D *collider1, collider2D *collider2, std::size_t thread_index);
-
-    specs::collision_manager2D::broad2D params;
+    void remove_pairs_containing(const collider2D *collider);
 
   private:
     virtual void update_pairs(const std::vector<collider2D *> &to_update) = 0;

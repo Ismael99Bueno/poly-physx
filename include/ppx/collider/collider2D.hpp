@@ -120,11 +120,11 @@ class collider2D final : public worldref2D, kit::non_copyable
     void update_shape();
     void update_bounding_boxes();
 
-    template <typename F> auto call_shape_method(F &&f)
+    template <typename F> auto call_shape_method(F &&f) -> std::invoke_result_t<F, shape2D &>
     {
         return std::visit(std::forward<F>(f), m_shape);
     }
-    template <typename F> auto call_shape_method(F &&f) const
+    template <typename F> auto call_shape_method_const(F &&f) const -> std::invoke_result_t<F, const shape2D &>
     {
         return std::visit(std::forward<F>(f), m_shape);
     }

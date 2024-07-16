@@ -64,7 +64,7 @@ void collider2D::charge_density(float charge_density)
 
 const transform2D &collider2D::ltransform() const
 {
-    return call_shape_method([](const auto &shape) -> const transform2D & { return shape.ltransform(); });
+    return call_shape_method_const([](const auto &shape) -> const transform2D & { return shape.ltransform(); });
 }
 void collider2D::ltransform(const transform2D &ltransform)
 {
@@ -92,11 +92,11 @@ void collider2D::end_update()
 
 float collider2D::area() const
 {
-    return call_shape_method([](const auto &shape) -> float { return shape.area(); });
+    return call_shape_method_const([](const auto &shape) -> float { return shape.area(); });
 }
 float collider2D::inertia() const
 {
-    return call_shape_method([](const auto &shape) -> float { return shape.inertia(); });
+    return call_shape_method_const([](const auto &shape) -> float { return shape.inertia(); });
 }
 
 bool collider2D::is_circle() const
@@ -137,11 +137,11 @@ void collider2D::lposition(const glm::vec2 &position)
 
 const glm::vec2 &collider2D::gcentroid() const
 {
-    return call_shape_method([](const auto &shape) -> const glm::vec2 & { return shape.gcentroid(); });
+    return call_shape_method_const([](const auto &shape) -> const glm::vec2 & { return shape.gcentroid(); });
 }
 const glm::vec2 &collider2D::lcentroid() const
 {
-    return call_shape_method([](const auto &shape) -> const glm::vec2 & { return shape.lcentroid(); });
+    return call_shape_method_const([](const auto &shape) -> const glm::vec2 & { return shape.lcentroid(); });
 }
 
 void collider2D::gcentroid(const glm::vec2 &gcentroid)
@@ -160,11 +160,11 @@ void collider2D::lcentroid(const glm::vec2 &lcentroid)
 
 float collider2D::lrotation() const
 {
-    return call_shape_method([](const auto &shape) -> float { return shape.lrotation(); });
+    return call_shape_method_const([](const auto &shape) -> float { return shape.lrotation(); });
 }
 const glm::vec2 &collider2D::origin() const
 {
-    return call_shape_method([](const auto &shape) -> const glm::vec2 & { return shape.origin(); });
+    return call_shape_method_const([](const auto &shape) -> const glm::vec2 & { return shape.origin(); });
 }
 
 void collider2D::lrotation(float lrotation)
@@ -195,8 +195,7 @@ void collider2D::gtranslate_shape(const glm::vec2 &dpos)
 
 void collider2D::update_bounding_boxes()
 {
-    m_tight_bb =
-        call_shape_method([](const auto &shape) -> const geo::aabb2D & { return shape.create_bounding_box(); });
+    m_tight_bb = call_shape_method([](const auto &shape) -> geo::aabb2D { return shape.create_bounding_box(); });
     if (m_fat_bb.contains(m_tight_bb))
         return;
 
@@ -209,6 +208,7 @@ void collider2D::update_bounding_boxes()
 
     m_fat_bb = m_tight_bb;
     const glm::vec2 dpos = m_body->velocity() * enlargement;
+    m_fat_bb.enlarge(0.01f);
     m_fat_bb.enlarge(dpos);
     if (qt)
         qt->insert(this);

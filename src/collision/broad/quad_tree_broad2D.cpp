@@ -6,10 +6,6 @@
 
 namespace ppx
 {
-quad_tree_broad2D::quad_tree_broad2D(world2D &world) : broad_phase2D(world)
-{
-    build_tree_from_scratch();
-}
 
 const char *quad_tree_broad2D::name() const
 {
@@ -71,12 +67,14 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
         kit::mt::for_each(*pool, to_update, lambda, pool->thread_count());
     }
     else // guaranteed to not be empty
+    {
         m_quad_tree.traverse(
-            [this, to_update](collider2D *other) {
+            [this, &to_update](collider2D *other) {
                 try_create_pair_st(to_update[0], other);
                 return true;
             },
             to_update[0]->fat_bbox(), pool);
+    }
 }
 void quad_tree_broad2D::build_tree_from_scratch()
 {
