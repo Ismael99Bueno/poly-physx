@@ -221,7 +221,7 @@ void body2D::update_centroids()
     const glm::vec2 diff = m_state.centroid.position() - centroid;
     m_state.centroid.position(centroid);
     for (collider2D *collider : *this)
-        collider->mutable_shape().gtranslate(diff);
+        collider->gtranslate_shape(diff);
     m_state.lposition = local_centroid_point(m_state.gposition);
 }
 void body2D::update_inertia()

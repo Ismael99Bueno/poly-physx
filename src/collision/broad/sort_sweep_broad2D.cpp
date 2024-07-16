@@ -63,7 +63,7 @@ void sort_sweep_broad2D::update_pairs_st(const std::vector<collider2D *> &to_upd
             relevant_count += contained;
             if (relevant_count > 0)
                 for (collider2D *collider : eligible)
-                    try_create_pair_st(edg.collider, collider);
+                    try_create_pair(edg.collider, collider);
             eligible.insert(edg.collider);
         }
         else

@@ -46,7 +46,7 @@ void quad_tree_broad2D::update_pairs_st(const std::vector<collider2D *> &to_upda
     for (collider2D *collider : to_update)
         m_quad_tree.traverse(
             [this, collider](collider2D *other) {
-                try_create_pair_st(collider, other);
+                try_create_pair(collider, other);
                 return true;
             },
             collider->fat_bbox());
@@ -58,8 +58,8 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
     {
         const auto lambda = [this](const std::size_t workload_index, collider2D *collider) {
             m_quad_tree.traverse(
-                [this, collider, workload_index](collider2D *other) {
-                    try_create_pair_mt(collider, other, workload_index);
+                [this, collider](collider2D *other) {
+                    try_create_pair(collider, other);
                     return true;
                 },
                 collider->fat_bbox());
@@ -70,7 +70,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
     {
         m_quad_tree.traverse(
             [this, &to_update](collider2D *other) {
-                try_create_pair_st(to_update[0], other);
+                try_create_pair(to_update[0], other);
                 return true;
             },
             to_update[0]->fat_bbox(), pool);

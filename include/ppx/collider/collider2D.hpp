@@ -24,6 +24,7 @@ class collider2D final : public worldref2D, kit::non_copyable
     {
         std::size_t index;
         bool broad_flag = false;
+        std::size_t broad_index;
     } meta;
 
     struct
@@ -114,7 +115,6 @@ class collider2D final : public worldref2D, kit::non_copyable
 
     stype m_type;
 
-    shape2D &mutable_shape();
     void gtranslate_shape(const glm::vec2 &dpos);
 
     void update_shape();

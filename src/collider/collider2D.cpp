@@ -182,10 +182,6 @@ const shape2D &collider2D::shape() const
 {
     return std::visit<const shape2D &>([](const auto &shape) -> const shape2D & { return shape; }, m_shape);
 }
-shape2D &collider2D::mutable_shape()
-{
-    return std::visit<shape2D &>([](auto &shape) -> shape2D & { return shape; }, m_shape);
-}
 
 void collider2D::gtranslate_shape(const glm::vec2 &dpos)
 {
@@ -208,7 +204,7 @@ void collider2D::update_bounding_boxes()
 
     m_fat_bb = m_tight_bb;
     const glm::vec2 dpos = m_body->velocity() * enlargement;
-    m_fat_bb.enlarge(0.01f);
+    m_fat_bb.enlarge(2.f);
     m_fat_bb.enlarge(dpos);
     if (qt)
         qt->insert(this);
@@ -218,7 +214,7 @@ void collider2D::update_bounding_boxes()
 
 void collider2D::update_shape()
 {
-    mutable_shape().update();
+    call_shape_method([](auto &shape) { shape.update(); });
     update_bounding_boxes();
 }
 
