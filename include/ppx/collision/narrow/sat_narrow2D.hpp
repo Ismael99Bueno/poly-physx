@@ -4,14 +4,14 @@
 
 namespace ppx
 {
-class sat_narrow2D final : public cp_narrow_phase2D, public pp_narrow_phase2D
+class sat_narrow2D final : public narrow_phase2D
 {
   public:
-    sat_narrow2D() = default;
+    using narrow_phase2D::narrow_phase2D;
 
     const char *name() const override;
 
-    narrow_result2D circle_polygon(const circle &circ, const polygon &poly) const override;
-    narrow_result2D polygon_polygon(const polygon &poly1, const polygon &poly2) const override;
+    result circle_polygon(const circle &circ, const polygon &poly) const override;
+    result polygon_polygon(const polygon &poly1, const polygon &poly2) const override;
 };
 } // namespace ppx

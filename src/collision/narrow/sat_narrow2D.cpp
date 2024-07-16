@@ -9,9 +9,9 @@ const char *sat_narrow2D::name() const
     return "SAT";
 }
 
-narrow_result2D sat_narrow2D::circle_polygon(const circle &circ, const polygon &poly) const
+narrow_phase2D::result sat_narrow2D::circle_polygon(const circle &circ, const polygon &poly) const
 {
-    narrow_result2D result;
+    result result;
     geo::sat_result2D sat_result = geo::sat(circ, poly);
     if (!sat_result)
         return result;
@@ -21,9 +21,9 @@ narrow_result2D sat_narrow2D::circle_polygon(const circle &circ, const polygon &
     return result;
 }
 
-narrow_result2D sat_narrow2D::polygon_polygon(const polygon &poly1, const polygon &poly2) const
+narrow_phase2D::result sat_narrow2D::polygon_polygon(const polygon &poly1, const polygon &poly2) const
 {
-    narrow_result2D result;
+    result result;
     geo::sat_result2D sat_result = geo::sat(poly1, poly2);
     if (!sat_result)
         return result;

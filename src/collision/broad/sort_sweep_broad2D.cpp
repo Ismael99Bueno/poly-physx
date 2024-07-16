@@ -36,34 +36,47 @@ const char *sort_sweep_broad2D::name() const
     return "Sort and Sweep";
 }
 
-void sort_sweep_broad2D::detect_collisions()
+void sort_sweep_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 {
     update_edges();
     if (params.multithreading)
-        detect_collisions_mt();
+        update_pairs_mt(to_update);
     else
-        detect_collisions_st();
+        update_pairs_st(to_update);
 }
 
-void sort_sweep_broad2D::detect_collisions_st()
+void sort_sweep_broad2D::update_pairs_st(const std::vector<collider2D *> &to_update)
 {
     static std::unordered_set<collider2D *> eligible;
+    static std::unordered_set<collider2D *> to_update_set;
+
     eligible.clear();
+    to_update_set.clear();
+    to_update_set.insert(to_update.begin(), to_update.end());
+    std::uint32_t relevant_count = 0;
 
     for (const edge &edg : m_edges)
+    {
+        const bool contained = to_update_set.contains(edg.collider);
         if (edg.end == end_side::LOWER)
         {
-            for (collider2D *collider : eligible)
-                process_collision_st(collider, edg.collider);
+            relevant_count += contained;
+            if (relevant_count > 0)
+                for (collider2D *collider : eligible)
+                    try_create_pair_st(edg.collider, collider);
             eligible.insert(edg.collider);
         }
         else
+        {
             eligible.erase(edg.collider);
+            relevant_count -= contained;
+        }
+    }
 }
 
-void sort_sweep_broad2D::detect_collisions_mt()
+void sort_sweep_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_update)
 {
-    detect_collisions_st();
+    update_pairs_st(to_update);
 }
 
 void sort_sweep_broad2D::update_edges()
@@ -71,7 +84,7 @@ void sort_sweep_broad2D::update_edges()
     KIT_PERF_SCOPE("sort_sweep_broad2D::update_edges")
     for (edge &edg : m_edges)
     {
-        const aabb2D &bbox = edg.collider->bounding_box();
+        const aabb2D &bbox = edg.collider->fat_bbox();
         edg.value = edg.end == end_side::LOWER ? bbox.min.x : bbox.max.x;
     }
     std::sort(m_edges.begin(), m_edges.end());

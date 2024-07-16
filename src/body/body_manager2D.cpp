@@ -79,7 +79,7 @@ static std::vector<Body *> in_area(C &elements, const aabb2D &aabb)
         {
             bool intersects = true;
             for (Collider *collider : *body)
-                if (!geo::intersects(collider->bounding_box(), aabb) || !geo::gjk(aabb_poly, collider->shape()))
+                if (!geo::intersects(collider->tight_bbox(), aabb) || !geo::gjk(aabb_poly, collider->shape()))
                 {
                     intersects = false;
                     break;
@@ -105,7 +105,7 @@ static std::vector<Body *> at_point(C &elements, const glm::vec2 &point)
     std::vector<Body *> at_point;
     for (Body *body : elements)
         for (Collider *collider : *body)
-            if (geo::intersects(collider->bounding_box(), point) && collider->shape().contains_point(point))
+            if (geo::intersects(collider->tight_bbox(), point) && collider->shape().contains_point(point))
             {
                 at_point.push_back(body);
                 break;

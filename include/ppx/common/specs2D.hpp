@@ -187,6 +187,11 @@ struct spring_joint2D : joint2D
     static spring_joint2D from_instance(const ppx::spring_joint2D &sp);
 };
 
+struct collider_manager2D
+{
+    float bbox_enlargement = 0.1f;
+};
+
 struct joint_manager2D
 {
     struct constraints2D
@@ -221,8 +226,12 @@ struct collision_manager2D
     struct broad2D
     {
         bool multithreading = true;
+    } broad;
+    struct narrow2D
+    {
+        bool multithreading = true;
         std::size_t parallel_workloads = std::thread::hardware_concurrency();
-    } detection;
+    } narrow;
 
     struct contacts2D
     {
@@ -238,6 +247,7 @@ struct world2D
         rk::butcher_tableau<float> tableau = rk::butcher_tableau<float>::rk1;
         rk::timestep<float> timestep{1.e-3f};
     } integrator;
+    collider_manager2D colliders;
     joint_manager2D joints;
     island_manager2D islands;
     collision_manager2D collision;

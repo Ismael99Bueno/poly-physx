@@ -8,6 +8,7 @@
 #include "ppx/collision/broad/quad_tree_broad2D.hpp"
 #include "ppx/collision/broad/sort_sweep_broad2D.hpp"
 #include "ppx/collision/broad/brute_force_broad2D.hpp"
+#include "ppx/collision/narrow/narrow_phase2D.hpp"
 #include "ppx/internal/worldref.hpp"
 
 namespace ppx
@@ -31,11 +32,11 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
 
     auto begin() const
     {
-        return m_broad->collisions().begin();
+        return m_narrow->collisions().begin();
     }
     auto end() const
     {
-        return m_broad->collisions().end();
+        return m_narrow->collisions().end();
     }
 
     const collision2D &operator[](std::size_t index) const;
@@ -49,21 +50,13 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
         return kit::get_casted_raw_ptr<T>(m_broad, m_known_broads);
     }
 
-    template <kit::DerivedFrom<cp_narrow_phase2D> T = cp_narrow_phase2D> const T *cp_narrow() const
+    template <kit::DerivedFrom<narrow_phase2D> T = narrow_phase2D> const T *narrow() const
     {
-        return kit::get_casted_raw_ptr<const T>(m_cp_narrow);
+        return kit::get_casted_raw_ptr<const T>(m_narrow);
     }
-    template <kit::DerivedFrom<cp_narrow_phase2D> T = cp_narrow_phase2D> T *cp_narrow()
+    template <kit::DerivedFrom<narrow_phase2D> T = narrow_phase2D> T *narrow()
     {
-        return kit::get_casted_raw_ptr<T>(m_cp_narrow);
-    }
-    template <kit::DerivedFrom<pp_narrow_phase2D> T = pp_narrow_phase2D> const T *pp_narrow() const
-    {
-        return kit::get_casted_raw_ptr<const T>(m_pp_narrow);
-    }
-    template <kit::DerivedFrom<pp_narrow_phase2D> T = pp_narrow_phase2D> T *pp_narrow()
-    {
-        return kit::get_casted_raw_ptr<T>(m_pp_narrow);
+        return kit::get_casted_raw_ptr<T>(m_narrow);
     }
 
     template <kit::DerivedFrom<collision_contacts2D> T = collision_contacts2D> const T *contact_solver() const
@@ -79,7 +72,7 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
     {
         auto broad = kit::make_scope<T>(world, std::forward<ColDetArgs>(args)...);
         if (m_broad)
-            broad->inherit(std::move(*m_broad));
+            broad->params = m_broad->params;
 
         T *ptr = broad.get();
 
@@ -92,20 +85,15 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
         return ptr;
     }
 
-    template <kit::DerivedFrom<cp_narrow_phase2D> T, class... NArgs> const T *set_cp_narrow(NArgs &&...args)
+    template <kit::DerivedFrom<narrow_phase2D> T, class... NArgs> const T *set_narrow(NArgs &&...args)
     {
-        auto nalg = kit::make_scope<T>(std::forward<NArgs>(args)...);
-        T *ptr = nalg.get();
+        auto narrow = kit::make_scope<T>(world, std::forward<NArgs>(args)...);
+        if (m_narrow)
+            narrow->params = m_narrow->params;
 
-        m_cp_narrow = std::move(nalg);
-        return ptr;
-    }
-    template <kit::DerivedFrom<pp_narrow_phase2D> T, class... NArgs> const T *set_pp_narrow(NArgs &&...args)
-    {
-        auto nalg = kit::make_scope<T>(std::forward<NArgs>(args)...);
-        T *ptr = nalg.get();
+        T *ptr = narrow.get();
 
-        m_pp_narrow = std::move(nalg);
+        m_narrow = std::move(narrow);
         return ptr;
     }
 
@@ -135,9 +123,7 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
     collision_manager2D(world2D &world);
 
     kit::scope<broad_phase2D> m_broad;
-
-    kit::scope<cp_narrow_phase2D> m_cp_narrow;
-    kit::scope<pp_narrow_phase2D> m_pp_narrow;
+    kit::scope<narrow_phase2D> m_narrow;
 
     kit::scope<collision_contacts2D> m_contacts;
 

@@ -27,7 +27,7 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
 
 static bool cast_check(collider2D *collider, const ray2D &ray, ray2D::hit<collider2D> &closest)
 {
-    if (!geo::intersects(collider->bounding_box(), ray))
+    if (!geo::intersects(collider->tight_bbox(), ray))
         return false;
     ray2D::hit<collider2D> hit;
     if (auto poly = collider->shape_if<polygon>())
@@ -44,13 +44,16 @@ static bool cast_check(collider2D *collider, const ray2D &ray, ray2D::hit<collid
 
 static void cast_qt_recursive(const quad_tree::node &qtnode, ray2D &ray, ray2D::hit<collider2D> &closest)
 {
-    if (!geo::intersects(qtnode.aabb, ray))
+    if (!geo::intersects(qtnode.aabb(), ray))
         return;
-    for (const qt_element &qtelm : qtnode.elements)
-        if (cast_check(qtelm.collider, ray, closest))
-            ray.resize(closest.distance);
-    if (qtnode.partitioned())
-        for (auto child : qtnode.children)
+    if (qtnode.leaf())
+    {
+        for (collider2D *collider : qtnode.elements())
+            if (cast_check(collider, ray, closest))
+                ray.resize(closest.distance);
+    }
+    else
+        for (auto child : qtnode.children())
             cast_qt_recursive(*child, ray, closest);
 }
 
@@ -74,13 +77,16 @@ template <typename Collider>
 static void in_area_qt_recursive(const quad_tree::node &qtnode, std::vector<Collider *> &in_area, const aabb2D &aabb,
                                  const polygon &aabb_poly)
 {
-    if (!geo::intersects(qtnode.aabb, aabb))
+    if (!geo::intersects(qtnode.aabb(), aabb))
         return;
-    for (const qt_element &qtelm : qtnode.elements)
-        if (geo::intersects(qtelm(), aabb) && geo::gjk(qtelm.collider->shape(), aabb_poly))
-            in_area.push_back(qtelm.collider);
-    if (qtnode.partitioned())
-        for (auto child : qtnode.children)
+    if (qtnode.leaf())
+    {
+        for (collider2D *collider : qtnode.elements())
+            if (geo::intersects(collider->tight_bbox(), aabb) && geo::gjk(collider->shape(), aabb_poly))
+                in_area.push_back(collider);
+    }
+    else
+        for (auto child : qtnode.children())
             in_area_qt_recursive(*child, in_area, aabb, aabb_poly);
 }
 
@@ -102,7 +108,7 @@ static std::vector<Collider *> in_area(const world2D &world, C &elements, const 
     if (!qtbroad)
     {
         for (Collider *collider : elements)
-            if (geo::intersects(collider->bounding_box(), aabb) && geo::gjk(collider->shape(), aabb_poly))
+            if (geo::intersects(collider->tight_bbox(), aabb) && geo::gjk(collider->shape(), aabb_poly))
                 in_area.emplace_back(collider);
     }
     else
@@ -122,7 +128,7 @@ std::vector<collider2D *> collider_manager2D::operator[](const aabb2D &aabb)
 template <typename Collider, typename C> static Collider *at_point(C &elements, const glm::vec2 &point)
 {
     for (Collider *collider : elements)
-        if (geo::intersects(collider->bounding_box(), point) && collider->shape().contains_point(point))
+        if (geo::intersects(collider->tight_bbox(), point) && collider->shape().contains_point(point))
             return collider;
     return nullptr;
 }

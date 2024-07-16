@@ -23,6 +23,7 @@ class collider2D final : public worldref2D, kit::non_copyable
     struct metadata
     {
         std::size_t index;
+        bool broad_flag = false;
     } meta;
 
     struct
@@ -34,6 +35,9 @@ class collider2D final : public worldref2D, kit::non_copyable
     } events;
 
     stype shape_type() const;
+
+    const geo::aabb2D &tight_bbox() const;
+    const geo::aabb2D &fat_bbox() const;
 
     const body2D *body() const;
     body2D *body();
@@ -53,22 +57,17 @@ class collider2D final : public worldref2D, kit::non_copyable
     void begin_update();
     void end_update();
 
-    bool bound_if_needed();
-    void bound();
-    void enlarge_bounding_box(const glm::vec2 &enlarge_vector);
-
     void ltranslate(const glm::vec2 &dpos);
     void gtranslate(const glm::vec2 &dpos);
     void lrotate(float dangle);
 
-    const aabb2D &bounding_box() const;
     const transform2D &ltransform() const;
     void ltransform(const transform2D &ltransform);
 
     const glm::vec2 &lposition() const;
 
     const glm::vec2 &gcentroid() const;
-    glm::vec2 lcentroid() const;
+    const glm::vec2 &lcentroid() const;
 
     float lrotation() const;
     const glm::vec2 &origin() const;
@@ -105,6 +104,9 @@ class collider2D final : public worldref2D, kit::non_copyable
 
   private:
     std::variant<polygon, circle> m_shape;
+    geo::aabb2D m_tight_bb;
+    geo::aabb2D m_fat_bb;
+
     glm::vec2 m_position;
     body2D *m_body;
     float m_density;
@@ -113,6 +115,19 @@ class collider2D final : public worldref2D, kit::non_copyable
     stype m_type;
 
     shape2D &mutable_shape();
+    void gtranslate_shape(const glm::vec2 &dpos);
+
+    void update_shape();
+    void update_bounding_boxes();
+
+    template <typename F> auto call_shape_method(F &&f)
+    {
+        return std::visit(std::forward<F>(f), m_shape);
+    }
+    template <typename F> auto call_shape_method(F &&f) const
+    {
+        return std::visit(std::forward<F>(f), m_shape);
+    }
 
     friend class body2D;
 };

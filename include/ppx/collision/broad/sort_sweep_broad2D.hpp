@@ -30,16 +30,16 @@ class sort_sweep_broad2D final : public broad_phase2D
     const char *name() const override;
 
   private:
+    void update_pairs(const std::vector<collider2D *> &to_update) override;
+    void update_pairs_st(const std::vector<collider2D *> &to_update);
+    void update_pairs_mt(const std::vector<collider2D *> &to_update);
+
+    void on_attach() override;
+    void update_edges();
+
     std::vector<edge> m_edges;
 
     kit::callback<collider2D *> m_add_edge;
     kit::callback<collider2D &> m_remove_edge;
-
-    void detect_collisions() override;
-    void detect_collisions_st();
-    void detect_collisions_mt();
-
-    void on_attach() override;
-    void update_edges();
 };
 } // namespace ppx

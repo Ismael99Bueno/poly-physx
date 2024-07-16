@@ -2,41 +2,61 @@
 
 #include "ppx/common/alias.hpp"
 #include "ppx/collision/collision2D.hpp"
+#include "ppx/collision/broad/broad_phase2D.hpp"
 #include "geo/algorithm/intersection2D.hpp"
+#include "kit/interface/toggleable.hpp"
 
 namespace ppx
 {
-struct narrow_result2D
+class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copyable
 {
-    bool intersects = false;
-    glm::vec2 mtv{0.f};
-    manifold2D manifold;
-    operator bool() const
+  public:
+    using cpair = broad_phase2D::cpair;
+    struct result
     {
-        return intersects;
-    }
-};
+        bool intersects = false;
+        glm::vec2 mtv{0.f};
+        manifold2D manifold;
+        operator bool() const;
+    };
 
-class named // so stupid
-{
-  public:
-    virtual const char *name() const
+    using worldref2D::worldref2D;
+
+    virtual ~narrow_phase2D() = default;
+
+    virtual result polygon_polygon(const polygon &poly1, const polygon &poly2) const = 0;
+    virtual result circle_polygon(const circle &circ, const polygon &poly) const = 0;
+
+    const std::vector<collision2D> &compute_collisions(const std::vector<cpair> &pairs);
+    virtual const char *name() const;
+
+    virtual void on_attach()
     {
-        return "Unnamed";
     }
+
+    const std::vector<collision2D> &collisions() const;
+    void flush_collisions();
+
+    static bool is_potential_collision(const collider2D *collider1, const collider2D *collider2);
+
+    KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
+    specs::collision_manager2D::narrow2D params;
+
+  private:
+    void compute_collisions_st(const std::vector<cpair> &pairs);
+    void compute_collisions_mt(const std::vector<cpair> &pairs);
+
+    void process_collision_st(collider2D *collider1, collider2D *collider2);
+    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t workload_index);
+    void join_mt_collisions();
+
+    collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
+    void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
+    void cp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
+    void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
+
+    std::vector<collision2D> m_collisions;
+    std::vector<std::vector<collision2D>> m_mt_collisions; // test using a mutex maybe its just faster!
 };
 
-class cp_narrow_phase2D : public named
-{
-  public:
-    virtual ~cp_narrow_phase2D() = default;
-    virtual narrow_result2D circle_polygon(const circle &circ, const polygon &poly) const = 0;
-};
-
-class pp_narrow_phase2D : public named
-{
-  public:
-    virtual ~pp_narrow_phase2D() = default;
-    virtual narrow_result2D polygon_polygon(const polygon &poly1, const polygon &poly2) const = 0;
-};
 } // namespace ppx

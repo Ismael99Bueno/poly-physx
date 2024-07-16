@@ -744,7 +744,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         else if (auto broad = cm.broad<ppx::quad_tree_broad2D>())
         {
             nbroad["Method"] = 1;
-            nbroad["Bounding box anticipation"] = broad->bounding_box_anticipation;
             nbroad["Force square"] = broad->force_square_shape;
             nbroad["Rebuild time threshold"] = broad->rebuild_time_threshold;
 
@@ -757,24 +756,14 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             nbroad["Method"] = 2;
 
         YAML::Node nnarrow = node["Narrow"];
-        nnarrow["C-P Name"] = cm.cp_narrow()->name();
-
-        if (auto narrow = cm.cp_narrow<ppx::gjk_epa_narrow2D>())
+        nnarrow["Name"] = cm.narrow()->name();
+        if (auto narrow = cm.narrow<ppx::gjk_epa_narrow2D>())
         {
-            nnarrow["C-P Method"] = 0;
-            nnarrow["C-P EPA Threshold"] = narrow->epa_threshold;
+            nnarrow["Method"] = 0;
+            nnarrow["EPA Threshold"] = narrow->epa_threshold;
         }
-        else if (cm.cp_narrow<ppx::sat_narrow2D>())
-            nnarrow["C-P Method"] = 1;
-
-        nnarrow["P-P Name"] = cm.pp_narrow()->name();
-        if (auto narrow = cm.pp_narrow<ppx::gjk_epa_narrow2D>())
-        {
-            nnarrow["P-P Method"] = 0;
-            nnarrow["P-P EPA Threshold"] = narrow->epa_threshold;
-        }
-        else if (cm.pp_narrow<ppx::sat_narrow2D>())
-            nnarrow["P-P Method"] = 1;
+        else if (cm.narrow<ppx::sat_narrow2D>())
+            nnarrow["Method"] = 1;
 
         YAML::Node nsolv = node["Contacts"];
         nsolv["Contact lifetime"] = cm.contact_solver()->params.contact_lifetime;
@@ -805,7 +794,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             else if (method == 1)
             {
                 auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>();
-                qtbroad->bounding_box_anticipation = nbroad["Bounding box anticipation"].as<float>();
                 qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
                 qtbroad->rebuild_time_threshold = nbroad["Rebuild time threshold"].as<float>();
 
@@ -820,21 +808,13 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         }
 
         YAML::Node nnarrow = node["Narrow"];
-        if (nnarrow["C-P Method"])
+        if (nnarrow["Method"])
         {
-            const int method = nnarrow["C-P Method"].as<int>();
+            const int method = nnarrow["Method"].as<int>();
             if (method == 0)
-                cm.set_cp_narrow<ppx::gjk_epa_narrow2D>(nnarrow["C-P EPA Threshold"].as<float>());
+                cm.set_narrow<ppx::gjk_epa_narrow2D>(nnarrow["EPA Threshold"].as<float>());
             else if (method == 1)
-                cm.set_cp_narrow<ppx::sat_narrow2D>();
-        }
-        if (nnarrow["P-P Method"])
-        {
-            const int method = nnarrow["P-P Method"].as<int>();
-            if (method == 0)
-                cm.set_pp_narrow<ppx::gjk_epa_narrow2D>(nnarrow["P-P EPA Threshold"].as<float>());
-            else if (method == 1)
-                cm.set_pp_narrow<ppx::sat_narrow2D>();
+                cm.set_narrow<ppx::sat_narrow2D>();
         }
 
         const YAML::Node nsolv = node["Contacts"];
@@ -933,6 +913,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Semi-implicit integration"] = world.semi_implicit_integration;
         node["Integrator"] = world.integrator;
         node["Joints repository"] = world.joints;
+        node["Bounding box enlargement"] = world.colliders.params.bbox_enlargement;
         node["Body manager"] = world.bodies;
 
         return node;
@@ -943,6 +924,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
             return false;
 
         world.semi_implicit_integration = node["Semi-implicit integration"].as<bool>();
+        world.colliders.params.bbox_enlargement = node["Bounding box enlargement"].as<float>();
         node["Body manager"].as<ppx::body_manager2D>(world.bodies);
         node["Integrator"].as<rk::integrator<float>>(world.integrator);
         node["Behaviour manager"].as<ppx::behaviour_manager2D>(world.behaviours);

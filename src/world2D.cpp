@@ -25,8 +25,9 @@ world2D::world2D(const specs::world2D &spc)
       behaviours(*this), collisions(*this), islands(*this),
       semi_implicit_integration(spc.integrator.semi_implicit_integration), m_previous_timestep(integrator.ts.value)
 {
+    colliders.params = spc.colliders;
     joints.constraints.params = spc.joints.constraints;
-    collisions.broad()->params = spc.collision.detection;
+    collisions.broad()->params = spc.collision.broad;
     collisions.contact_solver()->params = spc.collision.contacts;
     islands.params = spc.islands;
 }
@@ -83,7 +84,6 @@ void world2D::pre_step_preparation()
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
     m_rk_subset_index = 0;
-    collisions.broad()->flush_collisions();
     bodies.send_data_to_state(integrator.state);
     if (islands.enabled() && islands.params.enable_split)
         islands.try_split(1);

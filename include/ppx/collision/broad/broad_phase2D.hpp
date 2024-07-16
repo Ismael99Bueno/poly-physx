@@ -1,16 +1,8 @@
 #pragma once
 
 #include "ppx/collider/collider2D.hpp"
-#include "ppx/collision/collision2D.hpp"
-
-#include "ppx/collision/narrow/narrow_phase2D.hpp"
-
 #include "ppx/internal/worldref.hpp"
-#include "kit/memory/ptr/scope.hpp"
 #include "kit/utility/utils.hpp"
-#include "kit/utility/type_constraints.hpp"
-#include "kit/multithreading/mt_for_each.hpp"
-#include "kit/container/hashable_tuple.hpp"
 #include "kit/interface/toggleable.hpp"
 
 namespace ppx
@@ -19,56 +11,38 @@ class world2D;
 class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyable
 {
   public:
-    struct metrics
-    {
-        std::uint32_t total_collision_checks = 0;
-        std::uint32_t positive_collision_checks = 0;
-        float accuracy() const;
-    };
+    using cpair = std::pair<collider2D *, collider2D *>;
+
     broad_phase2D(world2D &world);
     virtual ~broad_phase2D() = default;
-
     virtual const char *name() const;
-
-    const std::vector<collision2D> &detect_collisions_cached(const cp_narrow_phase2D *cp_narrow,
-                                                             const pp_narrow_phase2D *pp_narrow);
-    const std::vector<collision2D> &collisions() const;
-    void flush_collisions();
-
     virtual void on_attach()
     {
     }
 
+    // as metrics, add the amount of pairs that had to be updated in a single frame
+
+    const std::vector<cpair> &update_pairs(); // clear to_update previous pairs and call virtual update_pairs. also
+                                              // reset mt pairs
+    void flag_update(collider2D *collider);
+    void clear_pending_updates();
+
+    const std::vector<cpair> &pairs() const;
+
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
 
-    metrics collision_metrics() const;
-    std::vector<metrics> collision_metrics_per_mt_workload() const;
-
-    void inherit(broad_phase2D &&broad);
+    void try_create_pair_st(collider2D *collider1, collider2D *collider2);
+    void try_create_pair_mt(collider2D *collider1, collider2D *collider2, std::size_t thread_index);
 
     specs::collision_manager2D::broad2D params;
 
-  protected:
-    void process_collision_st(collider2D *collider1, collider2D *collider2);
-    void process_collision_mt(collider2D *collider1, collider2D *collider2, std::size_t workload_index);
-    void join_mt_collisions();
-
   private:
-    std::vector<collision2D> m_collisions;
-    std::vector<std::vector<collision2D>> m_mt_collisions;
+    virtual void update_pairs(const std::vector<collider2D *> &to_update) = 0;
 
-    metrics m_metrics;
-    std::vector<metrics> m_mt_metrics;
+    std::vector<cpair> m_pairs;
+    std::vector<std::vector<cpair>> m_mt_pairs; // test using a mutex maybe its just faster!
 
-    const cp_narrow_phase2D *m_cp_narrow = nullptr;
-    const pp_narrow_phase2D *m_pp_narrow = nullptr;
-
-    collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
-    void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
-    void cp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
-    void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
-
-    virtual void detect_collisions() = 0;
+    std::vector<collider2D *> m_to_update;
 };
 
 } // namespace ppx

@@ -4,7 +4,8 @@
 
 namespace ppx
 {
-gjk_epa_narrow2D::gjk_epa_narrow2D(float epa_threshold) : epa_threshold(epa_threshold)
+gjk_epa_narrow2D::gjk_epa_narrow2D(world2D &world, float epa_threshold)
+    : narrow_phase2D(world), epa_threshold(epa_threshold)
 {
 }
 
@@ -13,18 +14,18 @@ const char *gjk_epa_narrow2D::name() const
     return "GJK-EPA";
 }
 
-narrow_result2D gjk_epa_narrow2D::circle_polygon(const circle &circ, const polygon &poly) const
+narrow_phase2D::result gjk_epa_narrow2D::circle_polygon(const circle &circ, const polygon &poly) const
 {
-    narrow_result2D result = gjk_epa(circ, poly);
+    result result = gjk_epa(circ, poly);
     if (!result)
         return result;
     result.manifold = {geo::radius_penetration_contact_point(circ, result.mtv)};
     return result;
 }
 
-narrow_result2D gjk_epa_narrow2D::polygon_polygon(const polygon &poly1, const polygon &poly2) const
+narrow_phase2D::result gjk_epa_narrow2D::polygon_polygon(const polygon &poly1, const polygon &poly2) const
 {
-    narrow_result2D result = gjk_epa(poly1, poly2);
+    result result = gjk_epa(poly1, poly2);
     if (!result)
         return result;
     result.manifold = geo::clipping_contacts(poly1, poly2, result.mtv);
@@ -32,9 +33,9 @@ narrow_result2D gjk_epa_narrow2D::polygon_polygon(const polygon &poly1, const po
     return result;
 }
 
-narrow_result2D gjk_epa_narrow2D::gjk_epa(const shape2D &sh1, const shape2D &sh2) const
+narrow_phase2D::result gjk_epa_narrow2D::gjk_epa(const shape2D &sh1, const shape2D &sh2) const
 {
-    narrow_result2D result;
+    result result;
     const geo::gjk_result2D gres = geo::gjk(sh1, sh2);
     if (!gres)
         return result;

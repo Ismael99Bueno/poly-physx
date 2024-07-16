@@ -1,6 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/island/island_manager2D.hpp"
 #include "ppx/world2D.hpp"
+#include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
 {
@@ -30,9 +31,15 @@ void island_manager2D::solve()
         return;
     }
 
+// use thread pool directly or mt::for_each? test it!
+#if 0
     for (island2D *island : awake_islands)
         pool->submit([](island2D *island) { island->solve(); }, island);
     pool->await_pending();
+#else
+    const auto lambda = [](const std::size_t workload_index, island2D *island) { island->solve(); };
+    kit::mt::for_each(*pool, awake_islands, lambda, pool->thread_count());
+#endif
 }
 
 void island_manager2D::remove_invalid()

@@ -25,6 +25,8 @@ class collider_manager2D final : public manager2D<collider2D>
     using manager2D<collider2D>::remove;
     bool remove(std::size_t index) override;
 
+    specs::collider_manager2D params;
+
   private:
     using manager2D<collider2D>::manager2D;
 };

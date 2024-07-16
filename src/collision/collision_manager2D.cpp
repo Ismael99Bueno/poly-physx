@@ -13,8 +13,7 @@ namespace ppx
 collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
 {
     set_broad<quad_tree_broad2D>();
-    set_cp_narrow<gjk_epa_narrow2D>();
-    set_pp_narrow<gjk_epa_narrow2D>();
+    set_narrow<gjk_epa_narrow2D>();
     set_contact_solver<contact_solver2D<nonpen_contact2D>>();
 }
 
@@ -32,26 +31,26 @@ void collision_manager2D::set_actuator_based_contact_solver(contact_actuator_sol
 
 void collision_manager2D::detect_and_create_contacts()
 {
-    if (!m_broad->enabled()) [[unlikely]]
-        return;
     KIT_PERF_SCOPE("collision_processing")
-    const auto &collisions = m_broad->detect_collisions_cached(m_cp_narrow.get(), m_pp_narrow.get());
+    const auto &pairs = m_broad->enabled() ? m_broad->update_pairs() : m_broad->pairs();
+    const auto &collisions = m_narrow->enabled() ? m_narrow->compute_collisions(pairs) : m_narrow->collisions();
+
     if (m_contacts->enabled()) [[likely]]
         m_contacts->create_contacts_from_collisions(collisions);
 }
 
 const collision2D &collision_manager2D::operator[](std::size_t index) const
 {
-    return m_broad->collisions()[index];
+    return m_narrow->collisions()[index];
 }
 
 std::size_t collision_manager2D::size() const
 {
-    return m_broad->collisions().size();
+    return m_narrow->collisions().size();
 }
 bool collision_manager2D::empty() const
 {
-    return m_broad->collisions().empty();
+    return m_narrow->collisions().empty();
 }
 
 void collision_manager2D::enabled(const bool enabled)
