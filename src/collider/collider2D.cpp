@@ -196,7 +196,9 @@ void collider2D::update_bounding_boxes()
         return;
 
     const float enlargement = world.colliders.params.bbox_enlargement;
+    const float buffer = world.colliders.params.bbox_buffer;
     KIT_ASSERT_ERROR(enlargement >= 0.f, "Bounding box expansion margin must be non-negative")
+    KIT_ASSERT_ERROR(buffer >= 0.f, "Bounding box buffer margin must be non-negative")
 
     auto qt = world.collisions.broad<quad_tree_broad2D>();
     if (qt)
@@ -204,7 +206,7 @@ void collider2D::update_bounding_boxes()
 
     m_fat_bb = m_tight_bb;
     const glm::vec2 dpos = m_body->velocity() * enlargement;
-    m_fat_bb.enlarge(2.f);
+    m_fat_bb.enlarge(buffer);
     m_fat_bb.enlarge(dpos);
     if (qt)
         qt->insert(this);

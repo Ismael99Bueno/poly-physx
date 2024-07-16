@@ -190,6 +190,7 @@ struct spring_joint2D : joint2D
 struct collider_manager2D
 {
     float bbox_enlargement = 0.1f;
+    float bbox_buffer = 2.f;
 };
 
 struct joint_manager2D
