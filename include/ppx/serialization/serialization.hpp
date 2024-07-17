@@ -12,7 +12,6 @@
 
 #include "ppx/collision/broad/quad_tree_broad2D.hpp"
 #include "ppx/collision/broad/brute_force_broad2D.hpp"
-#include "ppx/collision/broad/sort_sweep_broad2D.hpp"
 #include "ppx/collision/narrow/gjk_epa_narrow2D.hpp"
 #include "ppx/collision/narrow/sat_narrow2D.hpp"
 
@@ -751,8 +750,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             nbroad["Max depth"] = props.max_depth;
             nbroad["Min size"] = props.min_quad_size;
         }
-        else if (cm.broad<ppx::sort_sweep_broad2D>())
-            nbroad["Method"] = 2;
 
         YAML::Node nnarrow = node["Narrow"];
         nnarrow["Name"] = cm.narrow()->name();
@@ -800,8 +797,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>(props);
                 qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
             }
-            else if (method == 2)
-                cm.set_broad<ppx::sort_sweep_broad2D>();
         }
 
         const YAML::Node nnarrow = node["Narrow"];

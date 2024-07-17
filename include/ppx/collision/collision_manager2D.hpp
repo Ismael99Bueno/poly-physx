@@ -6,7 +6,6 @@
 #include "ppx/collision/contacts/collision_contacts2D.hpp"
 #include "ppx/collision/contacts/contact_solver2D.hpp"
 #include "ppx/collision/broad/quad_tree_broad2D.hpp"
-#include "ppx/collision/broad/sort_sweep_broad2D.hpp"
 #include "ppx/collision/broad/brute_force_broad2D.hpp"
 #include "ppx/collision/narrow/narrow_phase2D.hpp"
 #include "ppx/internal/worldref.hpp"
@@ -76,7 +75,7 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
 
         T *ptr = broad.get();
 
-        m_known_broads = {nullptr, nullptr, nullptr};
+        m_known_broads = {nullptr, nullptr};
         if constexpr (kit::tuple_has_type_v<T *, known_broads_t>)
             std::get<T *>(m_known_broads) = ptr;
 
@@ -127,8 +126,8 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
 
     kit::scope<collision_contacts2D> m_contacts;
 
-    using known_broads_t = std::tuple<quad_tree_broad2D *, sort_sweep_broad2D *, brute_force_broad2D *>;
-    known_broads_t m_known_broads{nullptr, nullptr, nullptr};
+    using known_broads_t = std::tuple<quad_tree_broad2D *, brute_force_broad2D *>;
+    known_broads_t m_known_broads{nullptr, nullptr};
     bool m_enabled = true;
 
     void set_constraint_based_contact_solver(contact_constraint_solver2D *contacts);
