@@ -33,13 +33,11 @@ class quad_tree_broad2D final : public broad_phase2D
     bool force_square_shape = true;
 
   private:
-    void find_new_pairs(const std::vector<collider2D *> &to_update) override;
+    void update_pairs(const std::vector<collider2D *> &to_update) override;
     void update_pairs_st(const std::vector<collider2D *> &to_update);
     void update_pairs_mt(const std::vector<collider2D *> &to_update);
 
     ppx::quad_tree m_quad_tree;
-    using ctuple = kit::non_commutative_tuple<collider2D *, collider2D *>;
-    std::unordered_set<ctuple> m_unique_pairs;
 
     aabb2D m_qt_bounds;
     float m_rebuild_timer = 0.f;

@@ -32,25 +32,34 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
 
     // as metrics, add the amount of pairs that had to be updated in a single frame
 
-    const std::vector<pair> &find_new_pairs();
+    const std::vector<pair> &update_pairs();
     void flag_update(collider2D *collider);
     void clear_pending_updates();
 
-    const std::vector<pair> &new_pairs() const;
+    std::size_t new_pairs_count() const;
     std::size_t pending_updates() const;
 
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
 
-    void try_create_pair(collider2D *collider1, collider2D *collider2);
-    void try_create_pair(collider2D *collider1, collider2D *collider2, std::unordered_set<ctuple> &processed_pairs);
+    void remove_pairs_containing(const collider2D *collider);
+    const std::vector<pair> &pairs() const;
 
     specs::collision_manager2D::broad2D params;
 
-  private:
-    virtual void find_new_pairs(const std::vector<collider2D *> &to_update) = 0;
+  protected:
+    bool is_potential_new_pair(collider2D **collider1, collider2D **collider2) const;
 
     std::vector<pair> m_pairs;
+    std::unordered_set<ctuple> m_unique_pairs;
+    std::size_t m_new_pairs_count;
+
+  private:
+    virtual void update_pairs(const std::vector<collider2D *> &to_update) = 0;
+    void remove_outdated_pairs();
+
     std::vector<collider2D *> m_to_update;
+
+    std::vector<pair> m_last_pairs;
 };
 
 } // namespace ppx

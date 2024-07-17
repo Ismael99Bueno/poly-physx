@@ -32,7 +32,7 @@ void collision_manager2D::set_actuator_based_contact_solver(contact_actuator_sol
 void collision_manager2D::detect_and_create_contacts()
 {
     KIT_PERF_SCOPE("collision_processing")
-    const auto &pairs = m_broad->enabled() ? m_broad->find_new_pairs() : m_broad->new_pairs();
+    const auto &pairs = m_broad->enabled() ? m_broad->update_pairs() : m_broad->pairs();
     const auto &collisions = m_narrow->enabled() ? m_narrow->compute_collisions(pairs) : m_narrow->collisions();
 
     if (m_contacts->enabled()) [[likely]]

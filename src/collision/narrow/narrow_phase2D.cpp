@@ -5,23 +5,15 @@
 
 namespace ppx
 {
-const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::vector<pair> &new_pairs)
+const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::vector<pair> &pairs)
 {
     if (world.rk_subset_index() == 0)
     {
-        {
-            KIT_PERF_SCOPE("narrow_phase2D::add_new_pairs")
-            for (const auto &np : new_pairs)
-                if (m_unique_pairs.emplace(np.collider1, np.collider2).second)
-                    m_pairs.push_back(np);
-        }
-
         m_collisions.clear();
         if (params.multithreading && world.thread_pool)
-            compute_collisions_mt();
+            compute_collisions_mt(pairs);
         else
-            compute_collisions_st();
-        remove_outdated_pairs();
+            compute_collisions_st(pairs);
         return m_collisions;
     }
 
@@ -36,40 +28,65 @@ const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::ve
     return m_collisions;
 }
 
-void narrow_phase2D::compute_collisions_st()
+static bool is_potential_collision(const collider2D *collider1,
+                                   const collider2D *collider2) // this must be tuned
+{
+    const body2D *body1 = collider1->body();
+    const body2D *body2 = collider2->body();
+    return (body1->is_dynamic() || body2->is_dynamic()) && (!body1->asleep() || !body2->asleep()) &&
+           (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
+           (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
+           geo::intersects(collider1->tight_bbox(), collider2->tight_bbox()) && !body1->joint_prevents_collision(body2);
+}
+
+void narrow_phase2D::compute_collisions_st(const std::vector<pair> &pairs)
 {
     KIT_PERF_SCOPE("narrow_phase2D::compute_collisions_st")
-    for (const pair &p : m_pairs)
-        process_collision(p.collider1, p.collider2);
+    for (const pair &p : pairs)
+    {
+        if (!is_potential_collision(p.collider1, p.collider2))
+            continue;
+        const collision2D colis = generate_collision(p.collider1, p.collider2);
+        if (!colis.collided)
+            continue;
+        KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
+        KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
+        m_collisions.push_back(colis);
+    }
 }
-void narrow_phase2D::compute_collisions_mt()
+void narrow_phase2D::compute_collisions_mt(const std::vector<pair> &pairs)
 {
     KIT_PERF_SCOPE("narrow_phase2D::compute_collisions_mt")
     auto pool = world.thread_pool;
-    const auto lambda = [this](const pair &p) { process_collision(p.collider1, p.collider2); };
-    kit::mt::for_each(*pool, m_pairs, lambda, pool->thread_count());
-}
-
-void narrow_phase2D::remove_pairs_containing(const collider2D *collider)
-{
-    for (std::size_t i = m_pairs.size() - 1; i != SIZE_MAX; --i)
-    {
-        const pair &p = m_pairs[i];
-        if (p.collider1 == collider || p.collider2 == collider)
+    const auto lambda = [this](auto it1, auto it2) {
+        thread_local std::vector<collision2D> collisions;
+        collisions.clear();
+        for (auto it = it1; it != it2; ++it)
         {
-            m_unique_pairs.erase({p.collider1, p.collider2});
-            m_pairs.erase(m_pairs.begin() + i);
+            collider2D *collider1 = it->collider1;
+            collider2D *collider2 = it->collider2;
+            if (!is_potential_collision(collider1, collider2))
+                continue;
+            const collision2D colis = generate_collision(collider1, collider2);
+            if (!colis.collided)
+                continue;
+            KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
+            KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
+            collisions.push_back(colis);
         }
+        return collisions;
+    };
+    auto futures = kit::mt::for_each_iter(*pool, pairs, lambda, pool->thread_count());
+    for (auto &f : futures)
+    {
+        const auto &collisions = f.get();
+        m_collisions.insert(m_collisions.end(), collisions.begin(), collisions.end());
     }
 }
 
 const std::vector<collision2D> &narrow_phase2D::collisions() const
 {
     return m_collisions;
-}
-const std::vector<narrow_phase2D::pair> &narrow_phase2D::pairs() const
-{
-    return m_pairs;
 }
 
 const char *narrow_phase2D::name() const
@@ -80,17 +97,6 @@ const char *narrow_phase2D::name() const
 narrow_phase2D::result::operator bool() const
 {
     return intersects;
-}
-
-static bool is_potential_collision(const collider2D *collider1,
-                                   const collider2D *collider2) // this must be tuned
-{
-    const body2D *body1 = collider1->body();
-    const body2D *body2 = collider2->body();
-    return (body1->is_dynamic() || body2->is_dynamic()) && (!body1->asleep() || !body2->asleep()) &&
-           (collider1->collision_filter.cgroups & collider2->collision_filter.collides_with) &&
-           (collider2->collision_filter.cgroups & collider1->collision_filter.collides_with) &&
-           geo::intersects(collider1->tight_bbox(), collider2->tight_bbox()) && !body1->joint_prevents_collision(body2);
 }
 
 void narrow_phase2D::process_collision(collider2D *collider1, collider2D *collider2)
@@ -106,28 +112,6 @@ void narrow_phase2D::process_collision(collider2D *collider1, collider2D *collid
         static std::mutex mutex;
         std::scoped_lock lock(mutex);
         m_collisions.push_back(colis);
-    }
-}
-
-void narrow_phase2D::remove_outdated_pairs()
-{
-    KIT_PERF_SCOPE("narrow_phase2D::remove_outdated_pairs")
-    const std::size_t max_iters = m_pairs.size() / 10;
-    std::size_t iters = 0;
-
-    if (m_remove_outdated_index >= m_pairs.size())
-        m_remove_outdated_index = m_pairs.size() - 1;
-
-    while (iters++ < max_iters)
-    {
-        const pair &p = m_pairs[m_remove_outdated_index];
-        if (!geo::intersects(p.collider1->fat_bbox(), p.collider2->fat_bbox()))
-        {
-            m_unique_pairs.erase({p.collider1, p.collider2});
-            m_pairs.erase(m_pairs.begin() + m_remove_outdated_index);
-        }
-        if (--m_remove_outdated_index == SIZE_MAX)
-            m_remove_outdated_index = m_pairs.size() - 1;
     }
 }
 

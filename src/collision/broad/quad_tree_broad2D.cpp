@@ -28,9 +28,8 @@ void quad_tree_broad2D::erase(collider2D *collider)
     m_quad_tree.erase(collider, collider->fat_bbox());
 }
 
-void quad_tree_broad2D::find_new_pairs(const std::vector<collider2D *> &to_update)
+void quad_tree_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 {
-    m_unique_pairs.clear();
     m_rebuild_timer += world.rk_substep_timestep();
     if (m_may_rebuild && m_rebuild_timer > rebuild_time_threshold)
         build_tree_from_scratch();
@@ -46,7 +45,12 @@ void quad_tree_broad2D::update_pairs_st(const std::vector<collider2D *> &to_upda
     for (collider2D *collider1 : to_update)
         m_quad_tree.traverse(
             [this, collider1](collider2D *collider2) {
-                try_create_pair(collider1, collider2, m_unique_pairs);
+                collider2D *c1 = collider1;
+                if (is_potential_new_pair(&c1, &collider2))
+                {
+                    m_pairs.emplace_back(c1, collider2);
+                    m_unique_pairs.emplace(c1, collider2);
+                }
                 return true;
             },
             collider1->fat_bbox());
@@ -55,15 +59,32 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
 {
     auto pool = world.thread_pool;
 
-    const auto lambda = [this](collider2D *collider1) {
-        m_quad_tree.traverse(
-            [this, collider1](collider2D *collider2) {
-                try_create_pair(collider1, collider2, m_unique_pairs);
-                return true;
-            },
-            collider1->fat_bbox());
+    const auto lambda = [this](auto it1, auto it2) {
+        thread_local std::vector<pair> new_pairs;
+        thread_local std::unordered_set<ctuple> unique_pairs;
+        new_pairs.clear();
+        unique_pairs.clear();
+
+        for (auto it = it1; it != it2; ++it)
+            m_quad_tree.traverse(
+                [this, &it](collider2D *collider2) {
+                    collider2D *c1 = *it;
+                    if (is_potential_new_pair(&c1, &collider2) && unique_pairs.emplace(c1, collider2).second)
+                        new_pairs.emplace_back(c1, collider2);
+                    return true;
+                },
+                (*it)->fat_bbox());
+        return new_pairs;
     };
-    kit::mt::for_each(*pool, to_update, lambda, pool->thread_count());
+    auto futures = kit::mt::for_each_iter(*pool, to_update, lambda, pool->thread_count());
+    const std::size_t start_idx = m_pairs.size();
+    for (auto &f : futures)
+    {
+        const auto &new_pairs = f.get();
+        m_pairs.insert(m_pairs.end(), new_pairs.begin(), new_pairs.end());
+    }
+    for (auto it = m_pairs.begin() + start_idx; it != m_pairs.end(); ++it)
+        m_unique_pairs.emplace(it->collider1, it->collider2);
 }
 void quad_tree_broad2D::build_tree_from_scratch()
 {

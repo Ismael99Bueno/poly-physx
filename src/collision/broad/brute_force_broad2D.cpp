@@ -12,7 +12,7 @@ const char *brute_force_broad2D::name() const
     return "Brute Force";
 }
 
-void brute_force_broad2D::find_new_pairs(const std::vector<collider2D *> &to_update)
+void brute_force_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 {
     if (params.multithreading && world.thread_pool)
         update_pairs_mt(to_update);
@@ -26,17 +26,40 @@ void brute_force_broad2D::update_pairs_st(const std::vector<collider2D *> &to_up
         {
             collider2D *collider1 = to_update[i];
             collider2D *collider2 = world.colliders[j];
-            try_create_pair(collider1, collider2);
+            if (is_potential_new_pair(&collider1, &collider2))
+            {
+                m_pairs.emplace_back(collider1, collider2);
+                m_unique_pairs.emplace(collider1, collider2);
+            }
         }
 }
 
 void brute_force_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_update)
 {
     auto pool = world.thread_pool;
-    const auto lambda = [this](collider2D *collider1) {
-        for (collider2D *collider2 : world.colliders)
-            try_create_pair(collider1, collider2);
+    const auto lambda = [this](auto it1, auto it2) {
+        thread_local std::vector<pair> new_pairs;
+        new_pairs.clear();
+
+        for (auto it = it1; it != it2; ++it)
+            for (collider2D *collider2 : world.colliders)
+            {
+                collider2D *collider1 = *it;
+                if (is_potential_new_pair(&collider1, &collider2))
+                    new_pairs.emplace_back(collider1, collider2);
+            }
+
+        return new_pairs;
     };
-    kit::mt::for_each(*pool, to_update, lambda, pool->thread_count());
+    auto futures = kit::mt::for_each_iter(*pool, to_update, lambda, pool->thread_count());
+    const std::size_t start_idx = m_pairs.size();
+
+    for (auto &f : futures)
+    {
+        const auto &new_pairs = f.get();
+        m_pairs.insert(m_pairs.end(), new_pairs.begin(), new_pairs.end());
+    }
+    for (auto it = m_pairs.begin() + start_idx; it != m_pairs.end(); ++it)
+        m_unique_pairs.emplace(it->collider1, it->collider2);
 }
 } // namespace ppx

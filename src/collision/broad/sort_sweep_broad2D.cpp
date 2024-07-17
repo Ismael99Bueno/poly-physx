@@ -36,7 +36,7 @@ const char *sort_sweep_broad2D::name() const
     return "Sort and Sweep";
 }
 
-void sort_sweep_broad2D::find_new_pairs(const std::vector<collider2D *> &to_update)
+void sort_sweep_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 {
     update_edges();
     if (params.multithreading)
@@ -47,31 +47,32 @@ void sort_sweep_broad2D::find_new_pairs(const std::vector<collider2D *> &to_upda
 
 void sort_sweep_broad2D::update_pairs_st(const std::vector<collider2D *> &to_update)
 {
-    static std::unordered_set<collider2D *> eligible;
-    static std::unordered_set<collider2D *> to_update_set;
+    // static std::unordered_set<collider2D *> eligible;
+    // static std::unordered_set<collider2D *> to_update_set;
 
-    eligible.clear();
-    to_update_set.clear();
-    to_update_set.insert(to_update.begin(), to_update.end());
-    std::uint32_t relevant_count = 0;
+    // eligible.clear();
+    // to_update_set.clear();
+    // to_update_set.insert(to_update.begin(), to_update.end());
+    // std::uint32_t relevant_count = 0;
 
-    for (const edge &edg : m_edges)
-    {
-        const bool contained = to_update_set.contains(edg.collider);
-        if (edg.end == end_side::LOWER)
-        {
-            relevant_count += contained;
-            if (relevant_count > 0)
-                for (collider2D *collider : eligible)
-                    try_create_pair(edg.collider, collider);
-            eligible.insert(edg.collider);
-        }
-        else
-        {
-            eligible.erase(edg.collider);
-            relevant_count -= contained;
-        }
-    }
+    // sort and sweep is about to die... :(
+    //  for (const edge &edg : m_edges)
+    //  {
+    //      const bool contained = to_update_set.contains(edg.collider);
+    //      if (edg.end == end_side::LOWER)
+    //      {
+    //          relevant_count += contained;
+    //          if (relevant_count > 0)
+    //              for (collider2D *collider : eligible)
+    //                  try_create_pair(edg.collider, collider);
+    //          eligible.insert(edg.collider);
+    //      }
+    //      else
+    //      {
+    //          eligible.erase(edg.collider);
+    //          relevant_count -= contained;
+    //      }
+    //  }
 }
 
 void sort_sweep_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_update)

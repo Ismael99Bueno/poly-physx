@@ -9,6 +9,7 @@
 #include "ppx/joints/joint_repository2D.hpp"
 #include "kit/interface/non_copyable.hpp"
 #include "kit/utility/utils.hpp"
+#include "kit/multithreading/thread_pool.hpp"
 
 namespace ppx
 {

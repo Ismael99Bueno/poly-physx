@@ -12,7 +12,6 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
 {
   public:
     using pair = broad_phase2D::pair;
-    using ctuple = broad_phase2D::ctuple;
     struct result
     {
         bool intersects = false;
@@ -28,26 +27,23 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     virtual result polygon_polygon(const polygon &poly1, const polygon &poly2) const = 0;
     virtual result circle_polygon(const circle &circ, const polygon &poly) const = 0;
 
-    const std::vector<collision2D> &compute_collisions(const std::vector<pair> &new_pairs);
+    const std::vector<collision2D> &compute_collisions(const std::vector<pair> &pairs);
     virtual const char *name() const;
 
     virtual void on_attach()
     {
     }
 
-    void remove_pairs_containing(const collider2D *collider);
     const std::vector<collision2D> &collisions() const;
-    const std::vector<pair> &pairs() const;
 
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
     specs::collision_manager2D::narrow2D params;
 
   private:
-    void compute_collisions_st();
-    void compute_collisions_mt();
+    void compute_collisions_st(const std::vector<pair> &pairs);
+    void compute_collisions_mt(const std::vector<pair> &pairs);
 
     void process_collision(collider2D *collider1, collider2D *collider2);
-    void remove_outdated_pairs();
 
     collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
     void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
@@ -55,10 +51,6 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
 
     std::vector<collision2D> m_collisions;
-
-    std::unordered_set<ctuple> m_unique_pairs;
-    std::vector<pair> m_pairs;
-    std::size_t m_remove_outdated_index = 0;
 };
 
 } // namespace ppx
