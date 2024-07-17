@@ -45,10 +45,9 @@ void narrow_phase2D::compute_collisions_st()
 void narrow_phase2D::compute_collisions_mt()
 {
     KIT_PERF_SCOPE("narrow_phase2D::compute_collisions_mt")
-    const auto lambda = [this](const std::size_t workload_index, const pair &p) {
-        process_collision(p.collider1, p.collider2);
-    };
-    kit::mt::for_each(*world.thread_pool, m_pairs, lambda, params.parallel_workloads);
+    auto pool = world.thread_pool;
+    const auto lambda = [this](const pair &p) { process_collision(p.collider1, p.collider2); };
+    kit::mt::for_each(*pool, m_pairs, lambda, pool->thread_count());
 }
 
 void narrow_phase2D::remove_pairs_containing(const collider2D *collider)

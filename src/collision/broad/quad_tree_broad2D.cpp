@@ -56,7 +56,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
     auto pool = world.thread_pool;
     if (to_update.size() > 1)
     {
-        const auto lambda = [this](const std::size_t workload_index, collider2D *collider1) {
+        const auto lambda = [this](collider2D *collider1) {
             m_quad_tree.traverse(
                 [this, collider1](collider2D *collider2) {
                     try_create_pair(collider1, collider2, m_unique_pairs);

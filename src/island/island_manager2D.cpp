@@ -37,7 +37,7 @@ void island_manager2D::solve()
         pool->submit([](island2D *island) { island->solve(); }, island);
     pool->await_pending();
 #else
-    const auto lambda = [](const std::size_t workload_index, island2D *island) { island->solve(); };
+    const auto lambda = [](island2D *island) { island->solve(); };
     kit::mt::for_each(*pool, awake_islands, lambda, pool->thread_count());
 #endif
 }

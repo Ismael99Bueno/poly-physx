@@ -231,7 +231,6 @@ struct collision_manager2D
     struct narrow2D
     {
         bool multithreading = true;
-        std::size_t parallel_workloads = std::thread::hardware_concurrency();
     } narrow;
 
     struct contacts2D

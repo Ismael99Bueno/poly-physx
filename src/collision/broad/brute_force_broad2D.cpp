@@ -33,7 +33,7 @@ void brute_force_broad2D::update_pairs_st(const std::vector<collider2D *> &to_up
 void brute_force_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_update)
 {
     auto pool = world.thread_pool;
-    const auto lambda = [this](const std::size_t workload_index, collider2D *collider1) {
+    const auto lambda = [this](collider2D *collider1) {
         for (collider2D *collider2 : world.colliders)
             try_create_pair(collider1, collider2);
     };
