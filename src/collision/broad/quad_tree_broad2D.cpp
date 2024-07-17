@@ -28,9 +28,9 @@ void quad_tree_broad2D::erase(collider2D *collider)
     m_quad_tree.erase(collider, collider->fat_bbox());
 }
 
-void quad_tree_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
+void quad_tree_broad2D::find_new_pairs(const std::vector<collider2D *> &to_update)
 {
-    // build_tree_from_scratch();
+    m_unique_pairs.clear();
     m_rebuild_timer += world.rk_substep_timestep();
     if (m_may_rebuild && m_rebuild_timer > rebuild_time_threshold)
         build_tree_from_scratch();
@@ -43,26 +43,26 @@ void quad_tree_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 
 void quad_tree_broad2D::update_pairs_st(const std::vector<collider2D *> &to_update)
 {
-    for (collider2D *collider : to_update)
+    for (collider2D *collider1 : to_update)
         m_quad_tree.traverse(
-            [this, collider](collider2D *other) {
-                try_create_pair(collider, other);
+            [this, collider1](collider2D *collider2) {
+                try_create_pair(collider1, collider2);
                 return true;
             },
-            collider->fat_bbox());
+            collider1->fat_bbox());
 }
 void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_update)
 {
     auto pool = world.thread_pool;
     if (to_update.size() > 1)
     {
-        const auto lambda = [this](const std::size_t workload_index, collider2D *collider) {
+        const auto lambda = [this](const std::size_t workload_index, collider2D *collider1) {
             m_quad_tree.traverse(
-                [this, collider](collider2D *other) {
-                    try_create_pair(collider, other);
+                [this, collider1](collider2D *collider2) {
+                    try_create_pair(collider1, collider2, m_unique_pairs);
                     return true;
                 },
-                collider->fat_bbox());
+                collider1->fat_bbox());
         };
         kit::mt::for_each(*pool, to_update, lambda, pool->thread_count());
     }
@@ -70,7 +70,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
     {
         m_quad_tree.traverse(
             [this, &to_update](collider2D *other) {
-                try_create_pair(to_update[0], other);
+                try_create_pair(to_update[0], other, m_unique_pairs);
                 return true;
             },
             to_update[0]->fat_bbox(), pool);

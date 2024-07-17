@@ -12,7 +12,7 @@ const char *brute_force_broad2D::name() const
     return "Brute Force";
 }
 
-void brute_force_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
+void brute_force_broad2D::find_new_pairs(const std::vector<collider2D *> &to_update)
 {
     if (params.multithreading && world.thread_pool)
         update_pairs_mt(to_update);

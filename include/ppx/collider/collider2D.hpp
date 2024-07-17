@@ -24,7 +24,6 @@ class collider2D final : public worldref2D, kit::non_copyable
     {
         std::size_t index;
         bool broad_flag = false;
-        std::size_t broad_index;
     } meta;
 
     struct

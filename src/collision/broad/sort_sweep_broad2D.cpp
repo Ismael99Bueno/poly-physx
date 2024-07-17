@@ -36,7 +36,7 @@ const char *sort_sweep_broad2D::name() const
     return "Sort and Sweep";
 }
 
-void sort_sweep_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
+void sort_sweep_broad2D::find_new_pairs(const std::vector<collider2D *> &to_update)
 {
     update_edges();
     if (params.multithreading)

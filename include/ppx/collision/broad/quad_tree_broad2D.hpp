@@ -24,18 +24,19 @@ class quad_tree_broad2D final : public broad_phase2D
     ppx::quad_tree &quad_tree();
 
     std::uint32_t rebuild_count() const;
+    void build_tree_from_scratch();
 
-    float rebuild_time_threshold = 5.f;
+    float rebuild_time_threshold = 1.5f;
     bool force_square_shape = true;
 
   private:
-    void update_pairs(const std::vector<collider2D *> &to_update) override;
+    void find_new_pairs(const std::vector<collider2D *> &to_update) override;
     void update_pairs_st(const std::vector<collider2D *> &to_update);
     void update_pairs_mt(const std::vector<collider2D *> &to_update);
 
-    void build_tree_from_scratch();
-
     ppx::quad_tree m_quad_tree;
+    using ctuple = kit::non_commutative_tuple<collider2D *, collider2D *>;
+    std::unordered_set<ctuple> m_unique_pairs;
 
     aabb2D m_qt_bounds;
     float m_rebuild_timer = 0.f;
