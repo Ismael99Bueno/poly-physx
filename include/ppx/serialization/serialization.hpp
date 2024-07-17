@@ -745,7 +745,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             nbroad["Method"] = 1;
             nbroad["Force square"] = broad->force_square_shape;
-            nbroad["Rebuild time threshold"] = broad->rebuild_time_threshold;
 
             const auto &props = broad->quad_tree().props();
             nbroad["Max colliders"] = props.elements_per_quad;
@@ -800,7 +799,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
 
                 auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>(props);
                 qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
-                qtbroad->rebuild_time_threshold = nbroad["Rebuild time threshold"].as<float>();
             }
             else if (method == 2)
                 cm.set_broad<ppx::sort_sweep_broad2D>();

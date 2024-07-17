@@ -4,6 +4,7 @@
 #include "ppx/internal/worldref.hpp"
 #include "kit/utility/utils.hpp"
 #include "kit/interface/toggleable.hpp"
+#include "kit/container/hashable_tuple.hpp"
 
 namespace ppx
 {

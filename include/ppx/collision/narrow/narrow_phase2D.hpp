@@ -5,7 +5,6 @@
 #include "ppx/collision/broad/broad_phase2D.hpp"
 #include "geo/algorithm/intersection2D.hpp"
 #include "kit/interface/toggleable.hpp"
-#include "kit/container/hashable_tuple.hpp"
 
 namespace ppx
 {

@@ -46,7 +46,7 @@ void quad_tree_broad2D::update_pairs_st(const std::vector<collider2D *> &to_upda
     for (collider2D *collider1 : to_update)
         m_quad_tree.traverse(
             [this, collider1](collider2D *collider2) {
-                try_create_pair(collider1, collider2);
+                try_create_pair(collider1, collider2, m_unique_pairs);
                 return true;
             },
             collider1->fat_bbox());
