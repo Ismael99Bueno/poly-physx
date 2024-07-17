@@ -115,6 +115,10 @@ void narrow_phase2D::remove_outdated_pairs()
     KIT_PERF_SCOPE("narrow_phase2D::remove_outdated_pairs")
     const std::size_t max_iters = m_pairs.size() / 10;
     std::size_t iters = 0;
+
+    if (m_remove_outdated_index >= m_pairs.size())
+        m_remove_outdated_index = m_pairs.size() - 1;
+
     while (iters++ < max_iters)
     {
         const pair &p = m_pairs[m_remove_outdated_index];
