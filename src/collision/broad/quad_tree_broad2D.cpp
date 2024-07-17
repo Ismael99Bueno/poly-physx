@@ -128,4 +128,16 @@ ppx::quad_tree &quad_tree_broad2D::quad_tree()
 {
     return m_quad_tree;
 }
+
+const ppx::quad_tree::properties &quad_tree_broad2D::props() const
+{
+    return m_quad_tree.props();
+}
+void quad_tree_broad2D::props(const ppx::quad_tree::properties &props)
+{
+    m_quad_tree.clear();
+    m_quad_tree.props(props);
+    build_tree_from_scratch();
+}
+
 } // namespace ppx

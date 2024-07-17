@@ -14,10 +14,8 @@ collider2D *collider_manager2D::add(body2D *parent, const collider2D::specs &spc
     m_elements.push_back(collider);
 
     parent->m_colliders.push_back(collider);
-    collider->body()->full_update();
 
-    if (auto qt = world.collisions.broad<quad_tree_broad2D>())
-        qt->insert(collider);
+    collider->update_bounding_boxes();
     world.collisions.broad()->flag_update(collider);
 
     events.on_addition(collider);

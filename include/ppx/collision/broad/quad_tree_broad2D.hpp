@@ -23,6 +23,9 @@ class quad_tree_broad2D final : public broad_phase2D
     const ppx::quad_tree &quad_tree() const;
     ppx::quad_tree &quad_tree();
 
+    const ppx::quad_tree::properties &props() const;
+    void props(const ppx::quad_tree::properties &props);
+
     std::uint32_t rebuild_count() const;
     void build_tree_from_scratch();
 

@@ -102,6 +102,9 @@ class collider2D final : public worldref2D, kit::non_copyable
         m_body->full_update();
     }
 
+    void update_shape();
+    void update_bounding_boxes();
+
   private:
     std::variant<polygon, circle> m_shape;
     geo::aabb2D m_tight_bb;
@@ -115,9 +118,6 @@ class collider2D final : public worldref2D, kit::non_copyable
     stype m_type;
 
     void gtranslate_shape(const glm::vec2 &dpos);
-
-    void update_shape();
-    void update_bounding_boxes();
 
     template <typename F> auto call_shape_method(F &&f) -> std::invoke_result_t<F, shape2D &>
     {
