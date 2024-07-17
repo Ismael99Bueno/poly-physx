@@ -58,6 +58,7 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
 
     std::unordered_set<ctuple> m_unique_pairs;
     std::vector<pair> m_pairs;
+    std::size_t m_remove_outdated_index = 0;
 };
 
 } // namespace ppx

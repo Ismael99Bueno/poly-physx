@@ -7,12 +7,14 @@ namespace ppx
 {
 const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::vector<pair> &new_pairs)
 {
-    KIT_PERF_SCOPE("narrow_phase")
     if (world.rk_subset_index() == 0)
     {
-        for (const auto &np : new_pairs)
-            if (m_unique_pairs.emplace(np.collider1, np.collider2).second)
-                m_pairs.push_back(np);
+        {
+            KIT_PERF_SCOPE("narrow_phase2D::add_new_pairs")
+            for (const auto &np : new_pairs)
+                if (m_unique_pairs.emplace(np.collider1, np.collider2).second)
+                    m_pairs.push_back(np);
+        }
 
         m_collisions.clear();
         if (params.multithreading && world.thread_pool)
@@ -36,11 +38,13 @@ const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::ve
 
 void narrow_phase2D::compute_collisions_st()
 {
+    KIT_PERF_SCOPE("narrow_phase2D::compute_collisions_st")
     for (const pair &p : m_pairs)
         process_collision(p.collider1, p.collider2);
 }
 void narrow_phase2D::compute_collisions_mt()
 {
+    KIT_PERF_SCOPE("narrow_phase2D::compute_collisions_mt")
     const auto lambda = [this](const std::size_t workload_index, const pair &p) {
         process_collision(p.collider1, p.collider2);
     };
@@ -108,14 +112,19 @@ void narrow_phase2D::process_collision(collider2D *collider1, collider2D *collid
 
 void narrow_phase2D::remove_outdated_pairs()
 {
-    for (std::size_t i = m_pairs.size() - 1; i != SIZE_MAX; --i)
+    KIT_PERF_SCOPE("narrow_phase2D::remove_outdated_pairs")
+    const std::size_t max_iters = m_pairs.size() / 10;
+    std::size_t iters = 0;
+    while (iters++ < max_iters)
     {
-        const pair &p = m_pairs[i];
+        const pair &p = m_pairs[m_remove_outdated_index];
         if (!geo::intersects(p.collider1->fat_bbox(), p.collider2->fat_bbox()))
         {
             m_unique_pairs.erase({p.collider1, p.collider2});
-            m_pairs.erase(m_pairs.begin() + i);
+            m_pairs.erase(m_pairs.begin() + m_remove_outdated_index);
         }
+        if (--m_remove_outdated_index == SIZE_MAX)
+            m_remove_outdated_index = m_pairs.size() - 1;
     }
 }
 
