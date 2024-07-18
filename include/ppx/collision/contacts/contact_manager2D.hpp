@@ -103,6 +103,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     }
     void remove_expired_contacts() override final
     {
+        KIT_PERF_SCOPE("ppx::contact_manager2D::remove_expired_contacts")
         std::swap(m_last_contacts, m_contacts);
         m_contacts.clear();
         for (Contact *contact : m_last_contacts)

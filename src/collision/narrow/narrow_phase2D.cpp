@@ -75,8 +75,11 @@ void narrow_phase2D::update_contacts_mt(const std::vector<pair> &pairs)
         const auto collisions = f.get();
         new_contacts.insert(new_contacts.end(), collisions.begin(), collisions.end());
     }
-    for (const collision2D &colis : new_contacts)
-        m_contacts->create_from_collision(colis);
+    {
+        KIT_PERF_SCOPE("ppx::narrow_phase2D::create_new_contacts")
+        for (const collision2D &colis : new_contacts)
+            m_contacts->create_from_collision(colis);
+    }
 }
 
 const char *narrow_phase2D::name() const
