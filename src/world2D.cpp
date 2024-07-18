@@ -85,8 +85,8 @@ void world2D::pre_step_preparation()
 #endif
     m_rk_subset_index = 0;
     bodies.send_data_to_state(integrator.state);
-    if (islands.enabled() && islands.params.enable_split)
-        islands.try_split(1);
+    if (islands.enabled())
+        islands.try_split();
     KIT_ASSERT_ERROR(collisions.contact_solver()->checksum(), "Contacts checksum failed")
     KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
     KIT_ASSERT_ERROR(joints.checksum(), "Joints checksum failed")

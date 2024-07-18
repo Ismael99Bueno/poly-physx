@@ -26,15 +26,14 @@ class island_manager2D final : public manager2D<island2D>
 
   private:
     bool m_enable = true;
-    std::size_t m_island_to_split = 0;
 
     void solve();
 
     island2D *create();
     island2D *create_island_from_body(body2D *body);
 
-    void try_split(std::uint32_t max_tries);
-    bool split(island2D *island);
+    void try_split();
+    void split(island2D *island);
     void build_from_existing_simulation();
 
     friend class world2D;

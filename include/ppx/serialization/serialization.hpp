@@ -866,7 +866,6 @@ template <> struct kit::yaml::codec<ppx::specs::island_manager2D>
     static YAML::Node encode(const ppx::specs::island_manager2D &params)
     {
         YAML::Node node;
-        node["Enable split"] = params.enable_split;
         node["Enable sleep"] = params.enable_sleep;
         node["Multithreading"] = params.multithreading;
         node["Lower sleep energy threshold"] = params.lower_sleep_energy_threshold;
@@ -877,10 +876,9 @@ template <> struct kit::yaml::codec<ppx::specs::island_manager2D>
     }
     static bool decode(const YAML::Node &node, ppx::specs::island_manager2D &params)
     {
-        if (!node.IsMap() || node.size() != 8)
+        if (!node.IsMap() || node.size() != 7)
             return false;
 
-        params.enable_split = node["Enable split"].as<bool>();
         params.enable_sleep = node["Enable sleep"].as<bool>();
         params.multithreading = node["Multithreading"].as<bool>();
         params.lower_sleep_energy_threshold = node["Lower sleep energy threshold"].as<float>();

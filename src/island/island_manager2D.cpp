@@ -48,7 +48,7 @@ void island_manager2D::remove_invalid()
     for (auto it = m_elements.begin(); it != m_elements.end();)
     {
         island2D *island = *it;
-        if (island->merged || island->is_void())
+        if (island->m_merged || island->is_void())
         {
             allocator<island2D>::destroy(island);
             it = m_elements.erase(it);
@@ -178,26 +178,23 @@ void island_manager2D::build_from_existing_simulation()
         create_island_from_body(body);
 }
 
-void island_manager2D::try_split(std::uint32_t max_splits)
+void island_manager2D::try_split()
 {
-    if (m_elements.empty())
-        return;
     KIT_PERF_SCOPE("ppx::island_manager2D::try_split")
-
-    std::size_t iters = 0;
-    const std::size_t size = m_elements.size();
-    m_island_to_split = glm::min(m_island_to_split, size - 1);
-    while (iters++ < size && max_splits > 0)
+    for (std::size_t i = 0; i < m_elements.size(); i++)
     {
-        island2D *island = m_elements[m_island_to_split];
-        if (island->can_split() && split(island))
-            max_splits--;
-        if (m_island_to_split-- == 0)
-            m_island_to_split = m_elements.size() - 1;
+        island2D *island = m_elements[i];
+        if (island->evaluate_split_candidate())
+        {
+            split(island);
+            allocator<island2D>::destroy(island);
+            m_elements.erase(m_elements.begin() + i);
+            return;
+        }
     }
 }
 
-bool island_manager2D::split(island2D *island)
+void island_manager2D::split(island2D *island)
 {
     KIT_PERF_SCOPE("ppx::island_manager2D::split")
     const bool was_asleep = island->asleep();
@@ -212,7 +209,6 @@ bool island_manager2D::split(island2D *island)
         joint->meta.island_flag = false;
     for (constraint2D *constraint : island->m_constraints)
         constraint->meta.island_flag = false;
-    std::uint32_t split_count = 0;
 
     for (body2D *body : island->m_bodies)
     {
@@ -221,14 +217,11 @@ bool island_manager2D::split(island2D *island)
             continue;
         new_island->m_asleep = was_asleep;
         new_island->m_time_still = time_still;
-        split_count++;
         if (new_island->m_bodies.size() == island->m_bodies.size())
             break;
     }
 
     allocator<island2D>::destroy(island);
-    m_elements.erase(m_elements.begin() + m_island_to_split);
-    return split_count > 1;
 }
 
 bool island_manager2D::checksum() const

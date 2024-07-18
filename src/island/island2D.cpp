@@ -32,9 +32,17 @@ bool island2D::about_to_sleep() const
     const float percent = 0.35f;
     return m_solved_positions && percent * m_energy < world.islands.sleep_energy_threshold(this);
 }
-bool island2D::can_split() const
+bool island2D::evaluate_split_candidate()
 {
-    return may_split && !merged && !is_void() && !about_to_sleep();
+    if (m_may_split)
+        return true;
+    if (is_void() || m_lost_contacts.empty())
+    {
+        m_split_points = 0;
+        return false;
+    }
+    m_split_points += m_lost_contacts.size();
+    return m_split_points > world.islands.params.points_to_split && !m_merged && !about_to_sleep();
 }
 
 void island2D::remove_body(body2D *body)
@@ -45,7 +53,7 @@ void island2D::remove_body(body2D *body)
             m_bodies.erase(m_bodies.begin() + i);
             body->meta.island = nullptr;
             awake();
-            may_split = true;
+            m_may_split = true;
             if (no_bodies())
                 world.islands.remove(this);
             return;
@@ -66,7 +74,7 @@ void island2D::merge(island2D &island)
     m_actuators.insert(m_actuators.end(), island.m_actuators.begin(), island.m_actuators.end());
     m_constraints.insert(m_constraints.end(), island.m_constraints.begin(), island.m_constraints.end());
     m_contacts.insert(m_contacts.end(), island.m_contacts.begin(), island.m_contacts.end());
-    island.merged = true;
+    island.m_merged = true;
     awake();
 }
 

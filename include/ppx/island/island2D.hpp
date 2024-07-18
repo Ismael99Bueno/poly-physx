@@ -4,6 +4,7 @@
 #include "ppx/constraints/constraint2D.hpp"
 #include "ppx/body/body2D.hpp"
 #include "ppx/collision/contacts/contact2D.hpp"
+#include "kit/container/hashable_tuple.hpp"
 
 namespace ppx
 {
@@ -11,14 +12,12 @@ class island2D : public worldref2D
 {
   public:
     using worldref2D::worldref2D;
-
-    bool may_split = false;
-    bool merged = false;
+    using contact_key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
 
     void awake();
     bool asleep() const;
     bool about_to_sleep() const;
-    bool can_split() const;
+    bool evaluate_split_candidate();
 
     void add_body(body2D *body);
     void remove_body(body2D *body);
@@ -39,6 +38,7 @@ class island2D : public worldref2D
 
     template <IJoint2D Joint> static void add(Joint *joint)
     {
+        KIT_PERF_SCOPE("ppx::island2D::add")
         island2D *island = get_effective_island(joint);
         if (!island)
             return;
@@ -50,6 +50,7 @@ class island2D : public worldref2D
                                  island->m_contacts.end(),
                              "Contact already exists on island")
             island->m_contacts.push_back(joint);
+            island->m_lost_contacts.erase({joint->collider1(), joint->collider2(), joint->point().id.key});
         }
 
         if constexpr (IConstraint2D<Joint>)
@@ -70,6 +71,7 @@ class island2D : public worldref2D
 
     template <IJoint2D Joint> static void remove(Joint *joint)
     {
+        KIT_PERF_SCOPE("ppx::island2D::remove")
         const body2D *body1 = joint->body1();
         const body2D *body2 = joint->body2();
         KIT_ASSERT_ERROR(body1->is_dynamic() || body2->is_dynamic(), "At least one body must be dynamic");
@@ -86,6 +88,7 @@ class island2D : public worldref2D
                 if (island->m_contacts[i] == joint)
                 {
                     island->m_contacts.erase(island->m_contacts.begin() + i);
+                    island->m_lost_contacts.emplace(joint->collider1(), joint->collider2(), joint->point().id.key);
                     break;
                 }
         if constexpr (IConstraint2D<Joint>)
@@ -96,7 +99,8 @@ class island2D : public worldref2D
                     island->m_constraints.erase(island->m_constraints.begin() + i);
                     if (!Contact2D<Joint> || !body2->is_dynamic() || island != body2->meta.island)
                         island->awake();
-                    island->may_split |= body2->is_dynamic();
+                    if constexpr (!Contact2D<Joint>)
+                        island->m_may_split |= body2->is_dynamic();
                     return;
                 }
         }
@@ -107,7 +111,8 @@ class island2D : public worldref2D
                     island->m_actuators.erase(island->m_actuators.begin() + i);
                     if (!Contact2D<Joint> || !body2->is_dynamic() || island != body2->meta.island)
                         island->awake();
-                    island->may_split |= body2->is_dynamic();
+                    if constexpr (!Contact2D<Joint>)
+                        island->m_may_split |= body2->is_dynamic();
                     return;
                 }
         KIT_WARN("Joint not found in island");
@@ -129,10 +134,15 @@ class island2D : public worldref2D
     std::vector<constraint2D *> m_active_constraints;
     std::vector<contact2D *> m_active_contacts;
 
+    std::unordered_set<contact_key> m_lost_contacts;
+
+    std::uint32_t m_split_points = 0;
     float m_time_still = 0.f;
     float m_energy = 0.f;
     bool m_solved_positions = false;
     bool m_asleep = false;
+    bool m_merged = false;
+    bool m_may_split = false;
 
     void collect_active_elements_and_call_pre_solve();
 
