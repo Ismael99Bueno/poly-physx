@@ -24,7 +24,7 @@ const std::vector<broad_phase2D::pair> &broad_phase2D::update_pairs()
 {
     if (m_to_update.empty() || world.rk_subset_index() != 0)
         return m_pairs;
-    KIT_PERF_SCOPE("broad_phase2D::update_pairs")
+    KIT_PERF_SCOPE("ppx::broad_phase2D::update_pairs")
 
     remove_outdated_pairs();
     update_pairs(m_to_update);
@@ -42,6 +42,7 @@ void broad_phase2D::flag_update(collider2D *collider)
 }
 void broad_phase2D::clear_pending_updates()
 {
+    KIT_PERF_SCOPE("ppx::broad_phase2D::clear_pending_updates")
     for (collider2D *collider : m_to_update)
         collider->meta.broad_flag = false;
     m_to_update.clear();
@@ -62,7 +63,7 @@ void broad_phase2D::remove_pairs_containing(const collider2D *collider)
 
 void broad_phase2D::remove_outdated_pairs()
 {
-    KIT_PERF_SCOPE("broad_phase2D::remove_outdated_pairs")
+    KIT_PERF_SCOPE("ppx::broad_phase2D::remove_outdated_pairs")
     std::swap(m_last_pairs, m_pairs);
     m_pairs.clear();
     for (const pair &p : m_last_pairs)

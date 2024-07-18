@@ -55,6 +55,7 @@ void island2D::remove_body(body2D *body)
 
 void island2D::merge(island2D &island)
 {
+    KIT_PERF_SCOPE("ppx::island2D::merge")
     for (body2D *body : island.m_bodies)
     {
         KIT_ASSERT_ERROR(body->is_dynamic(), "Body must be dynamic")

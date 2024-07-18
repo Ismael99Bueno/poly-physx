@@ -7,6 +7,7 @@ namespace ppx
 {
 const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::vector<pair> &pairs)
 {
+    KIT_PERF_SCOPE("ppx::narrow_phase2D::compute_collisions")
     if (world.rk_subset_index() == 0)
     {
         m_collisions.clear();
@@ -41,7 +42,7 @@ static bool is_potential_collision(const collider2D *collider1,
 
 void narrow_phase2D::compute_collisions_st(const std::vector<pair> &pairs)
 {
-    KIT_PERF_SCOPE("narrow_phase2D::compute_collisions_st")
+    KIT_PERF_SCOPE("ppx::narrow_phase2D::compute_collisions_st")
     for (const pair &p : pairs)
     {
         if (!is_potential_collision(p.collider1, p.collider2))
@@ -56,7 +57,7 @@ void narrow_phase2D::compute_collisions_st(const std::vector<pair> &pairs)
 }
 void narrow_phase2D::compute_collisions_mt(const std::vector<pair> &pairs)
 {
-    KIT_PERF_SCOPE("narrow_phase2D::compute_collisions_mt")
+    KIT_PERF_SCOPE("ppx::narrow_phase2D::compute_collisions_mt")
     auto pool = world.thread_pool;
     const auto lambda = [this](auto it1, auto it2) {
         thread_local std::vector<collision2D> collisions;

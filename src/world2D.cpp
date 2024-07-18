@@ -120,7 +120,7 @@ std::uint32_t world2D::hertz() const
 
 std::vector<float> world2D::create_state_derivative() const
 {
-    KIT_PERF_SCOPE("world2D::create_state_derivative")
+    KIT_PERF_SCOPE("ppx::world2D::create_state_derivative")
     std::vector<float> state_derivative(6 * bodies.size(), 0.f);
 
     for (const body2D *body : bodies)
@@ -192,7 +192,7 @@ float world2D::energy() const
 
 std::vector<float> world2D::operator()(const float time, const float timestep, const std::vector<float> &vars)
 {
-    KIT_PERF_SCOPE("world2D::ODE")
+    KIT_PERF_SCOPE("ppx::world2D::ODE")
     KIT_ASSERT_CRITICAL(
         vars.size() == 6 * bodies.size(),
         "State vector size must be exactly 6 times greater than the body array size - vars: {0}, body array: {1}",

@@ -30,7 +30,7 @@ void behaviour_manager2D::on_body_removal_validation(body2D *body)
 
 void behaviour_manager2D::apply_forces()
 {
-    KIT_PERF_SCOPE("behaviour_manager2D::apply_forces")
+    KIT_PERF_SCOPE("ppx::behaviour_manager2D::apply_forces")
     for (const auto &bhv : m_elements)
         if (bhv->enabled())
             bhv->apply_force_to_bodies();

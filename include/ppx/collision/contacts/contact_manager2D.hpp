@@ -67,7 +67,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
 
     void create_contacts_from_collisions(const std::vector<collision2D> &collisions) override final
     {
-        KIT_PERF_FUNCTION()
+        KIT_PERF_SCOPE("ppx::contact_manager2D::create_contacts_from_collisions")
         m_active_contacts.clear();
 
         for (const collision2D &collision : collisions)

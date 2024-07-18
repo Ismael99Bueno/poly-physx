@@ -14,6 +14,7 @@ const char *quad_tree_broad2D::name() const
 
 void quad_tree_broad2D::insert(collider2D *collider)
 {
+    KIT_PERF_SCOPE("ppx::quad_tree_broad2D::insert")
     if (geo::intersects(collider->fat_bbox(), m_qt_bounds))
     {
         m_may_rebuild = true;
@@ -24,6 +25,7 @@ void quad_tree_broad2D::insert(collider2D *collider)
 }
 void quad_tree_broad2D::erase(collider2D *collider)
 {
+    KIT_PERF_SCOPE("ppx::quad_tree_broad2D::erase")
     m_may_rebuild = true;
     m_quad_tree.erase(collider, collider->fat_bbox());
 }
@@ -42,6 +44,7 @@ void quad_tree_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 
 void quad_tree_broad2D::update_pairs_st(const std::vector<collider2D *> &to_update)
 {
+    KIT_PERF_SCOPE("ppx::quad_tree_broad2D::update_pairs_st")
     for (collider2D *collider1 : to_update)
         m_quad_tree.traverse(
             [this, collider1](collider2D *collider2) {
@@ -57,6 +60,7 @@ void quad_tree_broad2D::update_pairs_st(const std::vector<collider2D *> &to_upda
 }
 void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_update)
 {
+    KIT_PERF_SCOPE("ppx::quad_tree_broad2D::update_pairs_mt")
     auto pool = world.thread_pool;
 
     const auto lambda = [this](auto it1, auto it2) {
@@ -88,7 +92,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
 }
 void quad_tree_broad2D::build_tree_from_scratch()
 {
-    KIT_PERF_SCOPE("quad_tree_broad2D::build_tree_from_scratch")
+    KIT_PERF_SCOPE("ppx::quad_tree_broad2D::build_tree_from_scratch")
 
     m_may_rebuild = false;
     m_rebuild_timer = 0.f;
