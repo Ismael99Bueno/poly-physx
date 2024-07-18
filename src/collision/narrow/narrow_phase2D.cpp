@@ -58,7 +58,7 @@ void narrow_phase2D::compute_collisions_st(const std::vector<pair> &pairs)
 void narrow_phase2D::compute_collisions_mt(const std::vector<pair> &pairs)
 {
     KIT_PERF_SCOPE("ppx::narrow_phase2D::compute_collisions_mt")
-    auto pool = world.thread_pool;
+    const auto pool = world.thread_pool;
     const auto lambda = [this](auto it1, auto it2) {
         thread_local std::vector<collision2D> collisions;
         collisions.clear();

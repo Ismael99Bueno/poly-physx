@@ -25,14 +25,15 @@ class body_manager2D final : public manager2D<body2D>
     bool checksum() const;
     bool all_asleep() const;
 
+    specs::body_manager2D params;
+
   private:
     using manager2D<body2D>::manager2D;
 
     void prepare_for_next_substep(const std::vector<float> &vars_buffer);
     void prepare_constraint_states();
     void send_data_to_state(rk::state<float> &state);
-    void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
-    void reset_instant_forces();
+    void wrap_up_step(const std::vector<float> &vars_buffer);
 
     friend class world2D;
 };
