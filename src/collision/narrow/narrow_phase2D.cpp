@@ -100,22 +100,6 @@ narrow_phase2D::result::operator bool() const
     return intersects;
 }
 
-void narrow_phase2D::process_collision(collider2D *collider1, collider2D *collider2)
-{
-    if (!is_potential_collision(collider1, collider2))
-        return;
-    const collision2D colis = generate_collision(collider1, collider2);
-    if (colis.collided)
-    {
-        KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
-        KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
-
-        static std::mutex mutex;
-        std::scoped_lock lock(mutex);
-        m_collisions.push_back(colis);
-    }
-}
-
 collision2D narrow_phase2D::generate_collision(collider2D *collider1, collider2D *collider2) const
 {
     collision2D collision;

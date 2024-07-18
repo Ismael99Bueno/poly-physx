@@ -43,8 +43,6 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     void compute_collisions_st(const std::vector<pair> &pairs);
     void compute_collisions_mt(const std::vector<pair> &pairs);
 
-    void process_collision(collider2D *collider1, collider2D *collider2);
-
     collision2D generate_collision(collider2D *collider1, collider2D *collider2) const;
     void cc_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
     void cp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;

@@ -21,6 +21,7 @@ void brute_force_broad2D::update_pairs(const std::vector<collider2D *> &to_updat
 }
 void brute_force_broad2D::update_pairs_st(const std::vector<collider2D *> &to_update)
 {
+    KIT_PERF_SCOPE("ppx::brute_force_broad2D::update_pairs_st")
     for (std::size_t i = 0; i < to_update.size(); i++)
         for (std::size_t j = i + 1; j < world.colliders.size(); j++)
         {
@@ -36,6 +37,7 @@ void brute_force_broad2D::update_pairs_st(const std::vector<collider2D *> &to_up
 
 void brute_force_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_update)
 {
+    KIT_PERF_SCOPE("ppx::brute_force_broad2D::update_pairs_mt")
     auto pool = world.thread_pool;
     const auto lambda = [this](auto it1, auto it2) {
         thread_local std::vector<pair> new_pairs;
