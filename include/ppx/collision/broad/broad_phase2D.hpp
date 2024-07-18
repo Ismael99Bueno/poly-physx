@@ -58,7 +58,6 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     void remove_outdated_pairs();
 
     std::vector<collider2D *> m_to_update;
-
     std::vector<pair> m_last_pairs;
 };
 

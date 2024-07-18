@@ -80,7 +80,7 @@ void narrow_phase2D::compute_collisions_mt(const std::vector<pair> &pairs)
     auto futures = kit::mt::for_each_iter(*pool, pairs, lambda, pool->thread_count());
     for (auto &f : futures)
     {
-        const auto &collisions = f.get();
+        const auto collisions = f.get();
         m_collisions.insert(m_collisions.end(), collisions.begin(), collisions.end());
     }
 }

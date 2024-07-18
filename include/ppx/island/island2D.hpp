@@ -50,7 +50,6 @@ class island2D : public worldref2D
                                  island->m_contacts.end(),
                              "Contact already exists on island")
             island->m_contacts.push_back(joint);
-            island->m_lost_contacts.erase({joint->collider1(), joint->collider2(), joint->point().id.key});
         }
 
         if constexpr (IConstraint2D<Joint>)
@@ -84,13 +83,15 @@ class island2D : public worldref2D
         if (!island)
             return;
         if constexpr (Contact2D<Joint>)
+        {
+            island->m_lost_contacts++;
             for (std::size_t i = 0; i < island->m_contacts.size(); i++)
                 if (island->m_contacts[i] == joint)
                 {
                     island->m_contacts.erase(island->m_contacts.begin() + i);
-                    island->m_lost_contacts.emplace(joint->collider1(), joint->collider2(), joint->point().id.key);
                     break;
                 }
+        }
         if constexpr (IConstraint2D<Joint>)
         {
             for (std::size_t i = 0; i < island->m_constraints.size(); i++)
@@ -134,9 +135,8 @@ class island2D : public worldref2D
     std::vector<constraint2D *> m_active_constraints;
     std::vector<contact2D *> m_active_contacts;
 
-    std::unordered_set<contact_key> m_lost_contacts;
-
     std::uint32_t m_split_points = 0;
+    std::uint32_t m_lost_contacts = 0;
     float m_time_still = 0.f;
     float m_energy = 0.f;
     bool m_solved_positions = false;

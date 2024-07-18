@@ -84,7 +84,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
     const std::size_t start_idx = m_pairs.size();
     for (auto &f : futures)
     {
-        const auto &new_pairs = f.get();
+        const auto new_pairs = f.get();
         m_pairs.insert(m_pairs.end(), new_pairs.begin(), new_pairs.end());
     }
     for (auto it = m_pairs.begin() + start_idx; it != m_pairs.end(); ++it)

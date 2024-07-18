@@ -159,12 +159,15 @@ bool collider_manager2D::remove(const std::size_t index)
     body2D *parent = collider->body();
     parent->m_colliders.erase(std::find(parent->m_colliders.begin(), parent->m_colliders.end(), collider));
 
-    if (index != m_elements.size() - 1)
-    {
-        m_elements[index] = m_elements.back();
-        m_elements[index]->meta.index = index;
-    }
-    m_elements.pop_back();
+    // if (index != m_elements.size() - 1)
+    // {
+    //     m_elements[index] = m_elements.back();
+    //     m_elements[index]->meta.index = index;
+    // }
+    // m_elements.pop_back();
+    m_elements.erase(m_elements.begin() + index); // just so that pair order is preserved
+    for (auto it = m_elements.begin() + index; it != m_elements.end(); ++it)
+        (*it)->meta.index--;
     parent->full_update();
 
     allocator<collider2D>::destroy(collider);

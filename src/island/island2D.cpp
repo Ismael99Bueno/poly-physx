@@ -36,13 +36,16 @@ bool island2D::evaluate_split_candidate()
 {
     if (m_may_split)
         return true;
-    if (is_void() || m_lost_contacts.empty())
+    if (is_void() || m_merged || about_to_sleep())
     {
         m_split_points = 0;
         return false;
     }
-    m_split_points += m_lost_contacts.size();
-    return m_split_points > world.islands.params.points_to_split && !m_merged && !about_to_sleep();
+    if (m_lost_contacts < m_contacts.size() / 5)
+        return false;
+    m_split_points++;
+
+    return m_split_points > world.islands.params.steps_to_split;
 }
 
 void island2D::remove_body(body2D *body)
