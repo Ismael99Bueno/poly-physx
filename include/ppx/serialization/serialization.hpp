@@ -108,7 +108,7 @@ template <> struct kit::yaml::codec<ppx::collider2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::collider2D::specs &collider)
     {
-        if (!node.IsMap() || node.size() != 3)
+        if (!node.IsMap() || node.size() < 3)
             return false;
 
         collider.position = node["Position"].as<glm::vec2>();
@@ -161,7 +161,7 @@ template <> struct kit::yaml::codec<ppx::body2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::body2D::specs &body)
     {
-        if (!node.IsMap() || node.size() != 5)
+        if (!node.IsMap() || node.size() < 5)
             return false;
 
         body.position = node["Position"].as<glm::vec2>();
@@ -235,7 +235,7 @@ template <> struct kit::yaml::codec<ppx::specs::joint2D>
     }
     static bool decode(const YAML::Node &node, ppx::specs::joint2D &joint)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() < 2)
             return false;
 
         if (node["Index1"])
@@ -269,7 +269,7 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs::properties>
     {
         if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
             return false;
-        if (!node.IsMap() || node.size() != 10)
+        if (!node.IsMap() || node.size() < 10)
             return false;
 
         props.torque = node["Torque"].as<float>();
@@ -293,7 +293,7 @@ template <> struct kit::yaml::codec<ppx::rotor_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::rotor_joint2D::specs &rj)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() < 2)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], rj))
@@ -319,7 +319,7 @@ template <> struct kit::yaml::codec<ppx::motor_joint2D::specs::properties>
     {
         if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
             return false;
-        if (!node.IsMap() || node.size() != 8)
+        if (!node.IsMap() || node.size() < 8)
             return false;
 
         props.force = node["Force"].as<float>();
@@ -341,7 +341,7 @@ template <> struct kit::yaml::codec<ppx::motor_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::motor_joint2D::specs &mj)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() < 2)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], mj))
@@ -364,7 +364,7 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs::properties>
     {
         if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
             return false;
-        if (!node.IsMap() || node.size() != 6)
+        if (!node.IsMap() || node.size() < 6)
             return false;
 
         props.min_distance = node["Min distance"].as<float>();
@@ -387,7 +387,7 @@ template <> struct kit::yaml::codec<ppx::distance_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::distance_joint2D::specs &dj)
     {
-        if (!node.IsMap() || node.size() != 5)
+        if (!node.IsMap() || node.size() < 5)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], dj))
@@ -413,7 +413,7 @@ template <> struct kit::yaml::codec<ppx::ball_joint2D::specs::properties>
     {
         if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
             return false;
-        if (!node.IsMap() || node.size() != 6)
+        if (!node.IsMap() || node.size() < 6)
             return false;
 
         props.min_angle = node["Min angle"].as<float>();
@@ -434,7 +434,7 @@ template <> struct kit::yaml::codec<ppx::ball_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::ball_joint2D::specs &bj)
     {
-        if (!node.IsMap() || node.size() != 3)
+        if (!node.IsMap() || node.size() < 3)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], bj))
@@ -457,7 +457,7 @@ template <> struct kit::yaml::codec<ppx::prismatic_joint2D::specs::properties>
     {
         if (!kit::yaml::codec<ppx::specs::constraint2D::properties>::decode(node, props))
             return false;
-        if (!node.IsMap() || node.size() != 5)
+        if (!node.IsMap() || node.size() < 5)
             return false;
 
         props.axis = node["Axis"].as<glm::vec2>();
@@ -479,7 +479,7 @@ template <> struct kit::yaml::codec<ppx::prismatic_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::prismatic_joint2D::specs &pj)
     {
-        if (!node.IsMap() || node.size() != 5)
+        if (!node.IsMap() || node.size() < 5)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], pj))
@@ -504,7 +504,7 @@ template <> struct kit::yaml::codec<ppx::revolute_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::revolute_joint2D::specs &revj)
     {
-        if (!node.IsMap() || node.size() != 3)
+        if (!node.IsMap() || node.size() < 3)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], revj))
@@ -527,7 +527,7 @@ template <> struct kit::yaml::codec<ppx::weld_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::weld_joint2D::specs &weldj)
     {
-        if (!node.IsMap() || node.size() != 3)
+        if (!node.IsMap() || node.size() < 3)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], weldj))
@@ -555,7 +555,7 @@ template <> struct kit::yaml::codec<ppx::spring_joint2D::specs::properties>
     {
         if (!kit::yaml::codec<ppx::specs::joint2D::properties>::decode(node, props))
             return false;
-        if (!node.IsMap() || node.size() != 7)
+        if (!node.IsMap() || node.size() < 7)
             return false;
 
         props.frequency = node["Frequency"].as<float>();
@@ -581,7 +581,7 @@ template <> struct kit::yaml::codec<ppx::spring_joint2D::specs>
     }
     static bool decode(const YAML::Node &node, ppx::spring_joint2D::specs &sp)
     {
-        if (!node.IsMap() || node.size() != 4)
+        if (!node.IsMap() || node.size() < 4)
             return false;
 
         if (!kit::yaml::codec<ppx::specs::joint2D>::decode(node["Joint"], sp))
@@ -719,7 +719,7 @@ template <> struct kit::yaml::codec<ppx::joint_repository2D>
     }
     static bool decode(const YAML::Node &node, ppx::joint_repository2D &jr)
     {
-        if (!node.IsMap() || node.size() != 2)
+        if (!node.IsMap() || node.size() < 2)
             return false;
         kit::yaml::codec<ppx::joint_meta_manager2D<ppx::iactuator_manager2D>>::decode(node["Actuators"], jr.actuators);
         kit::yaml::codec<ppx::joint_meta_manager2D<ppx::iconstraint_manager2D>>::decode(node["Constraints"],
@@ -775,7 +775,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
     }
     static bool decode(const YAML::Node &node, ppx::collision_manager2D &cm)
     {
-        if (!node.IsMap() || node.size() != 4)
+        if (!node.IsMap() || node.size() < 4)
             return false;
 
         cm.enabled(node["Enabled"].as<bool>());
@@ -845,7 +845,7 @@ template <> struct kit::yaml::codec<ppx::specs::joint_manager2D::constraints2D>
     }
     static bool decode(const YAML::Node &node, ppx::specs::joint_manager2D::constraints2D &params)
     {
-        if (!node.IsMap() || node.size() != 9)
+        if (!node.IsMap() || node.size() < 9)
             return false;
 
         params.velocity_iterations = node["Velocity iterations"].as<std::uint32_t>();
@@ -876,7 +876,7 @@ template <> struct kit::yaml::codec<ppx::specs::island_manager2D>
     }
     static bool decode(const YAML::Node &node, ppx::specs::island_manager2D &params)
     {
-        if (!node.IsMap() || node.size() != 7)
+        if (!node.IsMap() || node.size() < 7)
             return false;
 
         params.enable_sleep = node["Enable sleep"].as<bool>();
@@ -911,7 +911,7 @@ template <> struct kit::yaml::codec<ppx::world2D>
     }
     static bool decode(const YAML::Node &node, ppx::world2D &world)
     {
-        if (!node.IsMap() || node.size() != 10)
+        if (!node.IsMap() || node.size() < 10)
             return false;
 
         world.semi_implicit_integration = node["Semi-implicit integration"].as<bool>();
