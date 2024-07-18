@@ -17,6 +17,8 @@ void contact2D::update(const collision2D *collision, std::size_t manifold_index)
 {
     m_collider1 = collision->collider1;
     m_collider2 = collision->collider2;
+    m_body1 = m_collider1->body();
+    m_body2 = m_collider2->body();
     m_point = collision->manifold[manifold_index];
     m_normal = glm::normalize(collision->mtv);
     m_restitution = collision->restitution;
