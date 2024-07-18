@@ -23,7 +23,7 @@ body2D *body_manager2D::add(const body2D::specs &spc)
 
     if (world.islands.enabled() && body->is_dynamic())
     {
-        island2D *island = world.islands.create();
+        island2D *island = world.islands.create_and_add();
         island->add_body(body);
     }
 

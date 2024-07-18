@@ -25,16 +25,17 @@ class island_manager2D final : public manager2D<island2D>
     specs::island_manager2D params;
 
   private:
-    bool m_enable = true;
-
     void solve();
 
-    island2D *create();
+    island2D *create_and_add();
     island2D *create_island_from_body(body2D *body);
 
     void try_split();
-    void split(island2D *island);
+    bool split(island2D *island);
     void build_from_existing_simulation();
+
+    bool m_enable = true;
+    std::size_t m_remove_index = 0;
 
     friend class world2D;
     friend class body2D;

@@ -361,7 +361,7 @@ void body2D::type(btype type)
         reset_dynamic_properties();
         if (world.islands.enabled())
         {
-            island2D *island = world.islands.create();
+            island2D *island = world.islands.create_and_add();
             island->add_body(this);
         }
         return;

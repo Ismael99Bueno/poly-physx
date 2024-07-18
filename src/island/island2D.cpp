@@ -30,22 +30,18 @@ bool island2D::asleep() const
 bool island2D::about_to_sleep() const
 {
     const float percent = 0.35f;
-    return m_solved_positions && percent * m_energy < world.islands.sleep_energy_threshold(this);
+    return m_time_still > percent * world.islands.params.sleep_time_threshold;
 }
 bool island2D::evaluate_split_candidate()
 {
     if (m_may_split)
         return true;
-    if (is_void() || m_merged || about_to_sleep())
+    if (is_void() || m_merged || !m_lost_contact || (!m_asleep && about_to_sleep()))
     {
         m_split_points = 0;
         return false;
     }
-    if (m_lost_contacts < m_contacts.size() / 5)
-        return false;
-    m_split_points++;
-
-    return m_split_points > world.islands.params.steps_to_split;
+    return m_split_points++ > world.islands.params.steps_to_split;
 }
 
 void island2D::remove_body(body2D *body)

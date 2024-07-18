@@ -96,7 +96,7 @@ void island_manager2D::enabled(bool enable)
     m_enable = enable;
 }
 
-island2D *island_manager2D::create()
+island2D *island_manager2D::create_and_add()
 {
     island2D *island = allocator<island2D>::create(world);
     m_elements.push_back(island);
@@ -108,8 +108,7 @@ island2D *island_manager2D::create_island_from_body(body2D *body)
     KIT_PERF_SCOPE("ppx::island_manager2D::create_island_from_body")
     if (body->meta.island_flag || !body->is_dynamic())
         return nullptr;
-    island2D *island = create();
-
+    island2D *island = allocator<island2D>::create(world);
     body->meta.island_flag = true;
 
     std::stack<body2D *> stack;
@@ -141,11 +140,9 @@ island2D *island_manager2D::create_island_from_body(body2D *body)
             process_joint(joint);
         for (contact2D *contact : current->meta.contacts)
         {
-            joint2D *joint = dynamic_cast<joint2D *>(contact);
-            KIT_ASSERT_ERROR(joint, "Contact is not a joint");
-            if (!joint->meta.island_flag)
+            if (!contact->meta.island_flag)
                 island->m_contacts.push_back(contact);
-            process_joint(joint);
+            process_joint(contact);
         }
     }
     return island;
@@ -168,33 +165,41 @@ void island_manager2D::build_from_existing_simulation()
     for (joint2D *joint : world.joints)
         joint->meta.island_flag = false;
     for (contact2D *contact : world.collisions.contact_solver()->create_total_contacts_list())
-    {
-        joint2D *joint = dynamic_cast<joint2D *>(contact);
-        KIT_ASSERT_ERROR(joint, "Contact is not a joint");
-        joint->meta.island_flag = false;
-    }
+        contact->meta.island_flag = false;
 
     for (body2D *body : world.bodies)
-        create_island_from_body(body);
+    {
+        island2D *island = create_island_from_body(body);
+        if (island)
+            m_elements.push_back(island);
+    }
 }
 
 void island_manager2D::try_split()
 {
     KIT_PERF_SCOPE("ppx::island_manager2D::try_split")
-    for (std::size_t i = 0; i < m_elements.size(); i++)
+
+    std::size_t iter = 0;
+    m_remove_index = glm::min(m_remove_index, m_elements.size());
+    while (iter++ < m_elements.size())
     {
-        island2D *island = m_elements[i];
+        if (m_remove_index-- == 0)
+            m_remove_index = m_elements.size() - 1;
+
+        island2D *island = m_elements[m_remove_index];
         if (island->evaluate_split_candidate())
         {
-            split(island);
-            allocator<island2D>::destroy(island);
-            m_elements.erase(m_elements.begin() + i);
+            if (split(island))
+            {
+                m_elements.erase(m_elements.begin() + m_remove_index);
+                allocator<island2D>::destroy(island);
+            }
             return;
         }
     }
 }
 
-void island_manager2D::split(island2D *island)
+bool island_manager2D::split(island2D *island)
 {
     KIT_PERF_SCOPE("ppx::island_manager2D::split")
     const bool was_asleep = island->asleep();
@@ -215,11 +220,21 @@ void island_manager2D::split(island2D *island)
         island2D *new_island = create_island_from_body(body);
         if (!new_island)
             continue;
+
+        if (new_island->m_bodies.size() == island->m_bodies.size())
+        {
+            // i could just swap the islands, but it messes up their adresses and its annoying
+            for (body2D *b : island->m_bodies)
+                b->meta.island = island;
+            allocator<island2D>::destroy(new_island);
+            return false;
+        }
         new_island->m_asleep = was_asleep;
         new_island->m_time_still = time_still;
-        if (new_island->m_bodies.size() == island->m_bodies.size())
-            break;
+        m_elements.push_back(new_island);
     }
+
+    return true;
 }
 
 bool island_manager2D::checksum() const

@@ -83,7 +83,7 @@ class island2D : public worldref2D
             return;
         if constexpr (Contact2D<Joint>)
         {
-            island->m_lost_contacts++;
+            island->m_lost_contact = true;
             for (std::size_t i = 0; i < island->m_contacts.size(); i++)
                 if (island->m_contacts[i] == joint)
                 {
@@ -91,6 +91,7 @@ class island2D : public worldref2D
                     break;
                 }
         }
+
         if constexpr (IConstraint2D<Joint>)
         {
             for (std::size_t i = 0; i < island->m_constraints.size(); i++)
@@ -124,25 +125,6 @@ class island2D : public worldref2D
     bool no_joints() const;
 
   private:
-    std::vector<body2D *> m_bodies;
-
-    std::vector<actuator2D *> m_actuators;
-    std::vector<constraint2D *> m_constraints;
-    std::vector<contact2D *> m_contacts;
-
-    std::vector<actuator2D *> m_active_actuators;
-    std::vector<constraint2D *> m_active_constraints;
-    std::vector<contact2D *> m_active_contacts;
-
-    std::uint32_t m_split_points = 0;
-    std::uint32_t m_lost_contacts = 0;
-    float m_time_still = 0.f;
-    float m_energy = 0.f;
-    bool m_solved_positions = false;
-    bool m_asleep = false;
-    bool m_merged = false;
-    bool m_may_split = false;
-
     void collect_active_elements_and_call_pre_solve();
 
     template <IJoint2D Joint> static island2D *get_effective_island(Joint *joint)
@@ -165,6 +147,25 @@ class island2D : public worldref2D
     }
 
     static island2D *handle_island_merge_encounter(island2D *island1, island2D *island2);
+
+    std::vector<body2D *> m_bodies;
+
+    std::vector<actuator2D *> m_actuators;
+    std::vector<constraint2D *> m_constraints;
+    std::vector<contact2D *> m_contacts;
+
+    std::vector<actuator2D *> m_active_actuators;
+    std::vector<constraint2D *> m_active_constraints;
+    std::vector<contact2D *> m_active_contacts;
+
+    std::uint32_t m_split_points = 0;
+    float m_time_still = 0.f;
+    float m_energy = 0.f;
+    bool m_solved_positions = false;
+    bool m_asleep = false;
+    bool m_merged = false;
+    bool m_may_split = false;
+    bool m_lost_contact = false;
 
     friend class island_manager2D;
 };
