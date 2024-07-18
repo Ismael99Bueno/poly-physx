@@ -104,7 +104,7 @@ void quad_tree_broad2D::build_tree_from_scratch()
 
     const float expansion_margin = 2.f * world.colliders.params.bbox_enlargement;
     m_qt_bounds = world.colliders[0]->fat_bbox();
-    for (collider2D *collider : world.colliders)
+    for (const collider2D *collider : world.colliders)
         m_qt_bounds += collider->fat_bbox();
 
     if (force_square_shape)

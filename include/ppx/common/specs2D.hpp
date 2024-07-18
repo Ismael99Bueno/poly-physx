@@ -187,11 +187,6 @@ struct spring_joint2D : joint2D
     static spring_joint2D from_instance(const ppx::spring_joint2D &sp);
 };
 
-struct body_manager2D
-{
-    bool multithreading = true;
-};
-
 struct collider_manager2D
 {
     float bbox_enlargement = 0.1f;
@@ -252,7 +247,6 @@ struct world2D
         rk::butcher_tableau<float> tableau = rk::butcher_tableau<float>::rk1;
         rk::timestep<float> timestep{1.e-3f};
     } integrator;
-    body_manager2D bodies;
     collider_manager2D colliders;
     joint_manager2D joints;
     island_manager2D islands;

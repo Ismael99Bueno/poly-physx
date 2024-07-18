@@ -36,7 +36,8 @@ void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::prepare_for_next_substep")
     const bool islands_enabled = world.islands.enabled();
-    const auto lambda = [&vars_buffer, islands_enabled](body2D *body) {
+    for (body2D *body : m_elements)
+    {
         body->reset_simulation_forces();
         if (!body->asleep())
         {
@@ -48,13 +49,7 @@ void body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
         // bodies.prepare_constraint_states() is called in world2D::step()
         if (!body->is_dynamic() && islands_enabled)
             body->prepare_constraint_states();
-    };
-    const auto pool = world.thread_pool;
-    if (params.multithreading && pool)
-        kit::mt::for_each(*pool, m_elements, lambda, pool->thread_count());
-    else
-        for (body2D *body : m_elements)
-            lambda(body);
+    }
 }
 
 template <typename Body, typename Collider, typename C>
@@ -204,18 +199,13 @@ void body_manager2D::send_data_to_state(rk::state<float> &state)
 void body_manager2D::wrap_up_step(const std::vector<float> &vars_buffer)
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::wrap_up_step")
-    const auto lambda = [&vars_buffer](body2D *body) {
+    for (body2D *body : m_elements)
+    {
         if (!body->asleep()) [[unlikely]]
             body->retrieve_data_from_state_variables(vars_buffer);
         body->m_instant_force = glm::vec2(0.f);
         body->m_instant_torque = 0.f;
-    };
-    const auto pool = world.thread_pool;
-    if (params.multithreading && pool)
-        kit::mt::for_each(*pool, m_elements, lambda, pool->thread_count());
-    else
-        for (body2D *body : m_elements)
-            lambda(body);
+    }
 }
 
 void body_manager2D::prepare_constraint_states()

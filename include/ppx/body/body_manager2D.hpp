@@ -25,8 +25,6 @@ class body_manager2D final : public manager2D<body2D>
     bool checksum() const;
     bool all_asleep() const;
 
-    specs::body_manager2D params;
-
   private:
     using manager2D<body2D>::manager2D;
 

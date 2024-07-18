@@ -25,7 +25,6 @@ world2D::world2D(const specs::world2D &spc)
       behaviours(*this), collisions(*this), islands(*this),
       semi_implicit_integration(spc.integrator.semi_implicit_integration), m_previous_timestep(integrator.ts.value)
 {
-    bodies.params = spc.bodies;
     colliders.params = spc.colliders;
     joints.constraints.params = spc.joints.constraints;
     collisions.broad()->params = spc.collision.broad;
