@@ -5,28 +5,14 @@
 
 namespace ppx
 {
-const std::vector<collision2D> &narrow_phase2D::compute_collisions(const std::vector<pair> &pairs)
+void narrow_phase2D::update_contacts(const std::vector<pair> &pairs, collision_contacts2D *contacts)
 {
-    KIT_PERF_SCOPE("ppx::narrow_phase2D::compute_collisions")
-    if (world.rk_subset_index() == 0)
-    {
-        m_collisions.clear();
-        if (params.multithreading && world.thread_pool)
-            compute_collisions_mt(pairs);
-        else
-            compute_collisions_st(pairs);
-        return m_collisions;
-    }
-
-    for (auto it = m_collisions.begin(); it != m_collisions.end();)
-    {
-        *it = generate_collision(it->collider1, it->collider2);
-        if (!it->collided)
-            it = m_collisions.erase(it);
-        else
-            ++it;
-    }
-    return m_collisions;
+    KIT_PERF_SCOPE("ppx::narrow_phase2D::update_contacts")
+    m_contacts = contacts;
+    if (params.multithreading && world.thread_pool)
+        update_contacts_mt(pairs);
+    else
+        update_contacts_st(pairs);
 }
 
 static bool is_potential_collision(const collider2D *collider1,
@@ -40,9 +26,9 @@ static bool is_potential_collision(const collider2D *collider1,
            geo::intersects(collider1->tight_bbox(), collider2->tight_bbox()) && !body1->joint_prevents_collision(body2);
 }
 
-void narrow_phase2D::compute_collisions_st(const std::vector<pair> &pairs)
+void narrow_phase2D::update_contacts_st(const std::vector<pair> &pairs)
 {
-    KIT_PERF_SCOPE("ppx::narrow_phase2D::compute_collisions_st")
+    KIT_PERF_SCOPE("ppx::narrow_phase2D::update_contacts_st")
     for (const pair &p : pairs)
     {
         if (!is_potential_collision(p.collider1, p.collider2))
@@ -52,12 +38,12 @@ void narrow_phase2D::compute_collisions_st(const std::vector<pair> &pairs)
             continue;
         KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
         KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
-        m_collisions.push_back(colis);
+        m_contacts->create_or_update_from_collision(colis);
     }
 }
-void narrow_phase2D::compute_collisions_mt(const std::vector<pair> &pairs)
+void narrow_phase2D::update_contacts_mt(const std::vector<pair> &pairs)
 {
-    KIT_PERF_SCOPE("ppx::narrow_phase2D::compute_collisions_mt")
+    KIT_PERF_SCOPE("ppx::narrow_phase2D::update_contacts_mt")
     const auto pool = world.thread_pool;
     const auto lambda = [this](auto it1, auto it2) {
         thread_local std::vector<collision2D> collisions;
@@ -68,26 +54,29 @@ void narrow_phase2D::compute_collisions_mt(const std::vector<pair> &pairs)
             collider2D *collider2 = it->collider2;
             if (!is_potential_collision(collider1, collider2))
                 continue;
-            const collision2D colis = generate_collision(collider1, collider2);
+            collision2D colis = generate_collision(collider1, collider2);
             if (!colis.collided)
                 continue;
             KIT_ASSERT_ERROR(colis.friction >= 0.f, "Friction must be non-negative: {0}", colis.friction)
             KIT_ASSERT_ERROR(colis.restitution >= 0.f, "Restitution must be non-negative: {0}", colis.restitution)
-            collisions.push_back(colis);
+
+            m_contacts->update_from_collision(colis);
+            if (!colis.manifold.empty())
+                collisions.push_back(colis);
         }
         return collisions;
     };
+    static std::vector<collision2D> new_contacts;
+    new_contacts.clear();
+
     auto futures = kit::mt::for_each_iter(*pool, pairs, lambda, pool->thread_count());
     for (auto &f : futures)
     {
         const auto collisions = f.get();
-        m_collisions.insert(m_collisions.end(), collisions.begin(), collisions.end());
+        new_contacts.insert(new_contacts.end(), collisions.begin(), collisions.end());
     }
-}
-
-const std::vector<collision2D> &narrow_phase2D::collisions() const
-{
-    return m_collisions;
+    for (const collision2D &colis : new_contacts)
+        m_contacts->create_from_collision(colis);
 }
 
 const char *narrow_phase2D::name() const

@@ -50,7 +50,7 @@ void broad_phase2D::clear_pending_updates()
 
 void broad_phase2D::remove_pairs_containing(const collider2D *collider)
 {
-    for (std::size_t i = m_pairs.size() - 1; i >= 0 && i < m_pairs.size(); --i)
+    for (std::size_t i = m_pairs.size() - 1; i < m_pairs.size(); --i)
     {
         const pair &p = m_pairs[i];
         if (p.collider1 == collider || p.collider2 == collider)
@@ -59,7 +59,7 @@ void broad_phase2D::remove_pairs_containing(const collider2D *collider)
             m_pairs.erase(m_pairs.begin() + i);
         }
     }
-    for (std::size_t i = m_to_update.size() - 1; i >= 0 && i < m_to_update.size(); --i)
+    for (std::size_t i = m_to_update.size() - 1; i < m_to_update.size(); --i)
         if (m_to_update[i] == collider)
             m_to_update.erase(m_to_update.begin() + i);
 }

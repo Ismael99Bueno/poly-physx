@@ -29,17 +29,6 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
         kit::event<contact2D &> on_contact_exit;
     } events;
 
-    auto begin() const
-    {
-        return m_narrow->collisions().begin();
-    }
-    auto end() const
-    {
-        return m_narrow->collisions().end();
-    }
-
-    const collision2D &operator[](std::size_t index) const;
-
     template <kit::DerivedFrom<broad_phase2D> T = broad_phase2D> const T *broad() const
     {
         return kit::get_casted_raw_ptr<const T>(m_broad, m_known_broads);
@@ -113,8 +102,6 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
         return ptr;
     }
 
-    std::size_t size() const;
-    bool empty() const;
     using kit::toggleable::enabled;
     void enabled(bool enable) override final;
 

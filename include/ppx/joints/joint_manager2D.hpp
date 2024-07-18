@@ -119,7 +119,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
     void on_body_removal_validation(body2D *body) override final
     {
         const auto &joints = body->meta.joints;
-        for (std::size_t i = joints.size() - 1; i < joints.size() && i >= 0; i--)
+        for (std::size_t i = joints.size() - 1; i < joints.size(); i--)
             remove(joints[i]);
     }
 

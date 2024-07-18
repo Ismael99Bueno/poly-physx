@@ -81,7 +81,7 @@ bool body2D::contains(const collider2D *collider) const
 
 void body2D::clear()
 {
-    for (std::size_t i = m_colliders.size() - 1; i < m_colliders.size() && i >= 0; i--)
+    for (std::size_t i = m_colliders.size() - 1; i < m_colliders.size(); i--)
         remove(i);
 }
 
@@ -366,7 +366,7 @@ void body2D::type(btype type)
         }
         return;
     }
-    for (std::size_t i = meta.joints.size() - 1; i < meta.joints.size() && i >= 0; i--)
+    for (std::size_t i = meta.joints.size() - 1; i < meta.joints.size(); i--)
     {
         joint2D *joint = meta.joints[i];
         if (!joint->other(this)->is_dynamic())

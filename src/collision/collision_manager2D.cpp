@@ -33,24 +33,11 @@ void collision_manager2D::detect_and_create_contacts()
 {
     KIT_PERF_SCOPE("ppx::collision_manager2D::detect_and_create_contacts");
     const auto &pairs = m_broad->enabled() ? m_broad->update_pairs() : m_broad->pairs();
-    const auto &collisions = m_narrow->enabled() ? m_narrow->compute_collisions(pairs) : m_narrow->collisions();
+    if (m_narrow->enabled()) [[likely]]
+        m_narrow->update_contacts(pairs, m_contacts.get());
 
     if (m_contacts->enabled()) [[likely]]
-        m_contacts->create_contacts_from_collisions(collisions);
-}
-
-const collision2D &collision_manager2D::operator[](std::size_t index) const
-{
-    return m_narrow->collisions()[index];
-}
-
-std::size_t collision_manager2D::size() const
-{
-    return m_narrow->collisions().size();
-}
-bool collision_manager2D::empty() const
-{
-    return m_narrow->collisions().empty();
+        m_contacts->remove_expired_contacts();
 }
 
 void collision_manager2D::enabled(const bool enabled)

@@ -24,7 +24,10 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     virtual std::vector<contact2D *> create_active_contacts_list() const = 0;
 
     virtual std::size_t total_contacts_count() const = 0;
-    virtual std::size_t active_contacts_count() const = 0;
+
+    virtual void create_from_collision(const collision2D &collision) = 0;
+    virtual void update_from_collision(collision2D &collision) = 0;
+    virtual void create_or_update_from_collision(const collision2D &collision) = 0;
 
     bool checksum() const;
     void inherit(collision_contacts2D &&contacts);
@@ -41,7 +44,7 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     }
 
     virtual void destroy_all_contacts() = 0;
-    virtual void create_contacts_from_collisions(const std::vector<collision2D> &collisions) = 0;
+    virtual void remove_expired_contacts() = 0;
 
     friend class collision_manager2D;
 };
