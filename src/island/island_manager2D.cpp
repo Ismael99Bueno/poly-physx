@@ -220,8 +220,6 @@ void island_manager2D::split(island2D *island)
         if (new_island->m_bodies.size() == island->m_bodies.size())
             break;
     }
-
-    allocator<island2D>::destroy(island);
 }
 
 bool island_manager2D::checksum() const
