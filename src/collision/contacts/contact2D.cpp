@@ -39,6 +39,10 @@ const geo::contact_point2D &contact2D::point() const
 {
     return m_point;
 }
+contact2D::contact_key contact2D::key() const
+{
+    return {m_collider1, m_collider2, m_point.id.key};
+}
 
 const glm::vec2 &contact2D::normal() const
 {

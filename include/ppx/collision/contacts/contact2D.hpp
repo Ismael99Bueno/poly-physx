@@ -4,6 +4,7 @@
 #include "ppx/collision/collision2D.hpp"
 #include "ppx/constraints/pvconstraint2D.hpp"
 #include "ppx/actuators/actuator2D.hpp"
+#include "kit/container/hashable_tuple.hpp"
 
 namespace ppx
 {
@@ -24,6 +25,7 @@ concept Contact2D = ContactConstraint2D<T> || ContactActuator2D<T>;
 class contact2D : virtual public joint2D
 {
   public:
+    using contact_key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
     virtual ~contact2D() = default;
 
     collider2D *collider1() const;
@@ -31,6 +33,7 @@ class contact2D : virtual public joint2D
 
     const geo::contact_point2D &point() const;
     const glm::vec2 &normal() const;
+    contact_key key() const;
 
     float restitution() const;
     float friction() const;

@@ -12,7 +12,6 @@ class island2D : public worldref2D
 {
   public:
     using worldref2D::worldref2D;
-    using contact_key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
 
     void awake();
     bool asleep() const;
