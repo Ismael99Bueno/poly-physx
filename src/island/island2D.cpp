@@ -193,9 +193,9 @@ bool island2D::checksum() const
 
 void island2D::solve()
 {
-    collect_active_elements_and_call_pre_solve();
-    for (actuator2D *actuator : m_active_actuators)
-        actuator->solve();
+    for (actuator2D *actuator : m_actuators)
+        if (actuator->enabled()) [[likely]]
+            actuator->solve();
 
     for (body2D *body : m_bodies)
         body->prepare_constraint_states();
@@ -203,23 +203,37 @@ void island2D::solve()
     const std::size_t viters = world.joints.constraints.params.velocity_iterations;
     const std::size_t piters = world.joints.constraints.params.position_iterations;
 
-    for (constraint2D *constraint : m_active_constraints)
-        constraint->startup();
+    thread_local std::vector<contact2D *> active_contacts;
+    active_contacts.clear();
+
+    for (contact2D *contact : m_contacts)
+        if (contact->enabled()) [[likely]]
+        {
+            contact->on_pre_solve();
+            if (contact->enabled()) [[likely]]
+                active_contacts.push_back(contact);
+        }
+
+    for (constraint2D *constraint : m_constraints)
+        if (constraint->enabled()) [[likely]]
+            constraint->startup();
 
     for (std::size_t i = 0; i < viters; i++)
-        for (constraint2D *constraint : m_active_constraints)
-            constraint->solve_velocities();
+        for (constraint2D *constraint : m_constraints)
+            if (constraint->enabled()) [[likely]]
+                constraint->solve_velocities();
 
     m_solved_positions = true;
     for (std::size_t i = 0; i < piters; i++)
     {
         m_solved_positions = true;
-        for (constraint2D *constraint : m_active_constraints)
-            m_solved_positions &= constraint->solve_positions();
+        for (constraint2D *constraint : m_constraints)
+            if (constraint->enabled()) [[likely]]
+                m_solved_positions &= constraint->solve_positions();
         if (m_solved_positions)
             break;
     }
-    for (contact2D *contact : m_active_contacts)
+    for (contact2D *contact : m_contacts)
         contact->on_post_solve();
 
     if (world.rk_subset_index() != 0 || !world.islands.params.enable_sleep)
@@ -237,26 +251,6 @@ void island2D::solve()
     }
     else
         m_time_still = 0.f;
-}
-
-void island2D::collect_active_elements_and_call_pre_solve()
-{
-    m_active_actuators.clear();
-    m_active_constraints.clear();
-    m_active_contacts.clear();
-    for (actuator2D *actuator : m_actuators)
-        if (actuator->enabled()) [[likely]]
-            m_active_actuators.push_back(actuator);
-    for (constraint2D *constraint : m_constraints)
-        if (constraint->enabled()) [[likely]]
-            m_active_constraints.push_back(constraint);
-    for (contact2D *contact : m_contacts)
-        if (contact->enabled()) [[likely]]
-        {
-            contact->on_pre_solve();
-            if (contact->enabled()) [[likely]]
-                m_active_contacts.push_back(contact);
-        }
 }
 
 bool island2D::is_void() const

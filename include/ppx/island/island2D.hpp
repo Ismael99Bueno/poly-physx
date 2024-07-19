@@ -125,8 +125,6 @@ class island2D : public worldref2D
     bool no_joints() const;
 
   private:
-    void collect_active_elements_and_call_pre_solve();
-
     template <IJoint2D Joint> static island2D *get_effective_island(Joint *joint)
     {
         const body2D *body1 = joint->body1();
@@ -153,10 +151,6 @@ class island2D : public worldref2D
     std::vector<actuator2D *> m_actuators;
     std::vector<constraint2D *> m_constraints;
     std::vector<contact2D *> m_contacts;
-
-    std::vector<actuator2D *> m_active_actuators;
-    std::vector<constraint2D *> m_active_constraints;
-    std::vector<contact2D *> m_active_contacts;
 
     std::uint32_t m_split_points = 0;
     float m_time_still = 0.f;
