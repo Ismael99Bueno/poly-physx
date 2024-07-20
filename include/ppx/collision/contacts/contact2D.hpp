@@ -13,6 +13,7 @@ class contact2D;
 template <typename T>
 concept IContact2D = IJoint2D<T> && kit::DerivedFrom<T, contact2D>;
 
+// replace IPVConstraint2D with a check to see if it has a solver getter
 template <typename T>
 concept ContactConstraint2D = IContact2D<T> && IPVConstraint2D<T>; // Use IVCConstraint2D instead of IPVConstraint2D?
 
@@ -28,7 +29,7 @@ class contact2D : virtual public joint2D
     using contact_key = kit::non_commutative_tuple<const collider2D *, const collider2D *, std::uint32_t>;
     virtual ~contact2D() = default;
 
-    collider2D *collider1() const;
+    collider2D *collider1() const; // what about non const?
     collider2D *collider2() const;
 
     const geo::contact_point2D &point() const;
@@ -50,7 +51,7 @@ class contact2D : virtual public joint2D
     void on_pre_solve();
     void on_post_solve();
 
-    bool is_contact() const override final;
+    bool is_contact() const override final; // remove this and from joint as well
 
   protected:
     contact2D(const collision2D *collision, std::size_t manifold_index);
