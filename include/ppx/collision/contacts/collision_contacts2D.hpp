@@ -39,10 +39,6 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     specs::collision_manager2D::contacts2D params;
 
   private:
-    virtual void on_attach()
-    {
-    }
-
     virtual void destroy_all_contacts() = 0;
     virtual void remove_expired_contacts() = 0;
 

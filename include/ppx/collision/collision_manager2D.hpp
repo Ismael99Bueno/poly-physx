@@ -69,7 +69,6 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
             std::get<T *>(m_known_broads) = ptr;
 
         m_broad = std::move(broad);
-        m_broad->on_attach();
         return ptr;
     }
 
@@ -98,7 +97,6 @@ class collision_manager2D final : public worldref2D, public kit::toggleable
             set_actuator_based_contact_solver(ptr);
 
         m_contacts = std::move(contacts);
-        m_contacts->on_attach();
         return ptr;
     }
 

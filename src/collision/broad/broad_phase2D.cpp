@@ -3,6 +3,7 @@
 #include "ppx/world2D.hpp"
 
 #include "geo/algorithm/intersection2D.hpp"
+#include "kit/multithreading/mt_for_each.hpp"
 
 namespace ppx
 {
@@ -69,6 +70,7 @@ void broad_phase2D::remove_outdated_pairs()
     KIT_PERF_SCOPE("ppx::broad_phase2D::remove_outdated_pairs")
     std::swap(m_last_pairs, m_pairs);
     m_pairs.clear();
+
     for (const pair &p : m_last_pairs)
         if (geo::intersects(p.collider1->fat_bbox(), p.collider2->fat_bbox()))
             m_pairs.push_back(p);

@@ -80,7 +80,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
                 (*it)->fat_bbox());
         return new_pairs;
     };
-    auto futures = kit::mt::for_each_iter(*pool, to_update, lambda, pool->thread_count());
+    auto futures = kit::mt::for_each_iter(*pool, to_update.begin(), to_update.end(), lambda, pool->thread_count());
     const std::size_t start_idx = m_pairs.size();
     for (auto &f : futures)
     {

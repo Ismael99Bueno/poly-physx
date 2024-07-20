@@ -56,7 +56,7 @@ bool body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buf
 
     const auto pool = world.thread_pool;
     if (mt && pool)
-        kit::mt::for_each(*pool, m_elements, lambda, pool->thread_count());
+        kit::mt::for_each(*pool, m_elements.begin(), m_elements.end(), lambda, pool->thread_count());
     else
         for (body2D *body : m_elements)
             lambda(body);
@@ -220,7 +220,7 @@ bool body_manager2D::retrieve_data_from_state(const std::vector<float> &vars_buf
 
     const auto pool = world.thread_pool;
     if (mt && pool)
-        kit::mt::for_each(*pool, m_elements, lambda, pool->thread_count());
+        kit::mt::for_each(*pool, m_elements.begin(), m_elements.end(), lambda, pool->thread_count());
     else
         for (body2D *body : m_elements)
             lambda(body);

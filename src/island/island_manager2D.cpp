@@ -38,7 +38,7 @@ void island_manager2D::solve()
     pool->await_pending();
 #else
     const auto lambda = [](island2D *island) { island->solve(); };
-    kit::mt::for_each(*pool, awake_islands, lambda, pool->thread_count());
+    kit::mt::for_each(*pool, awake_islands.begin(), awake_islands.end(), lambda, pool->thread_count());
 #endif
 }
 

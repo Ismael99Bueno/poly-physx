@@ -69,7 +69,7 @@ void narrow_phase2D::update_contacts_mt(const std::vector<pair> &pairs)
     static std::vector<collision2D> new_contacts;
     new_contacts.clear();
 
-    auto futures = kit::mt::for_each_iter(*pool, pairs, lambda, pool->thread_count());
+    auto futures = kit::mt::for_each_iter(*pool, pairs.begin(), pairs.end(), lambda, pool->thread_count());
     for (auto &f : futures)
     {
         const auto collisions = f.get();

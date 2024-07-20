@@ -26,9 +26,6 @@ class broad_phase2D : public worldref2D, public kit::toggleable, kit::non_copyab
     broad_phase2D(world2D &world);
     virtual ~broad_phase2D() = default;
     virtual const char *name() const;
-    virtual void on_attach()
-    {
-    }
 
     // as metrics, add the amount of pairs that had to be updated in a single frame
 
