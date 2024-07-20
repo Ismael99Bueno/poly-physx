@@ -195,7 +195,7 @@ struct body_manager2D
 struct collider_manager2D
 {
     float bbox_enlargement = 0.1f;
-    float bbox_buffer = 2.f;
+    float bbox_buffer = 0.5f;
 };
 
 struct joint_manager2D
