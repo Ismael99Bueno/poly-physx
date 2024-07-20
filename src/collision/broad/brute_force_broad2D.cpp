@@ -14,6 +14,7 @@ const char *brute_force_broad2D::name() const
 
 void brute_force_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 {
+    m_new_pairs_count = 0;
     if (params.multithreading && world.thread_pool)
         update_pairs_mt(to_update);
     else
@@ -31,6 +32,7 @@ void brute_force_broad2D::update_pairs_st(const std::vector<collider2D *> &to_up
             {
                 m_pairs.emplace_back(collider1, collider2);
                 m_unique_pairs.emplace(collider1, collider2);
+                m_new_pairs_count++;
             }
         }
 }
@@ -60,6 +62,7 @@ void brute_force_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_up
     {
         const auto new_pairs = f.get();
         m_pairs.insert(m_pairs.end(), new_pairs.begin(), new_pairs.end());
+        m_new_pairs_count += new_pairs.size();
     }
     for (auto it = m_pairs.begin() + start_idx; it != m_pairs.end(); ++it)
         m_unique_pairs.emplace(it->collider1, it->collider2);

@@ -206,8 +206,10 @@ void collider2D::update_bounding_boxes()
 
     m_fat_bb = m_tight_bb;
     const glm::vec2 dpos = m_body->velocity() * enlargement;
-    m_fat_bb.enlarge(buffer);
-    m_fat_bb.enlarge(dpos);
+    if (glm::length2(dpos) < buffer * buffer)
+        m_fat_bb.enlarge(buffer);
+    else
+        m_fat_bb.enlarge(dpos);
     if (qt)
         qt->insert(this);
 

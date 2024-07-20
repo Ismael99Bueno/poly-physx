@@ -32,6 +32,7 @@ void quad_tree_broad2D::erase(collider2D *collider)
 
 void quad_tree_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 {
+    m_new_pairs_count = 0;
     m_rebuild_timer += world.rk_substep_timestep();
     if (m_may_rebuild && m_rebuild_timer > rebuild_time_threshold)
         build_tree_from_scratch();
@@ -53,6 +54,7 @@ void quad_tree_broad2D::update_pairs_st(const std::vector<collider2D *> &to_upda
                 {
                     m_pairs.emplace_back(c1, collider2);
                     m_unique_pairs.emplace(c1, collider2);
+                    m_new_pairs_count++;
                 }
                 return true;
             },
@@ -86,6 +88,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
     {
         const auto new_pairs = f.get();
         m_pairs.insert(m_pairs.end(), new_pairs.begin(), new_pairs.end());
+        m_new_pairs_count += new_pairs.size();
     }
     for (auto it = m_pairs.begin() + start_idx; it != m_pairs.end(); ++it)
         m_unique_pairs.emplace(it->collider1, it->collider2);
