@@ -22,7 +22,7 @@ const char *broad_phase2D::name() const
 
 const std::vector<broad_phase2D::pair> &broad_phase2D::update_pairs()
 {
-    if (m_to_update.empty() || world.rk_subset_index() != 0)
+    if (m_to_update.empty() || world.rk_substep_index() != 0)
         return m_pairs;
     KIT_PERF_SCOPE("ppx::broad_phase2D::update_pairs")
 

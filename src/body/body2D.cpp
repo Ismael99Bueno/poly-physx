@@ -135,12 +135,12 @@ void body2D::begin_density_update()
     begin_spatial_update();
     m_density_update = true;
 }
-void body2D::end_density_update()
+void body2D::end_density_update(const bool update_bbox)
 {
     m_density_update = false;
     update_centroids();
     update_inertia();
-    end_spatial_update();
+    end_spatial_update(update_bbox);
     awake(true);
 }
 
@@ -149,20 +149,20 @@ void body2D::begin_spatial_update()
     KIT_ASSERT_ERROR(!m_spatial_update, "Cannot begin update while already updating");
     m_spatial_update = true;
 }
-void body2D::end_spatial_update()
+void body2D::end_spatial_update(const bool update_bbox)
 {
     m_spatial_update = false;
-    update_colliders();
+    update_colliders(update_bbox);
 }
 
-void body2D::retrieve_data_from_state_variables(const std::vector<float> &vars_buffer)
+void body2D::retrieve_data_from_state(const std::vector<float> &vars_buffer, const bool update_bbox)
 {
     const std::size_t idx = 6 * meta.index;
     m_awake_allowed = false;
     begin_spatial_update();
     centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});
     rotation(vars_buffer[idx + 2]);
-    end_spatial_update();
+    end_spatial_update(update_bbox);
 
     m_state.velocity = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
     m_state.angular_velocity = vars_buffer[idx + 5];
@@ -177,14 +177,14 @@ void body2D::full_update()
     awake(true);
 }
 
-void body2D::update_colliders()
+void body2D::update_colliders(const bool update_bbox)
 {
     if (m_spatial_update)
         return;
     for (collider2D *collider : *this)
     {
         KIT_ASSERT_ERROR(!collider->shape().updating(), "Cannot update collider while it is already being updated")
-        collider->update_shape();
+        collider->update_shape(update_bbox);
     }
 }
 void body2D::update_centroids()

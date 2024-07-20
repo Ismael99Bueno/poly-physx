@@ -30,8 +30,8 @@ class world2D : kit::non_copyable
     kit::mt::thread_pool *thread_pool = nullptr;
 
     void add(const specs::contraption2D &contraption);
-    std::uint32_t rk_subset_index() const;
-    std::uint32_t rk_subsets() const;
+    std::uint32_t rk_substep_index() const;
+    std::uint32_t rk_substeps() const;
 
     bool step();
     std::uint32_t step_count() const;

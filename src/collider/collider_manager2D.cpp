@@ -72,6 +72,13 @@ ray2D::hit<collider2D> collider_manager2D::cast(ray2D ray) const
     return closest;
 }
 
+void collider_manager2D::update_bounding_boxes()
+{
+    KIT_PERF_SCOPE("ppx::collider_manager2D::update_bounding_boxes")
+    for (collider2D *collider : m_elements)
+        collider->update_bounding_boxes();
+}
+
 template <typename Collider>
 static void in_area_qt_recursive(const quad_tree::node &qtnode, std::vector<Collider *> &in_area, const aabb2D &aabb,
                                  const polygon &aabb_poly)

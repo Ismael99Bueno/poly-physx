@@ -236,7 +236,7 @@ void island2D::solve()
     for (contact2D *contact : m_contacts)
         contact->on_post_solve();
 
-    if (world.rk_subset_index() != 0 || !world.islands.params.enable_sleep)
+    if (world.rk_substep_index() != 0 || !world.islands.params.enable_sleep)
         return;
 
     m_energy = 0.f;

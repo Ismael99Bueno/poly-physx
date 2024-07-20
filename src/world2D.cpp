@@ -25,6 +25,7 @@ world2D::world2D(const specs::world2D &spc)
       behaviours(*this), collisions(*this), islands(*this),
       semi_implicit_integration(spc.integrator.semi_implicit_integration), m_previous_timestep(integrator.ts.value)
 {
+    bodies.params = spc.bodies;
     colliders.params = spc.colliders;
     joints.constraints.params = spc.joints.constraints;
     collisions.broad()->params = spc.collision.broad;
@@ -54,11 +55,11 @@ void world2D::add(const specs::contraption2D &contraption)
         joints.add<prismatic_joint2D>(joint);
 }
 
-std::uint32_t world2D::rk_subset_index() const
+std::uint32_t world2D::rk_substep_index() const
 {
     return m_rk_subset_index;
 }
-std::uint32_t world2D::rk_subsets() const
+std::uint32_t world2D::rk_substeps() const
 {
     return integrator.tableau().stages;
 }
@@ -93,7 +94,9 @@ void world2D::pre_step_preparation()
 }
 void world2D::post_step_setup()
 {
-    bodies.wrap_up_step(integrator.state.vars());
+    if (!bodies.retrieve_data_from_state(integrator.state.vars()))
+        colliders.update_bounding_boxes();
+
     m_previous_timestep = integrator.ts.value;
 
     KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
@@ -198,7 +201,8 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
         vars.size(), bodies.size())
 
     m_rk_substep_timestep = timestep;
-    bodies.prepare_for_next_substep(vars);
+    if (!bodies.prepare_for_next_substep(vars))
+        colliders.update_bounding_boxes();
 
     behaviours.apply_forces();
     if (collisions.enabled())

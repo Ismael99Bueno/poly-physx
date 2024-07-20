@@ -95,10 +95,10 @@ class body2D final : public worldref2D, kit::non_copyable
     void type(btype type);
 
     void begin_density_update();
-    void end_density_update();
+    void end_density_update(bool update_bbox = true);
 
     void begin_spatial_update();
-    void end_spatial_update();
+    void end_spatial_update(bool update_bbox = true);
 
     float kinetic_energy() const;
 
@@ -169,7 +169,7 @@ class body2D final : public worldref2D, kit::non_copyable
     void apply_simulation_torque(float torque);
 
     void full_update();
-    void update_colliders();
+    void update_colliders(bool update_bbox = true);
     void update_centroids();
     void update_inertia();
 
@@ -205,7 +205,7 @@ class body2D final : public worldref2D, kit::non_copyable
     bool m_awake_allowed = true;
 
     void reset_simulation_forces();
-    void retrieve_data_from_state_variables(const std::vector<float> &vars_buffer);
+    void retrieve_data_from_state(const std::vector<float> &vars_buffer, bool update_bbox);
 
     void reset_dynamic_properties();
     void stop_all_motion();

@@ -22,7 +22,7 @@ void collision_contacts2D::enabled(const bool enabled)
 
 std::uint32_t collision_contacts2D::rk_substep_index() const
 {
-    return world.rk_subset_index();
+    return world.rk_substep_index();
 }
 
 bool collision_contacts2D::checksum() const

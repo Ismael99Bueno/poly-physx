@@ -102,7 +102,7 @@ class collider2D final : public worldref2D, kit::non_copyable
         m_body->full_update();
     }
 
-    void update_shape();
+    void update_shape(bool update_bbox = true);
     void update_bounding_boxes();
 
   private:

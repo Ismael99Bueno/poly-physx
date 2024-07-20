@@ -214,10 +214,11 @@ void collider2D::update_bounding_boxes()
     world.collisions.broad()->flag_update(this);
 }
 
-void collider2D::update_shape()
+void collider2D::update_shape(const bool update_bbox)
 {
     call_shape_method([](auto &shape) { shape.update(); });
-    update_bounding_boxes();
+    if (update_bbox)
+        update_bounding_boxes();
 }
 
 collider2D::stype collider2D::shape_type() const

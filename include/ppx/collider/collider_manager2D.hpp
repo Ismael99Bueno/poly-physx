@@ -14,6 +14,7 @@ class collider_manager2D final : public manager2D<collider2D>
     collider2D *add(body2D *parent, const collider2D::specs &spc = {});
 
     ray2D::hit<collider2D> cast(ray2D ray) const;
+    void update_bounding_boxes();
 
     using manager2D<collider2D>::operator[];
     std::vector<const collider2D *> operator[](const aabb2D &aabb) const;
