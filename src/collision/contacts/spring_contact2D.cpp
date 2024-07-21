@@ -28,9 +28,6 @@ glm::vec3 spring_contact2D::compute_force(const state2D &state1, const state2D &
     const glm::vec2 vel1 = state1.velocity_at_centroid_offset(m_offset1);
     const glm::vec2 vel2 = state2.velocity_at_centroid_offset(m_offset2);
 
-    const glm::vec2 &touch1 = m_point.point;
-    const glm::vec2 touch2 = m_point.point - m_mtv;
-
     const glm::vec2 relvel = vel2 - vel1;
 
     const glm::vec2 normal_vel = glm::dot(m_normal, relvel) * m_normal;

@@ -33,6 +33,7 @@ class contact_solver2D<Contact> final : public contact_manager2D<Contact>, publi
 
     void startup(std::vector<state2D> &states) override
     {
+        m_active_contacts.clear();
         for (Contact *contact : this->m_contacts)
         {
             if (!contact->enabled()) [[likely]] // no need to check sleep: if using this, islands are disabled

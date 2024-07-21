@@ -35,23 +35,23 @@ struct state2D
     bool is_kinematic() const;
     bool is_static() const;
 
-    transform2D centroid;
-    glm::vec2 lposition;
+    transform2D centroid{};
+    glm::vec2 lposition{0.f};
 
-    glm::vec2 velocity;
-    float angular_velocity;
+    glm::vec2 velocity{0.f};
+    float angular_velocity = 0.f;
 
-    float mass;
-    float imass;
+    float mass = 1.f;
+    float imass = 1.f;
 
-    float inertia;
-    float iinertia;
+    float inertia = 1.f;
+    float iinertia = 1.f;
 
-    glm::vec2 force;
-    float torque;
+    glm::vec2 force{0.f};
+    float torque = 0.f;
 
-    specs::body2D::btype type;
-    float charge;
-    glm::vec2 charge_centroid;
+    specs::body2D::btype type = specs::body2D::btype::DYNAMIC;
+    float charge = 1.f;
+    glm::vec2 charge_centroid{0.f};
 };
 } // namespace ppx

@@ -30,7 +30,7 @@ class behaviour2D : public manager2D<body2D>,
 
     float kinetic_energy() const;
     virtual float potential_energy() const = 0;
-    virtual float potential_energy(const body2D &body) const = 0;
+    virtual float potential_energy(const state2D &state) const = 0;
 
     float energy(const body2D &body) const;
     float energy() const;

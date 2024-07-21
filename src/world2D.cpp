@@ -77,8 +77,8 @@ void world2D::pre_step()
 #endif
     if (islands.enabled())
     {
-        islands.remove_invalid();
         islands.try_split();
+        islands.gather_awake_islands();
     }
     bodies.gather_and_load_states(integrator.state);
     KIT_ASSERT_ERROR(collisions.contact_solver()->checksum(), "Contacts checksum failed")
@@ -86,6 +86,7 @@ void world2D::pre_step()
     KIT_ASSERT_ERROR(joints.checksum(), "Joints checksum failed")
     if (collisions.enabled())
         collisions.detect_and_create_contacts();
+    m_rk_substep_index = 0;
 }
 
 std::vector<float> world2D::operator()(const float time, const float timestep, const std::vector<float> &posvels)
@@ -95,6 +96,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
                         "Positions and velocities vector size must be exactly 6 times greater than the body array size "
                         "- posvels: {0}, body array: {1}",
                         posvels.size(), bodies.size())
+    m_rk_substep_timestep = timestep;
 
     if (m_rk_substep_index != 0)
         bodies.update_states(posvels);
@@ -103,7 +105,10 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     behaviours.load_forces(states);
 
     if (islands.enabled())
+    {
+        islands.remove_invalid();
         islands.solve_actuators(states);
+    }
     else
         joints.actuators.solve(states);
 
@@ -113,7 +118,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
 
 void world2D::post_step()
 {
-    bodies.update_states(integrator.state.vars());
+    bodies.update_states(integrator.state.vars(), false);
     std::vector<state2D> &states = bodies.mutable_states();
 
     if (islands.enabled())
@@ -121,7 +126,7 @@ void world2D::post_step()
     else
         joints.constraints.solve(states);
 
-    if (!bodies.retrieve_data_from_states(integrator.state.vars()))
+    if (!bodies.retrieve_data_from_states())
         colliders.update_bounding_boxes();
 
     KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
@@ -135,6 +140,11 @@ std::uint32_t world2D::hertz() const
     if (kit::approaches_zero(integrator.ts.value))
         return 0;
     return (std::uint32_t)(1.f / integrator.ts.value);
+}
+
+float world2D::rk_substep_timestep() const
+{
+    return m_rk_substep_timestep;
 }
 
 void world2D::on_body_removal_validation(body2D *body)

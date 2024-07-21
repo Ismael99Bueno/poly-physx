@@ -37,14 +37,6 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
     virtual flat_t constraint_position() const = 0;
 
   protected:
-    flat_t m_c{0.f};
-    float m_slop;
-    bool m_baumgarte;
-    float m_bthreshold;
-    float m_bcoeff;
-    float m_max_position_correction;
-    float m_position_resolution_speed;
-
     virtual void update_constraint_data() override;
     virtual void update_position_data();
 
@@ -56,6 +48,14 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
 
     void apply_linear_correction(const glm::vec2 &lincorrection);
     void apply_angular_correction(float angcorrection);
+
+    flat_t m_c{0.f};
+    float m_slop;
+    bool m_baumgarte;
+    float m_bthreshold;
+    float m_bcoeff;
+    float m_max_position_correction;
+    float m_position_resolution_speed;
 };
 
 } // namespace ppx

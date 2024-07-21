@@ -37,14 +37,15 @@ std::vector<float> body_manager2D::load_velocities_and_forces() const
 
     for (std::size_t i = 0; i < m_elements.size(); i++) // is it worth it to multithread?
     {
+        const body2D *body = m_elements[i];
         const state2D &state = m_states[i];
         const std::size_t index = 6 * i;
 
         const float imass = state.inv_mass();
         const float iinertia = state.inv_inertia();
 
-        const glm::vec2 accel = state.force * imass;
-        const float angaccel = state.torque * iinertia;
+        const glm::vec2 accel = (state.force + body->instant_force() + body->persistent_force()) * imass;
+        const float angaccel = (state.torque + body->instant_torque() + body->persistent_torque()) * iinertia;
 
         const glm::vec2 vel = semi_impl ? state.velocity + accel * ts : state.velocity;
         const float angvel = semi_impl ? state.angular_velocity + angaccel * ts : state.angular_velocity;
@@ -201,14 +202,17 @@ void body_manager2D::gather_and_load_states(rk::state<float> &rkstate)
     }
 }
 
-void body_manager2D::update_states(const std::vector<float> &posvels)
+void body_manager2D::update_states(const std::vector<float> &posvels, const bool reset_forces)
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::update_states")
     for (std::size_t i = 0; i < m_elements.size(); i++)
     {
         state2D &state = m_states[i];
-        state.force = glm::vec2(0.f);
-        state.torque = 0.f;
+        if (reset_forces)
+        {
+            state.force = glm::vec2(0.f);
+            state.torque = 0.f;
+        }
 
         const std::size_t index = 6 * i;
 
@@ -221,24 +225,17 @@ void body_manager2D::update_states(const std::vector<float> &posvels)
     }
 }
 
-bool body_manager2D::retrieve_data_from_states(const std::vector<float> &posvels)
+bool body_manager2D::retrieve_data_from_states()
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::retrieve_data_from_states")
     const bool mt = params.multithreading;
-    const auto lambda = [this, mt, &posvels](body2D *body) {
+    const auto lambda = [this, mt](body2D *body) {
         body->m_instant_force = glm::vec2(0.f);
         body->m_instant_torque = 0.f;
         if (body->asleep()) [[unlikely]]
             return;
-        const std::size_t i = body->meta.index;
-        const std::size_t index = 6 * i;
-        state2D &state = m_states[i];
-
-        state.centroid.position = {posvels[index], posvels[index + 1]};
-        state.centroid.rotation = posvels[index + 2];
-        state.velocity = {posvels[index + 3], posvels[index + 4]};
-        state.angular_velocity = posvels[index + 5];
-        body->retrieve_data_from_state(state, !mt);
+        const std::size_t index = body->meta.index;
+        body->retrieve_data_from_state(m_states[index], !mt);
     };
 
     const auto pool = world.thread_pool;

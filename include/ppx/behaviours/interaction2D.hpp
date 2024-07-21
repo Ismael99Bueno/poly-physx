@@ -17,14 +17,14 @@ class interaction2D : public behaviour2D
     bool add(body2D *body) override final;
     bool remove(std::size_t index) override final;
 
-    float potential(const body2D &body, const glm::vec2 &position) const;
+    float potential(const state2D &state, const glm::vec2 &position) const;
     float potential(const glm::vec2 &position) const;
 
     virtual float potential_energy_pair(const state2D &state1, const state2D &state2) const
     {
         return 0.f;
     }
-    float potential_energy(const body2D &body) const override final;
+    float potential_energy(const state2D &state) const override final;
     float potential_energy() const override final;
 
   private:

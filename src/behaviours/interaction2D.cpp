@@ -6,30 +6,27 @@ namespace ppx
 {
 interaction2D::interaction2D(world2D &world, const std::string &name) : behaviour2D(world, name)
 {
-    m_unit.charge = 1.f;
-    m_unit.mass = 1.f;
-    m_unit.inertia = 1.f;
 }
-float interaction2D::potential(const body2D &body, const glm::vec2 &position) const
+float interaction2D::potential(const state2D &state, const glm::vec2 &position) const
 {
     m_unit.centroid.position = position;
-    return potential_energy_pair(m_unit, body.state());
+    return potential_energy_pair(m_unit, state);
 }
 float interaction2D::potential(const glm::vec2 &position) const
 {
     m_unit.centroid.position = position;
     float pot = 0.f;
-    for (const body2D *body : m_elements)
-        pot += potential_energy_pair(m_unit, body->state());
+    for (const state2D &state : world.bodies.states())
+        pot += potential_energy_pair(m_unit, state);
     return pot;
 }
 
-float interaction2D::potential_energy(const body2D &body) const
+float interaction2D::potential_energy(const state2D &state1) const
 {
     float pot = 0.f;
-    for (const body2D *b : m_elements)
-        if (b != &body)
-            pot += potential_energy_pair(body.state(), b->state());
+    for (const state2D &state2 : world.bodies.states())
+        if (&state1 != &state2)
+            pot += potential_energy_pair(state1, state2);
     return pot;
 }
 float interaction2D::potential_energy() const

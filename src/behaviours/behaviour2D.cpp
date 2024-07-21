@@ -37,7 +37,7 @@ float behaviour2D::kinetic_energy() const
 
 float behaviour2D::energy(const body2D &body) const
 {
-    return body.kinetic_energy() + potential_energy(body);
+    return body.kinetic_energy() + potential_energy(body.state());
 }
 float behaviour2D::energy() const
 {
@@ -46,17 +46,16 @@ float behaviour2D::energy() const
 
 void behaviour2D::load_forces(std::vector<state2D> &states) const
 {
-    for (std::size_t i = 0; i < m_elements.size(); i++)
+    for (const body2D *body : m_elements)
     {
-        const body2D *body = m_elements[i];
         if (!body->is_dynamic() || body->asleep())
             continue;
 
-        state2D &state = states[i];
+        state2D &state = states[body->meta.index];
         const glm::vec3 f = force(state);
 
-        state.force = glm::vec2(f);
-        state.torque = f.z;
+        state.force += glm::vec2(f);
+        state.torque += f.z;
     }
 }
 

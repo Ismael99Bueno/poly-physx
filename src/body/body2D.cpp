@@ -162,6 +162,8 @@ void body2D::retrieve_data_from_state(const state2D &state, const bool update_bb
 
     m_state.velocity = state.velocity;
     m_state.angular_velocity = state.angular_velocity;
+    m_state.force = state.force;
+    m_state.torque = state.torque;
     m_awake_allowed = true;
 }
 

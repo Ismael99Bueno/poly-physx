@@ -93,7 +93,7 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::
     };
 
     if (this->m_dyn1)
-        apply(this->state1(), this->m_imass1, this->m_iinertia1, this->m_offset1);
+        apply(this->state1(), -this->m_imass1, -this->m_iinertia1, this->m_offset1);
     if (this->m_dyn2)
         apply(this->state2(), this->m_imass2, this->m_iinertia2, this->m_offset2);
 }

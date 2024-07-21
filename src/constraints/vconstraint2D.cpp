@@ -60,21 +60,21 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
         KIT_ERROR("Linear impulse can only be applied when the linear degrees of the constraint is greater than 0")
     }
     const auto apply = [this, &linimpulse](state2D &state, const float imass, const float iinertia,
-                                           const glm::vec2 &force) {
+                                           const glm::vec2 &force, const glm::vec2 &offset) {
         state.velocity += imass * linimpulse;
         state.force += force;
         if (!m_no_anchors)
         {
-            state.angular_velocity += iinertia * kit::cross2D(m_offset1, linimpulse);
-            state.torque += kit::cross2D(m_offset1, force);
+            state.angular_velocity += iinertia * kit::cross2D(offset, linimpulse);
+            state.torque += kit::cross2D(offset, force);
         }
     };
 
     m_force = linimpulse / m_ts;
     if (m_dyn1)
-        apply(state1(), m_imass1, m_iinertia1, -m_force);
+        apply(state1(), -m_imass1, -m_iinertia1, -m_force, m_offset1);
     if (m_dyn2)
-        apply(state2(), m_imass2, m_iinertia2, m_force);
+        apply(state2(), m_imass2, m_iinertia2, m_force, m_offset2);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
