@@ -5,14 +5,6 @@
 
 namespace ppx
 {
-void island_manager2D::gather_awake_islands()
-{
-    KIT_PERF_SCOPE("ppx::island_manager2D::gather_awake_islands")
-    m_awake_islands.clear();
-    for (island2D *island : m_elements)
-        if (!island->asleep())
-            m_awake_islands.push_back(island);
-}
 
 void island_manager2D::solve_actuators(std::vector<state2D> &states)
 {
@@ -39,9 +31,10 @@ void island_manager2D::solve_constraints(std::vector<state2D> &states)
             lambda(island);
 }
 
-void island_manager2D::remove_invalid()
+void island_manager2D::remove_invalid_and_gather_awake()
 {
-    KIT_PERF_SCOPE("ppx::island_manager2D::remove_invalid")
+    KIT_PERF_SCOPE("ppx::island_manager2D::remove_invalid_and_gather_awake")
+    m_awake_islands.clear();
     for (auto it = m_elements.begin(); it != m_elements.end();)
     {
         island2D *island = *it;
@@ -51,7 +44,11 @@ void island_manager2D::remove_invalid()
             it = m_elements.erase(it);
         }
         else
+        {
+            if (!island->asleep())
+                m_awake_islands.push_back(island);
             ++it;
+        }
     }
 }
 

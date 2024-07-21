@@ -35,6 +35,8 @@ struct state2D
     bool is_kinematic() const;
     bool is_static() const;
 
+    float kinetic_energy() const;
+
     transform2D centroid{};
     glm::vec2 lposition{0.f};
 
@@ -47,8 +49,8 @@ struct state2D
     float inertia = 1.f;
     float iinertia = 1.f;
 
-    glm::vec2 force{0.f};
-    float torque = 0.f;
+    glm::vec2 substep_force{0.f};
+    float substep_torque = 0.f;
 
     specs::body2D::btype type = specs::body2D::btype::DYNAMIC;
     float charge = 1.f;

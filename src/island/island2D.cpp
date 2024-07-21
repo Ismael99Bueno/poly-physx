@@ -216,6 +216,15 @@ void island2D::solve_constraints(std::vector<state2D> &states)
             if (constraint->enabled()) [[likely]]
                 constraint->solve_velocities();
 
+    const float ts = world.integrator.ts.value;
+    for (const body2D *body : m_bodies)
+    {
+        const std::size_t index = body->meta.index;
+        states[index].centroid.position += states[index].velocity * ts;
+        states[index].centroid.rotation += states[index].angular_velocity * ts;
+    }
+
+    // try additional integration of positions here
     m_solved_positions = true;
     for (std::size_t i = 0; i < piters; i++)
     {
@@ -234,7 +243,7 @@ void island2D::solve_constraints(std::vector<state2D> &states)
 
     m_energy = 0.f;
     for (body2D *body : m_bodies)
-        m_energy += body->kinetic_energy();
+        m_energy += states[body->meta.index].kinetic_energy();
     m_energy /= m_bodies.size();
 
     if (m_energy < world.islands.sleep_energy_threshold(this))

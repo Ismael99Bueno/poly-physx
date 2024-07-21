@@ -72,20 +72,32 @@ std::uint32_t world2D::step_count() const
 
 void world2D::pre_step()
 {
+    KIT_PERF_SCOPE("ppx::world2D::pre_step")
 #if defined(DEBUG) && !defined(_MSC_VER) // little fix, seems feenableexcept does not exist on windows
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
+    std::vector<state2D> &states = bodies.gather_states();
+
+    if (collisions.enabled())
+        collisions.detect_and_create_contacts();
     if (islands.enabled())
     {
         islands.try_split();
-        islands.gather_awake_islands();
+        islands.remove_invalid_and_gather_awake();
+        islands.solve_constraints(states);
     }
-    bodies.gather_and_load_states(integrator.state);
+    else
+        joints.constraints.solve(states);
+    bodies.load_states(integrator.state);
+
+    // STOP LOADING FORCES FROM THE CONSTRAINTS, IT INTERFERES WITH INTEGRATION
+    // remove force and torque setters as they will now be meaningless. Plus, those are forces from the last rk substep,
+    // not from all the step
+    // remove no_anchors/use_both_anchors bool from joint. Its just not worth it
+
     KIT_ASSERT_ERROR(collisions.contact_solver()->checksum(), "Contacts checksum failed")
     KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
     KIT_ASSERT_ERROR(joints.checksum(), "Joints checksum failed")
-    if (collisions.enabled())
-        collisions.detect_and_create_contacts();
     m_rk_substep_index = 0;
 }
 
@@ -105,27 +117,18 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
     behaviours.load_forces(states);
 
     if (islands.enabled())
-    {
-        islands.remove_invalid();
         islands.solve_actuators(states);
-    }
     else
         joints.actuators.solve(states);
 
     m_rk_substep_index++;
-    return bodies.load_velocities_and_forces();
+    return bodies.load_velocities_and_forces(timestep);
 }
 
 void world2D::post_step()
 {
-    bodies.update_states(integrator.state.vars(), false);
-    std::vector<state2D> &states = bodies.mutable_states();
-
-    if (islands.enabled())
-        islands.solve_constraints(states);
-    else
-        joints.constraints.solve(states);
-
+    KIT_PERF_SCOPE("ppx::world2D::post_step")
+    bodies.update_states(integrator.state.vars());
     if (!bodies.retrieve_data_from_states())
         colliders.update_bounding_boxes();
 

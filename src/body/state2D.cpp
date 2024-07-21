@@ -87,4 +87,9 @@ bool state2D::is_static() const
     return type == specs::body2D::btype::STATIC;
 }
 
+float state2D::kinetic_energy() const
+{
+    return 0.5f * (mass * glm::length2(velocity) + inertia * angular_velocity * angular_velocity);
+}
+
 } // namespace ppx

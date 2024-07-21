@@ -25,11 +25,11 @@ void actuator2D::solve(std::vector<state2D> &states)
     const float t1 = kit::cross2D(m_force, m_offset1);
     const float t2 = kit::cross2D(m_offset2, m_force);
 
-    state1.force -= m_force;
-    state1.torque += t1 - m_torque;
+    state1.substep_force -= m_force;
+    state1.substep_torque += t1 - m_torque;
 
-    state2.force += m_force;
-    state2.torque += t2 + m_torque;
+    state2.substep_force += m_force;
+    state2.substep_torque += t2 + m_torque;
 }
 
 } // namespace ppx

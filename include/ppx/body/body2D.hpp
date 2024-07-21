@@ -107,9 +107,6 @@ class body2D final : public worldref2D, kit::non_copyable
 
     void add_force(const glm::vec2 &force);
 
-    const glm::vec2 &force() const;
-    float torque() const;
-
     const glm::vec2 &instant_force() const;
     const glm::vec2 &persistent_force() const;
 

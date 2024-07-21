@@ -54,8 +54,8 @@ void behaviour2D::load_forces(std::vector<state2D> &states) const
         state2D &state = states[body->meta.index];
         const glm::vec3 f = force(state);
 
-        state.force += glm::vec2(f);
-        state.torque += f.z;
+        state.substep_force += glm::vec2(f);
+        state.substep_torque += f.z;
     }
 }
 

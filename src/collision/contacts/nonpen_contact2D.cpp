@@ -68,8 +68,7 @@ void nonpen_contact2D::update(const collision2D *collision, const std::size_t ma
     contact2D::update(collision, manifold_index);
     KIT_ASSERT_ERROR(collision->friction >= 0.f, "Friction must be non-negative: {0}", collision->friction)
     KIT_ASSERT_ERROR(collision->restitution >= 0.f, "Restitution must be non-negative: {0}", collision->restitution)
-    m_lanchor1 =
-        m_body1->state().local_position_point(collision->manifold[manifold_index].point); // lanchor2 is not used
+    m_lanchor1 = state1().local_position_point(collision->manifold[manifold_index].point); // lanchor2 is not used
     m_friction_contact.update(collision, m_lanchor1, m_normal);
     m_is_adjusting_positions = false;
     m_pntr_correction = 0.f;

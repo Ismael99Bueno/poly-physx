@@ -60,21 +60,17 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
         KIT_ERROR("Linear impulse can only be applied when the linear degrees of the constraint is greater than 0")
     }
     const auto apply = [this, &linimpulse](state2D &state, const float imass, const float iinertia,
-                                           const glm::vec2 &force, const glm::vec2 &offset) {
+                                           const glm::vec2 &offset) {
         state.velocity += imass * linimpulse;
-        state.force += force;
         if (!m_no_anchors)
-        {
             state.angular_velocity += iinertia * kit::cross2D(offset, linimpulse);
-            state.torque += kit::cross2D(offset, force);
-        }
     };
 
     m_force = linimpulse / m_ts;
     if (m_dyn1)
-        apply(state1(), -m_imass1, -m_iinertia1, -m_force, m_offset1);
+        apply(state1(), -m_imass1, -m_iinertia1, m_offset1);
     if (m_dyn2)
-        apply(state2(), m_imass2, m_iinertia2, m_force, m_offset2);
+        apply(state2(), m_imass2, m_iinertia2, m_offset2);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -86,18 +82,15 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_angular_impulse(const float an
         KIT_ERROR("Angular impulse can only be applied when the angular degrees of the constraint is equal to 1")
     }
     m_torque = angimpulse / m_ts;
-
     if (m_dyn1)
     {
         state2D &st1 = state1();
         st1.angular_velocity -= m_iinertia1 * angimpulse;
-        st1.torque -= m_torque;
     }
     if (m_dyn2)
     {
         state2D &st2 = state2();
         st2.angular_velocity += m_iinertia2 * angimpulse;
-        st2.torque += m_torque;
     }
 }
 
@@ -144,12 +137,12 @@ void vconstraint2D<LinDegrees, AngDegrees>::startup(std::vector<state2D> &states
     m_index1 = m_body1->meta.index;
     m_index2 = m_body2->meta.index;
 
-    state2D &st1 = state1();
+    const state2D &st1 = state1();
     m_imass1 = st1.inv_mass();
     m_iinertia1 = st1.inv_inertia();
     m_dyn1 = st1.is_dynamic();
 
-    state2D &st2 = state2();
+    const state2D &st2 = state2();
     m_imass2 = st2.inv_mass();
     m_iinertia2 = st2.inv_inertia();
     m_dyn2 = st2.is_dynamic();

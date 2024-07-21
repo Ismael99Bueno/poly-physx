@@ -162,8 +162,6 @@ void body2D::retrieve_data_from_state(const state2D &state, const bool update_bb
 
     m_state.velocity = state.velocity;
     m_state.angular_velocity = state.angular_velocity;
-    m_state.force = state.force;
-    m_state.torque = state.torque;
     m_awake_allowed = true;
 }
 
@@ -361,8 +359,7 @@ void body2D::type(btype type)
 
 float body2D::kinetic_energy() const
 {
-    return 0.5f * (m_state.mass * glm::length2(m_state.velocity) +
-                   m_state.angular_velocity * m_state.angular_velocity * m_state.inertia);
+    return m_state.kinetic_energy();
 }
 
 const state2D &body2D::state() const
@@ -384,15 +381,6 @@ void body2D::add_force(const glm::vec2 &force)
 {
     m_instant_force += force;
     awake();
-}
-
-const glm::vec2 &body2D::force() const
-{
-    return m_state.force;
-}
-float body2D::torque() const
-{
-    return m_state.torque;
 }
 
 const glm::vec2 &body2D::instant_force() const
