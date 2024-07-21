@@ -10,9 +10,8 @@ typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<LinDegree
                                                                        AngDegrees>::compute_constraint_impulse() const
 {
     flat_t cvel = this->constraint_velocity();
-    if (this->world.joints.constraints.params.baumgarte_correction &&
-        glm::length(m_c) > this->world.joints.constraints.params.baumgarte_threshold)
-        cvel += this->world.joints.constraints.params.baumgarte_coef * m_c / this->world.rk_substep_timestep();
+    if (m_baumgarte && glm::length(m_c) > m_bthreshold)
+        cvel += m_bcoeff * m_c / this->m_ts;
 
     if constexpr (LinDegrees + AngDegrees == 1)
         return -cvel * this->m_mass;
@@ -25,20 +24,18 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 typename pvconstraint2D<LinDegrees, AngDegrees>::flat_t pvconstraint2D<
     LinDegrees, AngDegrees>::compute_constraint_correction() const
 {
-    const float max_correction = this->world.joints.constraints.params.max_position_correction;
-    const float resol_speed = this->world.joints.constraints.params.position_resolution_speed;
     if constexpr (LinDegrees + AngDegrees == 1)
     {
-        const float signed_slop =
-            m_c > 0.f ? -this->world.joints.constraints.params.slop : this->world.joints.constraints.params.slop;
-        return -std::clamp(resol_speed * (m_c + signed_slop), -max_correction, max_correction) * this->m_mass;
+        const float signed_slop = m_c > 0.f ? -m_slop : m_slop;
+        return -std::clamp(m_position_resolution_speed * (m_c + signed_slop), -m_max_position_correction,
+                           m_max_position_correction) *
+               this->m_mass;
     }
     else
     {
-        const flat_t correction =
-            resol_speed * (glm::normalize(m_c) * this->world.joints.constraints.params.slop - m_c);
-        if (glm::length2(correction) > max_correction * max_correction)
-            return this->m_mass * max_correction * glm::normalize(correction);
+        const flat_t correction = m_position_resolution_speed * (glm::normalize(m_c) * m_slop - m_c);
+        if (glm::length2(correction) > m_max_position_correction * m_max_position_correction)
+            return this->m_mass * m_max_position_correction * glm::normalize(correction);
 
         return this->m_mass * correction;
     }
@@ -83,34 +80,22 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::
     {
         KIT_ERROR("Linear correction can only be applied when the linear degrees of the constraint is greater than 0")
     }
-    const glm::vec2 dpos1 = -this->m_body1->props().dynamic.inv_mass * lincorrection;
-    const glm::vec2 dpos2 = this->m_body2->props().dynamic.inv_mass * lincorrection;
 
-    if (this->m_body1->is_dynamic())
-    {
-        this->m_body1->meta.ctr_state.centroid.translate(dpos1);
-        this->m_body1->velocity(this->m_body1->velocity() + dpos1 / this->world.rk_substep_timestep());
+    const auto apply = [this, &lincorrection](state2D &state, const float imass, const float iinertia,
+                                              const glm::vec2 &offset) {
+        const glm::vec2 dpos = imass * lincorrection;
+        state.centroid.position += dpos;
         if (!this->m_no_anchors)
         {
-            const float da1 =
-                -this->m_body1->props().dynamic.inv_inertia * kit::cross2D(this->m_offset1, lincorrection);
-            this->m_body1->meta.ctr_state.centroid.rotate(da1);
-            this->m_body1->angular_velocity(this->m_body1->angular_velocity() +
-                                            da1 / this->world.rk_substep_timestep());
+            const float da = iinertia * kit::cross2D(offset, lincorrection);
+            state.centroid.rotation += da;
         }
-    }
-    if (this->m_body2->is_dynamic())
-    {
-        this->m_body2->meta.ctr_state.centroid.translate(dpos2);
-        this->m_body2->velocity(this->m_body2->velocity() + dpos2 / this->world.rk_substep_timestep());
-        if (!this->m_no_anchors)
-        {
-            const float da2 = this->m_body2->props().dynamic.inv_inertia * kit::cross2D(this->m_offset2, lincorrection);
-            this->m_body2->meta.ctr_state.centroid.rotate(da2);
-            this->m_body2->angular_velocity(this->m_body2->angular_velocity() +
-                                            da2 / this->world.rk_substep_timestep());
-        }
-    }
+    };
+
+    if (this->m_dyn1)
+        apply(this->state1(), this->m_imass1, this->m_iinertia1, this->m_offset1);
+    if (this->m_dyn2)
+        apply(this->state2(), this->m_imass2, this->m_iinertia2, this->m_offset2);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -122,18 +107,33 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_angular_correction(float angc
         KIT_ERROR("Angular correction can only be applied when the angular degrees of the constraint is equal to 1")
     }
 
-    if (this->m_body1->is_dynamic())
+    if (this->m_dyn1)
     {
-        const float da1 = -this->m_body1->props().dynamic.inv_inertia * angcorrection;
-        this->m_body1->meta.ctr_state.centroid.rotate(da1);
-        this->m_body1->angular_velocity(this->m_body1->angular_velocity() + da1 / this->world.rk_substep_timestep());
+        state2D &st1 = this->state1();
+        const float da1 = -this->m_iinertia1 * angcorrection;
+        st1.centroid.rotation += da1;
     }
-    if (this->m_body2->is_dynamic())
+    if (this->m_dyn2)
     {
-        const float da2 = this->m_body2->props().dynamic.inv_inertia * angcorrection;
-        this->m_body2->meta.ctr_state.centroid.rotate(da2);
-        this->m_body2->angular_velocity(this->m_body2->angular_velocity() + da2 / this->world.rk_substep_timestep());
+        state2D &st2 = this->state2();
+        const float da2 = this->m_iinertia2 * angcorrection;
+        st2.centroid.rotation += da2;
     }
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+void pvconstraint2D<LinDegrees, AngDegrees>::startup(std::vector<state2D> &states)
+{
+    vconstraint2D<LinDegrees, AngDegrees>::startup(states);
+
+    // cache friendly stuff
+    m_slop = this->world.joints.constraints.params.slop;
+    m_baumgarte = this->world.joints.constraints.params.baumgarte_correction;
+    m_bthreshold = this->world.joints.constraints.params.baumgarte_threshold;
+    m_bcoeff = this->world.joints.constraints.params.baumgarte_coef;
+    m_max_position_correction = this->world.joints.constraints.params.max_position_correction;
+    m_position_resolution_speed = this->world.joints.constraints.params.position_resolution_speed;
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -141,7 +141,7 @@ template <std::size_t LinDegrees, std::size_t AngDegrees>
 bool pvconstraint2D<LinDegrees, AngDegrees>::solve_positions()
 {
     update_position_data();
-    if (glm::length(m_c) < this->world.joints.constraints.params.slop)
+    if (glm::length(m_c) < m_slop)
         return true;
 
     const flat_t ccorrection = compute_constraint_correction();

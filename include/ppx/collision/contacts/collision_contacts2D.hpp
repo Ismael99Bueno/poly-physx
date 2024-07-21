@@ -35,7 +35,6 @@ class collision_contacts2D : public worldref2D, public kit::toggleable, kit::non
     using kit::toggleable::enabled;
     void enabled(bool enabled) override final;
 
-    std::uint32_t rk_substep_index() const;
     specs::collision_manager2D::contacts2D params;
 
   private:

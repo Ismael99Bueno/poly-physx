@@ -11,7 +11,7 @@ collider2D::collider2D(world2D &world, body2D *body, const specs &spc)
 {
     meta.index = world.colliders.size();
     transform2D transform{kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()};
-    transform.parent(&body->centroid_transform());
+    transform.parent = &body->centroid_transform();
 
     switch (spc.props.shape)
     {
@@ -69,7 +69,7 @@ const transform2D &collider2D::ltransform() const
 void collider2D::ltransform(const transform2D &ltransform)
 {
     const glm::vec2 &lpos = call_shape_method([](const auto &shape) -> const glm::vec2 & { return shape.lposition(); });
-    m_position += lpos - ltransform.position();
+    m_position += lpos - ltransform.position;
     call_shape_method([&ltransform](auto &shape) { shape.ltransform(ltransform); });
     m_body->full_update();
 }
@@ -117,7 +117,8 @@ void collider2D::ltranslate(const glm::vec2 &dpos)
 void collider2D::gtranslate(const glm::vec2 &dpos)
 {
     call_shape_method([&dpos](auto &shape) { shape.gtranslate(dpos); });
-    m_position += glm::vec2(m_body->centroid_transform().inv_ltransform() * glm::vec3(dpos, 0.f));
+    m_position +=
+        glm::vec2(m_body->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
     m_body->full_update();
 }
 void collider2D::lrotate(float dangle)
@@ -150,7 +151,8 @@ void collider2D::gcentroid(const glm::vec2 &gcentroid)
     const glm::vec2 dpos = gcentroid - gc;
     call_shape_method([&gcentroid](auto &shape) { shape.gcentroid(gcentroid); });
 
-    m_position += glm::vec2(m_body->centroid_transform().inv_ltransform() * glm::vec3(dpos, 0.f));
+    m_position +=
+        glm::vec2(m_body->centroid_transform().inverse_center_scale_rotate_translate3() * glm::vec3(dpos, 0.f));
     m_body->full_update();
 }
 void collider2D::lcentroid(const glm::vec2 &lcentroid)

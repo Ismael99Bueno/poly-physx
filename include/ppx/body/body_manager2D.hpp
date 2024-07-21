@@ -25,16 +25,22 @@ class body_manager2D final : public manager2D<body2D>
     bool checksum() const;
     bool all_asleep() const;
 
+    const std::vector<state2D> &states() const;
+
     specs::body_manager2D params;
 
   private:
     using manager2D<body2D>::manager2D;
 
-    bool prepare_for_next_substep(const std::vector<float> &vars_buffer);
-    void prepare_constraint_states();
+    void gather_and_load_states(rk::state<float> &rkstate);
+    void update_states(const std::vector<float> &posvels);
 
-    void send_data_to_state(rk::state<float> &state);
-    bool retrieve_data_from_state(const std::vector<float> &vars_buffer);
+    std::vector<float> load_velocities_and_forces() const;
+    bool retrieve_data_from_states(const std::vector<float> &posvels);
+
+    std::vector<state2D> &mutable_states();
+
+    std::vector<state2D> m_states;
 
     friend class world2D;
 };

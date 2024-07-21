@@ -33,10 +33,17 @@ class pvconstraint2D : public vconstraint2D<LinDegrees, AngDegrees>
     using vconstraint2D<LinDegrees, AngDegrees>::vconstraint2D;
 
     virtual bool solve_positions() override;
+    virtual void startup(std::vector<state2D> &states) override;
     virtual flat_t constraint_position() const = 0;
 
   protected:
     flat_t m_c{0.f};
+    float m_slop;
+    bool m_baumgarte;
+    float m_bthreshold;
+    float m_bcoeff;
+    float m_max_position_correction;
+    float m_position_resolution_speed;
 
     virtual void update_constraint_data() override;
     virtual void update_position_data();

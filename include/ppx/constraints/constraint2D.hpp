@@ -13,7 +13,7 @@ class constraint2D : virtual public joint2D
   public:
     constraint2D(const specs::constraint2D::properties &cprops = {});
 
-    virtual void startup() = 0;
+    virtual void startup(std::vector<state2D> &states) = 0;
     virtual void solve_velocities() = 0;
 
     virtual bool solve_positions();

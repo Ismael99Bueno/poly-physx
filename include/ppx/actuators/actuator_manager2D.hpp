@@ -19,7 +19,7 @@ class iactuator_manager2D : virtual public ijoint_manager2D
     template <Actuator2D T> using manager_t = actuator_manager2D<T>;
 
     virtual ~iactuator_manager2D() = default;
-    virtual void solve() = 0;
+    virtual void solve(std::vector<state2D> &states) = 0;
 };
 
 template <Actuator2D T> class actuator_manager2D : public joint_manager2D<T>, public iactuator_manager2D
@@ -35,11 +35,11 @@ template <Actuator2D T> class actuator_manager2D : public joint_manager2D<T>, pu
     }
 
   private:
-    virtual void solve() override
+    virtual void solve(std::vector<state2D> &states) override
     {
         for (T *actuator : this->m_elements)
             if (actuator->enabled()) [[likely]]
-                actuator->solve();
+                actuator->solve(states);
     }
 };
 

@@ -18,7 +18,7 @@ class nonpen_contact2D final : public contact2D, public pvconstraint2D<1, 0>
     float constraint_position() const override;
     float constraint_velocity() const override;
 
-    void startup() override;
+    void startup(std::vector<state2D> &states) override;
     void solve_velocities() override;
     void update(const collision2D *collision, std::size_t manifold_index) override;
 

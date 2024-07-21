@@ -5,41 +5,38 @@
 
 namespace ppx
 {
-void island_manager2D::solve()
+void island_manager2D::gather_awake_islands()
 {
-    KIT_PERF_SCOPE("ppx::island_manager2D::solve")
-    static std::vector<island2D *> awake_islands;
-    awake_islands.clear();
-
+    KIT_PERF_SCOPE("ppx::island_manager2D::gather_awake_islands")
+    m_awake_islands.clear();
     for (island2D *island : m_elements)
         if (!island->asleep())
-            awake_islands.push_back(island);
+            m_awake_islands.push_back(island);
+}
 
-    if (awake_islands.empty())
-        return;
-    if (awake_islands.size() == 1)
-    {
-        awake_islands[0]->solve();
-        return;
-    }
+void island_manager2D::solve_actuators(std::vector<state2D> &states)
+{
+    KIT_PERF_SCOPE("ppx::island_manager2D::solve_actuators")
+    const auto lambda = [&states](island2D *island) { island->solve_actuators(states); };
+    const auto pool = world.thread_pool;
+    if (params.multithreading && pool)
+        kit::mt::for_each(*pool, m_awake_islands.begin(), m_awake_islands.end(), lambda, pool->thread_count());
+    else
+        for (island2D *island : m_awake_islands)
+            lambda(island);
+}
 
-    kit::mt::thread_pool *pool = world.thread_pool;
-    if (!params.multithreading || !pool)
-    {
-        for (island2D *island : awake_islands)
-            island->solve();
-        return;
-    }
+void island_manager2D::solve_constraints(std::vector<state2D> &states)
+{
+    KIT_PERF_SCOPE("ppx::island_manager2D::solve_constraints")
 
-// use thread pool directly or mt::for_each? test it!
-#if 0
-    for (island2D *island : awake_islands)
-        pool->submit([](island2D *island) { island->solve(); }, island);
-    pool->await_pending();
-#else
-    const auto lambda = [](island2D *island) { island->solve(); };
-    kit::mt::for_each(*pool, awake_islands.begin(), awake_islands.end(), lambda, pool->thread_count());
-#endif
+    const auto lambda = [&states](island2D *island) { island->solve_constraints(states); };
+    const auto pool = world.thread_pool;
+    if (params.multithreading && pool) // use thread pool directly or mt::for_each? test it!
+        kit::mt::for_each(*pool, m_awake_islands.begin(), m_awake_islands.end(), lambda, pool->thread_count());
+    else
+        for (island2D *island : m_awake_islands)
+            lambda(island);
 }
 
 void island_manager2D::remove_invalid()

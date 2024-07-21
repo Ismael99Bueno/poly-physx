@@ -28,12 +28,12 @@ void behaviour_manager2D::on_body_removal_validation(body2D *body)
         bhv->remove(body);
 }
 
-void behaviour_manager2D::apply_forces()
+void behaviour_manager2D::load_forces(std::vector<state2D> &states)
 {
-    KIT_PERF_SCOPE("ppx::behaviour_manager2D::apply_forces")
+    KIT_PERF_SCOPE("ppx::behaviour_manager2D::load_forces")
     for (const auto &bhv : m_elements)
         if (bhv->enabled())
-            bhv->apply_force_to_bodies();
+            bhv->load_forces(states);
 }
 
 void behaviour_manager2D::process_addition(kit::scope<behaviour2D> &&bhv)

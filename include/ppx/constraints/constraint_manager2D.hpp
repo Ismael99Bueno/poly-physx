@@ -20,7 +20,7 @@ class iconstraint_manager2D : virtual public ijoint_manager2D
 
     virtual ~iconstraint_manager2D() = default;
 
-    virtual void startup() = 0;
+    virtual void startup(std::vector<state2D> &states) = 0;
     virtual void solve_velocities() = 0;
     virtual bool solve_positions() = 0;
 };
@@ -38,11 +38,11 @@ template <Constraint2D T> class constraint_manager2D : public joint_manager2D<T>
     }
 
   private:
-    virtual void startup() override
+    virtual void startup(std::vector<state2D> &states) override
     {
         for (T *constraint : this->m_elements)
             if (constraint->enabled()) [[likely]]
-                constraint->startup();
+                constraint->startup(states);
     }
 
     virtual void solve_velocities() override

@@ -71,7 +71,7 @@ class actuator_meta_manager2D final : public joint_meta_manager2D<iactuator_mana
     using joint_meta_manager2D<iactuator_manager2D>::joint_meta_manager2D;
     contact_actuator_solver2D *m_contact_solver = nullptr;
 
-    void solve();
+    void solve(std::vector<state2D> &states);
     friend class world2D;
     friend class collision_manager2D;
 };
@@ -83,7 +83,7 @@ class constraint_meta_manager2D final : public joint_meta_manager2D<iconstraint_
 
   private:
     using joint_meta_manager2D<iconstraint_manager2D>::joint_meta_manager2D;
-    void solve();
+    void solve(std::vector<state2D> &states);
 
     contact_constraint_solver2D *m_contact_solver = nullptr;
 

@@ -6,8 +6,7 @@ namespace ppx
 {
 prismatic_joint2D::prismatic_joint2D(world2D &world, const specs &spc)
     : joint2D(world, spc, spc.ganchor1, spc.ganchor2, spc.props), pvconstraint2D(spc.props), m_axis(spc.props.axis),
-      m_target_relangle(m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation())
-
+      m_target_relangle(m_body2->state().centroid.rotation - m_body1->state().centroid.rotation)
 {
     if (spc.deduce_axis)
         m_axis = spc.ganchor2 - spc.ganchor1;
@@ -16,15 +15,16 @@ prismatic_joint2D::prismatic_joint2D(world2D &world, const specs &spc)
 glm::vec2 prismatic_joint2D::constraint_position() const
 {
     const float dp = glm::dot(m_dir, m_ganchor2 - m_ganchor1);
-    const float da =
-        m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation() - m_target_relangle;
+    const float da = state2().centroid.rotation - state1().centroid.rotation - m_target_relangle;
     return {dp, da};
 }
 glm::vec2 prismatic_joint2D::constraint_velocity() const
 {
-    const float dv = glm::dot(m_dir, m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
-                                         m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1));
-    const float dw = m_body2->meta.ctr_state.angular_velocity - m_body1->meta.ctr_state.angular_velocity;
+    const state2D &st1 = state1();
+    const state2D &st2 = state2();
+    const float dv =
+        glm::dot(m_dir, st1.velocity_at_centroid_offset(m_offset2) - st2.velocity_at_centroid_offset(m_offset1));
+    const float dw = st1.angular_velocity - st2.angular_velocity;
     return {dv, dw};
 }
 

@@ -14,7 +14,7 @@ rotor_joint2D::rotor_joint2D(world2D &world, const specs &spc)
 
 float rotor_joint2D::constraint_velocity() const
 {
-    const float dw = m_body2->meta.ctr_state.angular_velocity - m_body1->meta.ctr_state.angular_velocity;
+    const float dw = state2().angular_velocity - state1().angular_velocity;
     if (m_spin_indefinitely)
         return dw - m_target_speed;
     if (glm::abs(m_correction) > glm::abs(m_target_speed))
@@ -26,7 +26,7 @@ void rotor_joint2D::solve_velocities()
 {
     if (m_legal_angle && !m_spin_indefinitely)
         return;
-    const float max_impulse = world.rk_substep_timestep() * m_torque;
+    const float max_impulse = m_ts * m_torque;
     if (m_spin_indefinitely || kit::approximately(m_max_angle, m_min_angle))
         vconstraint2D<0, 1>::solve_velocities_clamped(-max_impulse, max_impulse);
     else if (m_relangle < m_min_angle)
@@ -131,14 +131,17 @@ void rotor_joint2D::update_constraint_data()
     vconstraint2D<0, 1>::update_constraint_data();
     if (m_spin_indefinitely)
         return;
-    float da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation();
+    const float rot1 = state1().centroid.rotation;
+    const float rot2 = state2().centroid.rotation;
+
+    float da = rot2 - rot1;
     da -= glm::round(da / glm::two_pi<float>()) * glm::two_pi<float>();
     m_relangle = da;
 
     if (da < m_min_angle)
-        da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation() - m_min_angle;
+        da = rot2 - rot1 - m_min_angle;
     else if (da > m_max_angle)
-        da = m_body2->meta.ctr_state.centroid.rotation() - m_body1->meta.ctr_state.centroid.rotation() - m_max_angle;
+        da = rot2 - rot1 - m_max_angle;
     else
     {
         m_correction = 0.f;
@@ -147,7 +150,7 @@ void rotor_joint2D::update_constraint_data()
     }
 
     da -= glm::round(da / glm::two_pi<float>()) * glm::two_pi<float>();
-    m_correction = m_correction_factor * da / world.rk_substep_timestep();
+    m_correction = m_correction_factor * da / m_ts;
     m_legal_angle = false;
 }
 } // namespace ppx

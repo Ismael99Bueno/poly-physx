@@ -20,11 +20,6 @@ void collision_contacts2D::enabled(const bool enabled)
         destroy_all_contacts();
 }
 
-std::uint32_t collision_contacts2D::rk_substep_index() const
-{
-    return world.rk_substep_index();
-}
-
 bool collision_contacts2D::checksum() const
 {
     std::unordered_set<const contact2D *> body_contacts;

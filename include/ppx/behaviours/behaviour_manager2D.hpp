@@ -34,7 +34,7 @@ class behaviour_manager2D final : public idmanager2D<kit::scope<behaviour2D>>
     using idmanager2D<kit::scope<behaviour2D>>::idmanager2D;
 
     void on_body_removal_validation(body2D *body);
-    void apply_forces();
+    void load_forces(std::vector<state2D> &states);
 
     void process_addition(kit::scope<behaviour2D> &&bhv);
     friend class world2D;

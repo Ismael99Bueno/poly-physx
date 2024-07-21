@@ -15,8 +15,8 @@ nonpen_friction2D::nonpen_friction2D(world2D &world, const collision2D *collisio
 }
 float nonpen_friction2D::constraint_velocity() const
 {
-    return glm::dot(m_dir, m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
-                               m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1));
+    return glm::dot(m_dir,
+                    state2().velocity_at_centroid_offset(m_offset2) - state1().velocity_at_centroid_offset(m_offset1));
 }
 
 void nonpen_friction2D::solve_velocities()

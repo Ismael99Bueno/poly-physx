@@ -8,7 +8,7 @@
 namespace ppx
 {
 behaviour2D::behaviour2D(world2D &world, const std::string &name)
-    : kit::identifiable<std::string>(name), worldref2D(world)
+    : manager2D(world), kit::identifiable<std::string>(name)
 {
 }
 
@@ -16,48 +16,23 @@ bool behaviour2D::add(body2D *body)
 {
     if (contains(body))
         return false;
-    m_bodies.push_back(body);
+    m_elements.push_back(body);
     return true;
 }
 bool behaviour2D::remove(std::size_t index)
 {
-    if (index >= m_bodies.size())
+    if (index >= m_elements.size())
         return false;
-    m_bodies.erase(m_bodies.begin() + index);
+    m_elements.erase(m_elements.begin() + index);
     return true;
 }
 
-bool behaviour2D::remove(body2D *body)
-{
-    for (std::size_t i = 0; i < m_bodies.size(); i++)
-        if (m_bodies[i] == body)
-            return remove(i);
-    return false;
-}
-bool behaviour2D::contains(const body2D *body) const
-{
-    for (body2D *b : m_bodies)
-        if (b == body)
-            return true;
-    return false;
-}
 float behaviour2D::kinetic_energy() const
 {
     float ke = 0.f;
-    for (const auto &body : m_bodies)
+    for (const auto &body : m_elements)
         ke += body->kinetic_energy();
     return ke;
-}
-
-const body2D &behaviour2D::operator[](std::size_t index) const
-{
-    KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds container size: {0}", index)
-    return *m_bodies[index];
-}
-body2D &behaviour2D::operator[](std::size_t index)
-{
-    KIT_ASSERT_ERROR(index < m_bodies.size(), "Index exceeds container size: {0}", index)
-    return *m_bodies[index];
 }
 
 float behaviour2D::energy(const body2D &body) const
@@ -69,24 +44,19 @@ float behaviour2D::energy() const
     return kinetic_energy() + potential_energy();
 }
 
-void behaviour2D::clear()
+void behaviour2D::load_forces(std::vector<state2D> &states) const
 {
-    m_bodies.clear();
-}
-std::size_t behaviour2D::size() const
-{
-    return m_bodies.size();
-}
-
-void behaviour2D::apply_force_to_bodies()
-{
-    for (const auto &body : m_bodies)
+    for (std::size_t i = 0; i < m_elements.size(); i++)
     {
+        const body2D *body = m_elements[i];
         if (!body->is_dynamic() || body->asleep())
             continue;
-        const glm::vec3 f = force(*body);
-        body->apply_simulation_force(glm::vec2(f));
-        body->apply_simulation_torque(f.z);
+
+        state2D &state = states[i];
+        const glm::vec3 f = force(state);
+
+        state.force = glm::vec2(f);
+        state.torque = f.z;
     }
 }
 

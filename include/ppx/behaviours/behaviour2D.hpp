@@ -5,51 +5,28 @@
 #include "kit/interface/identifiable.hpp"
 #include "kit/interface/toggleable.hpp"
 #include "kit/serialization/yaml/codec.hpp"
-#include "ppx/internal/worldref.hpp"
+#include "ppx/manager2D.hpp"
 
 namespace ppx
 {
 class world2D;
-class behaviour2D : kit::non_copyable,
+class behaviour2D : public manager2D<body2D>,
                     public kit::identifiable<std::string>,
                     public kit::toggleable,
-                    public kit::yaml::codecable,
-                    public worldref2D
+                    public kit::yaml::codecable
 {
   public:
     behaviour2D(world2D &world, const std::string &name);
     virtual ~behaviour2D() = default;
 
     virtual bool add(body2D *body);
-    bool contains(const body2D *body) const;
 
-    virtual bool remove(std::size_t index);
-    bool remove(body2D *body);
+    using manager2D<body2D>::remove;
+    virtual bool remove(std::size_t index) override;
 
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
 
-    auto begin() const
-    {
-        return m_bodies.begin();
-    }
-    auto end() const
-    {
-        return m_bodies.end();
-    }
-
-    auto begin()
-    {
-        return m_bodies.begin();
-    }
-    auto end()
-    {
-        return m_bodies.end();
-    }
-
-    const body2D &operator[](std::size_t index) const;
-    body2D &operator[](std::size_t index);
-
-    virtual glm::vec3 force(const body2D &body) const = 0;
+    virtual glm::vec3 force(const state2D &state) const = 0;
 
     float kinetic_energy() const;
     virtual float potential_energy() const = 0;
@@ -58,19 +35,13 @@ class behaviour2D : kit::non_copyable,
     float energy(const body2D &body) const;
     float energy() const;
 
-    void clear();
-    std::size_t size() const;
-
 #ifdef KIT_USE_YAML_CPP
     virtual YAML::Node encode() const override;
     virtual bool decode(const YAML::Node &node) override;
 #endif
 
-  protected:
-    std::vector<body2D *> m_bodies;
-
   private:
-    void apply_force_to_bodies();
+    void load_forces(std::vector<state2D> &states) const;
 
     friend class behaviour_manager2D;
 };

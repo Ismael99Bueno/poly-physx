@@ -21,25 +21,25 @@ template <IManager IM> bool joint_meta_manager2D<IM>::remove(joint2D *joint)
     return false;
 }
 
-void actuator_meta_manager2D::solve()
+void actuator_meta_manager2D::solve(std::vector<state2D> &states)
 {
     KIT_PERF_SCOPE("ppx::actuator_meta_manager2D::solve")
     if (m_contact_solver)
-        m_contact_solver->solve();
+        m_contact_solver->solve(states);
     for (const auto &manager : m_elements)
         if (manager->enabled()) [[likely]]
-            manager->solve();
+            manager->solve(states);
 }
 
-void constraint_meta_manager2D::solve()
+void constraint_meta_manager2D::solve(std::vector<state2D> &states)
 {
     KIT_PERF_SCOPE("ppx::constraint_meta_manager2D::solve")
     if (m_contact_solver)
-        m_contact_solver->startup();
+        m_contact_solver->startup(states);
 
     for (const auto &manager : this->m_elements)
         if (manager->enabled()) [[likely]]
-            manager->startup();
+            manager->startup(states);
 
     for (std::size_t i = 0; i < params.velocity_iterations; i++)
     {

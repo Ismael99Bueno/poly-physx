@@ -23,7 +23,7 @@ namespace ppx
 world2D::world2D(const specs::world2D &spc)
     : integrator(spc.integrator.tableau, spc.integrator.timestep), bodies(*this), colliders(*this), joints(*this),
       behaviours(*this), collisions(*this), islands(*this),
-      semi_implicit_integration(spc.integrator.semi_implicit_integration), m_previous_timestep(integrator.ts.value)
+      semi_implicit_integration(spc.integrator.semi_implicit_integration)
 {
     bodies.params = spc.bodies;
     colliders.params = spc.colliders;
@@ -55,23 +55,14 @@ void world2D::add(const specs::contraption2D &contraption)
         joints.add<prismatic_joint2D>(joint);
 }
 
-std::uint32_t world2D::rk_substep_index() const
-{
-    return m_rk_subset_index;
-}
-std::uint32_t world2D::rk_substeps() const
-{
-    return integrator.tableau().stages;
-}
-
 bool world2D::step()
 {
     if (islands.enabled() && bodies.all_asleep()) [[unlikely]]
         return true;
     m_step_count++;
-    pre_step_preparation();
+    pre_step();
     const bool valid = integrator.raw_forward(*this);
-    post_step_setup();
+    post_step();
     return valid;
 }
 std::uint32_t world2D::step_count() const
@@ -79,25 +70,59 @@ std::uint32_t world2D::step_count() const
     return m_step_count;
 }
 
-void world2D::pre_step_preparation()
+void world2D::pre_step()
 {
 #if defined(DEBUG) && !defined(_MSC_VER) // little fix, seems feenableexcept does not exist on windows
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
-    m_rk_subset_index = 0;
-    bodies.send_data_to_state(integrator.state);
     if (islands.enabled())
+    {
+        islands.remove_invalid();
         islands.try_split();
+    }
+    bodies.gather_and_load_states(integrator.state);
     KIT_ASSERT_ERROR(collisions.contact_solver()->checksum(), "Contacts checksum failed")
     KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
     KIT_ASSERT_ERROR(joints.checksum(), "Joints checksum failed")
+    if (collisions.enabled())
+        collisions.detect_and_create_contacts();
 }
-void world2D::post_step_setup()
-{
-    if (!bodies.retrieve_data_from_state(integrator.state.vars()))
-        colliders.update_bounding_boxes();
 
-    m_previous_timestep = integrator.ts.value;
+std::vector<float> world2D::operator()(const float time, const float timestep, const std::vector<float> &posvels)
+{
+    KIT_PERF_SCOPE("ppx::world2D::ODE")
+    KIT_ASSERT_CRITICAL(posvels.size() == 6 * bodies.size(),
+                        "Positions and velocities vector size must be exactly 6 times greater than the body array size "
+                        "- posvels: {0}, body array: {1}",
+                        posvels.size(), bodies.size())
+
+    if (m_rk_substep_index != 0)
+        bodies.update_states(posvels);
+
+    std::vector<state2D> &states = bodies.mutable_states();
+    behaviours.load_forces(states);
+
+    if (islands.enabled())
+        islands.solve_actuators(states);
+    else
+        joints.actuators.solve(states);
+
+    m_rk_substep_index++;
+    return bodies.load_velocities_and_forces();
+}
+
+void world2D::post_step()
+{
+    bodies.update_states(integrator.state.vars());
+    std::vector<state2D> &states = bodies.mutable_states();
+
+    if (islands.enabled())
+        islands.solve_constraints(states);
+    else
+        joints.constraints.solve(states);
+
+    if (!bodies.retrieve_data_from_states(integrator.state.vars()))
+        colliders.update_bounding_boxes();
 
     KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")
 #if defined(DEBUG) && !defined(_MSC_VER)
@@ -105,50 +130,11 @@ void world2D::post_step_setup()
 #endif
 }
 
-float world2D::rk_substep_timestep() const
-{
-    return m_rk_substep_timestep;
-}
-float world2D::timestep() const
-{
-    return integrator.ts.value;
-}
 std::uint32_t world2D::hertz() const
 {
     if (kit::approaches_zero(integrator.ts.value))
         return 0;
     return (std::uint32_t)(1.f / integrator.ts.value);
-}
-
-std::vector<float> world2D::create_state_derivative() const
-{
-    KIT_PERF_SCOPE("ppx::world2D::create_state_derivative")
-    std::vector<float> state_derivative(6 * bodies.size(), 0.f);
-
-    for (const body2D *body : bodies)
-    {
-        if (body->is_static() || body->asleep())
-            continue;
-        const std::size_t index = 6 * body->meta.index;
-
-        const glm::vec2 &accel = body->force() * body->props().dynamic.inv_mass;
-        const float angaccel = body->torque() * body->props().dynamic.inv_inertia;
-
-        const glm::vec2 velocity =
-            semi_implicit_integration ? body->velocity() + accel * m_rk_substep_timestep : body->velocity();
-        const float angular_velocity = semi_implicit_integration
-                                           ? body->angular_velocity() + angaccel * m_rk_substep_timestep
-                                           : body->angular_velocity();
-
-        state_derivative[index] = velocity.x;
-        state_derivative[index + 1] = velocity.y;
-        state_derivative[index + 2] = angular_velocity;
-
-        state_derivative[index + 3] = accel.x;
-        state_derivative[index + 4] = accel.y;
-        state_derivative[index + 5] = angaccel;
-    }
-    return state_derivative;
 }
 
 void world2D::on_body_removal_validation(body2D *body)
@@ -192,35 +178,4 @@ float world2D::energy() const
     return kinetic_energy() + potential_energy();
 }
 
-std::vector<float> world2D::operator()(const float time, const float timestep, const std::vector<float> &vars)
-{
-    KIT_PERF_SCOPE("ppx::world2D::ODE")
-    KIT_ASSERT_CRITICAL(
-        vars.size() == 6 * bodies.size(),
-        "State vector size must be exactly 6 times greater than the body array size - vars: {0}, body array: {1}",
-        vars.size(), bodies.size())
-
-    m_rk_substep_timestep = timestep;
-    if (!bodies.prepare_for_next_substep(vars))
-        colliders.update_bounding_boxes();
-
-    behaviours.apply_forces();
-    if (collisions.enabled())
-        collisions.detect_and_create_contacts();
-
-    if (islands.enabled())
-    {
-        islands.remove_invalid();
-        islands.solve();
-    }
-    else
-    {
-        joints.actuators.solve();
-        bodies.prepare_constraint_states();
-        joints.constraints.solve();
-    }
-
-    m_rk_subset_index++;
-    return create_state_derivative();
-}
 } // namespace ppx

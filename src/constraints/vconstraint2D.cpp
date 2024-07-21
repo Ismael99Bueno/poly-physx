@@ -59,54 +59,45 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
     {
         KIT_ERROR("Linear impulse can only be applied when the linear degrees of the constraint is greater than 0")
     }
-
-    m_force = linimpulse / world.rk_substep_timestep();
-    if (m_body1->is_dynamic())
-    {
-        m_body1->meta.ctr_state.velocity -= m_body1->props().dynamic.inv_mass * linimpulse;
-        m_body1->apply_simulation_force(-m_force);
-
+    const auto apply = [this, &linimpulse](state2D &state, const float imass, const float iinertia,
+                                           const glm::vec2 &force) {
+        state.velocity += imass * linimpulse;
+        state.force += force;
         if (!m_no_anchors)
         {
-            m_body1->meta.ctr_state.angular_velocity -=
-                m_body1->props().dynamic.inv_inertia * kit::cross2D(m_offset1, linimpulse);
-            const float torque1 = kit::cross2D(m_offset1, -m_force);
-            m_body1->apply_simulation_torque(torque1);
+            state.angular_velocity += iinertia * kit::cross2D(m_offset1, linimpulse);
+            state.torque += kit::cross2D(m_offset1, force);
         }
-    }
-    if (m_body2->is_dynamic())
-    {
-        m_body2->meta.ctr_state.velocity += m_body2->props().dynamic.inv_mass * linimpulse;
-        m_body2->apply_simulation_force(m_force);
+    };
 
-        if (!m_no_anchors)
-        {
-            m_body2->meta.ctr_state.angular_velocity +=
-                m_body2->props().dynamic.inv_inertia * kit::cross2D(m_offset2, linimpulse);
-            const float torque2 = kit::cross2D(m_offset2, m_force);
-            m_body2->apply_simulation_torque(torque2);
-        }
-    }
+    m_force = linimpulse / m_ts;
+    if (m_dyn1)
+        apply(state1(), m_imass1, m_iinertia1, -m_force);
+    if (m_dyn2)
+        apply(state2(), m_imass2, m_iinertia2, m_force);
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
-void vconstraint2D<LinDegrees, AngDegrees>::apply_angular_impulse(float angimpulse)
+void vconstraint2D<LinDegrees, AngDegrees>::apply_angular_impulse(const float angimpulse)
 {
     if constexpr (AngDegrees == 0)
     {
         KIT_ERROR("Angular impulse can only be applied when the angular degrees of the constraint is equal to 1")
     }
-    m_torque = angimpulse / world.rk_substep_timestep();
-    if (m_body1->is_dynamic())
+    m_torque = angimpulse / m_ts;
+
+    if (m_dyn1)
     {
-        m_body1->meta.ctr_state.angular_velocity -= m_body1->props().dynamic.inv_inertia * angimpulse;
-        m_body1->apply_simulation_torque(-m_torque);
+        state2D &st1 = state1();
+        st1.angular_velocity -= m_iinertia1 * angimpulse;
+        st1.torque -= m_torque;
     }
-    if (m_body2->is_dynamic())
+    if (m_dyn2)
     {
-        m_body2->meta.ctr_state.angular_velocity += m_body2->props().dynamic.inv_inertia * angimpulse;
-        m_body2->apply_simulation_torque(m_torque);
+        state2D &st2 = state2();
+        st2.angular_velocity += m_iinertia2 * angimpulse;
+        st2.torque += m_torque;
     }
 }
 
@@ -147,8 +138,24 @@ void vconstraint2D<LinDegrees, AngDegrees>::solve_velocities_clamped(const flat_
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
-void vconstraint2D<LinDegrees, AngDegrees>::startup()
+void vconstraint2D<LinDegrees, AngDegrees>::startup(std::vector<state2D> &states)
 {
+    m_states = &states;
+    m_index1 = m_body1->meta.index;
+    m_index2 = m_body2->meta.index;
+
+    state2D &st1 = state1();
+    m_imass1 = st1.inv_mass();
+    m_iinertia1 = st1.inv_inertia();
+    m_dyn1 = st1.is_dynamic();
+
+    state2D &st2 = state2();
+    m_imass2 = st2.inv_mass();
+    m_iinertia2 = st2.inv_inertia();
+    m_dyn2 = st2.is_dynamic();
+
+    m_ts = world.integrator.ts.value;
+
     update_constraint_data();
     if (world.joints.constraints.params.warmup)
         warmup();
@@ -158,9 +165,37 @@ void vconstraint2D<LinDegrees, AngDegrees>::startup()
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
     requires LegalDegrees2D<LinDegrees, AngDegrees>
+const state2D &vconstraint2D<LinDegrees, AngDegrees>::state1() const
+{
+    return m_states->at(m_index1);
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+const state2D &vconstraint2D<LinDegrees, AngDegrees>::state2() const
+{
+    return m_states->at(m_index2);
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+state2D &vconstraint2D<LinDegrees, AngDegrees>::state1()
+{
+    return m_states->at(m_index1);
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+state2D &vconstraint2D<LinDegrees, AngDegrees>::state2()
+{
+    return m_states->at(m_index2);
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
 void vconstraint2D<LinDegrees, AngDegrees>::update_constraint_data()
 {
-    compute_anchors_and_offsets();
+    compute_anchors_and_offsets(state1(), state2());
     if constexpr (LinDegrees == 1)
         this->m_dir = this->direction();
     m_mass = mass();
@@ -185,9 +220,8 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
         if (!m_is_soft)
             return mass;
 
-        const float ts = world.rk_substep_timestep();
         const auto [stiffness, damping] = spring_joint2D::stiffness_and_damping(m_frequency, m_damping_ratio, mass);
-        const float igamma = ts * (ts * stiffness + damping);
+        const float igamma = m_ts * (m_ts * stiffness + damping);
         if (kit::approaches_zero(igamma))
             return mass;
 
@@ -201,13 +235,12 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
         if (!m_is_soft)
             return m_no_anchors ? diagmass : glm::inverse(invmass);
 
-        const float ts = world.rk_substep_timestep();
         square_t gamma{0.f};
         for (int i = 0; i < diagmass.length(); i++)
         {
             const auto [stiffness, damping] =
                 spring_joint2D::stiffness_and_damping(m_frequency, m_damping_ratio, diagmass[i][i]);
-            const float igamma = ts * (ts * stiffness + damping);
+            const float igamma = m_ts * (m_ts * stiffness + damping);
             if (!kit::approaches_zero(igamma))
                 gamma[i][i] = 1.f / igamma;
         }
@@ -221,15 +254,14 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
     const
 {
     if constexpr (LinDegrees == 0)
-        return m_body1->props().dynamic.inv_inertia + m_body2->props().dynamic.inv_inertia;
+        return m_iinertia1 + m_iinertia2;
     else
     {
+        const float im1 = m_imass1;
+        const float im2 = m_imass2;
 
-        const float im1 = m_body1->props().dynamic.inv_mass;
-        const float im2 = m_body2->props().dynamic.inv_mass;
-
-        const float ii1 = m_body1->props().dynamic.inv_inertia;
-        const float ii2 = m_body2->props().dynamic.inv_inertia;
+        const float ii1 = m_iinertia1;
+        const float ii2 = m_iinertia2;
 
         if (m_no_anchors)
         {

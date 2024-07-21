@@ -47,7 +47,7 @@ body2D body2D::from_instance(const ppx::body2D &body)
             body.velocity(),
             body.rotation(),
             body.angular_velocity(),
-            {body.props().nondynamic.mass, body.charge(), colliders, body.type()}};
+            {body.mass(), body.charge(), colliders, body.type()}};
 }
 
 rotor_joint2D rotor_joint2D::from_instance(const ppx::rotor_joint2D &rotj)

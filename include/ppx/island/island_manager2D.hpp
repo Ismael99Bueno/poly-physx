@@ -25,7 +25,9 @@ class island_manager2D final : public manager2D<island2D>
     specs::island_manager2D params;
 
   private:
-    void solve();
+    void gather_awake_islands();
+    void solve_actuators(std::vector<state2D> &states);
+    void solve_constraints(std::vector<state2D> &states);
 
     island2D *create_and_add();
     island2D *create_island_from_body(body2D *body);
@@ -36,6 +38,7 @@ class island_manager2D final : public manager2D<island2D>
 
     bool m_enable = true;
     std::size_t m_remove_index = 0;
+    std::vector<island2D *> m_awake_islands;
 
     friend class world2D;
     friend class body2D;

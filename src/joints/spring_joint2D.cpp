@@ -35,23 +35,28 @@ glm::vec2 spring_joint2D::non_linear_displacement(const glm::vec2 &displacement)
     return nl_cummulative;
 }
 
-glm::vec3 spring_joint2D::compute_force() const
+glm::vec3 spring_joint2D::compute_force(const state2D &state1, const state2D &state2) const
 {
     const glm::vec2 relpos = m_ganchor2 - m_ganchor1;
     const float length = glm::length(relpos);
     if (length >= m_min_length && length <= m_max_length)
         return glm::vec3(0.f);
+
+    const glm::vec2 vel1 = state1.velocity_at_centroid_offset(m_offset1);
+    const glm::vec2 vel2 = state2.velocity_at_centroid_offset(m_offset2);
+
+    const float imass1 = state1.inv_mass();
+    const float imass2 = state2.inv_mass();
+
     const float efflength = length < m_min_length ? m_min_length : m_max_length;
 
     const glm::vec2 direction =
         !kit::approaches_zero(glm::length2(relpos)) ? glm::normalize(relpos) : glm::vec2(1.f, 0.f);
-    const glm::vec2 relvel = direction * glm::dot(m_body2->velocity_at_centroid_offset(m_offset2) -
-                                                      m_body1->velocity_at_centroid_offset(m_offset1),
-                                                  direction);
+    const glm::vec2 relvel = direction * glm::dot(vel2 - vel1, direction);
     const glm::vec2 vlen = efflength * direction;
     const glm::vec2 displacement = relpos - vlen;
 
-    const float meff = 1.f / (m_body1->props().dynamic.inv_mass + m_body2->props().dynamic.inv_mass);
+    const float meff = 1.f / (imass1 + imass2);
     const auto [stiffness, damping] = stiffness_and_damping(m_frequency, m_damping_ratio, meff);
 
     const glm::vec2 force =

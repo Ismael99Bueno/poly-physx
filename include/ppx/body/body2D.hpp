@@ -38,7 +38,6 @@ class body2D final : public worldref2D, kit::non_copyable
     struct metadata
     {
         std::size_t index;
-        state2D ctr_state;
         island2D *island = nullptr;
         bool island_flag = false;
 
@@ -101,22 +100,19 @@ class body2D final : public worldref2D, kit::non_copyable
     void end_spatial_update(bool update_bbox = true);
 
     float kinetic_energy() const;
-
-    glm::vec2 local_centroid_point(const glm::vec2 &gpoint) const;
-    glm::vec2 global_centroid_point(const glm::vec2 &lpoint) const;
-
-    glm::vec2 local_position_point(const glm::vec2 &gpoint) const;
-    glm::vec2 global_position_point(const glm::vec2 &lpoint) const;
-
-    glm::vec2 local_vector(const glm::vec2 &gvector) const;
-    glm::vec2 global_vector(const glm::vec2 &lvector) const;
+    const state2D &state() const;
 
     void ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint);
     void gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint);
+
     void add_force(const glm::vec2 &force);
+
+    const glm::vec2 &force() const;
+    float torque() const;
 
     const glm::vec2 &instant_force() const;
     const glm::vec2 &persistent_force() const;
+
     float instant_torque() const;
     float persistent_torque() const;
 
@@ -124,11 +120,6 @@ class body2D final : public worldref2D, kit::non_copyable
     void persistent_force(const glm::vec2 &force);
     void instant_torque(float torque);
     void persistent_torque(float torque);
-
-    const glm::vec2 &force() const;
-    float torque() const;
-
-    const properties &props() const;
 
     void translate(const glm::vec2 &dpos);
     void rotate(float dangle);
@@ -147,11 +138,12 @@ class body2D final : public worldref2D, kit::non_copyable
     const glm::vec2 &velocity() const;
     float angular_velocity() const;
 
-    glm::vec2 lvelocity_at_from_centroid(const glm::vec2 &lpoint) const;
-    glm::vec2 lvelocity_at_from_position(const glm::vec2 &lpoint) const;
-    glm::vec2 gvelocity_at(const glm::vec2 &gpoint) const;
-    glm::vec2 velocity_at_centroid_offset(const glm::vec2 &offset) const;
-    glm::vec2 velocity_at_position_offset(const glm::vec2 &offset) const;
+    float mass() const;
+    float inv_mass() const;
+    void mass(float mass);
+
+    float inertia() const;
+    float inv_inertia() const;
 
     float charge() const;
     void charge(float charge);
@@ -160,13 +152,9 @@ class body2D final : public worldref2D, kit::non_copyable
     void gposition(const glm::vec2 &gposition);
     void origin(const glm::vec2 &origin);
     void rotation(float rotation);
-    void mass(float mass);
 
     void velocity(const glm::vec2 &velocity);
     void angular_velocity(float angular_velocity);
-
-    void apply_simulation_force(const glm::vec2 &force);
-    void apply_simulation_torque(float torque);
 
     void full_update();
     void update_colliders(bool update_bbox = true);
@@ -176,8 +164,6 @@ class body2D final : public worldref2D, kit::non_copyable
     bool density_updating() const;
     bool spatial_updating() const;
 
-    void prepare_constraint_states();
-
     const std::vector<joint2D *> &joints() const;
     const std::vector<contact2D *> &contacts() const;
 
@@ -185,11 +171,7 @@ class body2D final : public worldref2D, kit::non_copyable
 
   private:
     state2D m_state;
-    properties m_props;
-    glm::vec2 m_charge_centroid;
-    glm::vec2 m_force{0.f};
-    float m_torque = 0.f;
-    float m_charge;
+    glm::vec2 m_gposition; // not relevant for the state
 
     glm::vec2 m_instant_force{0.f};
     glm::vec2 m_persistent_force{0.f};
@@ -198,16 +180,12 @@ class body2D final : public worldref2D, kit::non_copyable
     float m_persistent_torque = 0.f;
 
     std::vector<collider2D *> m_colliders;
-    btype m_type;
 
     bool m_density_update = false;
     bool m_spatial_update = false;
     bool m_awake_allowed = true;
 
-    void reset_simulation_forces();
-    void retrieve_data_from_state(const std::vector<float> &vars_buffer, bool update_bbox);
-
-    void reset_dynamic_properties();
+    void retrieve_data_from_state(const state2D &state, bool update_bbox);
     void stop_all_motion();
 
     friend class collider_manager2D;

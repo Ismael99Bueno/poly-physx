@@ -191,32 +191,25 @@ bool island2D::checksum() const
            body_contacts.size() == m_contacts.size();
 }
 
-void island2D::solve()
+void island2D::solve_actuators(std::vector<state2D> &states)
 {
     for (actuator2D *actuator : m_actuators)
         if (actuator->enabled()) [[likely]]
-            actuator->solve();
+            actuator->solve(states);
+}
 
-    for (body2D *body : m_bodies)
-        body->prepare_constraint_states();
-
+void island2D::solve_constraints(std::vector<state2D> &states)
+{
     const std::size_t viters = world.joints.constraints.params.velocity_iterations;
     const std::size_t piters = world.joints.constraints.params.position_iterations;
 
-    thread_local std::vector<contact2D *> active_contacts;
-    active_contacts.clear();
-
     for (contact2D *contact : m_contacts)
         if (contact->enabled()) [[likely]]
-        {
             contact->on_pre_solve();
-            if (contact->enabled()) [[likely]]
-                active_contacts.push_back(contact);
-        }
 
     for (constraint2D *constraint : m_constraints)
         if (constraint->enabled()) [[likely]]
-            constraint->startup();
+            constraint->startup(states);
 
     for (std::size_t i = 0; i < viters; i++)
         for (constraint2D *constraint : m_constraints)
@@ -236,7 +229,7 @@ void island2D::solve()
     for (contact2D *contact : m_contacts)
         contact->on_post_solve();
 
-    if (world.rk_substep_index() != 0 || !world.islands.params.enable_sleep)
+    if (!world.islands.params.enable_sleep)
         return;
 
     m_energy = 0.f;
@@ -246,7 +239,7 @@ void island2D::solve()
 
     if (m_energy < world.islands.sleep_energy_threshold(this))
     {
-        m_time_still += world.rk_substep_timestep();
+        m_time_still += world.integrator.ts.value;
         m_asleep = m_solved_positions && m_time_still >= world.islands.params.sleep_time_threshold;
     }
     else

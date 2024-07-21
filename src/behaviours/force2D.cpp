@@ -6,7 +6,7 @@ namespace ppx
 float force2D::potential_energy() const
 {
     float pot = 0.f;
-    for (const body2D *body : m_bodies)
+    for (const body2D *body : m_elements)
         pot += potential_energy(*body);
     return pot;
 }

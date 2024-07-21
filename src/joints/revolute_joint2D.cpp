@@ -16,8 +16,7 @@ glm::vec2 revolute_joint2D::constraint_position() const
 }
 glm::vec2 revolute_joint2D::constraint_velocity() const
 {
-    return m_body2->meta.ctr_state.velocity_at_centroid_offset(m_offset2) -
-           m_body1->meta.ctr_state.velocity_at_centroid_offset(m_offset1);
+    return state2().velocity_at_centroid_offset(m_offset2) - state1().velocity_at_centroid_offset(m_offset1);
 }
 
 revolute_joint2D::specs::properties revolute_joint2D::props() const

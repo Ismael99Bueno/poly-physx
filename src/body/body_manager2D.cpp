@@ -17,10 +17,6 @@ body2D *body_manager2D::add(const body2D::specs &spc)
         body->add(collider_spc);
     body->end_density_update();
 
-    rk::state<float> &state = world.integrator.state;
-    state.append({body->centroid().x, body->centroid().y, body->rotation(), body->velocity().x, body->velocity().y,
-                  body->angular_velocity()});
-
     if (world.islands.enabled() && body->is_dynamic())
     {
         island2D *island = world.islands.create_and_add();
@@ -32,35 +28,35 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     return body;
 }
 
-bool body_manager2D::prepare_for_next_substep(const std::vector<float> &vars_buffer)
+std::vector<float> body_manager2D::load_velocities_and_forces() const
 {
-    KIT_PERF_SCOPE("ppx::body_manager2D::prepare_for_next_substep")
-    const bool islands_enabled = world.islands.enabled();
-    const bool mt = params.multithreading;
-    const std::size_t rk_index = world.rk_substep_index();
+    KIT_PERF_SCOPE("ppx::body_manager2D::load_velocities_and_forces")
+    std::vector<float> velaccels(6 * m_elements.size());
+    const bool semi_impl = world.semi_implicit_integration;
+    const float ts = world.integrator.ts.value;
 
-    const auto lambda = [&vars_buffer, islands_enabled, mt, rk_index](body2D *body) {
-        body->reset_simulation_forces();
-        if (!body->asleep())
-        {
-            if (rk_index != 0)
-                body->retrieve_data_from_state(vars_buffer, !mt);
-            body->apply_simulation_force(body->instant_force() + body->persistent_force());
-            body->apply_simulation_torque(body->instant_torque() + body->persistent_torque());
-        }
-        // if islands are enabled, static bodies can only have their ctr states prepared here. Otherwise
-        // bodies.prepare_constraint_states() is called in world2D::operator()
-        if (!body->is_dynamic() && islands_enabled)
-            body->prepare_constraint_states();
-    };
+    for (std::size_t i = 0; i < m_elements.size(); i++) // is it worth it to multithread?
+    {
+        const state2D &state = m_states[i];
+        const std::size_t index = 6 * i;
 
-    const auto pool = world.thread_pool;
-    if (mt && pool)
-        kit::mt::for_each(*pool, m_elements.begin(), m_elements.end(), lambda, pool->thread_count());
-    else
-        for (body2D *body : m_elements)
-            lambda(body);
-    return !mt || rk_index == 0;
+        const float imass = state.inv_mass();
+        const float iinertia = state.inv_inertia();
+
+        const glm::vec2 accel = state.force * imass;
+        const float angaccel = state.torque * iinertia;
+
+        const glm::vec2 vel = semi_impl ? state.velocity + accel * ts : state.velocity;
+        const float angvel = semi_impl ? state.angular_velocity + angaccel * ts : state.angular_velocity;
+
+        velaccels[index] = vel.x;
+        velaccels[index + 1] = vel.y;
+        velaccels[index + 2] = angvel;
+        velaccels[index + 3] = accel.x;
+        velaccels[index + 4] = accel.y;
+        velaccels[index + 5] = angaccel;
+    }
+    return velaccels;
 }
 
 template <typename Body, typename Collider, typename C>
@@ -134,6 +130,11 @@ bool body_manager2D::all_asleep() const
     return true;
 }
 
+const std::vector<state2D> &body_manager2D::states() const
+{
+    return m_states;
+}
+
 bool body_manager2D::checksum() const
 {
     const std::size_t colliders = world.colliders.size();
@@ -166,17 +167,6 @@ bool body_manager2D::remove(const std::size_t index)
     events.on_removal(*body);
     body->clear();
 
-    rk::state<float> &state = world.integrator.state;
-    if (index != m_elements.size())
-    {
-        for (std::size_t i = 0; i < 6; i++)
-            state[6 * index + i] = state[state.size() - 6 + i];
-        m_elements[index] = m_elements.back();
-        m_elements[index]->meta.index = index;
-    }
-    m_elements.pop_back();
-    state.resize(6 * m_elements.size());
-
     KIT_ASSERT_ERROR(body->meta.island || !body->is_dynamic() || !world.islands.enabled(),
                      "Body is not in an island when it should be!")
 
@@ -187,35 +177,68 @@ bool body_manager2D::remove(const std::size_t index)
     return true;
 }
 
-void body_manager2D::send_data_to_state(rk::state<float> &state)
+void body_manager2D::gather_and_load_states(rk::state<float> &rkstate)
 {
-    KIT_PERF_SCOPE("ppx::body_manager2D::send_data_to_state")
-    for (body2D *body : m_elements)
-    {
-        const std::size_t index = 6 * body->meta.index;
-        const glm::vec2 &centroid = body->centroid();
-        if (body->is_static())
-            body->stop_all_motion();
+    KIT_PERF_SCOPE("ppx::body_manager2D::gather_and_load_states")
+    rkstate.resize(6 * m_elements.size());
+    m_states.resize(m_elements.size());
 
-        const glm::vec2 &velocity = body->velocity();
-        state[index] = centroid.x;
-        state[index + 1] = centroid.y;
-        state[index + 2] = body->rotation();
-        state[index + 3] = velocity.x;
-        state[index + 4] = velocity.y;
-        state[index + 5] = body->angular_velocity();
+    for (std::size_t i = 0; i < m_elements.size(); i++)
+    {
+        m_states[i] = m_elements[i]->state();
+        m_states[i].force = glm::vec2(0.f);
+        m_states[i].torque = 0.f;
+
+        const state2D &state = m_states[i];
+        const std::size_t index = 6 * i;
+
+        rkstate[index] = state.centroid.position.x;
+        rkstate[index + 1] = state.centroid.position.y;
+        rkstate[index + 2] = state.centroid.rotation;
+        rkstate[index + 3] = state.velocity.x;
+        rkstate[index + 4] = state.velocity.y;
+        rkstate[index + 5] = state.angular_velocity;
     }
 }
 
-bool body_manager2D::retrieve_data_from_state(const std::vector<float> &vars_buffer)
+void body_manager2D::update_states(const std::vector<float> &posvels)
 {
-    KIT_PERF_SCOPE("ppx::body_manager2D::retrieve_data_from_state")
+    KIT_PERF_SCOPE("ppx::body_manager2D::update_states")
+    for (std::size_t i = 0; i < m_elements.size(); i++)
+    {
+        state2D &state = m_states[i];
+        state.force = glm::vec2(0.f);
+        state.torque = 0.f;
+
+        const std::size_t index = 6 * i;
+
+        state.centroid.position.x = posvels[index];
+        state.centroid.position.y = posvels[index + 1];
+        state.centroid.rotation = posvels[index + 2];
+        state.velocity.x = posvels[index + 3];
+        state.velocity.y = posvels[index + 4];
+        state.angular_velocity = posvels[index + 5];
+    }
+}
+
+bool body_manager2D::retrieve_data_from_states(const std::vector<float> &posvels)
+{
+    KIT_PERF_SCOPE("ppx::body_manager2D::retrieve_data_from_states")
     const bool mt = params.multithreading;
-    const auto lambda = [&vars_buffer, mt](body2D *body) {
-        if (!body->asleep()) [[unlikely]]
-            body->retrieve_data_from_state(vars_buffer, !mt);
+    const auto lambda = [this, mt, &posvels](body2D *body) {
         body->m_instant_force = glm::vec2(0.f);
         body->m_instant_torque = 0.f;
+        if (body->asleep()) [[unlikely]]
+            return;
+        const std::size_t i = body->meta.index;
+        const std::size_t index = 6 * i;
+        state2D &state = m_states[i];
+
+        state.centroid.position = {posvels[index], posvels[index + 1]};
+        state.centroid.rotation = posvels[index + 2];
+        state.velocity = {posvels[index + 3], posvels[index + 4]};
+        state.angular_velocity = posvels[index + 5];
+        body->retrieve_data_from_state(state, !mt);
     };
 
     const auto pool = world.thread_pool;
@@ -228,11 +251,9 @@ bool body_manager2D::retrieve_data_from_state(const std::vector<float> &vars_buf
     return !mt;
 }
 
-void body_manager2D::prepare_constraint_states()
+std::vector<state2D> &body_manager2D::mutable_states()
 {
-    KIT_PERF_SCOPE("ppx::body_manager2D::prepare_constraint_states")
-    for (body2D *body : m_elements)
-        body->prepare_constraint_states();
+    return m_states;
 }
 
 } // namespace ppx

@@ -2,6 +2,7 @@
 
 #include "ppx/internal/worldref.hpp"
 #include "ppx/common/specs2D.hpp"
+#include "ppx/body/state2D.hpp"
 #include "kit/interface/toggleable.hpp"
 
 namespace ppx
@@ -97,7 +98,7 @@ class joint2D : public kit::toggleable, public worldref2D
     glm::vec2 m_offset1;
     glm::vec2 m_offset2;
 
-    void compute_anchors_and_offsets();
+    void compute_anchors_and_offsets(const state2D &state1, const state2D &state2);
 
   private:
     void add_to_bodies();

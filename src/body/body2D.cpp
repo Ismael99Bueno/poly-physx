@@ -8,12 +8,14 @@
 namespace ppx
 {
 body2D::body2D(world2D &world, const body2D::specs &spc)
-    : worldref2D(world),
-      m_state({transform2D{kit::transform2D<float>::builder().position(spc.position).rotation(spc.rotation).build()},
-               spc.position, glm::vec2(0.f), spc.velocity, spc.angular_velocity}),
-      m_charge_centroid(spc.position), m_charge(spc.props.charge), m_type(spc.props.type)
+    : worldref2D(world), m_state({transform2D::builder().position(spc.position).rotation(spc.rotation).build(),
+                                  spc.velocity, spc.angular_velocity})
 {
     meta.index = world.bodies.size();
+    m_gposition = spc.position;
+    m_state.charge = spc.props.charge;
+    m_state.charge_centroid = spc.position;
+    m_state.type = spc.props.type;
     mass(spc.props.mass);
 }
 
@@ -124,11 +126,6 @@ void body2D::stop_all_motion()
     m_state.angular_velocity = 0.f;
 }
 
-const body2D::properties &body2D::props() const
-{
-    return m_props;
-}
-
 void body2D::begin_density_update()
 {
     KIT_ASSERT_ERROR(!m_density_update, "Cannot begin update while already updating");
@@ -155,17 +152,16 @@ void body2D::end_spatial_update(const bool update_bbox)
     update_colliders(update_bbox);
 }
 
-void body2D::retrieve_data_from_state(const std::vector<float> &vars_buffer, const bool update_bbox)
+void body2D::retrieve_data_from_state(const state2D &state, const bool update_bbox)
 {
-    const std::size_t idx = 6 * meta.index;
     m_awake_allowed = false;
     begin_spatial_update();
-    centroid({vars_buffer[idx + 0], vars_buffer[idx + 1]});
-    rotation(vars_buffer[idx + 2]);
+    centroid(state.centroid.position);
+    rotation(state.centroid.rotation);
     end_spatial_update(update_bbox);
 
-    m_state.velocity = {vars_buffer[idx + 3], vars_buffer[idx + 4]};
-    m_state.angular_velocity = vars_buffer[idx + 5];
+    m_state.velocity = state.velocity;
+    m_state.angular_velocity = state.angular_velocity;
     m_awake_allowed = true;
 }
 
@@ -193,8 +189,8 @@ void body2D::update_centroids()
         return;
     if (empty())
     {
-        m_charge_centroid = m_state.gposition;
-        m_state.centroid.position(m_state.gposition);
+        m_state.charge_centroid = m_gposition;
+        m_state.centroid.position = m_gposition;
         return;
     }
     glm::vec2 centroid{0.f};
@@ -215,26 +211,25 @@ void body2D::update_centroids()
         charge_centroid += ccharge * shape.gcentroid();
         artificial_charge += ccharge;
     }
-    m_charge_centroid = charge_centroid / artificial_charge;
+    m_state.charge_centroid = charge_centroid / artificial_charge;
     centroid /= artificial_mass;
 
-    const glm::vec2 diff = m_state.centroid.position() - centroid;
-    m_state.centroid.position(centroid);
+    const glm::vec2 diff = m_state.centroid.position - centroid;
+    m_state.centroid.position = centroid;
+
     for (collider2D *collider : *this)
         collider->gtranslate_shape(diff);
-    m_state.lposition = local_centroid_point(m_state.gposition);
+    m_state.lposition = m_state.local_centroid_point(m_gposition);
 }
 void body2D::update_inertia()
 {
     if (m_density_update)
         return;
 
-    m_props.nondynamic.inertia = 0.f;
+    m_state.inertia = 0.f;
     if (empty())
     {
-        m_props.nondynamic.inv_inertia = 0.f;
-        m_props.dynamic.inertia = is_dynamic() ? 0.f : FLT_MAX;
-        m_props.dynamic.inv_inertia = 0.f;
+        m_state.iinertia = 0.f;
         return;
     }
 
@@ -243,18 +238,13 @@ void body2D::update_inertia()
     {
         const shape2D &shape = collider->shape();
         const float cmass = collider->density() * shape.area();
-        const float dist2 = glm::length2(shape.gcentroid() - m_state.centroid.position());
+        const float dist2 = glm::length2(shape.gcentroid() - m_state.centroid.position);
 
-        m_props.nondynamic.inertia += cmass * (dist2 + shape.inertia());
+        m_state.inertia += cmass * (dist2 + shape.inertia());
         artificial_mass += cmass;
     }
-    m_props.nondynamic.inertia *= m_props.nondynamic.mass / artificial_mass;
-    m_props.nondynamic.inv_inertia = 1.f / m_props.nondynamic.inertia;
-    if (is_dynamic())
-    {
-        m_props.dynamic.inertia = m_props.nondynamic.inertia;
-        m_props.dynamic.inv_inertia = m_props.nondynamic.inv_inertia;
-    }
+    m_state.inertia *= m_state.mass / artificial_mass;
+    m_state.iinertia = 1.f / m_state.inertia;
 }
 
 bool body2D::density_updating() const
@@ -264,16 +254,6 @@ bool body2D::density_updating() const
 bool body2D::spatial_updating() const
 {
     return m_spatial_update;
-}
-
-void body2D::prepare_constraint_states()
-{
-    meta.ctr_state = m_state;
-    if (is_dynamic() && world.semi_implicit_integration)
-    {
-        meta.ctr_state.velocity += m_props.dynamic.inv_mass * m_force * world.rk_substep_timestep();
-        meta.ctr_state.angular_velocity += m_props.dynamic.inv_inertia * m_torque * world.rk_substep_timestep();
-    }
 }
 
 const std::vector<joint2D *> &body2D::joints() const
@@ -298,23 +278,17 @@ bool body2D::checksum() const
            contacts.size() == meta.contacts.size();
 }
 
-void body2D::reset_simulation_forces()
-{
-    m_force = glm::vec2(0.f);
-    m_torque = 0.f;
-}
-
 bool body2D::is_dynamic() const
 {
-    return m_type == btype::DYNAMIC;
+    return m_state.type == btype::DYNAMIC;
 }
 bool body2D::is_kinematic() const
 {
-    return m_type == btype::KINEMATIC;
+    return m_state.type == btype::KINEMATIC;
 }
 bool body2D::is_static() const
 {
-    return m_type == btype::STATIC;
+    return m_state.type == btype::STATIC;
 }
 
 bool body2D::joint_prevents_collision(const body2D *body) const
@@ -338,11 +312,11 @@ bool body2D::attached_to(const joint2D *joint) const
 
 body2D::btype body2D::type() const
 {
-    return m_type;
+    return m_state.type;
 }
 void body2D::type(btype type)
 {
-    if (type == m_type)
+    if (type == m_state.type)
         return;
 
     const bool non_dynamic_change =
@@ -350,15 +324,15 @@ void body2D::type(btype type)
 
     if (non_dynamic_change)
     {
-        m_type = type;
-        reset_dynamic_properties();
+        m_state.type = type;
+        if (is_static())
+            stop_all_motion();
         return;
     }
 
     if (type == btype::DYNAMIC)
     {
-        m_type = type;
-        reset_dynamic_properties();
+        m_state.type = type;
         if (world.islands.enabled())
         {
             island2D *island = world.islands.create_and_add();
@@ -373,62 +347,50 @@ void body2D::type(btype type)
             world.joints.remove(joint);
     }
 
-    for (collider2D *collider : *this)
+    for (collider2D *collider : *this) // should only do this for other non-dynamic contacts
         world.collisions.contact_solver()->remove_any_contacts_with(collider);
     if (meta.island)
         meta.island->remove_body(this);
 
-    m_type = type;
-    reset_dynamic_properties();
+    m_state.type = type;
+    if (is_static())
+        stop_all_motion();
 }
 
 float body2D::kinetic_energy() const
 {
-    return 0.5f * (m_props.nondynamic.mass * glm::length2(m_state.velocity) +
-                   m_state.angular_velocity * m_state.angular_velocity * m_props.nondynamic.inertia);
+    return 0.5f * (m_state.mass * glm::length2(m_state.velocity) +
+                   m_state.angular_velocity * m_state.angular_velocity * m_state.inertia);
 }
 
-glm::vec2 body2D::local_centroid_point(const glm::vec2 &gpoint) const
+const state2D &body2D::state() const
 {
-    return m_state.local_centroid_point(gpoint);
-}
-glm::vec2 body2D::global_centroid_point(const glm::vec2 &lpoint) const
-{
-    return m_state.global_centroid_point(lpoint);
-}
-
-glm::vec2 body2D::local_position_point(const glm::vec2 &gpoint) const
-{
-    return m_state.local_position_point(gpoint);
-}
-glm::vec2 body2D::global_position_point(const glm::vec2 &lpoint) const
-{
-    return m_state.global_position_point(lpoint);
-}
-
-glm::vec2 body2D::local_vector(const glm::vec2 &gvector) const
-{
-    return m_state.local_vector(gvector);
-}
-glm::vec2 body2D::global_vector(const glm::vec2 &lvector) const
-{
-    return m_state.global_vector(lvector);
+    return m_state;
 }
 
 void body2D::ladd_force_at(const glm::vec2 &force, const glm::vec2 &lpoint)
 {
-    gadd_force_at(force, global_centroid_point(lpoint));
+    gadd_force_at(force, m_state.global_centroid_point(lpoint));
 }
 void body2D::gadd_force_at(const glm::vec2 &force, const glm::vec2 &gpoint)
 {
     m_instant_force += force;
-    m_instant_torque += kit::cross2D(gpoint - m_state.centroid.position(), force);
+    m_instant_torque += kit::cross2D(gpoint - m_state.centroid.position, force);
     awake();
 }
 void body2D::add_force(const glm::vec2 &force)
 {
     m_instant_force += force;
     awake();
+}
+
+const glm::vec2 &body2D::force() const
+{
+    return m_state.force;
+}
+float body2D::torque() const
+{
+    return m_state.torque;
 }
 
 const glm::vec2 &body2D::instant_force() const
@@ -470,26 +432,9 @@ void body2D::instant_torque(const float torque)
     awake();
 }
 
-void body2D::apply_simulation_force(const glm::vec2 &force)
-{
-    m_force += force;
-}
-void body2D::apply_simulation_torque(const float torque)
-{
-    m_torque += torque;
-}
-
-const glm::vec2 &body2D::force() const
-{
-    return m_force;
-}
-float body2D::torque() const
-{
-    return m_torque;
-}
 const glm::vec2 &body2D::charge_centroid() const
 {
-    return m_charge_centroid;
+    return m_state.charge_centroid;
 }
 
 const glm::vec2 &body2D::velocity() const
@@ -500,6 +445,31 @@ const glm::vec2 &body2D::velocity() const
 float body2D::angular_velocity() const
 {
     return m_state.angular_velocity;
+}
+
+float body2D::mass() const
+{
+    return m_state.mass;
+}
+float body2D::inv_mass() const
+{
+    return m_state.imass;
+}
+void body2D::mass(const float mass)
+{
+    m_state.mass = mass;
+    m_state.imass = 1.f / mass;
+    update_inertia();
+    awake();
+}
+
+float body2D::inertia() const
+{
+    return m_state.inertia;
+}
+float body2D::inv_inertia() const
+{
+    return m_state.iinertia;
 }
 
 void body2D::velocity(const glm::vec2 &velocity)
@@ -515,15 +485,15 @@ void body2D::angular_velocity(const float angular_velocity)
 
 void body2D::translate(const glm::vec2 &dpos)
 {
-    m_state.centroid.translate(dpos);
-    m_state.gposition += dpos;
-    m_charge_centroid += dpos;
+    m_state.centroid.position += dpos;
+    m_gposition += dpos;
+    m_state.charge_centroid += dpos;
     update_colliders();
     awake(true);
 }
 void body2D::rotate(const float dangle)
 {
-    rotation(m_state.centroid.rotation() + dangle);
+    rotation(m_state.centroid.rotation + dangle);
 }
 
 const transform2D &body2D::centroid_transform() const
@@ -532,9 +502,9 @@ const transform2D &body2D::centroid_transform() const
 }
 void body2D::centroid_transform(const transform2D &centroid)
 {
-    const glm::vec2 dpos = centroid.position() - m_state.centroid.position();
-    m_state.gposition += dpos;
-    m_charge_centroid += dpos;
+    const glm::vec2 dpos = centroid.position - m_state.centroid.position;
+    m_gposition += dpos;
+    m_state.charge_centroid += dpos;
     m_state.centroid = centroid;
     update_colliders();
     awake(true);
@@ -542,7 +512,7 @@ void body2D::centroid_transform(const transform2D &centroid)
 
 const glm::vec2 &body2D::centroid() const
 {
-    return m_state.centroid.position();
+    return m_state.centroid.position;
 }
 
 const glm::vec2 &body2D::lposition() const
@@ -551,116 +521,62 @@ const glm::vec2 &body2D::lposition() const
 }
 const glm::vec2 &body2D::gposition() const
 {
-    return m_state.gposition;
+    return m_gposition;
 }
 
 const glm::vec2 &body2D::origin() const
 {
-    return m_state.centroid.origin();
-}
-
-glm::vec2 body2D::lvelocity_at_from_centroid(const glm::vec2 &lpoint) const
-{
-    return m_state.lvelocity_at_from_centroid(lpoint);
-}
-glm::vec2 body2D::lvelocity_at_from_position(const glm::vec2 &lpoint) const
-{
-    return m_state.lvelocity_at_from_position(lpoint);
-}
-glm::vec2 body2D::gvelocity_at(const glm::vec2 &gpoint) const
-{
-    return m_state.gvelocity_at(gpoint);
-}
-glm::vec2 body2D::velocity_at_centroid_offset(const glm::vec2 &offset) const
-{
-    return m_state.velocity_at_centroid_offset(offset);
-}
-glm::vec2 body2D::velocity_at_position_offset(const glm::vec2 &offset) const
-{
-    return m_state.velocity_at_position_offset(offset);
+    return m_state.centroid.origin;
 }
 
 float body2D::charge() const
 {
-    return m_charge;
+    return m_state.charge;
 }
 void body2D::charge(const float charge)
 {
-    m_charge = charge;
+    m_state.charge = charge;
     awake();
 }
 
 float body2D::rotation() const
 {
-    return m_state.centroid.rotation();
+    return m_state.centroid.rotation;
 }
 
 void body2D::centroid(const glm::vec2 &centroid)
 {
-    const glm::vec2 dpos = centroid - m_state.centroid.position();
-    m_state.gposition += dpos;
-    m_charge_centroid += dpos;
-    m_state.centroid.position(centroid);
+    const glm::vec2 dpos = centroid - m_state.centroid.position;
+    m_gposition += dpos;
+    m_state.charge_centroid += dpos;
+    m_state.centroid.position = centroid;
     update_colliders();
     awake(true);
 }
 
 void body2D::gposition(const glm::vec2 &gposition)
 {
-    const glm::vec2 dpos = gposition - m_state.gposition;
-    m_state.centroid.translate(dpos);
-    m_charge_centroid += dpos;
-    m_state.gposition = gposition;
+    const glm::vec2 dpos = gposition - m_gposition;
+    m_state.centroid.position += dpos;
+    m_state.charge_centroid += dpos;
+    m_gposition = gposition;
     update_colliders();
     awake(true);
 }
 void body2D::origin(const glm::vec2 &origin)
 {
-    m_state.centroid.origin(origin);
+    m_state.centroid.origin = origin;
     update_colliders();
     awake(true);
 }
 void body2D::rotation(const float rotation)
 {
-    const glm::mat2 rmat = kit::transform2D<float>::rotation_matrix(rotation - m_state.centroid.rotation());
-    m_state.gposition = m_state.centroid.position() + rmat * (m_state.gposition - m_state.centroid.position());
-    m_charge_centroid = m_state.centroid.position() + rmat * (m_charge_centroid - m_state.centroid.position());
-    m_state.centroid.rotation(rotation);
+    const glm::mat2 rmat = kit::transform2D<float>::rotation_matrix(rotation - m_state.centroid.rotation);
+    m_gposition = m_state.centroid.position + rmat * (m_gposition - m_state.centroid.position);
+    m_state.charge_centroid = m_state.centroid.position + rmat * (m_state.charge_centroid - m_state.centroid.position);
+    m_state.centroid.rotation = rotation;
     update_colliders();
     awake(true);
-}
-
-void body2D::mass(const float mass)
-{
-    const float pmass = m_props.nondynamic.mass;
-
-    m_props.nondynamic.mass = mass;
-    m_props.nondynamic.inv_mass = 1.f / mass;
-    if (kit::approaches_zero(m_props.nondynamic.inertia))
-        update_inertia();
-    else if (!kit::approaches_zero(pmass))
-    {
-        const float ratio = mass / m_props.nondynamic.mass;
-        m_props.nondynamic.inertia *= ratio;
-        m_props.nondynamic.inv_inertia /= ratio;
-    }
-    reset_dynamic_properties();
-    awake();
-}
-
-void body2D::reset_dynamic_properties()
-{
-    if (is_dynamic())
-        m_props.dynamic = m_props.nondynamic;
-    else
-    {
-        m_props.dynamic.mass = FLT_MAX;
-        m_props.dynamic.inv_mass = 0.f;
-        m_props.dynamic.inertia = FLT_MAX;
-        m_props.dynamic.inv_inertia = 0.f;
-        if (is_static() || (is_dynamic() && asleep()))
-            stop_all_motion();
-    }
 }
 
 } // namespace ppx

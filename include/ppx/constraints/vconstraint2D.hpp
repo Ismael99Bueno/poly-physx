@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ppx/constraints/constraint2D.hpp"
+#include "ppx/body/state2D.hpp"
 
 namespace ppx
 {
@@ -64,13 +65,10 @@ class vconstraint2D : public constraint2D, public auxiliar_1D_direction<LinDegre
     virtual flat_t constraint_velocity() const = 0;
 
     virtual void solve_velocities() override;
-    virtual void startup() override;
+    virtual void startup(std::vector<state2D> &states) override;
     virtual void warmup();
 
   protected:
-    flat_t m_cumimpulse{0.f};
-    square_t m_mass;
-
     virtual void update_constraint_data();
 
     virtual square_t mass() const;
@@ -83,5 +81,28 @@ class vconstraint2D : public constraint2D, public auxiliar_1D_direction<LinDegre
     void apply_linear_impulse(const glm::vec2 &linimpulse);
     void apply_angular_impulse(float angimpulse);
     void solve_velocities_clamped(const flat_t &min, const flat_t &max);
+
+    const state2D &state1() const;
+    const state2D &state2() const;
+
+    state2D &state1();
+    state2D &state2();
+
+    flat_t m_cumimpulse{0.f};
+    square_t m_mass;
+
+    std::vector<state2D> *m_states;
+
+    std::size_t m_index1;
+    float m_imass1;
+    float m_iinertia1;
+    bool m_dyn1;
+
+    std::size_t m_index2;
+    float m_imass2;
+    float m_iinertia2;
+    bool m_dyn2;
+
+    float m_ts;
 };
 } // namespace ppx
