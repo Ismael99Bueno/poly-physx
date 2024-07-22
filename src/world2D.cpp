@@ -134,8 +134,7 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
 void world2D::post_step()
 {
     KIT_PERF_SCOPE("ppx::world2D::post_step")
-    bodies.update_states(integrator.state.vars());
-    if (!bodies.retrieve_data_from_states())
+    if (!bodies.retrieve_data_from_states(integrator.state.vars()))
         colliders.update_bounding_boxes();
 
     KIT_ASSERT_ERROR(!islands.enabled() || islands.checksum(), "Island checkusm failed")

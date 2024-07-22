@@ -246,17 +246,32 @@ void body_manager2D::integrate_positions(const float ts)
     }
 }
 
-bool body_manager2D::retrieve_data_from_states()
+// id even dare to say that maybe separate this into a call to update states may be better
+bool body_manager2D::retrieve_data_from_states(const std::vector<float> &posvels)
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::retrieve_data_from_states")
     const bool mt = params.multithreading;
-    const auto lambda = [this, mt](body2D *body) {
+    const auto lambda = [this, mt, &posvels](body2D *body) {
         body->m_instant_force = glm::vec2(0.f);
         body->m_instant_torque = 0.f;
+
+        const std::size_t i = body->meta.index;
+        state2D &state = m_states[i];
+        state.substep_force = glm::vec2(0.f);
+        state.substep_torque = 0.f;
+
         if (body->asleep()) [[unlikely]]
             return;
-        const std::size_t index = body->meta.index;
-        body->retrieve_data_from_state(m_states[index], !mt);
+
+        const std::size_t index = 6 * i;
+        state.centroid.position.x = posvels[index];
+        state.centroid.position.y = posvels[index + 1];
+        state.centroid.rotation = posvels[index + 2];
+        state.velocity.x = posvels[index + 3];
+        state.velocity.y = posvels[index + 4];
+        state.angular_velocity = posvels[index + 5];
+
+        body->retrieve_data_from_state(state, !mt);
     };
 
     const auto pool = world.thread_pool;

@@ -39,7 +39,7 @@ class body_manager2D final : public manager2D<body2D>
     void integrate_positions(float ts);
 
     std::vector<float> load_velocities_and_forces() const;
-    bool retrieve_data_from_states();
+    bool retrieve_data_from_states(const std::vector<float> &posvels);
 
     std::vector<state2D> &mutable_states();
 
