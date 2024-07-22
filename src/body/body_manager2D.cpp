@@ -178,7 +178,7 @@ bool body_manager2D::remove(const std::size_t index)
 
 void body_manager2D::gather_and_load_states(rk::state<float> &rkstate)
 {
-    KIT_PERF_SCOPE("ppx::body_manager2D::gather_states")
+    KIT_PERF_SCOPE("ppx::body_manager2D::gather_and_load_states")
     m_states.resize(m_elements.size());
     rkstate.resize(6 * m_elements.size());
     for (std::size_t i = 0; i < m_elements.size(); i++)
