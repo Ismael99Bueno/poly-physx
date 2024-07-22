@@ -26,7 +26,6 @@ class world2D : kit::non_copyable
     collision_manager2D collisions;
     island_manager2D islands;
 
-    bool semi_implicit_integration = true;
     kit::mt::thread_pool *thread_pool = nullptr;
 
     void add(const specs::contraption2D &contraption);
@@ -34,7 +33,9 @@ class world2D : kit::non_copyable
 
     std::uint32_t step_count() const;
     std::uint32_t hertz() const;
-    float rk_substep_timestep() const;
+
+    float rk_timestep() const;
+    float substep_timestep() const;
 
     float kinetic_energy() const;
     float potential_energy() const;
@@ -48,7 +49,7 @@ class world2D : kit::non_copyable
   private:
     std::uint32_t m_step_count = 0;
     std::uint32_t m_rk_substep_index = 0;
-    float m_rk_substep_timestep = 0.f;
+    float m_rk_timestep = 0.f;
 
     void pre_step();
     void post_step();

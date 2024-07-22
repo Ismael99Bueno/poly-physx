@@ -25,7 +25,9 @@ class island_manager2D final : public manager2D<island2D>
 
   private:
     void solve_actuators(std::vector<state2D> &states);
-    void solve_constraints(std::vector<state2D> &states);
+
+    void solve_velocity_constraints(std::vector<state2D> &states);
+    void solve_position_constraints(std::vector<state2D> &states);
 
     island2D *create_and_add();
     island2D *create_island_from_body(body2D *body);

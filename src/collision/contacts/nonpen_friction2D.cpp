@@ -25,12 +25,14 @@ void nonpen_friction2D::solve_velocities()
     solve_velocities_clamped(-mu, mu);
 }
 
-void nonpen_friction2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &normal)
+void nonpen_friction2D::update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &lanchor2,
+                               const glm::vec2 &normal)
 {
     m_body1 = collision->collider1->body();
     m_body2 = collision->collider2->body();
     m_friction = collision->friction;
     m_lanchor1 = lanchor1;
+    m_lanchor2 = lanchor2;
     m_tangent = glm::vec2(-normal.y, normal.x);
 
     m_is_soft = global_props.is_soft;

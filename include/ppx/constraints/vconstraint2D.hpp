@@ -68,6 +68,9 @@ class vconstraint2D : public constraint2D, public auxiliar_1D_direction<LinDegre
     virtual void startup(std::vector<state2D> &states) override;
     virtual void warmup();
 
+    glm::vec2 reactive_force() const override final;
+    float reactive_torque() const override final;
+
   protected:
     virtual void update_constraint_data();
 

@@ -81,21 +81,29 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_linear_correction(const glm::
         KIT_ERROR("Linear correction can only be applied when the linear degrees of the constraint is greater than 0")
     }
 
-    const auto apply = [this, &lincorrection](state2D &state, const float imass, const float iinertia,
-                                              const glm::vec2 &offset) {
-        const glm::vec2 dpos = imass * lincorrection;
-        state.centroid.position += dpos;
-        if (!this->m_no_anchors)
-        {
-            const float da = iinertia * kit::cross2D(offset, lincorrection);
-            state.centroid.rotation += da;
-        }
-    };
-
+    const float inv_ts = 1.f / this->m_ts;
     if (this->m_dyn1)
-        apply(this->state1(), -this->m_imass1, -this->m_iinertia1, this->m_offset1);
+    {
+        state2D &st1 = this->state1();
+        const glm::vec2 dpos1 = this->m_imass1 * lincorrection;
+        const float da1 = this->m_iinertia1 * kit::cross2D(this->m_offset1, lincorrection);
+
+        st1.centroid.position -= dpos1;
+        st1.centroid.rotation -= da1;
+        st1.velocity -= dpos1 * inv_ts;
+        st1.angular_velocity -= da1 * inv_ts;
+    }
     if (this->m_dyn2)
-        apply(this->state2(), this->m_imass2, this->m_iinertia2, this->m_offset2);
+    {
+        state2D &st2 = this->state2();
+        const glm::vec2 dpos2 = this->m_imass2 * lincorrection;
+        const float da2 = this->m_iinertia2 * kit::cross2D(this->m_offset2, lincorrection);
+
+        st2.centroid.position += dpos2;
+        st2.centroid.rotation += da2;
+        st2.velocity += dpos2 * inv_ts;
+        st2.angular_velocity += da2 * inv_ts;
+    }
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -110,8 +118,8 @@ void pvconstraint2D<LinDegrees, AngDegrees>::apply_angular_correction(float angc
     if (this->m_dyn1)
     {
         state2D &st1 = this->state1();
-        const float da1 = -this->m_iinertia1 * angcorrection;
-        st1.centroid.rotation += da1;
+        const float da1 = this->m_iinertia1 * angcorrection;
+        st1.centroid.rotation -= da1;
     }
     if (this->m_dyn2)
     {

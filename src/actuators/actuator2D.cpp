@@ -1,6 +1,7 @@
 #include "ppx/internal/pch.hpp"
 #include "ppx/actuators/actuator2D.hpp"
 #include "ppx/body/body2D.hpp"
+#include "ppx/world2D.hpp"
 
 namespace ppx
 {
@@ -22,14 +23,23 @@ void actuator2D::solve(std::vector<state2D> &states)
     m_force = glm::vec2(f);
     m_torque = f.z;
 
-    const float t1 = kit::cross2D(m_force, m_offset1);
-    const float t2 = kit::cross2D(m_offset2, m_force);
+    const float t1 = kit::cross2D(m_offset1, m_force) + m_torque;
+    const float t2 = kit::cross2D(m_offset2, m_force) + m_torque;
 
     state1.substep_force -= m_force;
-    state1.substep_torque += t1 - m_torque;
+    state1.substep_torque -= t1;
 
     state2.substep_force += m_force;
-    state2.substep_torque += t2 + m_torque;
+    state2.substep_torque += t2;
+}
+
+glm::vec2 actuator2D::reactive_force() const
+{
+    return m_force;
+}
+float actuator2D::reactive_torque() const
+{
+    return m_torque;
 }
 
 } // namespace ppx

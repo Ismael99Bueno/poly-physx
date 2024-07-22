@@ -22,8 +22,7 @@ namespace ppx
 {
 world2D::world2D(const specs::world2D &spc)
     : integrator(spc.integrator.tableau, spc.integrator.timestep), bodies(*this), colliders(*this), joints(*this),
-      behaviours(*this), collisions(*this), islands(*this),
-      semi_implicit_integration(spc.integrator.semi_implicit_integration)
+      behaviours(*this), collisions(*this), islands(*this)
 {
     bodies.params = spc.bodies;
     colliders.params = spc.colliders;
@@ -59,6 +58,7 @@ bool world2D::step()
 {
     if (islands.enabled() && bodies.all_asleep()) [[unlikely]]
         return true;
+
     m_step_count++;
     pre_step();
     const bool valid = integrator.raw_forward(*this);
@@ -76,24 +76,13 @@ void world2D::pre_step()
 #if defined(DEBUG) && !defined(_MSC_VER) // little fix, seems feenableexcept does not exist on windows
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
-    std::vector<state2D> &states = bodies.gather_states();
+    bodies.gather_and_load_states(integrator.state);
 
+    // surprisingly, i can get away with computing collisions once per step no matter the rk order
     if (collisions.enabled())
         collisions.detect_and_create_contacts();
     if (islands.enabled())
-    {
         islands.try_split();
-        islands.remove_invalid_and_gather_awake();
-        islands.solve_constraints(states);
-    }
-    else
-        joints.constraints.solve(states);
-    bodies.load_states(integrator.state);
-
-    // STOP LOADING FORCES FROM THE CONSTRAINTS, IT INTERFERES WITH INTEGRATION
-    // remove force and torque setters as they will now be meaningless. Plus, those are forces from the last rk substep,
-    // not from all the step
-    // remove no_anchors/use_both_anchors bool from joint. Its just not worth it
 
     KIT_ASSERT_ERROR(collisions.contact_solver()->checksum(), "Contacts checksum failed")
     KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
@@ -108,21 +97,38 @@ std::vector<float> world2D::operator()(const float time, const float timestep, c
                         "Positions and velocities vector size must be exactly 6 times greater than the body array size "
                         "- posvels: {0}, body array: {1}",
                         posvels.size(), bodies.size())
-    m_rk_substep_timestep = timestep;
-
+    m_rk_timestep = timestep;
     if (m_rk_substep_index != 0)
         bodies.update_states(posvels);
 
     std::vector<state2D> &states = bodies.mutable_states();
     behaviours.load_forces(states);
 
-    if (islands.enabled())
+    const bool islands_enabled = islands.enabled();
+    if (islands_enabled)
+    {
+        islands.remove_invalid_and_gather_awake();
         islands.solve_actuators(states);
+
+        bodies.integrate_velocities(timestep);
+        islands.solve_velocity_constraints(states);
+    }
     else
+    {
         joints.actuators.solve(states);
 
+        bodies.integrate_velocities(timestep);
+        joints.constraints.solve_velocities(states);
+    }
+
+    bodies.integrate_positions(timestep);
+    if (islands_enabled)
+        islands.solve_position_constraints(states);
+    else
+        joints.constraints.solve_positions(states);
+
     m_rk_substep_index++;
-    return bodies.load_velocities_and_forces(timestep);
+    return bodies.load_velocities_and_forces();
 }
 
 void world2D::post_step()
@@ -145,9 +151,13 @@ std::uint32_t world2D::hertz() const
     return (std::uint32_t)(1.f / integrator.ts.value);
 }
 
-float world2D::rk_substep_timestep() const
+float world2D::rk_timestep() const
 {
-    return m_rk_substep_timestep;
+    return m_rk_timestep;
+}
+float world2D::substep_timestep() const
+{
+    return integrator.ts.value / integrator.tableau().stages;
 }
 
 void world2D::on_body_removal_validation(body2D *body)

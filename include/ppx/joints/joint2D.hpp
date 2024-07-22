@@ -45,8 +45,8 @@ class joint2D : public kit::toggleable, public worldref2D
     glm::vec2 ganchor1() const;
     glm::vec2 ganchor2() const;
 
-    const glm::vec2 &reactive_force() const;
-    float reactive_torque() const;
+    virtual glm::vec2 reactive_force() const = 0;
+    virtual float reactive_torque() const = 0;
 
     bool contains(const body2D *body) const;
     void awake();
@@ -85,11 +85,6 @@ class joint2D : public kit::toggleable, public worldref2D
     glm::vec2 m_lanchor1;
     glm::vec2 m_lanchor2;
 
-    glm::vec2 m_force{0.f};
-    float m_torque = 0.f;
-
-    bool m_no_anchors = false; // joint is not anchored (e.g. rotor or motor)
-    bool m_use_both_anchors = true;
     bool m_bodies_collide;
 
     glm::vec2 m_ganchor1;

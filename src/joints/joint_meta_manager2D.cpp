@@ -31,9 +31,9 @@ void actuator_meta_manager2D::solve(std::vector<state2D> &states)
             manager->solve(states);
 }
 
-void constraint_meta_manager2D::solve(std::vector<state2D> &states)
+void constraint_meta_manager2D::solve_velocities(std::vector<state2D> &states)
 {
-    KIT_PERF_SCOPE("ppx::constraint_meta_manager2D::solve")
+    KIT_PERF_SCOPE("ppx::constraint_meta_manager2D::solve_velocities")
     if (m_contact_solver)
         m_contact_solver->startup(states);
 
@@ -43,12 +43,17 @@ void constraint_meta_manager2D::solve(std::vector<state2D> &states)
 
     for (std::size_t i = 0; i < params.velocity_iterations; i++)
     {
-        if (m_contact_solver)
-            m_contact_solver->solve_velocities();
         for (const auto &manager : this->m_elements)
             if (manager->enabled()) [[likely]]
                 manager->solve_velocities();
+        if (m_contact_solver)
+            m_contact_solver->solve_velocities();
     }
+}
+
+void constraint_meta_manager2D::solve_positions(std::vector<state2D> &states)
+{
+    KIT_PERF_SCOPE("ppx::constraint_meta_manager2D::solve_positions")
     for (std::size_t i = 0; i < params.position_iterations; i++)
     {
         bool solved = true;

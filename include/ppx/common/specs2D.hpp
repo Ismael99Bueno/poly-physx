@@ -248,7 +248,6 @@ struct world2D
 {
     struct
     {
-        bool semi_implicit_integration = true;
         rk::butcher_tableau<float> tableau = rk::butcher_tableau<float>::rk1;
         rk::timestep<float> timestep{1.e-3f};
     } integrator;

@@ -5,7 +5,6 @@
 
 namespace ppx
 {
-
 void island_manager2D::solve_actuators(std::vector<state2D> &states)
 {
     KIT_PERF_SCOPE("ppx::island_manager2D::solve_actuators")
@@ -18,11 +17,24 @@ void island_manager2D::solve_actuators(std::vector<state2D> &states)
             lambda(island);
 }
 
-void island_manager2D::solve_constraints(std::vector<state2D> &states)
+void island_manager2D::solve_velocity_constraints(std::vector<state2D> &states)
 {
-    KIT_PERF_SCOPE("ppx::island_manager2D::solve_constraints")
+    KIT_PERF_SCOPE("ppx::island_manager2D::solve_velocity_constraints")
 
-    const auto lambda = [&states](island2D *island) { island->solve_constraints(states); };
+    const auto lambda = [&states](island2D *island) { island->solve_velocity_constraints(states); };
+    const auto pool = world.thread_pool;
+    if (params.multithreading && pool) // use thread pool directly or mt::for_each? test it!
+        kit::mt::for_each(*pool, m_awake_islands.begin(), m_awake_islands.end(), lambda, pool->thread_count());
+    else
+        for (island2D *island : m_awake_islands)
+            lambda(island);
+}
+
+void island_manager2D::solve_position_constraints(std::vector<state2D> &states)
+{
+    KIT_PERF_SCOPE("ppx::island_manager2D::solve_position_constraints")
+
+    const auto lambda = [&states](island2D *island) { island->solve_position_constraints(states); };
     const auto pool = world.thread_pool;
     if (params.multithreading && pool) // use thread pool directly or mt::for_each? test it!
         kit::mt::for_each(*pool, m_awake_islands.begin(), m_awake_islands.end(), lambda, pool->thread_count());

@@ -59,18 +59,27 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_linear_impulse(const glm::vec2
     {
         KIT_ERROR("Linear impulse can only be applied when the linear degrees of the constraint is greater than 0")
     }
-    const auto apply = [this, &linimpulse](state2D &state, const float imass, const float iinertia,
-                                           const glm::vec2 &offset) {
-        state.velocity += imass * linimpulse;
-        if (!m_no_anchors)
-            state.angular_velocity += iinertia * kit::cross2D(offset, linimpulse);
-    };
 
-    m_force = linimpulse / m_ts;
+    const float inv_ts = 1.f / m_ts;
+    const glm::vec2 force = linimpulse * inv_ts;
     if (m_dyn1)
-        apply(state1(), -m_imass1, -m_iinertia1, m_offset1);
+    {
+        state2D &st1 = state1();
+        st1.velocity -= m_imass1 * linimpulse;
+        st1.substep_force -= force;
+        const float dw1 = kit::cross2D(m_offset1, linimpulse);
+        st1.angular_velocity -= m_iinertia1 * dw1;
+        st1.substep_torque -= dw1 * inv_ts;
+    }
     if (m_dyn2)
-        apply(state2(), m_imass2, m_iinertia2, m_offset2);
+    {
+        state2D &st2 = state2();
+        st2.velocity += m_imass2 * linimpulse;
+        st2.substep_force += force;
+        const float dw2 = kit::cross2D(m_offset2, linimpulse);
+        st2.angular_velocity += m_iinertia2 * dw2;
+        st2.substep_torque += dw2 * inv_ts;
+    }
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>
@@ -81,16 +90,18 @@ void vconstraint2D<LinDegrees, AngDegrees>::apply_angular_impulse(const float an
     {
         KIT_ERROR("Angular impulse can only be applied when the angular degrees of the constraint is equal to 1")
     }
-    m_torque = angimpulse / m_ts;
+    const float torque = angimpulse / m_ts;
     if (m_dyn1)
     {
         state2D &st1 = state1();
         st1.angular_velocity -= m_iinertia1 * angimpulse;
+        st1.substep_torque -= torque;
     }
     if (m_dyn2)
     {
         state2D &st2 = state2();
         st2.angular_velocity += m_iinertia2 * angimpulse;
+        st2.substep_torque += torque;
     }
 }
 
@@ -147,7 +158,7 @@ void vconstraint2D<LinDegrees, AngDegrees>::startup(std::vector<state2D> &states
     m_iinertia2 = st2.inv_inertia();
     m_dyn2 = st2.is_dynamic();
 
-    m_ts = world.integrator.ts.value;
+    m_ts = world.rk_timestep();
 
     update_constraint_data();
     if (world.joints.constraints.params.warmup)
@@ -224,10 +235,10 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
     else
     {
         const square_t invmass = default_inverse_mass();
-        const square_t diagmass = invert_diagonal(invmass);
         if (!m_is_soft)
-            return m_no_anchors ? diagmass : glm::inverse(invmass);
+            return glm::inverse(invmass);
 
+        const square_t diagmass = invert_diagonal(invmass);
         square_t gamma{0.f};
         for (int i = 0; i < diagmass.length(); i++)
         {
@@ -237,7 +248,7 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
             if (!kit::approaches_zero(igamma))
                 gamma[i][i] = 1.f / igamma;
         }
-        return m_no_anchors ? invert_diagonal(invmass + gamma) : glm::inverse(invmass + gamma);
+        return glm::inverse(invmass + gamma);
     }
 }
 
@@ -255,18 +266,6 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
 
         const float ii1 = m_iinertia1;
         const float ii2 = m_iinertia2;
-
-        if (m_no_anchors)
-        {
-            if constexpr (LinDegrees == 1 && AngDegrees == 0)
-                return im1 + im2;
-            else if constexpr (LinDegrees == 1 && AngDegrees == 1)
-                return glm::mat2{{im1 + im2, 0.f}, {0.f, ii1 + ii2}};
-            else if constexpr (LinDegrees == 2 && AngDegrees == 0)
-                return glm::mat2{{im1 + im2, 0.f}, {0.f, im1 + im2}};
-            else if constexpr (LinDegrees == 2 && AngDegrees == 1)
-                return glm::mat3{{im1 + im2, 0.f, 0.f}, {0.f, im1 + im2, 0.f}, {0.f, 0.f, ii1 + ii2}};
-        }
 
         if constexpr (LinDegrees == 1)
         {
@@ -303,6 +302,26 @@ typename vconstraint2D<LinDegrees, AngDegrees>::square_t vconstraint2D<LinDegree
             }
         }
     }
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+glm::vec2 vconstraint2D<LinDegrees, AngDegrees>::reactive_force() const
+{
+    if constexpr (LinDegrees > 0)
+        return compute_linear_impulse(m_cumimpulse) / m_ts;
+    else
+        return glm::vec2(0.f);
+}
+
+template <std::size_t LinDegrees, std::size_t AngDegrees>
+    requires LegalDegrees2D<LinDegrees, AngDegrees>
+float vconstraint2D<LinDegrees, AngDegrees>::reactive_torque() const
+{
+    if constexpr (AngDegrees == 1)
+        return compute_angular_impulse(m_cumimpulse) / m_ts;
+    else
+        return 0.f;
 }
 
 template <std::size_t LinDegrees, std::size_t AngDegrees>

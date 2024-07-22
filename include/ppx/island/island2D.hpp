@@ -24,7 +24,9 @@ class island2D : public worldref2D
     void merge(island2D &island);
 
     void solve_actuators(std::vector<state2D> &states);
-    void solve_constraints(std::vector<state2D> &states);
+
+    void solve_velocity_constraints(std::vector<state2D> &states);
+    void solve_position_constraints(std::vector<state2D> &states);
 
     float time_still() const;
     float energy() const;

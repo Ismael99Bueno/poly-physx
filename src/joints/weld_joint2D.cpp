@@ -9,7 +9,6 @@ weld_joint2D::weld_joint2D(world2D &world, const specs &spc)
     : joint2D(world, spc, spc.ganchor, spc.props), pvconstraint2D(spc.props),
       m_target_relangle(m_body2->state().centroid.rotation - m_body1->state().centroid.rotation)
 {
-    m_use_both_anchors = true;
 }
 
 glm::vec3 weld_joint2D::constraint_position() const

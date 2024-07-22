@@ -198,10 +198,9 @@ void island2D::solve_actuators(std::vector<state2D> &states)
             actuator->solve(states);
 }
 
-void island2D::solve_constraints(std::vector<state2D> &states)
+void island2D::solve_velocity_constraints(std::vector<state2D> &states)
 {
     const std::size_t viters = world.joints.constraints.params.velocity_iterations;
-    const std::size_t piters = world.joints.constraints.params.position_iterations;
 
     for (contact2D *contact : m_contacts)
         if (contact->enabled()) [[likely]]
@@ -215,16 +214,11 @@ void island2D::solve_constraints(std::vector<state2D> &states)
         for (constraint2D *constraint : m_constraints)
             if (constraint->enabled()) [[likely]]
                 constraint->solve_velocities();
+}
 
-    const float ts = world.integrator.ts.value;
-    for (const body2D *body : m_bodies)
-    {
-        const std::size_t index = body->meta.index;
-        states[index].centroid.position += states[index].velocity * ts;
-        states[index].centroid.rotation += states[index].angular_velocity * ts;
-    }
-
-    // try additional integration of positions here
+void island2D::solve_position_constraints(std::vector<state2D> &states)
+{
+    const std::size_t piters = world.joints.constraints.params.position_iterations;
     m_solved_positions = true;
     for (std::size_t i = 0; i < piters; i++)
     {
@@ -248,7 +242,7 @@ void island2D::solve_constraints(std::vector<state2D> &states)
 
     if (m_energy < world.islands.sleep_energy_threshold(this))
     {
-        m_time_still += world.integrator.ts.value;
+        m_time_still += world.substep_timestep();
         m_asleep = m_solved_positions && m_time_still >= world.islands.params.sleep_time_threshold;
     }
     else

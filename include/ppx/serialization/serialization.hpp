@@ -900,7 +900,6 @@ template <> struct kit::yaml::codec<ppx::world2D>
         node["Behaviour manager"] = world.behaviours;
         node["Collision manager"] = world.collisions;
 
-        node["Semi-implicit integration"] = world.semi_implicit_integration;
         node["Integrator"] = world.integrator;
         node["Joints repository"] = world.joints;
         node["Bounding box enlargement"] = world.colliders.params.bbox_enlargement;
@@ -911,10 +910,9 @@ template <> struct kit::yaml::codec<ppx::world2D>
     }
     static bool decode(const YAML::Node &node, ppx::world2D &world)
     {
-        if (!node.IsMap() || node.size() < 10)
+        if (!node.IsMap() || node.size() < 9)
             return false;
 
-        world.semi_implicit_integration = node["Semi-implicit integration"].as<bool>();
         world.colliders.params.bbox_enlargement = node["Bounding box enlargement"].as<float>();
         world.colliders.params.bbox_buffer = node["Bounding box buffer"].as<float>();
         node["Body manager"].as<ppx::body_manager2D>(world.bodies);

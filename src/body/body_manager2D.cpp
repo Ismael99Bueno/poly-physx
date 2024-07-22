@@ -28,30 +28,22 @@ body2D *body_manager2D::add(const body2D::specs &spc)
     return body;
 }
 
-std::vector<float> body_manager2D::load_velocities_and_forces(const float ts) const
+std::vector<float> body_manager2D::load_velocities_and_forces() const
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::load_velocities_and_forces")
     std::vector<float> velaccels(6 * m_elements.size());
-    const bool semi_impl = world.semi_implicit_integration;
 
-    for (std::size_t i = 0; i < m_elements.size(); i++) // is it worth it to multithread?
+    for (std::size_t i = 0; i < m_elements.size(); i++)
     {
-        const body2D *body = m_elements[i];
         const state2D &state = m_states[i];
         const std::size_t index = 6 * i;
 
-        const float imass = state.inv_mass();
-        const float iinertia = state.inv_inertia();
+        const glm::vec2 accel = state.substep_force * state.inv_mass();
+        const float angaccel = state.substep_torque * state.inv_inertia();
 
-        const glm::vec2 accel = (state.substep_force + body->instant_force() + body->persistent_force()) * imass;
-        const float angaccel = (state.substep_torque + body->instant_torque() + body->persistent_torque()) * iinertia;
-
-        const glm::vec2 vel = semi_impl ? state.velocity + accel * ts : state.velocity;
-        const float angvel = semi_impl ? state.angular_velocity + angaccel * ts : state.angular_velocity;
-
-        velaccels[index] = vel.x;
-        velaccels[index + 1] = vel.y;
-        velaccels[index + 2] = angvel;
+        velaccels[index] = state.velocity.x;
+        velaccels[index + 1] = state.velocity.y;
+        velaccels[index + 2] = state.angular_velocity;
         velaccels[index + 3] = accel.x;
         velaccels[index + 4] = accel.y;
         velaccels[index + 5] = angaccel;
@@ -184,26 +176,17 @@ bool body_manager2D::remove(const std::size_t index)
     return true;
 }
 
-std::vector<state2D> &body_manager2D::gather_states()
+void body_manager2D::gather_and_load_states(rk::state<float> &rkstate)
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::gather_states")
     m_states.resize(m_elements.size());
+    rkstate.resize(6 * m_elements.size());
     for (std::size_t i = 0; i < m_elements.size(); i++)
     {
         m_states[i] = m_elements[i]->state();
         m_states[i].substep_force = glm::vec2(0.f);
         m_states[i].substep_torque = 0.f;
-    }
-    return m_states;
-}
 
-void body_manager2D::load_states(rk::state<float> &rkstate) const
-{
-    KIT_PERF_SCOPE("ppx::body_manager2D::load_states")
-    rkstate.resize(6 * m_elements.size());
-
-    for (std::size_t i = 0; i < m_elements.size(); i++)
-    {
         const state2D &state = m_states[i];
         const std::size_t index = 6 * i;
 
@@ -234,6 +217,32 @@ void body_manager2D::update_states(const std::vector<float> &posvels)
         state.velocity.x = posvels[index + 3];
         state.velocity.y = posvels[index + 4];
         state.angular_velocity = posvels[index + 5];
+    }
+}
+
+void body_manager2D::integrate_velocities(const float ts)
+{
+    KIT_PERF_SCOPE("ppx::body_manager2D::integrate_velocities")
+    for (std::size_t i = 0; i < m_elements.size(); i++)
+    {
+        const body2D *body = m_elements[i];
+        state2D &state = m_states[i];
+
+        state.substep_force += body->instant_force() + body->persistent_force();
+        state.substep_torque += body->instant_torque() + body->persistent_torque();
+
+        state.velocity += state.substep_force * state.inv_mass() * ts;
+        state.angular_velocity += state.substep_torque * state.inv_inertia() * ts;
+    }
+}
+
+void body_manager2D::integrate_positions(const float ts)
+{
+    KIT_PERF_SCOPE("ppx::body_manager2D::integrate_positions")
+    for (state2D &state : m_states)
+    {
+        state.centroid.position += state.velocity * ts;
+        state.centroid.rotation += state.angular_velocity * ts;
     }
 }
 

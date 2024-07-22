@@ -33,7 +33,7 @@ void quad_tree_broad2D::erase(collider2D *collider)
 void quad_tree_broad2D::update_pairs(const std::vector<collider2D *> &to_update)
 {
     m_new_pairs_count = 0;
-    m_rebuild_timer += world.integrator.ts.value;
+    m_rebuild_timer += world.integrator.ts.value; // change this with substep ts if inside rk loop
     if (m_may_rebuild && m_rebuild_timer > rebuild_time_threshold)
         build_tree_from_scratch();
 

@@ -15,7 +15,8 @@ class nonpen_friction2D final : public vconstraint2D<1, 0>
 
     float constraint_velocity() const override;
     void solve_velocities() override;
-    void update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &normal);
+    void update(const collision2D *collision, const glm::vec2 &lanchor1, const glm::vec2 &lanchor2,
+                const glm::vec2 &normal);
 
     static inline specs::constraint2D::properties global_props{};
 

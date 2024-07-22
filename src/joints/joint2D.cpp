@@ -16,7 +16,6 @@ joint2D::joint2D(world2D &world, const specs::joint2D &spc, const glm::vec2 &gan
                  const specs::joint2D::properties &jprops)
     : joint2D(world, spc, ganchor, ganchor, jprops)
 {
-    m_use_both_anchors = false;
 }
 
 joint2D::joint2D(world2D &world, const specs::joint2D &spc, const specs::joint2D::properties &jprops)
@@ -37,12 +36,11 @@ joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const glm::vec2 &
                  const specs::joint2D::properties &jprops)
     : joint2D(world, body1, body2, ganchor, ganchor, jprops)
 {
-    m_use_both_anchors = false;
 }
 
 joint2D::joint2D(world2D &world, body2D *body1, body2D *body2, const specs::joint2D::properties &jprops)
-    : worldref2D(world), m_body1(body1), m_body2(body2), m_lanchor1(0.f), m_lanchor2(0.f), m_no_anchors(true),
-      m_use_both_anchors(false), m_bodies_collide(jprops.bodies_collide)
+    : worldref2D(world), m_body1(body1), m_body2(body2), m_lanchor1(0.f), m_lanchor2(0.f),
+      m_bodies_collide(jprops.bodies_collide)
 {
 }
 
@@ -83,20 +81,11 @@ const glm::vec2 &joint2D::lanchor2() const
 
 glm::vec2 joint2D::ganchor1() const
 {
-    return m_no_anchors ? m_body1->centroid() : m_body1->state().global_position_point(m_lanchor1);
+    return m_body1->state().global_position_point(m_lanchor1);
 }
 glm::vec2 joint2D::ganchor2() const
 {
-    return m_no_anchors ? m_body2->centroid() : m_body2->state().global_position_point(m_lanchor2);
-}
-
-const glm::vec2 &joint2D::reactive_force() const
-{
-    return m_force;
-}
-float joint2D::reactive_torque() const
-{
-    return m_torque;
+    return m_body2->state().global_position_point(m_lanchor2);
 }
 
 bool joint2D::contains(const body2D *body) const
@@ -154,24 +143,11 @@ bool joint2D::is_contact() const
 
 void joint2D::compute_anchors_and_offsets(const state2D &state1, const state2D &state2)
 {
-    if (m_no_anchors)
-    {
-        m_ganchor1 = state1.centroid.position;
-        m_ganchor2 = state2.centroid.position;
-        m_offset1 = glm::vec2(0.f);
-        m_offset2 = glm::vec2(0.f);
-    }
-    else
-    {
-        m_ganchor1 = state1.global_position_point(m_lanchor1);
-        if (m_use_both_anchors)
-            m_ganchor2 = state2.global_position_point(m_lanchor2);
-        else
-            m_ganchor2 = m_ganchor1;
+    m_ganchor1 = state1.global_position_point(m_lanchor1);
+    m_ganchor2 = state2.global_position_point(m_lanchor2);
 
-        m_offset1 = m_ganchor1 - state1.centroid.position;
-        m_offset2 = m_ganchor2 - state2.centroid.position;
-    }
+    m_offset1 = m_ganchor1 - state1.centroid.position;
+    m_offset2 = m_ganchor2 - state2.centroid.position;
 }
 
 void joint2D::add_to_bodies()

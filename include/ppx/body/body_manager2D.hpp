@@ -32,12 +32,13 @@ class body_manager2D final : public manager2D<body2D>
   private:
     using manager2D<body2D>::manager2D;
 
-    std::vector<state2D> &gather_states();
-    void load_states(rk::state<float> &rkstate) const;
-
+    void gather_and_load_states(rk::state<float> &rkstate);
     void update_states(const std::vector<float> &posvels);
 
-    std::vector<float> load_velocities_and_forces(float ts) const;
+    void integrate_velocities(float ts);
+    void integrate_positions(float ts);
+
+    std::vector<float> load_velocities_and_forces() const;
     bool retrieve_data_from_states();
 
     std::vector<state2D> &mutable_states();

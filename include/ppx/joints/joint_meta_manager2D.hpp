@@ -66,6 +66,7 @@ template <IManager IM> class joint_meta_manager2D : public idmanager2D<kit::scop
     friend class joint_repository2D;
 };
 
+// move these to its own file??
 class actuator_meta_manager2D final : public joint_meta_manager2D<iactuator_manager2D>
 {
     using joint_meta_manager2D<iactuator_manager2D>::joint_meta_manager2D;
@@ -83,7 +84,8 @@ class constraint_meta_manager2D final : public joint_meta_manager2D<iconstraint_
 
   private:
     using joint_meta_manager2D<iconstraint_manager2D>::joint_meta_manager2D;
-    void solve(std::vector<state2D> &states);
+    void solve_velocities(std::vector<state2D> &states);
+    void solve_positions(std::vector<state2D> &states);
 
     contact_constraint_solver2D *m_contact_solver = nullptr;
 
