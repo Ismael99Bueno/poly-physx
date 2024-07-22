@@ -348,7 +348,7 @@ void body2D::type(btype type)
     }
 
     for (collider2D *collider : *this) // should only do this for other non-dynamic contacts
-        world.collisions.contact_solver()->remove_any_contacts_with(collider);
+        world.collisions.contact_manager()->remove_any_contacts_with(collider);
     if (meta.island)
         meta.island->remove_body(this);
 

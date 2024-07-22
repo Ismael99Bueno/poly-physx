@@ -43,6 +43,10 @@ template <typename T> class manager2D : public worldref2D, kit::non_copyable
     using value_t = typename type_wrapper<T>::value_t;
     using element_t = typename type_wrapper<T>::element_t;
 
+    manager2D(world2D &world) : worldref2D(world)
+    {
+    }
+
     virtual ~manager2D() = default;
 
     manager_events<T> events;
@@ -118,12 +122,7 @@ template <typename T> class manager2D : public worldref2D, kit::non_copyable
     }
 
   protected:
-    manager2D(world2D &world) : worldref2D(world)
-    {
-    }
     std::vector<element_t> m_elements;
-
-    friend class world2D;
 };
 
 template <typename T>
@@ -135,6 +134,8 @@ template <Identifiable T> class idmanager2D : public manager2D<T>
     using value_t = typename type_wrapper<T>::value_t;
     using element_t = typename type_wrapper<T>::element_t;
     using id_t = typename value_t::id_type;
+
+    using manager2D<T>::manager2D;
 
     const value_t *at(const id_t &id) const
     {
@@ -173,9 +174,6 @@ template <Identifiable T> class idmanager2D : public manager2D<T>
     {
         return (*this)[id] != nullptr;
     }
-
-  protected:
-    using manager2D<T>::manager2D;
 };
 
 } // namespace ppx

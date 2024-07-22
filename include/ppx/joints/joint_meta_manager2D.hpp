@@ -6,8 +6,6 @@
 
 namespace ppx
 {
-class contact_constraint_solver2D;
-class contact_actuator_solver2D;
 template <typename T>
 concept IManager = std::is_same_v<T, iactuator_manager2D> || std::is_same_v<T, iconstraint_manager2D>;
 
@@ -64,32 +62,5 @@ template <IManager IM> class joint_meta_manager2D : public idmanager2D<kit::scop
 
     friend class world2D;
     friend class joint_repository2D;
-};
-
-// move these to its own file??
-class actuator_meta_manager2D final : public joint_meta_manager2D<iactuator_manager2D>
-{
-    using joint_meta_manager2D<iactuator_manager2D>::joint_meta_manager2D;
-    contact_actuator_solver2D *m_contact_solver = nullptr;
-
-    void solve(std::vector<state2D> &states);
-    friend class world2D;
-    friend class collision_manager2D;
-};
-
-class constraint_meta_manager2D final : public joint_meta_manager2D<iconstraint_manager2D>
-{
-  public:
-    specs::joint_manager2D::constraints2D params;
-
-  private:
-    using joint_meta_manager2D<iconstraint_manager2D>::joint_meta_manager2D;
-    void solve_velocities(std::vector<state2D> &states);
-    void solve_positions(std::vector<state2D> &states);
-
-    contact_constraint_solver2D *m_contact_solver = nullptr;
-
-    friend class world2D;
-    friend class collision_manager2D;
 };
 } // namespace ppx

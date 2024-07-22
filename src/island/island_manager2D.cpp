@@ -170,7 +170,7 @@ void island_manager2D::build_from_existing_simulation()
         body->meta.island_flag = false;
     for (joint2D *joint : world.joints)
         joint->meta.island_flag = false;
-    for (contact2D *contact : world.collisions.contact_solver()->create_total_contacts_list())
+    for (contact2D *contact : world.collisions.contact_manager()->create_total_contacts_list())
         contact->meta.island_flag = false;
 
     for (body2D *body : world.bodies)
@@ -250,7 +250,7 @@ bool island_manager2D::checksum() const
         if (body->is_dynamic())
             dynamic_bodies++;
 
-    const std::size_t contacts = world.collisions.contact_solver()->total_contacts_count();
+    const std::size_t contacts = world.collisions.contact_manager()->total_contacts_count();
     const std::size_t joints = world.joints.size();
 
     std::size_t body_count = 0;

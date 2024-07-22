@@ -4,10 +4,6 @@
 
 namespace ppx
 {
-icontact_manager2D::icontact_manager2D(world2D &world) : worldref2D(world)
-{
-}
-
 void icontact_manager2D::inherit(icontact_manager2D &&contacts)
 {
     params = contacts.params;
@@ -20,7 +16,7 @@ void icontact_manager2D::enabled(const bool enabled)
         destroy_all_contacts();
 }
 
-bool icontact_manager2D::checksum() const
+bool icontact_manager2D::checksum(const body_manager2D &bm) const
 {
     std::unordered_set<const contact2D *> body_contacts;
     const std::size_t contacts_count = total_contacts_count();
@@ -28,7 +24,7 @@ bool icontact_manager2D::checksum() const
 
     const auto contact_list = create_total_contacts_list();
     const std::unordered_set<const contact2D *> contacts(contact_list.begin(), contact_list.end());
-    for (const body2D *body : world.bodies)
+    for (const body2D *body : bm)
         for (const contact2D *contact : body->meta.contacts)
         {
             if (!contact->contains(body))

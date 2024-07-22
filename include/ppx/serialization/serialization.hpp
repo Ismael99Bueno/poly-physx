@@ -17,6 +17,7 @@
 
 #include "ppx/collision/contacts/spring_contact2D.hpp"
 #include "ppx/collision/contacts/nonpen_contact2D.hpp"
+#include "ppx/collision/contacts/contact_manager2D.hpp"
 
 #include "rk/serialization/serialization.hpp"
 
@@ -762,10 +763,10 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
             nnarrow["Method"] = 1;
 
         YAML::Node nsolv = node["Contacts"];
-        nsolv["Contact lifetime"] = cm.contact_solver()->params.contact_lifetime;
-        if (auto colsolv = cm.contact_solver<ppx::contact_solver2D<ppx::nonpen_contact2D>>())
+        nsolv["Contact lifetime"] = cm.contact_manager()->params.contact_lifetime;
+        if (auto colsolv = cm.contact_manager<ppx::contact_constraint_manager2D<ppx::nonpen_contact2D>>())
             nsolv["Solver method"] = 0;
-        else if (auto colsolv = cm.contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>())
+        else if (auto colsolv = cm.contact_manager<ppx::contact_actuator_manager2D<ppx::spring_contact2D>>())
             nsolv["Solver method"] = 1;
 
         nsolv["Rigidity"] = ppx::spring_contact2D::rigidity;
@@ -814,11 +815,11 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             const int method = nsolv["Solver method"].as<int>();
             if (method == 0)
-                cm.set_contact_solver<ppx::contact_solver2D<ppx::nonpen_contact2D>>();
+                cm.set_contact_manager<ppx::contact_constraint_manager2D<ppx::nonpen_contact2D>>();
             else if (method == 1)
-                cm.set_contact_solver<ppx::contact_solver2D<ppx::spring_contact2D>>();
+                cm.set_contact_manager<ppx::contact_actuator_manager2D<ppx::spring_contact2D>>();
         }
-        cm.contact_solver()->params.contact_lifetime = nsolv["Contact lifetime"].as<std::uint32_t>();
+        cm.contact_manager()->params.contact_lifetime = nsolv["Contact lifetime"].as<std::uint32_t>();
 
         ppx::spring_contact2D::rigidity = nsolv["Rigidity"].as<float>();
         ppx::spring_contact2D::max_normal_damping = nsolv["Max normal damping"].as<float>();

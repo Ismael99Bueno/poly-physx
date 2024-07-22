@@ -8,7 +8,7 @@
 
 namespace ppx
 {
-class collision_contacts2D;
+class icontact_manager2D;
 class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copyable
 {
   public:
@@ -28,7 +28,7 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     virtual result polygon_polygon(const polygon &poly1, const polygon &poly2) const = 0;
     virtual result circle_polygon(const circle &circ, const polygon &poly) const = 0;
 
-    void update_contacts(const std::vector<pair> &pairs, collision_contacts2D *contacts);
+    void update_contacts(const std::vector<pair> &pairs, icontact_manager2D *contacts);
     virtual const char *name() const;
 
     virtual void on_attach()
@@ -47,7 +47,7 @@ class narrow_phase2D : public worldref2D, public kit::toggleable, kit::non_copya
     void cp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
     void pp_narrow_collision_check(collider2D *collider1, collider2D *collider2, collision2D &collision) const;
 
-    collision_contacts2D *m_contacts = nullptr;
+    icontact_manager2D *m_contacts = nullptr;
 };
 
 } // namespace ppx

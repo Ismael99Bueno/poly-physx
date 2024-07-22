@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-void narrow_phase2D::update_contacts(const std::vector<pair> &pairs, collision_contacts2D *contacts)
+void narrow_phase2D::update_contacts(const std::vector<pair> &pairs, icontact_manager2D *contacts)
 {
     KIT_PERF_SCOPE("ppx::narrow_phase2D::update_contacts")
     m_contacts = contacts;

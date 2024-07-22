@@ -3,7 +3,7 @@
 
 #include "ppx/collision/broad/quad_tree_broad2D.hpp"
 #include "ppx/collision/narrow/gjk_epa_narrow2D.hpp"
-
+#include "ppx/collision/contacts/contact_manager2D.hpp"
 #include "ppx/collision/contacts/nonpen_contact2D.hpp"
 
 #include "ppx/world2D.hpp"
@@ -14,16 +14,16 @@ collision_manager2D::collision_manager2D(world2D &world) : worldref2D(world)
 {
     set_broad<quad_tree_broad2D>();
     set_narrow<gjk_epa_narrow2D>();
-    set_contact_solver<contact_solver2D<nonpen_contact2D>>();
+    set_contact_manager<contact_constraint_manager2D<nonpen_contact2D>>();
 }
 
-void collision_manager2D::set_constraint_based_contact_solver(contact_constraint_solver2D *solver)
+void collision_manager2D::set_constraint_based_contact_manager(icontact_constraint_manager2D *solver)
 {
     world.joints.constraints.m_contact_solver = solver;
     world.joints.actuators.m_contact_solver = nullptr;
 }
 
-void collision_manager2D::set_actuator_based_contact_solver(contact_actuator_solver2D *solver)
+void collision_manager2D::set_actuator_based_contact_manager(icontact_actuator_manager2D *solver)
 {
     world.joints.actuators.m_contact_solver = solver;
     world.joints.constraints.m_contact_solver = nullptr;

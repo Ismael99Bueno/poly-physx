@@ -157,7 +157,7 @@ bool collider_manager2D::remove(const std::size_t index)
     KIT_INFO("Removing collider with index {0}.", index)
 
     events.on_removal(*collider);
-    world.collisions.contact_solver()->remove_any_contacts_with(collider);
+    world.collisions.contact_manager()->remove_any_contacts_with(collider);
     world.collisions.broad()->remove_pairs_containing(collider);
 
     if (auto qt = world.collisions.broad<quad_tree_broad2D>())

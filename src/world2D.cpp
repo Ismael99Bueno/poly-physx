@@ -28,7 +28,7 @@ world2D::world2D(const specs::world2D &spc)
     colliders.params = spc.colliders;
     joints.constraints.params = spc.joints.constraints;
     collisions.broad()->params = spc.collision.broad;
-    collisions.contact_solver()->params = spc.collision.contacts;
+    collisions.contact_manager()->params = spc.collision.contacts;
     islands.params = spc.islands;
 }
 
@@ -84,7 +84,7 @@ void world2D::pre_step()
     if (islands.enabled())
         islands.try_split();
 
-    KIT_ASSERT_ERROR(collisions.contact_solver()->checksum(), "Contacts checksum failed")
+    KIT_ASSERT_ERROR(collisions.contact_manager()->checksum(bodies), "Contacts checksum failed")
     KIT_ASSERT_ERROR(bodies.checksum(), "Bodies checksum failed")
     KIT_ASSERT_ERROR(joints.checksum(), "Joints checksum failed")
     m_rk_substep_index = 0;

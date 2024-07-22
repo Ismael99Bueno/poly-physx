@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ppx/joints/joint_meta_manager2D.hpp"
+#include "ppx/constraints/constraint_meta_manager2D.hpp"
+#include "ppx/actuators/actuator_meta_manager2D.hpp"
 
 namespace ppx
 {

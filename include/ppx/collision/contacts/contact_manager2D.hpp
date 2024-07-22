@@ -1,15 +1,16 @@
 #pragma once
 
 #include "ppx/collision/contacts/contact2D.hpp"
-#include "ppx/collision/contacts/collision_contacts2D.hpp"
+#include "ppx/collision/contacts/icontact_manager2D.hpp"
+#include "ppx/manager2D.hpp"
 
 namespace ppx
 {
-template <Contact2D Contact> class contact_manager2D : public collision_contacts2D
+template <Contact2D Contact> class contact_manager2D : public manager2D<Contact>, virtual public icontact_manager2D
 {
   public:
     using contact_map = std::unordered_map<contact_key, Contact *>;
-    using collision_contacts2D::collision_contacts2D;
+    using manager2D<Contact>::manager2D;
 
     virtual ~contact_manager2D()
     {
@@ -18,22 +19,34 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
 
     const std::vector<Contact *> &contacts() const
     {
-        return m_contacts;
+        return this->m_elements;
     }
     const contact_map &contacts_map() const
     {
         return m_unique_contacts;
     }
 
+    using manager2D<Contact>::remove;
+    bool remove(const std::size_t index) override
+    {
+        if (index >= this->m_elements.size())
+            return false;
+        Contact *contact = this->m_elements[index];
+        m_unique_contacts.erase(contact->key());
+        destroy_contact(contact);
+        this->m_elements.erase(this->m_elements.begin() + index);
+        return true;
+    }
+
     std::vector<contact2D *> create_total_contacts_list() const override final
     {
-        return std::vector<contact2D *>(m_contacts.begin(), m_contacts.end());
+        return std::vector<contact2D *>(this->m_elements.begin(), this->m_elements.end());
     }
     std::vector<contact2D *> create_active_contacts_list() const override final
     {
         std::vector<contact2D *> active_contacts;
-        active_contacts.reserve(m_contacts.size());
-        for (Contact *contact : m_contacts)
+        active_contacts.reserve(this->m_elements.size());
+        for (Contact *contact : this->m_elements)
             if (contact->enabled()) [[likely]]
                 active_contacts.push_back(contact);
         return active_contacts;
@@ -41,12 +54,12 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
 
     std::size_t total_contacts_count() const override final
     {
-        return m_contacts.size();
+        return this->m_elements.size();
     }
 
     void remove_any_contacts_with(const collider2D *collider) override final
     {
-        for (auto it = m_contacts.begin(); it != m_contacts.end();)
+        for (auto it = this->m_elements.begin(); it != this->m_elements.end();)
         {
             Contact *contact = *it;
             if (contact->collider1() == collider || contact->collider2() == collider)
@@ -55,7 +68,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
                     contact->on_exit();
                 m_unique_contacts.erase(contact->key());
                 destroy_contact(contact);
-                it = m_contacts.erase(it);
+                it = this->m_elements.erase(it);
             }
             else
                 ++it;
@@ -63,7 +76,6 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     }
 
   protected:
-    std::vector<Contact *> m_contacts;
     std::vector<Contact *> m_last_contacts;
     contact_map m_unique_contacts;
 
@@ -104,13 +116,13 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
     void remove_expired_contacts() override final
     {
         KIT_PERF_SCOPE("ppx::contact_manager2D::remove_expired_contacts")
-        std::swap(m_last_contacts, m_contacts);
-        m_contacts.clear();
+        std::swap(m_last_contacts, this->m_elements);
+        this->m_elements.clear();
         for (Contact *contact : m_last_contacts)
         {
             if (contact->asleep())
             {
-                m_contacts.push_back(contact);
+                this->m_elements.push_back(contact);
                 continue;
             }
             if (contact->expired())
@@ -125,17 +137,17 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
                 contact->on_exit();
             }
             contact->increment_age();
-            m_contacts.push_back(contact);
+            this->m_elements.push_back(contact);
         }
     }
 
     void create_contact(const contact_key &hash, const collision2D *collision, const std::size_t manifold_index)
     {
-        Contact *contact = allocator<Contact>::create(world, collision, manifold_index);
+        Contact *contact = allocator<Contact>::create(this->world, collision, manifold_index);
         KIT_ASSERT_ERROR(!m_unique_contacts.contains(hash), "Contact already exists!")
 
         m_unique_contacts.emplace(hash, contact);
-        m_contacts.push_back(contact);
+        this->m_elements.push_back(contact);
         island2D::add(contact);
         contact->body1()->meta.contacts.push_back(contact);
         contact->body2()->meta.contacts.push_back(contact);
@@ -163,7 +175,7 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
 
     void destroy_all_contacts() override final
     {
-        for (Contact *contact : m_contacts)
+        for (Contact *contact : this->m_elements)
         {
             if (contact->enabled()) [[likely]]
                 contact->on_exit();
@@ -171,8 +183,75 @@ template <Contact2D Contact> class contact_manager2D : public collision_contacts
         } // this is expensive, for every contact a call to remove_contact for
           // colliders and bodies. it shouldnt matter because this is almost never
           // called (only when user changes contact solver or disables collisions)
-        m_contacts.clear();
+        this->m_elements.clear();
         m_unique_contacts.clear();
+    }
+};
+
+template <ContactConstraint2D Contact>
+class contact_constraint_manager2D final : public contact_manager2D<Contact>, public icontact_constraint_manager2D
+{
+  public:
+    using contact_manager2D<Contact>::contact_manager2D;
+
+    void startup(std::vector<state2D> &states) override
+    {
+        m_active_contacts.clear();
+        for (Contact *contact : this->m_elements)
+        {
+            if (!contact->enabled()) [[likely]]
+                continue;
+            contact->on_pre_solve();
+            if (contact->enabled()) [[likely]] // could be disabled by on_pre_solve
+            {
+                m_active_contacts.push_back(contact);
+                contact->startup(states);
+            }
+        }
+    }
+
+    void solve_velocities() override
+    {
+        for (Contact *contact : m_active_contacts)
+            contact->solve_velocities();
+    }
+
+    bool solve_positions() override
+    {
+        bool solved = true;
+        for (Contact *contact : m_active_contacts)
+            solved &= contact->solve_positions();
+        return solved;
+    }
+
+    void on_post_solve() override
+    {
+        for (Contact *contact : m_active_contacts)
+            contact->on_post_solve();
+    }
+
+  private:
+    std::vector<Contact *> m_active_contacts;
+};
+
+template <ContactActuator2D Contact>
+class contact_actuator_manager2D final : public contact_manager2D<Contact>, public icontact_actuator_manager2D
+{
+  public:
+    using contact_manager2D<Contact>::contact_manager2D;
+    void solve(std::vector<state2D> &states) override
+    {
+        for (Contact *contact : this->m_elements)
+        {
+            if (!contact->enabled()) [[likely]]
+                continue;
+
+            // on islands, all pre solves are executed before the firs solve ever, but here the implementation differs.
+            // take into account for the future :)
+            contact->on_pre_solve();
+            contact->solve(states);
+            contact->on_post_solve();
+        }
     }
 };
 } // namespace ppx
