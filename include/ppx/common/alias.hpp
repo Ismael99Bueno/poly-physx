@@ -1,7 +1,7 @@
 #pragma once
 
-#include "geo/shapes2D/polygon.hpp"
-#include "geo/shapes2D/circle.hpp"
+#include "geo/shapes/polytope.hpp"
+#include "geo/shapes/nsphere.hpp"
 #include "geo/algorithm/ray.hpp"
 #ifdef PPX_ENABLE_BLOCK_ALLOCATOR
 #include "kit/memory/allocator/block_allocator.hpp"
