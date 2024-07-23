@@ -8,12 +8,7 @@ namespace ppx
 class quad_tree_broad2D final : public broad_phase2D
 {
   public:
-    template <class... QTArgs>
-    quad_tree_broad2D(world2D &world, QTArgs &&...qt_args)
-        : broad_phase2D(world), m_quad_tree(std::forward<QTArgs>(qt_args)...)
-    {
-        build_tree_from_scratch();
-    }
+    quad_tree_broad2D(world2D &world);
 
     const char *name() const override;
 
@@ -22,9 +17,6 @@ class quad_tree_broad2D final : public broad_phase2D
 
     const ppx::quad_tree &quad_tree() const;
     ppx::quad_tree &quad_tree();
-
-    const ppx::quad_tree::properties &props() const;
-    void props(const ppx::quad_tree::properties &props);
 
     std::uint32_t rebuild_count() const;
     void build_tree_from_scratch();

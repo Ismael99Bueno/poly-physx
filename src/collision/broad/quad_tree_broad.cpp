@@ -6,6 +6,10 @@
 
 namespace ppx
 {
+quad_tree_broad2D::quad_tree_broad2D(world2D &world) : broad_phase2D(world)
+{
+    build_tree_from_scratch();
+}
 
 const char *quad_tree_broad2D::name() const
 {
@@ -144,17 +148,6 @@ const ppx::quad_tree &quad_tree_broad2D::quad_tree() const
 ppx::quad_tree &quad_tree_broad2D::quad_tree()
 {
     return m_quad_tree;
-}
-
-const ppx::quad_tree::properties &quad_tree_broad2D::props() const
-{
-    return m_quad_tree.props();
-}
-void quad_tree_broad2D::props(const ppx::quad_tree::properties &props)
-{
-    m_quad_tree.clear();
-    m_quad_tree.props(props);
-    build_tree_from_scratch();
 }
 
 } // namespace ppx

@@ -745,11 +745,6 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
         {
             nbroad["Method"] = 1;
             nbroad["Force square"] = broad->force_square_shape;
-
-            const auto &props = broad->quad_tree().props();
-            nbroad["Max colliders"] = props.elements_per_quad;
-            nbroad["Max depth"] = props.max_depth;
-            nbroad["Min size"] = props.min_quad_size;
         }
 
         YAML::Node nnarrow = node["Narrow"];
@@ -790,12 +785,7 @@ template <> struct kit::yaml::codec<ppx::collision_manager2D>
                 cm.set_broad<ppx::brute_force_broad2D>();
             else if (method == 1)
             {
-                ppx::quad_tree::properties props;
-                props.elements_per_quad = nbroad["Max colliders"].as<std::size_t>();
-                props.max_depth = nbroad["Max depth"].as<std::uint32_t>();
-                props.min_quad_size = nbroad["Min size"].as<float>();
-
-                auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>(props);
+                auto qtbroad = cm.set_broad<ppx::quad_tree_broad2D>();
                 qtbroad->force_square_shape = nbroad["Force square"].as<bool>();
             }
         }

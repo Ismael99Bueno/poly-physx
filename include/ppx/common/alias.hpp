@@ -14,6 +14,10 @@
 #define PPX_MAX_VERTICES 8
 #endif
 
+#ifndef PPX_MAX_QUAD_COLLIDERS
+#define PPX_MAX_QUAD_COLLIDERS 128
+#endif
+
 namespace ppx
 {
 class collider2D;
@@ -46,6 +50,6 @@ template <typename T> class allocator
     static inline allocator_t<T> s_allocator;
 };
 
-using quad_tree = kit::quad_tree<collider2D *, allocator_t>;
+using quad_tree = kit::quad_tree<collider2D *, PPX_MAX_QUAD_COLLIDERS, allocator_t>;
 
 } // namespace ppx
