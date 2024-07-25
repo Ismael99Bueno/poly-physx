@@ -11,7 +11,7 @@
 
 namespace ppx
 {
-class behaviour_manager2D final : public idmanager2D<kit::scope<behaviour2D>>
+class behaviour_manager2D final : public id_contiguous_manager2D<kit::scope<behaviour2D>>
 {
   public:
     template <kit::DerivedFrom<behaviour2D> T, class... BehaviourArgs> T *add(BehaviourArgs &&...args)
@@ -27,11 +27,11 @@ class behaviour_manager2D final : public idmanager2D<kit::scope<behaviour2D>>
         return dynamic_cast<T *>(from_name<behaviour2D>(name));
     }
 
-    using idmanager2D<kit::scope<behaviour2D>>::remove;
+    using id_contiguous_manager2D<kit::scope<behaviour2D>>::remove;
     bool remove(std::size_t index) override;
 
   private:
-    using idmanager2D<kit::scope<behaviour2D>>::idmanager2D;
+    using id_contiguous_manager2D<kit::scope<behaviour2D>>::id_contiguous_manager2D;
 
     void on_body_removal_validation(body2D *body);
     void load_forces(std::vector<state2D> &states);

@@ -8,7 +8,7 @@
 
 namespace ppx
 {
-class collider_manager2D final : public manager2D<collider2D>
+class collider_manager2D final : public contiguous_manager2D<collider2D>
 {
   public:
     collider2D *add(body2D *parent, const collider2D::specs &spc = {});
@@ -16,19 +16,19 @@ class collider_manager2D final : public manager2D<collider2D>
     ray2D::hit<collider2D> cast(ray2D ray) const;
     void update_bounding_boxes();
 
-    using manager2D<collider2D>::operator[];
+    using contiguous_manager2D<collider2D>::operator[];
     std::vector<const collider2D *> operator[](const aabb2D &aabb) const;
     std::vector<collider2D *> operator[](const aabb2D &aabb);
 
     const collider2D *operator[](const glm::vec2 &point) const;
     collider2D *operator[](const glm::vec2 &point);
 
-    using manager2D<collider2D>::remove;
+    using contiguous_manager2D<collider2D>::remove;
     bool remove(std::size_t index) override;
 
     specs::collider_manager2D params;
 
   private:
-    using manager2D<collider2D>::manager2D;
+    using contiguous_manager2D<collider2D>::contiguous_manager2D;
 };
 } // namespace ppx

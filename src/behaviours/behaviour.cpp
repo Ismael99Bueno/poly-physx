@@ -8,7 +8,7 @@
 namespace ppx
 {
 behaviour2D::behaviour2D(world2D &world, const std::string &name)
-    : manager2D(world), kit::identifiable<std::string>(name)
+    : contiguous_manager2D(world), kit::identifiable<std::string>(name)
 {
 }
 

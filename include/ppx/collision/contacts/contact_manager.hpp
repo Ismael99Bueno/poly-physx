@@ -6,11 +6,12 @@
 
 namespace ppx
 {
-template <Contact2D Contact> class contact_manager2D : public manager2D<Contact>, virtual public icontact_manager2D
+template <Contact2D Contact>
+class contact_manager2D : public contiguous_manager2D<Contact>, virtual public icontact_manager2D
 {
   public:
     using contact_map = std::unordered_map<contact_key, Contact *>;
-    using manager2D<Contact>::manager2D;
+    using contiguous_manager2D<Contact>::contiguous_manager2D;
 
     virtual ~contact_manager2D()
     {
@@ -26,7 +27,7 @@ template <Contact2D Contact> class contact_manager2D : public manager2D<Contact>
         return m_unique_contacts;
     }
 
-    using manager2D<Contact>::remove;
+    using contiguous_manager2D<Contact>::remove;
     bool remove(const std::size_t index) override
     {
         if (index >= this->m_elements.size())

@@ -5,7 +5,7 @@
 
 namespace ppx
 {
-class joint_repository2D final : public manager2D<joint2D>
+class joint_repository2D final : public contiguous_manager2D<joint2D>
 {
   public:
     actuator_meta_manager2D actuators;

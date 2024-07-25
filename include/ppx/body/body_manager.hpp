@@ -7,19 +7,19 @@
 
 namespace ppx
 {
-class body_manager2D final : public manager2D<body2D>
+class body_manager2D final : public contiguous_manager2D<body2D>
 {
   public:
     body2D *add(const body2D::specs &spc = {});
 
-    using manager2D<body2D>::operator[];
+    using contiguous_manager2D<body2D>::operator[];
     std::vector<const body2D *> operator[](const aabb2D &aabb) const;
     std::vector<body2D *> operator[](const aabb2D &aabb);
 
     std::vector<const body2D *> operator[](const glm::vec2 &point) const;
     std::vector<body2D *> operator[](const glm::vec2 &point);
 
-    using manager2D<body2D>::remove;
+    using contiguous_manager2D<body2D>::remove;
     bool remove(std::size_t index) override;
 
     bool checksum() const;
@@ -30,7 +30,7 @@ class body_manager2D final : public manager2D<body2D>
     specs::body_manager2D params;
 
   private:
-    using manager2D<body2D>::manager2D;
+    using contiguous_manager2D<body2D>::contiguous_manager2D;
 
     void gather_and_load_states(rk::state<float> &rkstate);
     void update_states(const std::vector<float> &posvels);

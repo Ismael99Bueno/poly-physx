@@ -10,7 +10,7 @@
 namespace ppx
 {
 class world2D;
-class behaviour2D : public manager2D<body2D>,
+class behaviour2D : public contiguous_manager2D<body2D>,
                     public kit::identifiable<std::string>,
                     public kit::toggleable,
                     public kit::yaml::codecable
@@ -21,7 +21,7 @@ class behaviour2D : public manager2D<body2D>,
 
     virtual bool add(body2D *body);
 
-    using manager2D<body2D>::remove;
+    using contiguous_manager2D<body2D>::remove;
     virtual bool remove(std::size_t index) override;
 
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()

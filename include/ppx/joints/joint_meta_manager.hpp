@@ -9,12 +9,12 @@ namespace ppx
 template <typename T>
 concept IManager = std::is_same_v<T, iactuator_manager2D> || std::is_same_v<T, iconstraint_manager2D>;
 
-template <IManager IM> class joint_meta_manager2D : public idmanager2D<kit::scope<IM>>
+template <IManager IM> class joint_meta_manager2D : public id_contiguous_manager2D<kit::scope<IM>>
 {
     template <Joint2D T> using manager_t = typename IM::template manager_t<T>;
 
     joint_meta_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents)
-        : idmanager2D<kit::scope<IM>>(world), m_total_joints(total_joints), m_jevents(jevents)
+        : id_contiguous_manager2D<kit::scope<IM>>(world), m_total_joints(total_joints), m_jevents(jevents)
     {
     }
 
@@ -42,7 +42,7 @@ template <IManager IM> class joint_meta_manager2D : public idmanager2D<kit::scop
         return manager ? static_cast<Manager *>(manager) : nullptr;
     }
 
-    using idmanager2D<kit::scope<IM>>::remove;
+    using id_contiguous_manager2D<kit::scope<IM>>::remove;
     bool remove(std::size_t index) override final;
     bool remove(joint2D *joint);
 

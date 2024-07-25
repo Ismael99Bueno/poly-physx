@@ -5,7 +5,7 @@
 namespace ppx
 {
 joint_repository2D::joint_repository2D(world2D &world)
-    : manager2D(world), actuators(world, m_elements, events), constraints(world, m_elements, events)
+    : contiguous_manager2D(world), actuators(world, m_elements, events), constraints(world, m_elements, events)
 {
 }
 

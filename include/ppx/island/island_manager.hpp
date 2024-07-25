@@ -5,10 +5,10 @@
 
 namespace ppx
 {
-class island_manager2D final : public manager2D<island2D>
+class island_manager2D final : public contiguous_manager2D<island2D>
 {
   public:
-    using manager2D::manager2D;
+    using contiguous_manager2D::contiguous_manager2D;
 
     bool enabled() const;
     void enabled(bool enable);
@@ -16,7 +16,7 @@ class island_manager2D final : public manager2D<island2D>
     bool checksum() const;
     bool all_asleep() const;
 
-    using manager2D::remove;
+    using contiguous_manager2D::remove;
     bool remove(std::size_t index);
 
     float sleep_energy_threshold(const island2D *island) const;

@@ -5,6 +5,7 @@
 #include "kit/interface/non_copyable.hpp"
 #include "kit/memory/ptr/scope.hpp"
 #include "kit/events/event.hpp"
+#include "kit/container/linked_list.hpp"
 #include <vector>
 
 namespace ppx
@@ -37,17 +38,15 @@ template <typename T> struct manager_events
     kit::event<value_t &> on_removal;
 };
 
-template <typename T> class manager2D : public worldref2D, kit::non_copyable
+template <typename T> class contiguous_manager2D : public worldref2D, kit::non_copyable
 {
   public:
     using value_t = typename type_wrapper<T>::value_t;
     using element_t = typename type_wrapper<T>::element_t;
 
-    manager2D(world2D &world) : worldref2D(world)
-    {
-    }
+    using worldref2D::worldref2D;
 
-    virtual ~manager2D() = default;
+    virtual ~contiguous_manager2D() = default;
 
     manager_events<T> events;
 
@@ -128,14 +127,14 @@ template <typename T> class manager2D : public worldref2D, kit::non_copyable
 template <typename T>
 concept Identifiable = kit::Identifiable<typename type_wrapper<T>::value_t>;
 
-template <Identifiable T> class idmanager2D : public manager2D<T>
+template <Identifiable T> class id_contiguous_manager2D : public contiguous_manager2D<T>
 {
   public:
     using value_t = typename type_wrapper<T>::value_t;
     using element_t = typename type_wrapper<T>::element_t;
     using id_t = typename value_t::id_type;
 
-    using manager2D<T>::manager2D;
+    using contiguous_manager2D<T>::contiguous_manager2D;
 
     const value_t *at(const id_t &id) const
     {
@@ -161,7 +160,7 @@ template <Identifiable T> class idmanager2D : public manager2D<T>
         return at(id);
     }
 
-    using manager2D<T>::remove;
+    using contiguous_manager2D<T>::remove;
     bool remove(const id_t &id)
     {
         for (std::size_t i = 0; i < this->m_elements.size(); i++)
@@ -174,6 +173,47 @@ template <Identifiable T> class idmanager2D : public manager2D<T>
     {
         return (*this)[id] != nullptr;
     }
+};
+
+template <typename T, kit::LinkAccessor<T> LA> class linked_manager2D : public worldref2D, kit::non_copyable
+{
+  public:
+    using worldref2D::worldref2D;
+
+    virtual ~linked_manager2D() = default;
+
+    auto begin() const
+    {
+        return m_elements.begin();
+    }
+    auto end() const
+    {
+        return m_elements.end();
+    }
+
+    virtual bool remove(T *element) = 0;
+
+    bool contains(const T *element) const
+    {
+        return m_elements.find(element) != m_elements.end();
+    }
+
+    std::size_t size() const
+    {
+        return m_elements.size();
+    }
+    bool empty() const
+    {
+        return m_elements.empty();
+    }
+    void clear()
+    {
+        while (!m_elements.empty())
+            remove(m_elements.head());
+    }
+
+  protected:
+    kit::linked_list<T, LA> m_elements;
 };
 
 } // namespace ppx

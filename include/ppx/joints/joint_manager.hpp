@@ -25,7 +25,7 @@ class ijoint_manager2D : virtual public kit::identifiable<std::string>,
     KIT_TOGGLEABLE_FINAL_DEFAULT_SETTER()
 };
 
-template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public ijoint_manager2D
+template <Joint2D T> class joint_manager2D : public contiguous_manager2D<T>, virtual public ijoint_manager2D
 {
   public:
     using specs = typename T::specs;
@@ -56,7 +56,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
         return from_bodies<T>(body1, body2, this->m_elements);
     }
 
-    using manager2D<T>::remove;
+    using contiguous_manager2D<T>::remove;
     virtual bool remove(const std::size_t index) override
     {
         if (index >= this->m_elements.size())
@@ -107,7 +107,7 @@ template <Joint2D T> class joint_manager2D : public manager2D<T>, virtual public
 
   protected:
     joint_manager2D(world2D &world, std::vector<joint2D *> &total_joints, manager_events<joint2D> &jevents)
-        : manager2D<T>(world), m_total_joints(total_joints), m_jevents(jevents)
+        : contiguous_manager2D<T>(world), m_total_joints(total_joints), m_jevents(jevents)
     {
     }
 
