@@ -148,23 +148,13 @@ bool body_manager2D::checksum() const
     return collider_count1 == collider_count2 && collider_count1 == colliders;
 }
 
-bool body_manager2D::remove(const std::size_t index)
+void body_manager2D::remove(body2D *body)
 {
-    if (index >= m_elements.size())
-        return false;
-
-    body2D *body = m_elements[index];
-    KIT_INFO("Removing body with index {0}.", index)
+    KIT_INFO("Removing body with index {0}.", body->meta.index)
 
     events.on_removal(*body);
     body->clear();
-
-    if (index != m_elements.size())
-    {
-        m_elements[index] = m_elements.back();
-        m_elements[index]->meta.index = index;
-    }
-    m_elements.pop_back();
+    m_elements.erase(body);
 
     KIT_ASSERT_ERROR(body->meta.island || !body->is_dynamic() || !world.islands.enabled(),
                      "Body is not in an island when it should be!")
@@ -173,7 +163,6 @@ bool body_manager2D::remove(const std::size_t index)
     if (body->meta.island)
         body->meta.island->remove_body(body);
     allocator<body2D>::destroy(body);
-    return true;
 }
 
 void body_manager2D::gather_and_load_states(rk::state<float> &rkstate)
@@ -181,9 +170,15 @@ void body_manager2D::gather_and_load_states(rk::state<float> &rkstate)
     KIT_PERF_SCOPE("ppx::body_manager2D::gather_and_load_states")
     m_states.resize(m_elements.size());
     rkstate.resize(6 * m_elements.size());
-    for (std::size_t i = 0; i < m_elements.size(); i++)
+    m_bodies.resize(m_elements.size());
+
+    std::size_t i = 0;
+    for (body2D *body : m_elements)
     {
-        m_states[i] = m_elements[i]->state();
+        body->meta.index = i;
+
+        m_bodies[i] = body;
+        m_states[i] = body->state();
         m_states[i].substep_force = glm::vec2(0.f);
         m_states[i].substep_torque = 0.f;
 
@@ -196,6 +191,7 @@ void body_manager2D::gather_and_load_states(rk::state<float> &rkstate)
         rkstate[index + 3] = state.velocity.x;
         rkstate[index + 4] = state.velocity.y;
         rkstate[index + 5] = state.angular_velocity;
+        ++i;
     }
 }
 
@@ -223,9 +219,10 @@ void body_manager2D::update_states(const std::vector<float> &posvels)
 void body_manager2D::integrate_velocities(const float ts)
 {
     KIT_PERF_SCOPE("ppx::body_manager2D::integrate_velocities")
-    for (std::size_t i = 0; i < m_elements.size(); i++)
+
+    std::size_t i = 0;
+    for (const body2D *body : m_elements)
     {
-        const body2D *body = m_elements[i];
         state2D &state = m_states[i];
 
         state.substep_force += body->instant_force() + body->persistent_force();
@@ -233,6 +230,7 @@ void body_manager2D::integrate_velocities(const float ts)
 
         state.velocity += state.substep_force * state.inv_mass() * ts;
         state.angular_velocity += state.substep_torque * state.inv_inertia() * ts;
+        ++i;
     }
 }
 
@@ -276,7 +274,7 @@ bool body_manager2D::retrieve_data_from_states(const std::vector<float> &posvels
 
     const auto pool = world.thread_pool;
     if (mt && pool)
-        kit::mt::for_each(*pool, m_elements.begin(), m_elements.end(), lambda, pool->thread_count());
+        kit::mt::for_each(*pool, m_bodies.begin(), m_bodies.end(), lambda, pool->thread_count());
     else
         for (body2D *body : m_elements)
             lambda(body);

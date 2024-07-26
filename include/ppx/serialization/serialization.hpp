@@ -44,7 +44,13 @@ template <> struct kit::yaml::codec<ppx::behaviour2D>
 
         bhv.enabled(node["Enabled"].as<bool>());
         for (const YAML::Node &n : node["Bodies"])
-            bhv.add(bhv.world.bodies[n.as<std::size_t>()]);
+            for (ppx::body2D *body : bhv.world.bodies)
+                if (body->meta.index == n.as<std::size_t>())
+                {
+                    bhv.add(body);
+                    break;
+                }
+
         return true;
     }
 };

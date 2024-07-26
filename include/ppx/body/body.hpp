@@ -37,6 +37,9 @@ class body2D final : public worldref2D, kit::non_copyable
 
     struct metadata
     {
+        body2D *next = nullptr;
+        body2D *prev = nullptr;
+
         std::size_t index;
         island2D *island = nullptr;
         bool island_flag = false;

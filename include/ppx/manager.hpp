@@ -180,6 +180,8 @@ template <typename T, kit::LinkAccessor<T> LA> class linked_manager2D : public w
   public:
     using worldref2D::worldref2D;
 
+    manager_events<T> events;
+
     virtual ~linked_manager2D() = default;
 
     auto begin() const
@@ -191,7 +193,7 @@ template <typename T, kit::LinkAccessor<T> LA> class linked_manager2D : public w
         return m_elements.end();
     }
 
-    virtual bool remove(T *element) = 0;
+    virtual void remove(T *element) = 0;
 
     bool contains(const T *element) const
     {
@@ -209,7 +211,7 @@ template <typename T, kit::LinkAccessor<T> LA> class linked_manager2D : public w
     void clear()
     {
         while (!m_elements.empty())
-            remove(m_elements.head());
+            remove(*m_elements.head());
     }
 
   protected:
