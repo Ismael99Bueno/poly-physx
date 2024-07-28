@@ -192,6 +192,7 @@ template <ContactConstraint2D Contact>
 class contact_constraint_manager2D final : public contact_manager2D<Contact>, public icontact_constraint_manager2D
 {
   public:
+    virtual ~contact_constraint_manager2D() = default;
     using contact_manager2D<Contact>::contact_manager2D;
 
     void startup(std::vector<state2D> &states) override
@@ -238,6 +239,7 @@ template <ContactActuator2D Contact>
 class contact_actuator_manager2D final : public contact_manager2D<Contact>, public icontact_actuator_manager2D
 {
   public:
+    virtual ~contact_actuator_manager2D() = default;
     using contact_manager2D<Contact>::contact_manager2D;
     void solve(std::vector<state2D> &states) override
     {
