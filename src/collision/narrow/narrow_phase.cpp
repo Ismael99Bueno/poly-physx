@@ -45,7 +45,7 @@ void narrow_phase2D::update_contacts_mt(const std::vector<pair> &pairs)
 {
     KIT_PERF_SCOPE("ppx::narrow_phase2D::update_contacts_mt")
     const auto pool = world.thread_pool;
-    auto lambda = [this](auto it1, auto it2) {
+    const auto lambda = [this](auto it1, auto it2) {
         thread_local std::vector<collision2D> collisions;
         collisions.clear();
         for (auto it = it1; it != it2; ++it)

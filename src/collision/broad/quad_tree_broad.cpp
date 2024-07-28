@@ -69,7 +69,7 @@ void quad_tree_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_upda
     KIT_PERF_SCOPE("ppx::quad_tree_broad2D::update_pairs_mt")
     const auto pool = world.thread_pool;
 
-    auto lambda = [this](auto it1, auto it2) {
+    const auto lambda = [this](auto it1, auto it2) {
         thread_local std::vector<pair> new_pairs;
         thread_local std::unordered_set<ctuple> unique_pairs;
         new_pairs.clear();
