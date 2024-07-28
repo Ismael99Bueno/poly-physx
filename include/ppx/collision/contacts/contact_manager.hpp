@@ -11,8 +11,7 @@
 
 namespace ppx
 {
-template <Contact2D Contact>
-class contact_manager2D : public manager2D<Contact>, virtual public icontact_manager2D, kit::non_copyable
+template <Contact2D Contact> class contact_manager2D : public manager2D<Contact>, virtual public icontact_manager2D
 {
   public:
     using contact_map = std::unordered_map<contact_key, Contact *>;
