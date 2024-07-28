@@ -41,7 +41,7 @@ void brute_force_broad2D::update_pairs_mt(const std::vector<collider2D *> &to_up
 {
     KIT_PERF_SCOPE("ppx::brute_force_broad2D::update_pairs_mt")
     const auto pool = world.thread_pool;
-    const auto lambda = [this](auto it1, auto it2) {
+    auto lambda = [this](auto it1, auto it2) {
         thread_local std::vector<pair> new_pairs;
         new_pairs.clear();
 
