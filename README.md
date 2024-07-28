@@ -1,41 +1,37 @@
 # poly-physx
 
-poly-physx is a 2D physics engine that simulates collisions between convex polygons, forces and interactions between bodies, and constraints. It is designed to be flexible and easy to use, allowing developers to create complex 2D physics simulations with ease.
+poly-physx is a 2D physics engine that I started as a hobby project in September 2022. It attempts to implement some of the most prominent features a physics engine has, such as collision detection, constraint solving, island management, etc. When I started, I had no idea how a physics engine was designed (I didn't even know what broad/narrow phase meant). Because of that, I made some pretty bad design choices that required me to re-write many components of the engine throughout development. I also took the "make it so that I can re-use everything I can" approach, which is not inherently bad, but it makes the engine less portable and harder to integrate into other projects.
+
+Regarding performance, I would say it is mediocre compared to other physics engines available. Some of the latest tests I conducted involved 4 rotating tumblers with 1000 bodies each (4000 in total), with roughly 4.5ms per step. The most prominent issue seems to be cache misses throughout the whole application, but the main bottleneck is constraint contact solving, especially due to memory indirection when iterating over a collection of contact pointers (block allocated, yes, but still not ideal). I was about to optimize that part by using tight structs with constraint information until I decided I wanted to start over, so I guess that won't get done.
+
+Because of all this, this project is now discontinued, and I will focus on developing a new physics engine, applying everything I've learned from the beginning.
 
 ## Features
 
-- Collision detection and resolution between convex polygons
-- Forces and interactions between bodies, including gravity, friction, and spring forces
-- Constraints, including distance constraints and hinge constraints
-- Integration with the Runge-Kutta method for accurate movement of bodies
-- Debugging and profiling tools for better development experience
-- Ability to write and read the state of the simulation to and from a file using an ini-parser
+- Collision detection and resolution between convex polygons and circles
+- Forces and interactions between bodies, including gravity, friction, electric interactions, etc.
+- Multiple actuator and constraint joints
+- Can be integrated with Runge-Kutta or symplectic Euler methods
+- Island management and sleeping
+- Multithreaded collision processing and constraint solving through islands
+- Easily customizable broad and narrow phase
 
 ## Dependencies
 
-poly-physx depends on several other projects, all created by the same author:
+poly-physx depends on several other projects:
 
 - [glm](https://github.com/g-truc/glm)
 - [geometry](https://github.com/ismawno/geometry)
 - [rk-integrator](https://github.com/ismawno/rk-integrator)
-- [debug-tools](https://github.com/ismawno/debug-tools)
-- [profile-tools](https://github.com/ismawno/profile-tools)
-- [ini-parser](https://github.com/ismawno/ini-parser)
-- [container-view](https://github.com/ismawno/container-view)
-
-The [fetch_dependencies.py](https://github.com/ismawno/poly-physx/scripts/fetch_dependencies.py) script will automatically add all the dependencies as git submodules, provided that the user has already created their own repository and included the current project as a git submodule (or at least downloaded it into the repository). To ensure all runs smoothly once the script has been executed, do not rename the folders containing the various dependencies. All external dependencies, those not created by the same author, will be added as submodules within the [vendor](https://github.com/ismawno/poly-physx/vendor) folder.
+- [cpp-kit](https://github.com/ismawno/cpp-kit)
+- [yaml-cpp](https://github.com/ismawno/yaml-cpp) (optional)
+- [spdlog](https://github.com/gabime/spdlog) (optional)
 
 ## Building and Usage
 
-1. Ensure you have `premake5` and `make` installed on your system. `premake5` is used to generate the build files, and `make` is used to compile the project.
-2. Create your own repository and include the current project as a git submodule (or at least download it into the repository).
-3. Run the [fetch_dependencies.py](https://github.com/ismawno/poly-physx/scripts/fetch_dependencies.py) script located in the [scripts](https://github.com/ismawno/poly-physx/scripts) folder to automatically add all the dependencies as git submodules.
-4. Create an entry point project with a `premake5` file, where the `main.cpp` will be located. Link all libraries and specify the kind of the executable as `ConsoleApp`. Don't forget to specify the different configurations for the project.
-5. Create a `premake5` file at the root of the repository describing the `premake` workspace and including all dependency projects.
-6. Build the entire project by running the `make` command in your terminal. You can specify the configuration by using `make config=the_configuration`.
-7. To use poly-physx, simply include the [engine.hpp](https://github.com/ismawno/poly-physx/include/ppx/engine.hpp) header in your project. This is typically the only necessary header to include.
+This project is intended to be used as a git submodule within another project (parent repo). A premake file is provided for building and linking poly-physx.
 
-For more information on how to use poly-physx, please refer to the documentation.
+While these build instructions are minimal, this project is primarily for personal use. Although it has been built and tested on multiple machines (MacOS and Windows), it is not necessarily fully cross-platform or easy to build.
 
 ## License
 
