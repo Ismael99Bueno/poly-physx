@@ -4,9 +4,15 @@
 #include "ppx/collision/contacts/icontact_manager.hpp"
 #include "ppx/manager.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(push) // Inheritance via dominance is intended
+#pragma warning(disable : 4250)
+#endif
+
 namespace ppx
 {
-template <Contact2D Contact> class contact_manager2D : public manager2D<Contact>, virtual public icontact_manager2D
+template <Contact2D Contact>
+class contact_manager2D : public manager2D<Contact>, virtual public icontact_manager2D, kit::non_copyable
 {
   public:
     using contact_map = std::unordered_map<contact_key, Contact *>;
@@ -257,3 +263,7 @@ class contact_actuator_manager2D final : public contact_manager2D<Contact>, publ
     }
 };
 } // namespace ppx
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

@@ -12,7 +12,7 @@
 namespace ppx
 {
 class body_manager2D;
-class icontact_manager2D : virtual public kit::toggleable, virtual kit::non_copyable
+class icontact_manager2D : virtual public kit::toggleable
 {
   public:
     using contact_key = contact2D::contact_key;
